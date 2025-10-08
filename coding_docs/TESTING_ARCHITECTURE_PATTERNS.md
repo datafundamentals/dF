@@ -74,6 +74,9 @@ Use this pattern for **application development** where integration testing is th
 ## Test Server Architecture
 
 ### Vite's Role
+
+The following statement about Vite not being a test runner is preliminary based on real world usage. Any coding agent which follows a different route due to expediency needs to modify this document accordingly.
+
 **Important:** Vite is **NOT a test runner** - it's the **development server** that serves your application during testing.
 
 **Configuration Pattern:**

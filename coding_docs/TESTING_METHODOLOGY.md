@@ -1,7 +1,5 @@
 # Complete Testing Strategy & Methodology
 
-> **Current status:** The procedures below outline the desired end-state for automated testing. The monorepo currently lacks the Playwright suites referenced here; see `coding_docs/STANDARDIZATION_FOLLOWUPS.md` for the work items that will activate this plan.
-
 This document establishes a comprehensive testing approach that combines manual interactive testing with automated regression tests, providing both developer confidence and automated safety nets for ongoing development.
 
 ## Overview

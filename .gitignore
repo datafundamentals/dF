@@ -1,6 +1,9 @@
 # Monorepo .gitignore
 # Covers all node_modules directories across all projects
 
+.archive/
+.claude/
+
 # Node.js dependencies
 **/node_modules/
 node_modules/
