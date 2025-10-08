@@ -6,9 +6,9 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ### 1. Context Loading
 - [ ] Read `coding_docs/TICKET_SESSION_CHECKLIST.md` (this file)
-- [ ] Read relevant session documentation from `docs/sessions/`
-- [ ] Check `coding_docs/architecture.md` for system overview
-- [ ] Review `shared/` directory for available components/services
+- [ ] Review the root `README.md` for workspace-level commands
+- [ ] Open the target app/package README for project-specific scripts
+- [ ] Scan relevant standards in `coding_docs/` (e.g., `STANDARDS_STYLES.md`, `WC_SHARED_DEFAULTS.md`, `TESTING_INTEGRATION.md`)
 
 ### 2. Environment Verification
 - [ ] Confirm current working directory location
@@ -20,15 +20,14 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Define clear session objective (1-3 features max)
 - [ ] Identify if this is: Shared Resource / Project-Specific / Integration session
 - [ ] Set session boundaries (what will NOT be done)
-- [ ] Create TodoWrite list for session tasks
+- [ ] Capture a lightweight task list (TodoWrite or equivalent notes)
 
 ## During Session (Active Development)
 
 ### 4. Documentation Standards
-- [ ] if claude Use TodoWrite tool to track all tasks and progress
-- [ ] Mark todos as completed immediately after finishing
-- [ ] Document architectural decisions in real-time
-- [ ] Update relevant files with implementation notes
+- [ ] Keep the current task list up to date as work progresses
+- [ ] Document architectural decisions in real time (inline comments or doc updates)
+- [ ] Update relevant files with implementation notes as soon as behavior changes
 
 ### 5. Code Quality Protocols
 - [ ] Follow existing code conventions and patterns
@@ -36,6 +35,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Use shared components/utilities when available
 - [ ] Run lint/typecheck commands when available
 - [ ] Never commit secrets or sensitive data
+- [ ] Verify that every command you record in docs or ticket notes matches the latest `package.json`
 
 ### 6. Monorepo Awareness
 - [ ] Check if changes affect other apps/shared resources
@@ -62,12 +62,10 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 ## Pre-Exit Protocols (End Every Session)
 
 ### 8. Documentation Updates (MANDATORY)
-- [ ] if claude **Update `coding_docs/claude/CLAUDE.md` with current monorepo status/priorities**
-- [ ] Update app-specific `coding_docs/claude/` files if project-specific changes made
-- [ ] Create/update session-specific documentation in `coding_docs/sessions/`
-- [ ] Update `coding_docs/architecture.md` if architectural changes made
-- [ ] Document any new shared resources in `coding_docs/shared-resources.md`
-- [ ] Update project-specific README files
+- [ ] Update the standards or reference docs you touched inside `coding_docs/`
+- [ ] Refresh the relevant app/package README when commands or workflows change
+- [ ] Record any future work or ideas in `future_tickets_ignore/` (never in `coding_docs/`)
+- [ ] Confirm every command in updated docs was tested or re-read directly from the associated `package.json`
 
 ### 9. Code Finalization
 - [ ] Complete all active todos or document blockers
@@ -76,7 +74,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Tag incomplete work clearly for next session
 
 ### 10. Session Handoff Preparation
-- [ ] Create next session context in `coding_docs/sessions/next-session.md`
+- [ ] Capture next-session notes in your ticket or `future_tickets_ignore/` if needed
 - [ ] List immediate next priorities
 - [ ] Document any blockers or dependencies
 - [ ] Reference related shared resources
@@ -171,11 +169,6 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ## Documentation Architecture Notes
 
-**CLAUDE.md Hierarchy:**
-- **Main `/coding_docs/claude/CLAUDE.md`**: Monorepo overview, current state, shared context
-- **App `/apps/{project}/coding_docs/claude/`**: Project-specific implementation details
-
-**Shared Documentation:**
-- Conceptual docs (coding standards, testing strategies) belong in `/coding_docs/`
-- Project-specific addendums stay in app directories
-- Avoid duplication between apps - consolidate shared concepts
+- **Active references** live in `coding_docs/` and should stay relevant to the current ticket.
+- **Future planning** belongs in `/future_tickets_ignore/` so active tickets stay focused.
+- Avoid duplication between apps—consolidate shared concepts in `coding_docs/`.

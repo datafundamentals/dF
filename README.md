@@ -13,13 +13,14 @@ Turbo and pnpm see every workspace via `pnpm-workspace.yaml`, so all standard co
 1. Install dependencies once after cloning: `pnpm install`
 2. Launch all dev servers: `pnpm dev`
 3. Scope commands to a workspace when you only need one package: `pnpm --filter <workspace> <command>`
+4. Before copying a command into documentation, confirm it exists in the target `package.json`.
 
 ### Shared UI Components (`packages/ui-lit`)
 - Houses reusable Lit elements consumed by multiple apps.
 - Build output lives in `packages/ui-lit/dist`; regenerate it with `pnpm --filter @df/ui-lit run build`.
-- Lint before publishing changes: `pnpm --filter @df/ui-lit run lint`
-- Unit tests (if present) can be added under `packages/ui-lit/test` and run via `pnpm --filter @df/ui-lit test`
-- TypeScript consumers import via `@df/ui-lit/...` (for example `import '@df/ui-lit/my-element'`); Storybook maps that alias to the source directory while apps consume the built output from `dist`.
+- Lint before publishing changes: `pnpm --filter @df/ui-lit run lint`.
+- There is no standalone test script today; component behavior is covered through the consuming app harnesses.
+- TypeScript consumers import via `@df/ui-lit/...` (for example `import '@df/ui-lit/my-element'`); apps consume the built output from `dist` while local harnesses point at source.
 - When iterating on components, run `pnpm --filter @df/ui-lit run build --watch` in a second terminal so dependent apps pick up the latest `dist` output.
 
 ### Storybook (`apps/df-storybook`)
@@ -32,8 +33,14 @@ Turbo and pnpm see every workspace via `pnpm-workspace.yaml`, so all standard co
 
 ### Lit Starter App (`apps/df-lit-starter`)
 - Demonstrates integration of shared components into an application shell.
-- The local `MyElement` re-exports the implementation from `@df/ui-lit/my-element`, so any changes flow through Storybook and the starter simultaneously.
-- Analyzer scripts reference the shared source: `pnpm --filter @df/df-lit-starter run analyze`
+- The local `MyElement` re-exports the implementation from `@df/ui-lit/my-element`, so any changes flow through the teaching harnesses simultaneously.
+- Analyzer scripts reference the shared source: `pnpm --filter @df/df-lit-starter run analyze`.
+- `pnpm --filter @df/df-lit-starter test` runs Web Test Runner suites followed by Playwright flows.
+
+### Deployment Model
+- 11ty is the default hosting mechanism for deployed apps; each workspace ships Rollup bundles that can be consumed by external 11ty instances.
+- Vite remains the local development server used by both developers and Playwright.
+- Most production 11ty sites live outside this repo; the lit-starter app preserves its upstream 11ty demo purely for teaching purposes.
 
 ## Helpful Commands
 - `pnpm lint` – run linting across every workspace

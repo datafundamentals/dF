@@ -1,54 +1,60 @@
 # Integration Testing in the DF monorepo
 
-This guide explains how browser-level tests are organised and how to add coverage for new surfaces.
+This guide explains how browser-level tests are organised today, how to run them, and what to do when adding coverage for a new app or package.
 
-## Tooling overview
+## Tooling Overview
 
-- **Web Test Runner** remains the harness for component-level checks that render Lit elements against compiled bundles (currently used by `apps/df-lit-starter`).
-- **Playwright** now drives user-flow validation. Tests live alongside each app under `tests/integration` and run via the shared `playwright.config.ts` at the repo root.
-- Turbo already wires `test` -> `^build`, so every package must export a `build` script that produces the assets loaded by the tests.
+- **Playwright** drives user-flow validation. Each app stores specs in `tests/integration/` and runs them through the shared `playwright.config.ts`.
+- **Web Test Runner (WTR)** still powers the lit-starter component suite (`apps/df-lit-starter/tests`). Other apps rely solely on Playwright.
+- **Turbo graph** ensures `pnpm test` runs workspace builds before executing tests. Every workspace must expose a `build` script that emits the assets consumed by tests.
 
-## Running the suites
+## Command Matrix
+
+Always verify commands in documentation against the relevant `package.json` before relying on them; incorrect instructions must be fixed immediately.
+
+| Workspace | Local dev server | Integration tests | Notes |
+| --- | --- | --- | --- |
+| `@df/df-npm-info-app` | `pnpm --filter @df/df-npm-info-app dev` (Vite) | `pnpm --filter @df/df-npm-info-app test` | `start:test` serves on port 4173 for Playwright |
+| `@df/df-teaching-app` | `pnpm --filter @df/df-teaching-app dev` | `pnpm --filter @df/df-teaching-app test` | Supports forced-error toggles for negative paths |
+| `@df/df-lit-starter` | `pnpm --filter @df/df-lit-starter dev` | `pnpm --filter @df/df-lit-starter test` | Runs WTR (dev + prod) then Playwright |
+
+Repo-level helpers:
 
 ```bash
-# Install the Playwright browsers once per machine
+# Install Playwright browsers once per machine
 pnpm exec playwright install --with-deps
 
-# Run integration tests for a single app
-pnpm --filter @df/df-npm-info-app test
-
-# Execute all test tasks across the workspace
+# Run every workspace test target
 pnpm test
 
-# Run only the Playwright layer from the repo root
-pnpm test:integration -- --project=df-npm-info-app
+# Run only the Playwright layer across projects
+pnpm test:integration
 ```
 
-> **Note:** The local sandbox used for automated checks in this repository cannot bind to TCP ports, so Playwright runs may fail in CI unless they execute on a host without that restriction. When running locally, ensure nothing is already bound to the configured port (`4173`).
+> **Local port usage:** Playwright spins up Vite dev servers on `127.0.0.1:4173-4175`. Ensure those ports are free before running the suites.
 
-## Current coverage
+## Current Coverage Snapshot
 
-- `@df/df-npm-info-app`: browser smoke for happy/error handlers on the npm widget (Playwright).
-- `@df/df-teaching-app`: verifies initial task hydration, host reset actions, and forced error recovery (Playwright).
-- `@df/df-lit-starter`: Web Test Runner dev/prod suites plus Playwright coverage for the host shell's name + counter flows.
+- `@df/df-npm-info-app` exercises happy/error registry flows and store snapshots.
+- `@df/df-teaching-app` verifies task hydration, host-driven reload/reset, and forced failure recovery.
+- `@df/df-lit-starter` runs the WTR component harness plus Playwright coverage for the host shell.
 
-## Adding integration coverage to a new package
+## Adding Integration Coverage to a New Workspace
 
-1. Implement or reuse a `start:test` script that builds the package (for type safety) and launches a deterministic dev/preview server (see `apps/df-npm-info-app/package.json`).
-2. Create `tests/integration/*.spec.ts` files that rely on `playwright/test` and mock external traffic via `page.route`.
-3. Register a new project in `playwright.config.ts` with a unique `baseURL` and port so tests can run in parallel.
-4. Update the package’s `test` script to call `playwright test --config ../../playwright.config.ts --project=<package-name>`.
-5. Extend documentation with the critical workflows each integration suite covers so contributors know when to add or update scenarios.
+1. **Build script** – Provide a `build` script that compiles the TypeScript entrypoints.
+2. **Deterministic server** – Add a `start:test` script that runs `pnpm build` and launches a Vite dev server with `--strictPort` and a unique port.
+3. **Playwright specs** – Create `tests/integration/*.spec.ts` using `playwright/test`. Mock external traffic via `page.route` where needed.
+4. **Config registration** – Add a project entry to `playwright.config.ts` with the workspace test directory and base URL.
+5. **Package test script** – Call Playwright with the shared config: `playwright test --config ../../playwright.config.ts --project=<name>`.
+6. **Documentation** – Update this file and the workspace README with accurate commands immediately after wiring the suite.
 
-## What counts as “integration tested”
+## Integration Test Definition
 
 - The app renders from its real entry point (the same HTML or route exposed to users).
 - Component events are wired into the shared state stores without manual stubbing.
-- External calls (REST, GraphQL, etc.) are mocked at the network layer to keep tests deterministic, but state transitions are exercised end-to-end.
-- Happy path *and* at least one failure path per critical workflow are asserted (for instance, ready and error states while fetching npm metadata).
+- External calls are mocked at the network layer to keep tests deterministic while still exercising state transitions.
+- Critical workflows cover both success and failure states.
 
-Following these conventions keeps browser automation consistent while the repo grows additional apps or shared widgets.
+## Test-only Controls
 
-## Test-only controls
-
-- Set `window.__dfPracticeForcePracticeError = true` (and back to `false`) to force the practice widget store into its error branch. A dedicated setter helper is also exposed as `window.__dfPracticeForcePracticeErrorSetter` for convenience. Leave the flag `false` outside of tests.
+- `apps/df-teaching-app` exposes `window.__dfPracticeForcePracticeErrorSetter(flag)` for forcing error paths during tests. Always reset the flag to `false` when cleaning up.

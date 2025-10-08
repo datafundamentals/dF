@@ -1,174 +1,132 @@
 # LitElement TypeScript starter
 
-This workspace now treats `<my-app>` as the reference host component. It wires
-the shared `<my-element>` widget from `@df/ui-lit` into a signals-first store
-that lives under `@df/state`, demonstrating the monorepo patterns used across
-Data Fundamentals apps.
+This workspace continues to use the upstream `lit-starter-ts` app as a teaching tool. It wires the shared `<my-element>` widget from `@df/ui-lit` into a signals-first store from `@df/state`, mirroring the patterns used across Data Fundamentals apps. Where the upstream template references `npm`, the commands below translate those steps into pnpm workspace scripts.
 
 ## Monorepo usage
 
-Inside the Data Fundamentals workspace we rely on `pnpm` workspaces. Run the
-component tests through Web Test Runner with:
+Run all commands from the repository root and scope them with `pnpm --filter @df/df-lit-starter`:
 
 ```bash
-pnpm --filter @df/df-lit-starter test
+# Build once (TypeScript only)
+pnpm --filter @df/df-lit-starter run build
+
+# Watch TypeScript rebuilds
+pnpm --filter @df/df-lit-starter run build:watch
+
+# Launch the Vite dev server
+pnpm --filter @df/df-lit-starter run dev
+
+# Execute the full test suite (Web Test Runner + Playwright)
+pnpm --filter @df/df-lit-starter run test
+
+# Playwright-only integration flows
+pnpm --filter @df/df-lit-starter run test:e2e
+
+# Start the deterministic server used by Playwright (`start:test`)
+pnpm --filter @df/df-lit-starter run start:test
 ```
 
-That command builds the project before executing both dev/prod Web Test Runner
-suites and the Playwright browser flow. To focus on the integration harness
-alone you can run:
-
-```bash
-pnpm --filter @df/df-lit-starter test:e2e
-```
-
-This template is generated from the `lit-starter-ts` package in [the main Lit
-repo](https://github.com/lit/lit). Issues and PRs for this template should be
-filed in that repo.
+The command set mirrors the original template while fitting into pnpm’s workspace model. Always confirm commands in `apps/df-lit-starter/package.json` before updating documentation.
 
 ## About this release
 
-This is a pre-release of Lit 3.0, the next major version of Lit.
-
-Lit 3.0 has very few breaking changes from Lit 2.0:
+This project tracks Lit 3.x just like the upstream starter:
 
 - Drops support for IE11
-- Published as ES2021
-- Removes a couple of deprecated Lit 1.x APIs
+- Ships modern (ES2021) output
+- Removes deprecated Lit 1.x APIs
 
-Lit 3.0 should require no changes to upgrade from Lit 2.0 for the vast majority of users. Once the full release is published, most apps and libraries will be able to extend their npm version ranges to include both 2.x and 3.x, like `"^2.7.0 || ^3.0.0"`.
-
-Lit 2.x and 3.0 are _interoperable_: templates, base classes, directives, decorators, etc., from one version of Lit will work with those from another.
-
-Please file any issues you find on our [issue tracker](https://github.com/lit/lit/issues).
+Lit 2.x and 3.x remain interoperable. For upstream release notes and additional guidance, see the [lit-starter-ts README](https://github.com/lit/lit/tree/main/packages/lit-starter-ts).
 
 ## Setup
 
-Install dependencies:
+Install dependencies from the monorepo root:
 
 ```bash
-npm i
+pnpm install
 ```
 
 ## Build
 
-This sample uses the TypeScript compiler to produce JavaScript that runs in modern browsers.
-
-To build the JavaScript version of your component:
+Use the TypeScript compiler to produce JavaScript for modern browsers:
 
 ```bash
-npm run build
+pnpm --filter @df/df-lit-starter run build
 ```
 
-To watch files and rebuild when the files are modified, run the following command in a separate shell:
+Watch for incremental builds during development:
 
 ```bash
-npm run build:watch
+pnpm --filter @df/df-lit-starter run build:watch
 ```
-
-Both the TypeScript compiler and lit-analyzer are configured to be very strict. You may want to change `tsconfig.json` to make them less strict.
 
 ## Testing
 
-This sample uses modern-web.dev's
-[@web/test-runner](https://www.npmjs.com/package/@web/test-runner) for testing. See the
-[modern-web.dev testing documentation](https://modern-web.dev/docs/test-runner/overview) for
-more information.
-
-Tests can be run with the `test` script, which will run your tests against Lit's development mode (with more verbose errors) as well as against Lit's production mode:
+This workspace runs Web Test Runner for component coverage (dev + prod) and Playwright for browser flows:
 
 ```bash
-npm test
+# Full suite
+pnpm --filter @df/df-lit-starter run test
+
+# Web Test Runner (dev mode)
+pnpm --filter @df/df-lit-starter run test:dev
+
+# Web Test Runner (watch)
+pnpm --filter @df/df-lit-starter run test:watch
+
+# Web Test Runner (prod mode)
+pnpm --filter @df/df-lit-starter run test:prod
+
+# Playwright integration flows
+pnpm --filter @df/df-lit-starter run test:e2e
 ```
-
-For local testing during development, the `test:dev:watch` command will run your tests in Lit's development mode (with verbose errors) on every change to your source files:
-
-```bash
-npm test:watch
-```
-
-Alternatively the `test:prod` and `test:prod:watch` commands will run your tests in Lit's production mode.
 
 ## Dev Server
 
-This sample uses modern-web.dev's [@web/dev-server](https://www.npmjs.com/package/@web/dev-server) for previewing the project without additional build steps. Web Dev Server handles resolving Node-style "bare" import specifiers, which aren't supported in browsers. It also automatically transpiles JavaScript and adds polyfills to support older browsers. See [modern-web.dev's Web Dev Server documentation](https://modern-web.dev/docs/dev-server/overview/) for more information.
-
-To run the dev server and open the project in a new browser tab:
+Start the Vite dev server to preview the project without additional build steps:
 
 ```bash
-npm run serve
+pnpm --filter @df/df-lit-starter run serve
 ```
 
-There is a development HTML file located at `/dev/index.html` that you can view at http://localhost:8000/dev/index.html. Note that this command will serve your code using Lit's development mode (with more verbose errors). To serve your code against Lit's production mode, use `npm run serve:prod`.
+- Visit `/dev/index.html` while the server is running to load the teaching harness.
+- Use `pnpm --filter @df/df-lit-starter run serve:prod` to emulate production mode.
 
-## Editing
+> **11ty note:** The upstream template bundles an Eleventy documentation site. We keep that structure for teaching purposes, but other apps in this monorepo ship Rollup bundles for consumption by external 11ty deployments instead of hosting 11ty inside the repo.
 
-If you use VS Code, we highly recommend the [lit-plugin extension](https://marketplace.visualstudio.com/items?itemName=runem.lit-plugin), which enables some extremely useful features for lit-html templates:
+## Editing support
 
-- Syntax highlighting
-- Type-checking
-- Code completion
-- Hover-over docs
-- Jump to definition
-- Linting
-- Quick Fixes
+- Install the [lit-plugin extension](https://marketplace.visualstudio.com/items?itemName=runem.lit-plugin) for Lit-specific editor features.
+- Run `pnpm --filter @df/df-lit-starter run analyze` to regenerate `custom-elements.json` and docs metadata.
 
-The project is setup to recommend lit-plugin to VS Code users if they don't already have it installed.
-
-## Linting
-
-Linting of TypeScript files is provided by [ESLint](eslint.org) and [TypeScript ESLint](https://github.com/typescript-eslint/typescript-eslint). In addition, [lit-analyzer](https://www.npmjs.com/package/lit-analyzer) is used to type-check and lint lit-html templates with the same engine and rules as lit-plugin.
-
-The rules are mostly the recommended rules from each project, but some have been turned off to make LitElement usage easier. The recommended rules are pretty strict, so you may want to relax them by editing `.eslintrc.json` and `tsconfig.json`.
-
-To lint the project run:
+## Linting & Formatting
 
 ```bash
-npm run lint
+pnpm --filter @df/df-lit-starter run lint
+pnpm exec prettier "apps/df-lit-starter/**/*.{cjs,html,js,json,md,ts}" --write
 ```
 
-## Formatting
+## Static Site (Eleventy)
 
-[Prettier](https://prettier.io/) is used for code formatting. It has been pre-configured according to the Lit's style. You can change this in `.prettierrc.json`.
-
-Prettier has not been configured to run when committing files, but this can be added with Husky and `pretty-quick`. See the [prettier.io](https://prettier.io/) site for instructions.
-
-## Static Site
-
-This project includes a simple website generated with the [eleventy](https://11ty.dev) static site generator and the templates and pages in `/docs-src`. The site is generated to `/docs` and intended to be checked in so that GitHub pages can serve the site [from `/docs` on the main branch](https://help.github.com/en/github/working-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
-
-To enable the site go to the GitHub settings and change the GitHub Pages &quot;Source&quot; setting to &quot;main branch /docs folder&quot;.</p>
-
-To build the site, run:
+The upstream documentation site remains available for reference:
 
 ```bash
-npm run docs
+# Generate docs
+pnpm --filter @df/df-lit-starter run docs
+
+# Serve the generated docs locally
+pnpm --filter @df/df-lit-starter run docs:serve
+
+# Regenerate docs on change
+pnpm --filter @df/df-lit-starter run docs:gen:watch
 ```
 
-To serve the site locally, run:
+GitHub Pages configuration mirrors the upstream instructions (serve from `/docs` on the default branch) should you choose to publish the demo.
 
-```bash
-npm run docs:serve
-```
+## Staying Aligned with Upstream
 
-To watch the site files, and re-build automatically, run:
+Whenever the Lit team updates `lit-starter-ts`, review the diff and reconcile:
 
-```bash
-npm run docs:gen:watch
-```
-
-The site will usually be served at http://localhost:8000.
-
-**Note**: The project uses Rollup to bundle and minify the source code for the docs site and not to publish to NPM. For bundling and minification, check the [Bundling and minification](#bundling-and-minification) section.
-
-## Bundling and minification
-
-As stated in the [static site generation](#static-site) section, the bundling and minification setup in the Rollup configuration in this project is there specifically for the docs generation.
-
-We recommend publishing components as unoptimized JavaScript modules and performing build-time optimizations at the application level. This gives build tools the best chance to deduplicate code, remove dead code, and so on.
-
-Please check the [Publishing best practices](https://lit.dev/docs/tools/publishing/#publishing-best-practices) for information on publishing reusable Web Components, and [Build for production](https://lit.dev/docs/tools/production/) for building application projects that include LitElement components, on the Lit site.
-
-## More information
-
-See [Get started](https://lit.dev/docs/getting-started/) on the Lit site for more information.
+1. Re-run `pnpm --filter @df/df-lit-starter run analyze` to capture manifest changes.
+2. Update dependency ranges to match upstream.
+3. Re-test using the commands above to ensure the pnpm workflow still functions.
