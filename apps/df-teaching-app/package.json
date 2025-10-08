@@ -1,5 +1,5 @@
 {
-  "name": "@df/df-practice-app",
+  "name": "@df/df-teaching-app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "start:test": "pnpm build && vite dev --host 127.0.0.1 --port 4174 --strictPort --mode test --logLevel error",
     "pretest": "pnpm build",
     "test": "pnpm test:integration",
-    "test:integration": "playwright test --config ../../playwright.config.ts --project=df-practice-app"
+    "test:integration": "playwright test --config ../../playwright.config.ts --project=df-teaching-app"
   },
   "dependencies": {
     "@df/state": "workspace:*",

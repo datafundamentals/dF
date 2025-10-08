@@ -3,7 +3,7 @@
 datafundamentals monorepo
 
 ## Workspaces
-- `apps/` – runnable front ends and local tooling (e.g., `lit-starter`, `storybook`)
+- `apps/` – runnable front ends and local tooling (e.g., `df-lit-starter`, `df-storybook`)
 - `packages/` – shareable libraries consumed across apps (e.g., `ui-lit`)
 - `services/` – backend-oriented projects and API facades
 
@@ -22,18 +22,18 @@ Turbo and pnpm see every workspace via `pnpm-workspace.yaml`, so all standard co
 - TypeScript consumers import via `@df/ui-lit/...` (for example `import '@df/ui-lit/my-element'`); Storybook maps that alias to the source directory while apps consume the built output from `dist`.
 - When iterating on components, run `pnpm --filter @df/ui-lit run build --watch` in a second terminal so dependent apps pick up the latest `dist` output.
 
-### Storybook (`apps/storybook`)
+### Storybook (`apps/df-storybook`)
 - Runs `@storybook/web-components-vite` against the shared components in `packages/ui-lit`.
-- Dev server: `pnpm --filter @df/storybook run dev`
-- Static build: `pnpm --filter @df/storybook run build` (outputs to `apps/storybook/storybook-static`)
-- Lint stories: `pnpm --filter @df/storybook run lint`
+- Dev server: `pnpm --filter @df/df-storybook run dev`
+- Static build: `pnpm --filter @df/df-storybook run build` (outputs to `apps/df-storybook/storybook-static`)
+- Lint stories: `pnpm --filter @df/df-storybook run lint`
 - Use `pnpm test` from the root to execute Storybook interaction tests once they are added (they live alongside stories)
 - Stories import components through the same `@df/ui-lit/...` aliases used by the apps.
 
-### Lit Starter App (`apps/lit-starter`)
+### Lit Starter App (`apps/df-lit-starter`)
 - Demonstrates integration of shared components into an application shell.
 - The local `MyElement` re-exports the implementation from `@df/ui-lit/my-element`, so any changes flow through Storybook and the starter simultaneously.
-- Analyzer scripts reference the shared source: `pnpm --filter @lit/lit-starter-ts run analyze`
+- Analyzer scripts reference the shared source: `pnpm --filter @df/df-lit-starter run analyze`
 
 ## Helpful Commands
 - `pnpm lint` – run linting across every workspace

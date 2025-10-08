@@ -26,16 +26,16 @@ export default defineConfig({
       },
     },
     {
-      name: 'df-practice-app',
-      testDir: 'apps/df-practice-app/tests/integration',
+      name: 'df-teaching-app',
+      testDir: 'apps/df-teaching-app/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4174',
       },
     },
     {
-      name: 'lit-starter',
-      testDir: 'apps/lit-starter/tests/integration',
+      name: 'df-lit-starter',
+      testDir: 'apps/df-lit-starter/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4175',
@@ -50,13 +50,13 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: 'pnpm --filter @df/df-practice-app run start:test',
+      command: 'pnpm --filter @df/df-teaching-app run start:test',
       url: 'http://127.0.0.1:4174',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: 'pnpm --filter @lit/lit-starter-ts run start:test',
+      command: 'pnpm --filter @df/df-lit-starter run start:test',
       url: 'http://127.0.0.1:4175',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

@@ -6,8 +6,8 @@ This walkthrough extends the existing Web Components conventions (items 1 – 5 
 - **Shared component**: `packages/ui-lit/src/df-practice-widget.ts` renders a practice planner UI backed by signals.
 - **Store + side effects**: `packages/state/src/stores/practice-widget.store.ts` owns signals, async task loading, and interval-based refresh logic.
 - **Shared types**: `packages/types/src/practice-widget.ts` defines the contract consumed by UI and store code.
-- **Sandbox app**: `apps/df-practice-app` is a lightweight host showing how an app workspace consumes the shared widget and store.
-- **Storybook coverage**: `apps/storybook/stories/df-practice-widget.stories.ts` exercises default, auto-refresh, and debugging scenarios.
+- **Sandbox app**: `apps/df-teaching-app` is a lightweight host showing how an app workspace consumes the shared widget and store.
+- **Storybook coverage**: `apps/df-storybook/stories/df-practice-widget.stories.ts` exercises default, auto-refresh, and debugging scenarios.
 
 ## Pattern checklist (apply per feature)
 1. **Model the contract first**
@@ -42,10 +42,10 @@ This walkthrough extends the existing Web Components conventions (items 1 – 5 
    - Capture learnings in `docs/` so future contributors can repeat the setup without spelunking through commits.
 
 ## Running the new assets
-- Practice app build: `pnpm --filter @df/df-practice-app run build`
-- Practice app watch mode: `pnpm --filter @df/df-practice-app run build:watch`
-- Practice app dev server: in another terminal, `pnpm --filter @df/df-practice-app run serve`
-- Storybook with practice widget: `pnpm --filter @df/storybook run dev`
+- Practice app build: `pnpm --filter @df/df-teaching-app run build`
+- Practice app watch mode: `pnpm --filter @df/df-teaching-app run build:watch`
+- Practice app dev server: in another terminal, `pnpm --filter @df/df-teaching-app run serve`
+- Storybook with practice widget: `pnpm --filter @df/df-storybook run dev`
 
 With both the sandbox app and Storybook story you can verify signals wiring, observe interval cleanup, and exercise host-driven reloads without touching the web component internals.
 

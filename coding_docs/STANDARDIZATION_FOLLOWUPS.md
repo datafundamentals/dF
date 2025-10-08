@@ -8,7 +8,7 @@ This ticket produces the plan; the items below should be tracked as individual f
 - **Dependencies:** `coding_docs/SHARED_WEB_COMPONENT_DEFAULTS.md` (signals guidance); this ticket.
 - **Acceptance:** No duplicate NPM info components remain; Storybook and dev harness continue to work.
 
-## 2. Refresh `apps/lit-starter` as canonical skeleton - done
+## 2. Refresh `apps/df-lit-starter` as canonical skeleton - done
 - **Goal:** Refactor those portions of the stock Lit starter export with changes necessary to follow the signals-first architecture as outlined in /coding_docs/SHARED_WEB_COMPONENT_DEFAULTS.md, while maintaining as much of the lit starter structure as is reasonably practical.
 - **Scope:** Introduce a simple store in `src/stores/`, a matching presentation component, and at least one test or story demonstrating usage. Update README/docs to link back to the standards doc.
 - **Dependencies:** `coding_docs/SHARED_WEB_COMPONENT_DEFAULTS.md`, `coding_docs/CODING_STANDARDS_STYLES.md`.
@@ -34,6 +34,6 @@ This ticket produces the plan; the items below should be tracked as individual f
 
 ## 6. Harmonize Storybook coverage
 - **Goal:** Ensure Storybook stories exist for every canonical component and align with the documentation patterns.
-- **Scope:** Audit `apps/storybook/stories/`, add or update stories to include documentation blocks, events lists, and references to the standards doc.
+- **Scope:** Audit `apps/df-storybook/stories/`, add or update stories to include documentation blocks, events lists, and references to the standards doc.
 - **Dependencies:** `coding_docs/SHARED_WEB_COMPONENT_DEFAULTS.md`, `coding_docs/CODING_STANDARDS_STYLES.md`.
 - **Acceptance:** Running Storybook shows updated stories with consistent docs across components.

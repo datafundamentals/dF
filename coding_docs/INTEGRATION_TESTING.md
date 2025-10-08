@@ -4,7 +4,7 @@ This guide explains how browser-level tests are organised and how to add coverag
 
 ## Tooling overview
 
-- **Web Test Runner** remains the harness for component-level checks that render Lit elements against compiled bundles (currently used by `apps/lit-starter`).
+- **Web Test Runner** remains the harness for component-level checks that render Lit elements against compiled bundles (currently used by `apps/df-lit-starter`).
 - **Playwright** now drives user-flow validation. Tests live alongside each app under `tests/integration` and run via the shared `playwright.config.ts` at the repo root.
 - Turbo already wires `test` -> `^build`, so every package must export a `build` script that produces the assets loaded by the tests.
 
@@ -29,8 +29,8 @@ pnpm test:integration -- --project=df-npm-info-app
 ## Current coverage
 
 - `@df/df-npm-info-app`: browser smoke for happy/error handlers on the npm widget (Playwright).
-- `@df/df-practice-app`: verifies initial task hydration, host reset actions, and forced error recovery (Playwright).
-- `@lit/lit-starter-ts`: Web Test Runner dev/prod suites plus Playwright coverage for the host shell’s name + counter flows.
+- `@df/df-teaching-app`: verifies initial task hydration, host reset actions, and forced error recovery (Playwright).
+- `@df/df-lit-starter`: Web Test Runner dev/prod suites plus Playwright coverage for the host shell's name + counter flows.
 
 ## Adding integration coverage to a new package
 

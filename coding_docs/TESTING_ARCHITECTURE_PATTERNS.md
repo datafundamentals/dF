@@ -4,12 +4,12 @@
 
 This document defines the testing patterns and standards established across the three teaching apps in this monorepo. These patterns serve as templates for future app development and set the minimum standards for test coverage and architecture.
 
-**Purpose:** Each of the three apps (`lit-starter`, `df-practice-app`, `df-npm-info-app`) exists as a teaching example for coding agents to reference when setting up new apps. The patterns documented here represent best practices and minimum standards.
+**Purpose:** Each of the three apps (`df-lit-starter`, `df-teaching-app`, `df-npm-info-app`) exists as a teaching example for coding agents to reference when setting up new apps. The patterns documented here represent best practices and minimum standards.
 
 ## Test Runner Distribution
 
 ### Pattern 1: Hybrid Testing (WTR + Playwright)
-**Example App:** `lit-starter`
+**Example App:** `df-lit-starter`
 
 Use this pattern for **component libraries** or apps that need both unit/component testing AND integration/e2e testing.
 
@@ -21,7 +21,7 @@ Use this pattern for **component libraries** or apps that need both unit/compone
     "test:integration": "pnpm test:dev && pnpm test:prod",
     "test:dev": "wtr --config web-test-runner.config.js",
     "test:prod": "MODE=prod wtr --config web-test-runner.config.js",
-    "test:e2e": "playwright test --config ../../playwright.config.ts --project=lit-starter"
+    "test:e2e": "playwright test --config ../../playwright.config.ts --project=df-lit-starter"
   }
 }
 ```
@@ -43,7 +43,7 @@ Use this pattern for **component libraries** or apps that need both unit/compone
 - Developing design systems or UI kits
 
 ### Pattern 2: Playwright-Only Testing
-**Example Apps:** `df-practice-app`, `df-npm-info-app`
+**Example Apps:** `df-teaching-app`, `df-npm-info-app`
 
 Use this pattern for **application development** where integration testing is the primary concern.
 
@@ -90,8 +90,8 @@ Use this pattern for **application development** where integration testing is th
    
 2. **Port Assignment**: Each app gets a unique port
    - `df-npm-info-app`: 4173
-   - `df-practice-app`: 4174
-   - `lit-starter`: 4175
+   - `df-teaching-app`: 4174
+   - `df-lit-starter`: 4175
 
 3. **Required Flags**:
    - `--host 127.0.0.1`: Explicit localhost binding
@@ -112,13 +112,13 @@ All apps share a root-level `playwright.config.ts` with per-project configuratio
       use: { baseURL: 'http://127.0.0.1:4173' },
     },
     {
-      name: 'df-practice-app',
-      testDir: './apps/df-practice-app/tests/integration',
+      name: 'df-teaching-app',
+      testDir: './apps/df-teaching-app/tests/integration',
       use: { baseURL: 'http://127.0.0.1:4174' },
     },
     {
-      name: 'lit-starter',
-      testDir: './apps/lit-starter/tests/integration',
+      name: 'df-lit-starter',
+      testDir: './apps/df-lit-starter/tests/integration',
       use: { baseURL: 'http://127.0.0.1:4175' },
     },
   ],
@@ -177,13 +177,13 @@ Are you building a component library or design system?
 ├─ YES → Use Pattern 1 (Hybrid: WTR + Playwright)
 │        - Set up Web Test Runner for component tests
 │        - Add Playwright for integration tests
-│        - Reference lit-starter as template
+│        - Reference df-lit-starter as template
 │
 └─ NO → Are you building a complete application?
          └─ YES → Use Pattern 2 (Playwright Only)
                   - Simpler setup, single test runner
                   - Focus on user workflows
-                  - Reference df-practice-app or df-npm-info-app as template
+                  - Reference df-teaching-app or df-npm-info-app as template
 ```
 
 ## Common Patterns Across All Apps
@@ -225,8 +225,8 @@ When adding new apps to this monorepo:
 
 1. **Choose your pattern** (Hybrid vs Playwright-only)
 2. **Copy from reference app**:
-   - Pattern 1: Use `lit-starter` as template
-   - Pattern 2: Use `df-practice-app` or `df-npm-info-app` as template
+   - Pattern 1: Use `df-lit-starter` as template
+   - Pattern 2: Use `df-teaching-app` or `df-npm-info-app` as template
 3. **Update ports**: Assign next available port (4176, 4177, etc.)
 4. **Register in playwright.config.ts**: Add project and webServer entries
 5. **Write minimum 2 integration tests**: Cover primary user flows
@@ -241,7 +241,7 @@ When adding new apps to this monorepo:
 ## Version History
 
 - **2025-10-07**: Initial documentation of testing architecture patterns
-  - Documented WTR + Playwright hybrid pattern (lit-starter)
-  - Documented Playwright-only pattern (df-practice-app, df-npm-info-app)
+  - Documented WTR + Playwright hybrid pattern (df-lit-starter)
+  - Documented Playwright-only pattern (df-teaching-app, df-npm-info-app)
   - Established minimum standards for new apps
   - Fixed webserver startup bug in df-npm-info-app (pnpm exec vite)

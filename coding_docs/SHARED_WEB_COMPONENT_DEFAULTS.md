@@ -23,7 +23,7 @@ This approach effectively decouples components from a rigid parent-child hierarc
 When in doubt, review one of the canonical examples before writing code:
 
 - **`apps/df-npm-info-app`** – End-to-end harness demonstrating side effects contained in `@df/state` and presentation logic in `@df/ui-lit` (source of truth for AsyncComputed usage inspired by the Fagnani article).
-- **`apps/df-practice-app`** – Example of computed signal orchestration, auto-refresh behaviour, and widget → store separation.
+- **`apps/df-teaching-app`** – Example of computed signal orchestration, auto-refresh behaviour, and widget → store separation.
 - **`packages/ui-lit/df-npm-info-widget.ts`** & **`packages/ui-lit/df-practice-widget.ts`** – Current “golden” presentation components showing property patterns, event naming, and styling guidelines.
 
 Treat these references as living specifications. Any new component pattern should either follow them verbatim or document why it intentionally deviates.
@@ -130,7 +130,7 @@ Use events **only** for communicating **transient user actions** that do not map
 - [ ] **Add to state/src/index.ts** - Export your store functions
 - [ ] **Add to ui-lit/src/index.ts** - Export your component
 - [ ] **Add to ui-lit/package.json exports** - Add the new component path
-- [ ] **Build packages in order** - types → state → ui-lit → storybook
+- [ ] **Build packages in order** - types → state → ui-lit → df-storybook
 
 ### 3.2. Critical Technical Patterns
 
@@ -209,7 +209,7 @@ this.dispatchEvent(
 ### 3.3. Testing and Debugging
 
 #### **Build Order Dependencies**
-Remember: types → state → ui-lit → storybook → apps
+Remember: types → state → ui-lit → df-storybook → apps
 
 #### **Common Issue Resolution**
 - [ ] **Empty component?** → Check property shadowing (use `declare`)
@@ -221,7 +221,7 @@ Remember: types → state → ui-lit → storybook → apps
 1. **Types compile** - `pnpm --filter @df/types run build`
 2. **State compiles** - `pnpm --filter @df/state run build`
 3. **Component compiles** - `pnpm --filter @df/ui-lit run build`
-4. **Stories load** - `pnpm --filter @df/storybook run dev`
+4. **Stories load** - `pnpm --filter @df/df-storybook run dev`
 5. **Linting passes** - `pnpm --filter @df/ui-lit run lint`
 6. **Full build** - `pnpm build`
 

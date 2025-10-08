@@ -1,5 +1,5 @@
 {
-  "name": "@lit/lit-starter-ts",
+  "name": "@df/df-lit-starter",
   "private": true,
   "version": "2.0.2",
   "description": "Reference host app demonstrating signals-first Lit wiring",
@@ -29,7 +29,7 @@
     "pretest": "pnpm build",
     "test": "pnpm test:integration && pnpm test:e2e",
     "start:test": "pnpm build && vite dev --host 127.0.0.1 --port 4175 --strictPort --mode test --logLevel error",
-    "test:e2e": "playwright test --config ../../playwright.config.ts --project=lit-starter",
+    "test:e2e": "playwright test --config ../../playwright.config.ts --project=df-lit-starter",
     "test:integration": "pnpm test:dev && pnpm test:prod",
     "test:dev": "wtr --config ./web-test-runner.config.js",
     "test:watch": "wtr --watch --config ./web-test-runner.config.js",

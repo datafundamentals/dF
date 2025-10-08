@@ -24,9 +24,9 @@
 
 ### Active Apps
 - `@df/df-npm-info-app`: NPM package information viewer (recently consolidated)
-- `@df/df-practice-app`: Practice/demo components
-- `@df/storybook`: Component documentation
-- `@lit/lit-starter-ts`: Basic Lit starter template
+- `@df/df-teaching-app`: Teaching/demo components
+- `@df/df-storybook`: Component documentation
+- `@df/df-lit-starter`: Basic Lit starter template
 
 ### Commands
 - Build: `pnpm build`

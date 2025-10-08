@@ -31,7 +31,7 @@ Perform a lightweight audit of representative code from each workspace. Suggeste
   - Confirm at least one harness/story demonstrates the standards patterns (signals-first, presentation-only components).
   - Spot-check import paths to ensure they use shared packages (`@df/state`, `@df/ui-lit`, etc.).
 - **Packages** (`packages/*`)
-  - Verify exports match the documentation (types → state → ui-lit → storybook).
+  - Verify exports match the documentation (types → state → ui-lit → df-storybook).
   - Ensure naming conventions and property/event patterns follow the standards doc.
 - **Services** (if applicable)
   - Confirm any shared utilities align with the docs and the follow-up roster.

@@ -12,7 +12,7 @@ This methodology establishes a practical, incremental testing approach for valid
 
 ### UI Components & Applications
 - **Framework**: Web Test Runner (WTR) + Web Dev Server (WDS)
-- **Rationale**: Following Google Chrome team's approach from lit-starter kit
+- **Rationale**: Following Google Chrome team's approach from df-lit-starter kit
 - **Browser Testing**: Chromium, Firefox, WebKit
 - **Test Location**: `src/test/` directories
 - **Commands**:
