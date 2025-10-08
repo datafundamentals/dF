@@ -2,7 +2,7 @@
 
 ## 1\. The Prime Directive: Design for Reusability
 
-Our single most important architectural goal is to make every visual component **shareable** across different applications within the monorepo. To achieve this, components must be designed as **presentation-only** ("dumb") components whenever reasonably practical. The guidance in this document is grounded in the [Reactive State with Signals in Lit](https://justinfagnani.com/2024/10/09/reactive-state-with-signals-in-lit/) reference by Justin Fagnani; read it alongside this document whenever you are creating or refactoring signal-driven code.
+Our single most important architectural goal is to make every visual component **shareable** across different applications within the monorepo. To achieve this, components must be designed as **presentation-only** ("dumb") components whenever reasonably practical. The guidance in this document reflects the current state of `@df/state`, `@df/ui-lit`, and the teaching apps in this repo; revisit the upstream article [Reactive State with Signals in Lit](https://justinfagnani.com/2024/10/09/reactive-state-with-signals-in-lit/) for additional theory.
 
 A presentation-only component is completely decoupled from its environment. It has three core characteristics:
 
@@ -20,15 +20,15 @@ This approach effectively decouples components from a rigid parent-child hierarc
 
 ### 2.0. Reference Implementations
 
-When in doubt, review one of the canonical examples before writing code:
+When in doubt, review one or more of the canonical examples before writing code:
 
-- **`apps/df-npm-info-app`** – End-to-end harness demonstrating side effects contained in `@df/state` and presentation logic in `@df/ui-lit` (source of truth for AsyncComputed usage inspired by the Fagnani article).
-- **`apps/df-teaching-app`** – Example of computed signal orchestration, auto-refresh behaviour, and widget → store separation.
-- **`packages/ui-lit/df-npm-info-widget.ts`** & **`packages/ui-lit/df-practice-widget.ts`** – Current “golden” presentation components showing property patterns, event naming, and styling guidelines.
+- **`apps/df-npm-info-app`** – End-to-end harness demonstrating side effects contained in `@df/state` and presentation logic in `@df/ui-lit` (source of truth for AsyncComputed usage inspired by the Fagnani article).  Also a browser harness demonstrating how Playwright exercises shared state and component events.
+- **`apps/df-teaching-app`** – Example of computed signal orchestration, auto-refresh behaviour, and widget → store separation. Shows auto-refresh workflows, error forcing hooks, and host → widget contracts.
+- **`packages/ui-lit/df-npm-info-widget.ts`** & **`packages/ui-lit/df-practice-widget.ts`** – “Golden” presentation components showing property patterns, event naming, and styling guidelines.
 
 Treat these references as living specifications. Any new component pattern should either follow them verbatim or document why it intentionally deviates.
 
-> **Why Storybook still feels "live":** Our Storybook stories (and the runtime harnesses under `apps/`) deliberately connect presentation components to the real `@df/state` stores. That wiring means UI events still trigger fetches or other side effects—handled *outside* the component—so the preview looks functional. The component remains presentation-only because it only renders signal values and dispatches events; side effects stay in the stores or harness code that listens to those events.
+> **Why harnesses feel "live":** Our runtime harnesses deliberately connect presentation components to the real `@df/state` stores. That wiring means UI events still trigger fetches or other side effects—handled *outside* the component—so the preview looks functional.  The component remains presentation-only because it only renders signal values and dispatches events; side effects stay in the stores or harness code that listens to those events.
 
 ### 2.1. The Source of Truth: Centralized Signal State
 
@@ -65,12 +65,16 @@ export async function updateUser(newName: string) {
 
 Components achieve their presentation-only nature by connecting directly to the state signals they need, making them independent of their position in the component tree.
 
-  * ✅ **Do:** Import signals directly into your components. Use tooling like the `@signal` decorator to ensure the component automatically re-renders when the signal's value changes.
-  * ❌ **Don't:** Pass reactive data via props from a parent. This creates unnecessary coupling and violates the principle of a component being self-sufficient.
+  * ✅ **Do:** Import signals directly into your components. Use tooling like the `@signal` decorator to ensure the component automatically re-renders when the signal's value changes, or extend `SignalWatcher(LitElement)` so the component automatically re-renders when the signal's value changes.
+  * ❌ **Don't:** Pass reactive data via props from a parent unless you are selecting which signal to read. This creates unnecessary coupling and violates the principle of a component being self-sufficient.
 
-#### Example: Signal-Consuming Components
+#### 2 Examples: Signal-Consuming Components
 
 This `user-display` component is purely presentational. It only knows how to render a user's name and email; it has no idea where that data comes from.
+
+Please not two different examples, each with a different approach. Each approach has it's place.
+
+Here is the first example.
 
 ```typescript
 // file: ./src/components/user-display.ts
@@ -94,6 +98,29 @@ export class UserDisplay extends LitElement {
 }
 ```
 
+Here is the 2nd example.
+
+```typescript
+// file: ./src/components/user-display.ts
+import {LitElement, html} from 'lit';
+import {customElement} from 'lit/decorators.js';
+import {SignalWatcher} from '@lit-labs/signals';
+
+// 1. Import the signal directly.
+import { currentUser } from '../state/user.state.ts';
+
+@customElement('user-display')
+export class UserDisplay extends SignalWatcher(LitElement) {
+  override render() {
+    // 2. Read the signal's value directly in the template.
+    return html`
+      <h2>Welcome, ${currentUser.value.name}!</h2>
+      <p>Email: ${currentUser.value.email}</p>
+    `;
+  }
+}
+```
+
 ### 2.3. The Limited Role of Properties and Events
 
 While signals are the default for all reactive data, properties and events are reserved for specific use cases that do not break the presentation-only model.
@@ -108,10 +135,11 @@ Use properties **only** for passing **static or configuration data**—data that
 
 #### When to Use Events (`CustomEvent`)
 
-Use events **only** for communicating **transient user actions** that do not map directly to a persistent state change.
+Use events **only** for communicating **transient user actions** or relaying the user's intent. Persisted state transitions remain in stores.
 
   * **Notifications:** Notifying a parent that a one-time animation has completed.
   * **Layout Changes:** Requesting a parent container to `close` or `dismiss` the component (e.g., a modal's close button).
+  * **Intent relays:** Forwarding search terms, filter tweaks, or other user-supplied values so a store can respond.
 
 -----
 
@@ -120,22 +148,22 @@ Use events **only** for communicating **transient user actions** that do not map
 ### 3.1. Component Development Workflow
 
 #### **Pre-Development Setup**
-- [ ] **Study existing component patterns** - Read through a similar component's full implementation (types → state → UI → stories) before starting
-- [ ] **Plan the state shape first** - Define your `Config` interface in types before writing any code
-- [ ] **Identify signal dependencies** - Map out what signals you'll need and how they interact
+- [ ] **Study existing component patterns** – Read through a similar component's full implementation (types → state → UI → tests) before starting.
+- [ ] **Plan the state shape first** – Define or update shared types in `@df/types`.
+- [ ] **Identify signal dependencies** – Map the signals and actions you’ll need from `@df/state`.
 - [ ] **Verify downstream dependencies** - If a store touches another workspace (e.g., `@df/utils`), add the TS project reference and extend Storybook's Vite aliases before you run builds
 
 #### **Package Export Checklist**
-- [ ] **Add to types/src/index.ts** - Export your new types
-- [ ] **Add to state/src/index.ts** - Export your store functions
-- [ ] **Add to ui-lit/src/index.ts** - Export your component
-- [ ] **Add to ui-lit/package.json exports** - Add the new component path
-- [ ] **Build packages in order** - types → state → ui-lit → df-storybook
+- [ ] **Add to types/src/index.ts** – Export new shared types.
+- [ ] **Add to state/src/index.ts** – Export store functions and computeds.
+- [ ] **Add to ui-lit/src/index.ts** – Export the component.
+- [ ] **Add to ui-lit/package.json exports** – Map the component to its built output.
+- [ ] **Build packages in order** – types → state → ui-lit → apps.
 
 ### 3.2. Critical Technical Patterns
 
 #### **Property Declaration Pattern**
-Always use `declare` keyword with `@property` decorators to avoid property shadowing.
+Always use the `declare` keyword with `@property` decorators to avoid property shadowing.
 
 ```typescript
 // ❌ AVOID - causes property shadowing
@@ -167,6 +195,10 @@ Use fallback values in usage, not in definition, to prevent circular references.
 #### **Signal Architecture Pattern**
 Follow consistent naming and structure for state management.
 
+Here are a couple different, but similar examples.
+
+
+
 ```typescript
 // Signal naming convention:
 const [featureName]Signal = signal<Type>(defaultValue);
@@ -177,6 +209,21 @@ export function set[FeatureName](...args) { }
 export function reset[FeatureName]() { }
 export function update[FeatureName](...args) { }
 ```
+
+```typescript
+const topicSignal = signal<PracticeTopic>('web-components');
+export const practiceWidgetState = computed<PracticeWidgetState>(() => ({
+  topic: topicSignal.get(),
+  // …
+}));
+
+export function setPracticeTopic(next: PracticeTopic) {
+  topicSignal.set(next);
+}
+```
+
+#### **Typed Exports**
+When exporting helpers, return the computed value directly or expose factory helpers that wrap `computed`. Keep types in `@df/types` and import them as needed to avoid circular references.
 
 #### **Signal Return Type Pattern**
 When exporting a signal or computed instance, prefer `ReturnType<typeof createState>` instead of referencing the `Signal` namespace directly. Bundlers like Vite strip namespace types during build, and this pattern preserves accurate typings while remaining tool-friendly.
@@ -191,7 +238,6 @@ export function avatarState(id = 'default'): ReturnType<typeof createAvatarState
   return ensureAvatarState(id);
 }
 ```
-
 #### **Event Design Pattern**
 Follow consistent event naming and payload structure.
 
@@ -209,29 +255,29 @@ this.dispatchEvent(
 ### 3.3. Testing and Debugging
 
 #### **Build Order Dependencies**
-Remember: types → state → ui-lit → df-storybook → apps
+Remember: types → state → ui-lit → apps. Turbo handles this automatically when using workspace scripts, but manual builds should respect the order.
 
 #### **Common Issue Resolution**
-- [ ] **Empty component?** → Check property shadowing (use `declare`)
-- [ ] **No styling?** → Check CSS custom property circular references
-- [ ] **Build fails?** → Check package build order (types first)
-- [ ] **Types not found?** → Rebuild types package, check exports
+- [ ] **Empty component?** → Check property shadowing (use `declare`).
+- [ ] **No styling?** → Verify CSS custom property fallbacks.
+- [ ] **Build fails?** → Confirm TypeScript references and run `pnpm --filter @df/types run build` first.
+- [ ] **Types not found?** → Rebuild the types package and ensure exports are in place.
 
 #### **Development Testing Progression**
-1. **Types compile** - `pnpm --filter @df/types run build`
-2. **State compiles** - `pnpm --filter @df/state run build`
-3. **Component compiles** - `pnpm --filter @df/ui-lit run build`
-4. **Stories load** - `pnpm --filter @df/df-storybook run dev`
-5. **Linting passes** - `pnpm --filter @df/ui-lit run lint`
-6. **Full build** - `pnpm build`
+1. **Types compile** – `pnpm --filter @df/types run build`
+2. **State compiles** – `pnpm --filter @df/state run build`
+3. **Components compile** – `pnpm --filter @df/ui-lit run build`
+4. **App harnesses run** – `pnpm --filter <app> run dev` or `start:test`
+5. **Playwright passes** – `pnpm --filter <app> run test`
+6. **Full repo** – `pnpm build` and `pnpm test`
 
 ### 3.4. Storybook Story Guidelines
 
-#### **Essential Story Variants**
-- [ ] **Default** - Basic usage example
-- [ ] **Interactive** - Shows event handling with live feedback
-- [ ] **Variants** - All visual/behavioral variants (compact, disabled, etc.)
-- [ ] **Edge cases** - Error states, empty states, loading states
+#### **Essential Examples**
+- [ ] **Default** – Basic usage example.
+- [ ] **Interactive** – Demonstrates event handling with live feedback.
+- [ ] **Variants** – Capture visual or behavioral variants (compact, disabled, etc.).
+- [ ] **Edge cases** – Include error, empty, and loading states.
 
 #### **Story Documentation Pattern**
 ```typescript

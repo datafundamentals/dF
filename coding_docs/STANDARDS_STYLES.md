@@ -1,6 +1,6 @@
 # Coding Standards & Styles
 
-> **See also:** `coding_docs/SHARED_WEB_COMPONENT_DEFAULTS.md` is the canonical reference for signals-first component guidance. This document supplements it with broader stylistic expectations.
+> **See also:** `coding_docs/WC_SHARED_DEFAULTS.md` is the canonical reference for signals-first component guidance. This document supplements it with broader stylistic expectations and repo-wide conventions.
 
 ## Typescript
 
@@ -11,15 +11,17 @@
 
 ## Web Component Coding
 
-- **Lit** - Web Components to be coded with the latest stable version of Lit as made available and documented by the Google Chrome team.
-- **Typescript** - As Lit is designed for usage in both javascript and typescript projects, only typescript Lit usage should be use in this project.
+- **Lit** – Always build web components with the current stable Lit release (see `packages/ui-lit/package.json`).
+- **TypeScript** – Author all components in TypeScript; emit JavaScript through the package build steps.
+- **Signals-first** – Presentation components consume state via signals exported from `@df/state`; they never own persisted data or business logic.
+
 - **Visual Only** - Web Components should primarily focus on rendering UI. Application state that needs to be persisted or shared across different parts of the application must be managed in external src/stores classes. Internal, non-persisted UI state (e.g., animation state, toggling visibility of an element) can be managed within the component itself.
 - **Material Design 3** - All web component coding to follow Material Design 3 coding standards, importing directly when available, implementing internally when not available for import from the Material Design repository.
 
 ### Lit Component Implementation Patterns
 
 #### **Property Declaration Pattern**
-When using `@property` decorators, initialize values in constructor, not as class fields, to avoid property shadowing.
+When using `@property` decorators, initialize values in the constructor instead of class fields to avoid property shadowing.
 
 ```typescript
 // ❌ AVOID - causes property shadowing
@@ -45,23 +47,33 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 ```
 
 #### **CSS Architecture Guidelines**
-- **Use CSS custom properties** for themability, but with concrete fallbacks
-- **Follow BEM-style naming** for classes (`.component__element--modifier`)
-- **Design mobile-first** then add responsive enhancements
-- **Avoid circular custom property references** - use fallbacks in usage, not definition
+- **Use CSS custom properties** for themability, but always include concrete fallbacks.
+- **Follow BEM-style naming** for classes (`.component__element--modifier`).
+- **Design mobile-first** then add responsive enhancements.
+- **Avoid circular custom property references** – place fallbacks where the property is consumed, not defined.
 
 
 ## Signals-Based Reactive Architecture
 
 ### Core Philosophy
-- **Standards-based approach** - Signals represent a potential web standard for reactive programming
-- **Interoperability** - Code should work across libraries and frameworks through universal reactive primitives
-- **UI-agnostic state** - Business logic and data models live in signals, separate from UI components
-- **Deep observability** - Fine-grained reactivity through signal-based data structures
+- **Standards-based approach** – Signals are the default reactive primitive across the monorepo.
+- **Interoperability** – Shared state lives in `@df/state` and is imported directly by any component or app that needs it.
+- **UI-agnostic state** – Signals and computed helpers expose business data; UI layers consume but never own that state.
+- **Deep observability** – Use computed signals to derive view models whenever this is more effective than ad-hoc props-down events-up plumbing.
 
 ### Reference Implementation
 - **Author's article**: [Reactive State with Signals in Lit](https://justinfagnani.com/2024/10/09/reactive-state-with-signals-in-lit/)
-- **Demo projects**: `npmish.html` and related AsyncComputed examples in codebase
+- **df-npm-info-app** – t bhe **Demo project** from the above article.This is arowser harness for async workflows and event dispatching.
+- **df-lit-starter** – Demonstrates a host shell wired to shared state and components.
+- **df-teaching-app** – Showcases a host harness orchestrating signals and the `df-practice-widget`.
+
+## Shared State & Stores
+
+- **Location** – All shared state lives in `packages/state/src/stores/*` and is exported via `packages/state/src/index.ts`.
+- **Signal naming** – Use `camelCaseSignal` for internal writable signals and `somethingState` for exported computeds.
+- **Side effects** – Encapsulate async work inside store functions; UI layers call them but never await results directly inside templates.
+- **Lifecycle helpers** – Components extend `SignalWatcher` and read signals in `render()`; avoid manual subscriptions.
+- **Upcoming Firebase work** – Additional guidance will ship with the dedicated Firebase ticket; until then do not introduce Firebase-specific contracts into new docs. (See `future_tickets_ignore/` for planning notes.)
 
 ## Firebase & State Management
 
@@ -92,8 +104,14 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 - **SignalWatcher pattern** - Components accessing auth state must extend `SignalWatcher(LitElement)`
 - **Login UI** - Provide clear login prompts and user info when authenticated
 - **No Authentication Emulator** - Use direct, non-emulated firebase authentication, not the emulator, even when other emulators are in use.
+- **SignalWatcher pattern** – Any component that consumes authentication state must extend `SignalWatcher(LitElement)`.
+- **Boundary enforcement** – Authentication guards belong in host shells or wrappers, never in presentation components.
+- **UI feedback** – Provide clear prompts for logged-out states and visible, accessible sign-out affordances.
 
 ## Development Environment
+- **Vite dev servers** – Each app exposes `dev`/`preview`/`start:test` scripts that launch Vite on a dedicated port.
+- **Turbo graph** – Repository scripts (`pnpm build`, `pnpm test`, etc.) rely on Turbo to build dependencies in order.
+
 - **Firebase Emulators** - Use local emulators for development (configured in `firebase.json`), excepting Auth Emulator which is sometimes problematical in this dev environment, and should be avoided.
 - **Emulator connection** - Auto-connect to emulators when running on localhost
 - **Environment detection** - Use `import.meta.env.DEV` or `location.hostname === 'localhost'` for dev-specific code
@@ -117,7 +135,7 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 
 **TypeScript/JavaScript Source Files (`.ts`, `.js`)**
 - **Components/Classes**: `PascalCase.ts` (matches class name)
-- **Utilities/Services**: `kebab-case.ts` 
+- **Utilities/Services**: `kebab-case.ts`
 - **Configuration**: `kebab-case.config.ts`
 - **Types/Interfaces**: `kebab-case.types.ts`
 
@@ -163,30 +181,29 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 
 ### Multi-Page Application (MPA) Pattern
 - **No Single Page Applications (SPAs)** - Use multi-page applications with 11ty static site generator
-- **Page-per-feature principle** - Each distinct feature gets its own HTML page and web component
-- **Natural navigation** - Leverage browser navigation, bookmarking, and back/forward buttons
-- **Component size limit** - Aim to keep individual components under 200 lines. If you approach ~300 lines, pause and evaluate whether the component has taken on multiple responsibilities and should be split into smaller pieces or delegated to separate pages/components.
+- **Deployment target** – 11ty is the default hosting mechanism for shipped apps; treat each component bundle as an MPA widget consumed by 11ty.
+- **Page-per-feature** – Each externally deployed feature maps to its own HTML page and host component inside the consuming 11ty site.
+- **Natural navigation** – Rely on browser navigation/back-forward rather than client-side routers.
+- **Component size limit** – Keep individual components under ~200 lines; if you approach 300 lines, split responsibilities.
 
-### Development vs Production Structure  
-- **`dev/` folder** - Development and testing environment only
-  - Individual HTML pages for testing components (`dev/rag.html`, `dev/pageAuthor.html`)
-  - Direct component imports for development
-  - Not used in production deployments
+### Development vs Production Structure
+- **Vite for local dev** – Use the app-level Vite scripts for rapid iteration and Playwright integration.
+- **Rollup bundles** – Each app/package owns a Rollup build that emits the artifacts consumed by 11ty deployments.
 - **Rollup bundling** - Components are bundled for production deployment
   - Configured in `rollup.config.js` 
   - Bundles placed in `_site/ui/` for 11ty integration
-- **11ty integration** - Static site generator consumes bundled components
-  - Components can be deployed across multiple 11ty sites
-  - Maintains component reusability across different contexts
+- **External 11ty instances** – Customer-facing 11ty sites live outside this repo; keep our bundles clean and portable.
+- **df-lit-starter exception** – `apps/df-lit-starter` intentionally preserves the upstream lit-starter-ts 11ty demo as part of the teaching experience; this is not a template for other apps.
 
 ### Component Organization
-- **One component per page** - Each HTML page typically hosts one primary web component
-- **Feature-focused components** - Components should serve a single, well-defined purpose
-- **Cross-page navigation** - Use standard HTML links between pages, not client-side routing
+- **One component per page** – In dev mode, each HTML page typically hosts one primary web component.
+- **Feature-focused components** – Components serve a single, well-defined purpose; compose rather than nest large UIs.
+- **Cross-page navigation** – Use standard HTML links between pages, not client-side routing.
 
 ## File Structure & Organization
-- **Component imports** - Import Firebase config and stores from their canonical locations
-- **Type safety** - Use TypeScript interfaces for Firebase document structures
+- **Component imports** – Import shared state from `@df/state` and UI elements from `@df/ui-lit`.
+- Import Firebase config and stores from their canonical locations
+- **Type safety** – Define shared types in `@df/types` and import them wherever needed.
 
 ## Documentation
 - **Function documentation** - Include JSDoc comments for public functions, especially async operations
