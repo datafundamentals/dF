@@ -71,10 +71,13 @@ shared/dist/
 **/*.tsbuildinfo
 *.tsbuildinfo
 
-# Firebase
+# Firebase Emulator runtime/cache (NOT the seed data)
 **/.firebase/
 **/firebase-debug.log
 **/firestore-debug.log
+**/ui-debug.log
+**/database-debug.log
+**/pubsub-debug.log
 
 # Package manager
 **/package-lock.json.bak
