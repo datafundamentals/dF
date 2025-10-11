@@ -10,6 +10,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
+    "firebase": "^11.7.0",
     "typescript": "^5.9.2"
   }
 }

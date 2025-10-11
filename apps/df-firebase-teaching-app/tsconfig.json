@@ -13,6 +13,7 @@
   "references": [
     {"path": "../../packages/types"},
     {"path": "../../packages/state"},
-    {"path": "../../packages/ui-lit"}
+    {"path": "../../packages/ui-lit"},
+    {"path": "../../packages/firebase"}
   ]
 }

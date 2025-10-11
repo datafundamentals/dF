@@ -11,6 +11,8 @@
       "@df/utils": ["packages/utils/src/index.ts"],
       "@df/types/*": ["packages/types/src/*"],
       "@df/types": ["packages/types/src/index.ts"],
+      "@df/firebase/*": ["packages/firebase/src/*"],
+      "@df/firebase": ["packages/firebase/src/index.ts"],
       "@df/config": ["packages/config/src/index.ts"]
     },
     "lib": ["es2022", "DOM", "DOM.Iterable"],

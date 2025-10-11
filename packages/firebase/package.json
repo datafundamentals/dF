@@ -1,0 +1,25 @@
+{
+  "name": "@df/firebase",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./auth": "./dist/auth/index.js",
+    "./firestore": "./dist/firestore/index.js",
+    "./storage": "./dist/storage/index.js",
+    "./functions": "./dist/functions/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@df/types": "workspace:*",
+    "firebase": "^11.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
