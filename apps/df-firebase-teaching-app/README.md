@@ -35,6 +35,74 @@ Offline-friendly host application for teaching Firebase development patterns wit
 
 Avoid running other Firebase workspaces on the same ports. If you already have emulators running, shut them down or update one project's ports before continuing.
 
+## Environment Configuration
+
+This app uses environment variables for Firebase configuration, enabling seamless switching between emulator and production modes.
+
+### Quick Start (Emulator Development)
+
+1. Copy the example environment file:
+   ```sh
+   cp .env.example .env.emulator
+   ```
+
+2. The `.env.emulator` file contains placeholder values that work perfectly for emulator development:
+   ```
+   VITE_USE_EMULATOR=true
+   VITE_FIREBASE_PROJECT_ID=demo-firebase-teaching-app
+   # ... other placeholder values
+   ```
+
+3. **No real Firebase project needed!** The placeholder values in `.env.emulator` are sufficient for all local development (Tickets 1-12).
+
+### Environment Variables
+
+All environment variables use the `VITE_` prefix for Vite compatibility:
+
+| Variable | Purpose | Emulator Value | Production Value |
+|----------|---------|----------------|------------------|
+| `VITE_FIREBASE_API_KEY` | Firebase API key | Any placeholder | Real key from Console |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Auth domain | `demo-project.firebaseapp.com` | `your-project.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID` | Project ID | `demo-firebase-teaching-app` | Your real project ID |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Storage bucket | `demo-project.appspot.com` | `your-project.appspot.com` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Messaging sender | `000000000000` | Your real sender ID |
+| `VITE_FIREBASE_APP_ID` | App ID | `1:000000000000:web:abc123` | Your real app ID |
+| `VITE_USE_EMULATOR` | Enable emulator mode | `true` | `false` |
+| `VITE_FIREBASE_EMULATOR_UI` | Emulator UI URL | `http://127.0.0.1:5400` | (not used) |
+
+### Switching Between Emulator and Live Firebase
+
+**Emulator Mode (Default - Recommended for Development):**
+- Uses `.env.emulator` file
+- `VITE_USE_EMULATOR=true`
+- Placeholder Firebase config values work fine
+- 100% offline development
+- No Firebase project or billing required
+
+**Production Mode (Demonstrated in Ticket 13):**
+- Uses `.env.production` file (you create this)
+- `VITE_USE_EMULATOR=false`
+- Requires real Firebase project credentials
+- Connects to actual Firebase services
+- See `.env.production.example` for template
+
+To switch modes, simply use different `.env.*` files. Vite automatically loads `.env.emulator` during development.
+
+### Security Best Practices
+
+- ✅ `.env.example` and `.env.production.example` are committed (templates only)
+- ✅ `.env.emulator` is committed (contains safe placeholder values)
+- ❌ `.env.production` is **NEVER** committed (contains real credentials)
+- ❌ Never commit files with real Firebase credentials
+- ✅ Use GitHub Secrets for CI/CD deployments
+- ✅ Rotate credentials immediately if accidentally exposed
+
+### Troubleshooting Environment Issues
+
+- **Missing environment variables**: If you see an error about missing `VITE_FIREBASE_*` variables, ensure you have `.env.emulator` file. Copy from `.env.example` if needed.
+- **Emulator not connecting**: Verify `VITE_USE_EMULATOR=true` in your `.env.emulator` file.
+- **Wrong Firebase project**: Check that your environment file has the correct `VITE_FIREBASE_PROJECT_ID` value.
+
 ## Working with Seed Data
 
 The suite persists state to `apps/df-firebase-teaching-app/emulator-data/`.
