@@ -17,7 +17,10 @@
     "emulators:start": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --export-on-exit ./emulator-data",
     "emulators:export": "firebase emulators:export --project demo-firebase-teaching-app ./emulator-data",
     "emulators:import": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --only auth,firestore,storage,functions,hosting",
-    "emulators:clear": "node ./scripts/clear-emulator-data.mjs"
+    "emulators:clear": "node ./scripts/clear-emulator-data.mjs",
+    "seed": "tsx ./scripts/seed-data/seed.ts",
+    "seed:reset": "pnpm emulators:clear && pnpm seed",
+    "test:auth": "tsx ./scripts/test-auth.ts"
   },
   "dependencies": {
     "@df/state": "workspace:*",
@@ -27,8 +30,10 @@
     "lit": "^3.3.1"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "firebase-tools": "^13.29.1",
     "rimraf": "^6.0.1",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.2",
     "vite": "^5.4.10"
   }

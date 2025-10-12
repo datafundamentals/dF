@@ -24,14 +24,7 @@
  * - Implemented in Ticket 13
  */
 
-export interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-}
+import type {FirebaseConfig} from '@df/types/firebase.types';
 
 export interface EnvironmentConfig {
   firebase: FirebaseConfig;

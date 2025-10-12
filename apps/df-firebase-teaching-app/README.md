@@ -1,6 +1,6 @@
 # DF Firebase Teaching App
 
-Offline-friendly host application for teaching Firebase development patterns with Lit and the Firebase Emulator Suite.
+Offline-friendly host application for teaching Firebase development patterns with all other monorepo patterns, Firebase,  and the Firebase Emulator Suite running locally, and added seed data.
 
 ## Setting Up Firebase Emulators
 
@@ -8,10 +8,13 @@ Offline-friendly host application for teaching Firebase development patterns wit
    ```sh
    pnpm install
    ```
-2. Configure the Firebase CLI (only needed once per machine):
+2. Configure the Firebase CLI (only needed once per machine, **optional for emulator-only development**):
    ```sh
-   pnpm --filter @df/df-firebase-teaching-app dlx firebase-tools login
+   pnpm dlx firebase-tools login
    ```
+   
+   **Note:** You can skip this step for emulator-only work. Login is only required when deploying to production Firebase (Ticket 13).
+
 3. Start the emulators against the shared demo project. This command keeps the suite running and persists data across restarts:
    ```sh
    pnpm --filter @df/df-firebase-teaching-app emulators:start
@@ -105,22 +108,117 @@ To switch modes, simply use different `.env.*` files. Vite automatically loads `
 
 ## Working with Seed Data
 
-The suite persists state to `apps/df-firebase-teaching-app/emulator-data/`.
+The Firebase Emulator Suite persists state to `apps/df-firebase-teaching-app/emulator-data/`. This app includes comprehensive seed data for authentication, Firestore collections, and Storage files.
 
-- Export a snapshot without starting the web app:
+### Seeding the Emulators
+
+**First-time setup or reset:**
+```sh
+pnpm --filter @df/df-firebase-teaching-app seed
+```
+
+This populates the emulators with:
+- **10 authentication users** with diverse states (verified/unverified)
+- **4 Firestore collections** with 10+ documents each:
+  - `flowers` - 12 botanical examples
+  - `continents` - 7 geographic regions
+  - `chemicalElements` - 13 elements from periodic table
+  - `musicalInstruments` - 12 instruments from various families
+- **Storage files** - Sample images, documents, and user avatars (when available)
+
+The seed script is **idempotent** - safe to run multiple times. It skips existing data and only creates what's missing.
+
+**Clear and reseed:**
+```sh
+pnpm --filter @df/df-firebase-teaching-app seed:reset
+```
+
+This clears all emulator data and repopulates from scratch.
+
+### Viewing Seed Data
+
+Open the Firebase Emulator UI to browse the seeded data:
+```sh
+open http://127.0.0.1:5400
+```
+
+Navigate to:
+- **Authentication** → See 10 test users (alice.anderson@example.com, bob.builder@example.com, etc.)
+- **Firestore Database** → Browse collections (flowers, continents, chemicalElements, musicalInstruments)
+- **Storage** → View uploaded files (images, documents, avatars)
+
+**Test user credentials:**
+- Email: Any user from `scripts/seed-data/auth-users.json`
+- Password: `password123` (all users - teaching only, never use in production!)
+
+### Testing Authentication
+
+To verify that the seeded authentication users work correctly:
+
+```sh
+pnpm --filter @df/df-firebase-teaching-app test:auth
+```
+
+This script tests logging in with all 10 users and displays their authentication details (UID, email verification status, display name, photo URL).
+
+**Example output:**
+```
+✅ Alice Anderson
+   Email: alice.anderson@example.com
+   UID: RJjbp5cAylLirrlVdVlRsnpHPR5G
+   Email Verified: false
+   Display Name: Alice Anderson
+   Photo URL: avatars/alice.jpg
+```
+
+**Note:** The teaching app doesn't yet have a login UI (coming in later tickets). For now, authentication can be tested via:
+- The test script above
+- Browser console with Firebase SDK
+- Building your own UI components as practice
+
+### Manual Export/Import
+
+- Export current emulator state:
   ```sh
   pnpm --filter @df/df-firebase-teaching-app emulators:export
   ```
-- Import a saved snapshot and start the suite:
+  
+- Import a saved snapshot and start emulators:
   ```sh
   pnpm --filter @df/df-firebase-teaching-app emulators:import
   ```
-- Clear the persisted state:
+  
+- Clear all persisted data:
   ```sh
   pnpm --filter @df/df-firebase-teaching-app emulators:clear
   ```
 
-When teaching, export data at the end of each session so new students can replay the same state by running `emulators:import` before `emulators:start`.
+### Seed Data Documentation
+
+For detailed information about seed data structure, adding new data, or troubleshooting:
+
+📚 **See:** [`scripts/seed-data/README.md`](./scripts/seed-data/README.md)
+
+This includes:
+- Seed data philosophy and design principles
+- Complete data schemas for all collections
+- Instructions for adding new seed data
+- Versioning and compatibility guidelines
+- Troubleshooting common issues
+
+### Teaching Workflow
+
+**For instructors:**
+1. Start emulators: `pnpm emulators:start`
+2. Seed initial data: `pnpm seed`
+3. Teach your session, creating/modifying data
+4. Export at end: `pnpm emulators:export`
+5. Students can replay by running `pnpm emulators:import`
+
+**For students:**
+1. Start with clean slate: `pnpm seed:reset`
+2. Or resume from instructor's export: `pnpm emulators:import`
+3. Experiment freely - seed again anytime to reset
 
 ## Development Tasks
 
