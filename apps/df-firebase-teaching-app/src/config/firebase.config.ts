@@ -122,16 +122,6 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       useEmulator: isEmulatorEnabled(),
       emulatorUiUrl: loadEmulatorUiUrl(),
     };
-
-    // Log configuration in development (but mask sensitive values in production)
-    if (import.meta.env.DEV) {
-      console.log('[firebase-config] Configuration loaded:', {
-        projectId: cachedConfig.firebase.projectId,
-        useEmulator: cachedConfig.useEmulator,
-        emulatorUiUrl: cachedConfig.useEmulator ? cachedConfig.emulatorUiUrl : '(not used)',
-        apiKey: cachedConfig.firebase.apiKey ? '***' : '(missing)',
-      });
-    }
   }
 
   return cachedConfig;

@@ -23,6 +23,7 @@
     "test:auth": "tsx ./scripts/test-auth.ts"
   },
   "dependencies": {
+    "@df/firebase": "workspace:*",
     "@df/state": "workspace:*",
     "@df/ui-lit": "workspace:*",
     "@lit-labs/signals": "^0.1.0",

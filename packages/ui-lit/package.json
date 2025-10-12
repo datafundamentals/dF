@@ -22,7 +22,9 @@
     "./df-npm-info-widget": "./dist/df-npm-info-widget.js",
     "./df-npm-info-widget.js": "./dist/df-npm-info-widget.js",
     "./df-markdown-codemirror": "./dist/df-markdown-codemirror.js",
-    "./df-markdown-codemirror.js": "./dist/df-markdown-codemirror.js"
+    "./df-markdown-codemirror.js": "./dist/df-markdown-codemirror.js",
+    "./firebase": "./dist/firebase/index.js",
+    "./firebase/index.js": "./dist/firebase/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

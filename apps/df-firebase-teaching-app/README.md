@@ -44,19 +44,24 @@ This app uses environment variables for Firebase configuration, enabling seamles
 
 ### Quick Start (Emulator Development)
 
-1. Copy the example environment file:
+1. The `.env.emulator` file is already included with placeholder values that work perfectly for emulator development:
    ```sh
-   cp .env.example .env.emulator
+   # Already exists - no need to copy from .env.example
    ```
 
-2. The `.env.emulator` file contains placeholder values that work perfectly for emulator development:
+2. For Vite dev server compatibility, a symlink `.env.development` → `.env.emulator` is created automatically:
+   ```sh
+   ln -sf .env.emulator .env.development
+   ```
+
+3. The `.env.emulator` file contains placeholder values:
    ```
    VITE_USE_EMULATOR=true
    VITE_FIREBASE_PROJECT_ID=demo-firebase-teaching-app
    # ... other placeholder values
    ```
 
-3. **No real Firebase project needed!** The placeholder values in `.env.emulator` are sufficient for all local development (Tickets 1-12).
+4. **No real Firebase project needed!** The placeholder values in `.env.emulator` are sufficient for all local development (Tickets 1-12).
 
 ### Environment Variables
 
@@ -95,6 +100,7 @@ To switch modes, simply use different `.env.*` files. Vite automatically loads `
 
 - ✅ `.env.example` and `.env.production.example` are committed (templates only)
 - ✅ `.env.emulator` is committed (contains safe placeholder values)
+- ✅ `.env.development` is a symlink to `.env.emulator` (for Vite compatibility, not committed)
 - ❌ `.env.production` is **NEVER** committed (contains real credentials)
 - ❌ Never commit files with real Firebase credentials
 - ✅ Use GitHub Secrets for CI/CD deployments
@@ -219,6 +225,45 @@ This includes:
 1. Start with clean slate: `pnpm seed:reset`
 2. Or resume from instructor's export: `pnpm emulators:import`
 3. Experiment freely - seed again anytime to reset
+
+## Authentication (Ticket 5: ✅ Complete)
+
+The Firebase teaching app now includes complete authentication patterns demonstrating:
+- ✅ Sign in / Sign up with email and password
+- ✅ Sign out
+- ✅ Password reset
+- ✅ User profile display
+- ✅ Auth guards for protected content
+- ✅ Signals-first architecture
+- ✅ Presentation-only UI components
+
+### Quick Auth Demo
+
+```bash
+# Terminal 1: Start emulators
+pnpm --filter @df/df-firebase-teaching-app emulators:start
+
+# Terminal 2: Start dev server
+pnpm --filter @df/df-firebase-teaching-app dev
+```
+
+Then:
+1. Open http://127.0.0.1:4176
+2. Scroll to the "Authentication Pattern Demo" section
+3. Use test credentials:
+   - Email: `alice.anderson@example.com` (or any seeded user)
+   - Password: `password123`
+
+**Alternative:** You can also use production build with `pnpm build && pnpm preview` if preferred.
+
+### Auth Documentation
+
+See [AUTHENTICATION_PATTERNS.md](./AUTHENTICATION_PATTERNS.md) for complete documentation including:
+- Architecture overview
+- Component API reference
+- Auth guard usage
+- Integration examples
+- Testing strategies
 
 ## Development Tasks
 

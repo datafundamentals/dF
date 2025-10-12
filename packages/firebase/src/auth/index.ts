@@ -2,6 +2,11 @@ import type {FirebaseApp} from 'firebase/app';
 import {
   connectAuthEmulator,
   getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  sendPasswordResetEmail,
+  updateProfile,
   type Auth,
   type IdTokenResult,
   type Unsubscribe,
@@ -45,6 +50,52 @@ export function onAuthStateChange(
   callback: (user: User | null) => void
 ): Unsubscribe {
   return getFirebaseAuth(app).onAuthStateChanged(callback);
+}
+
+/**
+ * Sign in a user with email and password
+ */
+export async function signInWithEmail(
+  auth: Auth,
+  email: string,
+  password: string
+): Promise<UserCredential> {
+  return signInWithEmailAndPassword(auth, email, password);
+}
+
+/**
+ * Create a new user account with email and password
+ */
+export async function createUserWithEmail(
+  auth: Auth,
+  email: string,
+  password: string
+): Promise<UserCredential> {
+  return createUserWithEmailAndPassword(auth, email, password);
+}
+
+/**
+ * Sign out the current user
+ */
+export async function signOut(auth: Auth): Promise<void> {
+  return firebaseSignOut(auth);
+}
+
+/**
+ * Send password reset email
+ */
+export async function resetPassword(auth: Auth, email: string): Promise<void> {
+  return sendPasswordResetEmail(auth, email);
+}
+
+/**
+ * Update user profile (display name, photo URL)
+ */
+export async function updateUserProfile(
+  user: User,
+  profile: {displayName?: string | null; photoURL?: string | null}
+): Promise<void> {
+  return updateProfile(user, profile);
 }
 
 export type {Auth, IdTokenResult, Unsubscribe, User, UserCredential};

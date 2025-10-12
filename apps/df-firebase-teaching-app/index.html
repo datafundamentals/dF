@@ -19,13 +19,24 @@
         color: #0f172a;
       }
 
+      body {
+        flex-direction: column;
+        gap: 40px;
+        padding: 40px 20px;
+      }
+
       df-firebase-teaching-app {
         width: min(960px, 90vw);
+      }
+
+      df-auth-demo {
+        width: min(1200px, 90vw);
       }
     </style>
   </head>
   <body>
     <df-firebase-teaching-app></df-firebase-teaching-app>
+    <df-auth-demo></df-auth-demo>
     <script type="module" src="./dist/main.js"></script>
   </body>
 </html>

@@ -6,3 +6,4 @@ export * from './wrong-markdown-codemirror.js';
 export * from './df-practice-widget.js';
 export * from './df-npm-info-widget.js';
 export * from './df-markdown-codemirror.js';
+export * from './firebase/index.js';

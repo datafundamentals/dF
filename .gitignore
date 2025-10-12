@@ -22,10 +22,13 @@ build/
 **/.env
 **/.env.*
 !**/.env.example
+!**/.env.emulator
 !**/.env.production.example
+# .env.development is a symlink to .env.emulator (excluded but kept for Vite)
 .env
 .env.*
 !.env.example
+!.env.emulator
 !.env.production.example
 
 # Logs
