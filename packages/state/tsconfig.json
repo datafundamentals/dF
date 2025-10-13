@@ -5,5 +5,5 @@
     "composite": true
   },
   "include": ["src/**/*.ts"],
-  "references": [{"path": "../types"}, {"path": "../utils"}, {"path": "../firebase"}]
+  "references": [{"path": "../types"}, {"path": "../firebase"}]
 }

@@ -8,7 +8,6 @@
     "paths": {
       "@df/state/*": ["packages/state/src/*"],
       "@df/state": ["packages/state/src/index.ts"],
-      "@df/utils": ["packages/utils/src/index.ts"],
       "@df/types/*": ["packages/types/src/*"],
       "@df/types": ["packages/types/src/index.ts"],
       "@df/firebase/*": ["packages/firebase/src/*"],

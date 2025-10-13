@@ -12,7 +12,6 @@
   "dependencies": {
     "@df/firebase": "workspace:*",
     "@df/types": "workspace:*",
-    "@df/utils": "workspace:*",
     "@lit-labs/signals": "^0.1.0",
     "firebase": "^11.7.0"
   },
