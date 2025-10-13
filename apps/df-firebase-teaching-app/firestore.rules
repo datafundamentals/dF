@@ -1,10 +1,176 @@
 rules_version = '2';
+
+/**
+ * Firebase Firestore Security Rules
+ *
+ * This ruleset demonstrates production-ready security patterns for the teaching app.
+ * It covers authentication checks, field validation, and extensible permission models.
+ *
+ * Key Patterns:
+ * - Authentication-first: All operations require valid auth
+ * - Field validation: Explicit schemas prevent malformed data
+ * - Read separation: Query rules vs document rules for flexibility
+ * - Extensible ownership: Ready for userId-based permissions when needed
+ *
+ * Testing:
+ *   pnpm test:rules  - Run automated security rules tests
+ *
+ * @see tests/security-rules/ for comprehensive test coverage
+ */
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Development/teaching rules - EMULATOR ONLY
-    // For production, implement proper authentication-based rules
+    
+    // =============================================================================
+    // HELPER FUNCTIONS
+    // =============================================================================
+    
+    /**
+     * Check if user is authenticated
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Check if user has admin custom claim
+     */
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+    
+    /**
+     * Check if user is the document owner (when userId field exists)
+     */
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Validate that required fields exist in the document
+     */
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    
+    /**
+     * Validate that no unexpected fields are present
+     */
+    function hasOnlyAllowedFields(allowedFields) {
+      return request.resource.data.keys().hasOnly(allowedFields);
+    }
+    
+    /**
+     * Check if a field's type matches expected type
+     */
+    function isValidType(field, expectedType) {
+      let value = request.resource.data[field];
+      return expectedType == 'string' && value is string
+          || expectedType == 'bool' && value is bool
+          || expectedType == 'number' && value is number
+          || expectedType == 'timestamp' && value is timestamp
+          || expectedType == 'list' && value is list
+          || expectedType == 'map' && value is map
+          || expectedType == 'null' && value == null;
+    }
+    
+    // =============================================================================
+    // TODOS COLLECTION
+    // =============================================================================
+    
+    match /todos/{todoId} {
+      
+      /**
+       * Validate todo document structure and field types
+       */
+      function isValidTodo() {
+        let required = ['title', 'description', 'completed', 'priority', 'tags', 
+                       'createdAt', 'updatedAt', 'titleLower'];
+        let allowed = ['title', 'description', 'completed', 'priority', 'tags',
+                      'createdAt', 'updatedAt', 'dueDate', 'titleLower', 'userId'];
+        
+        return hasRequiredFields(required)
+            && hasOnlyAllowedFields(allowed)
+            && isValidType('title', 'string')
+            && isValidType('titleLower', 'string')
+            && isValidType('description', 'string')
+            && isValidType('completed', 'bool')
+            && isValidType('priority', 'string')
+            && isValidType('tags', 'list')
+            && (isValidType('createdAt', 'timestamp') || isValidType('createdAt', 'null'))
+            && (isValidType('updatedAt', 'timestamp') || isValidType('updatedAt', 'null'))
+            && (isValidType('dueDate', 'timestamp') || isValidType('dueDate', 'null'))
+            && request.resource.data.priority in ['low', 'medium', 'high']
+            && request.resource.data.title.size() > 0
+            && request.resource.data.title.size() <= 200
+            && request.resource.data.description.size() <= 2000
+            && request.resource.data.titleLower == request.resource.data.title.lower()
+            && request.resource.data.tags.size() <= 10;
+      }
+      
+      /**
+       * Allow reads for authenticated users
+       * Future: Add ownership filter with userId field
+       */
+      allow read: if isAuthenticated();
+      
+      /**
+       * Allow creates for authenticated users if document is valid
+       * Future: Enforce request.auth.uid == resource.data.userId
+       */
+      allow create: if isAuthenticated() && isValidTodo();
+      
+      /**
+       * Allow updates for authenticated users if document remains valid
+       * Future: Add ownership check with isOwner(resource.data.userId)
+       */
+      allow update: if isAuthenticated() && isValidTodo();
+      
+      /**
+       * Allow deletes for authenticated users
+       * Future: Add ownership check with isOwner(resource.data.userId)
+       */
+      allow delete: if isAuthenticated();
+    }
+    
+    // =============================================================================
+    // READ-ONLY REFERENCE DATA COLLECTIONS
+    // =============================================================================
+    
+    /**
+     * Reference data collections are read-only for authenticated users
+     * Admins can write for seeding and maintenance
+     */
+    match /flowers/{flowerId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /continents/{continentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /chemicalElements/{elementId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /musicalInstruments/{instrumentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // =============================================================================
+    // DEFAULT DENY
+    // =============================================================================
+    
+    /**
+     * Deny all other paths by default
+     * Explicit rules required for all collections
+     */
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

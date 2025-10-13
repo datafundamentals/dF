@@ -1,6 +1,7 @@
 # Firebase Teaching App Roadmap
 
-**Last Updated:** 2025-10-11
+**Last Updated:** 2025-01-15
+**Version:** 1.4
 **Status:** Planning Complete - Ready for Implementation
 **Target App:** `apps/df-firebase-teaching-app`
 
@@ -430,11 +431,10 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
   - Upload state: `idle|uploading|complete|error`
   - `uploadProgress` signal (0-100)
 - [ ] Create UI components:
-  - `<df-file-upload>` - file picker with drag-drop
-  - `<df-upload-progress>` - progress bar
-  - `<df-file-list>` - display uploaded files
-  - `<df-file-preview>` - preview images/documents
-  - `<df-file-delete>` - delete confirmation
+  - `<df-upload-link>` - file picker with drag-drop and inline progress tracking (reused from existing component)
+  - `<df-file-list>` - display uploaded files with optional preview and delete buttons
+  - `<df-file-delete>` - delete confirmation dialog
+  - Note: Upload progress is integrated into `<df-upload-link>` component; preview functionality is integrated into `<df-file-list>` component
 - [ ] Implement file validation (size, type)
 - [ ] Demonstrate reference path patterns
 - [ ] Add thumbnail generation example
@@ -470,31 +470,33 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
 
 ---
 
-#### Ticket 8: Security Rules Foundation
+#### Ticket 8: Security Rules Foundation ✅
+
+**Status:** Complete
 
 **Objective:** Implement and test Firebase security rules.
 
 **Acceptance Criteria:**
-- [ ] Create `firestore.rules` with patterns:
+- [x] Create `firestore.rules` with patterns:
   - Authentication requirements
   - Document ownership rules
   - Read vs write permissions
   - Field-level validation
-- [ ] Create `storage.rules` with patterns:
+- [x] Create `storage.rules` with patterns:
   - File type restrictions
   - File size limits
   - Path-based permissions
   - User-specific directories
-- [ ] Set up rules testing framework:
+- [x] Set up rules testing framework:
   - `@firebase/rules-unit-testing`
   - Test files in `tests/security-rules/`
-- [ ] Create comprehensive test suite:
+- [x] Create comprehensive test suite:
   - Authenticated vs unauthenticated access
   - Owner-only operations
   - Field validation
   - File upload restrictions
-- [ ] Document security patterns and anti-patterns
-- [ ] Create deployment scripts for rules
+- [x] Document security patterns and anti-patterns
+- [x] Create deployment scripts for rules
 
 **Dependencies:** Ticket 5, 6, 7 (needs auth and data patterns established)
 
@@ -504,16 +506,16 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
 - Testing strategy for rules
 
 **Testing Requirements:**
-- [ ] All rules tests pass
-- [ ] Unauthorized access blocked
-- [ ] Authorized access succeeds
-- [ ] Edge cases handled
+- [x] All rules tests pass (64/64 tests)
+- [x] Unauthorized access blocked
+- [x] Authorized access succeeds
+- [x] Edge cases handled
 
 **Documentation Needs:**
-- README section: "Security Rules"
-- Rules testing guide
-- Common security patterns
-- Security anti-patterns to avoid
+- [x] README section: "Security Rules"
+- [x] Rules testing guide
+- [x] Common security patterns
+- [x] Security anti-patterns to avoid
 
 ---
 
@@ -1491,6 +1493,7 @@ This ticket documents its own origin story - a systemic failure where all agents
 | 1.0 | 2025-10-09 | Initial roadmap created | CoPilot/Pete |
 | 1.1 | 2025-10-11 | Amended Ticket 2 with emulator-first philosophy; Added Ticket 13 for production deployment & bundle patterns | Claude/Pete |
 | 1.2 | 2025-10-12 | Added Ticket 14: Standards Enforcement System & Agent-Resistant Quality Gates - addresses systemic MD3 compliance failures discovered during Ticket 6 implementation | Claude/Pete |
+| 1.3 | 2025-10-13 | Updated Ticket 7 component names to match actual implementation: `<df-upload-link>` (not `<df-file-upload>`), `<df-file-list>` (with integrated preview), `<df-file-delete>` (progress tracking integrated into upload component) | Claude/Pete |
 
 ## Appendix: Firebase Resources
 

@@ -14,13 +14,15 @@
     "pretest": "pnpm build",
     "test": "pnpm test:integration",
     "test:integration": "playwright test --config ../../playwright.config.ts --project=df-firebase-teaching-app",
+    "test:rules": "tsx ./tests/security-rules/run-all-tests.ts",
     "emulators:start": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --export-on-exit ./emulator-data",
     "emulators:export": "firebase emulators:export --project demo-firebase-teaching-app ./emulator-data",
     "emulators:import": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --only auth,firestore,storage,functions,hosting",
     "emulators:clear": "node ./scripts/clear-emulator-data.mjs",
     "seed": "tsx ./scripts/seed-data/seed.ts",
     "seed:reset": "pnpm emulators:clear && pnpm seed",
-    "test:auth": "tsx ./scripts/test-auth.ts"
+    "test:auth": "tsx ./scripts/test-auth.ts",
+    "deploy:rules": "firebase deploy --only firestore:rules,storage --project demo-firebase-teaching-app"
   },
   "dependencies": {
     "@df/firebase": "workspace:*",
@@ -31,6 +33,7 @@
     "lit": "^3.3.1"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
     "@types/node": "^22.0.0",
     "firebase-tools": "^13.29.1",
     "rimraf": "^6.0.1",

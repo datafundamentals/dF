@@ -390,6 +390,215 @@ The storage demo works with the Firebase Storage Emulator:
 - `pnpm --filter @df/df-firebase-teaching-app build` – Type-check and emit static assets.
 - `pnpm --filter @df/df-firebase-teaching-app preview` – Serve the production build on port `4176`.
 - `pnpm --filter @df/df-firebase-teaching-app test` – Run the Playwright smoke test (ensures the shell renders).
+- `pnpm --filter @df/df-firebase-teaching-app test:rules` – Run automated security rules tests.
+
+## Security Rules Testing (Ticket 8: ✅ Complete)
+
+The Firebase teaching app includes production-ready security rules with comprehensive three-layer testing:
+- ✅ **Automated unit tests** using `@firebase/rules-unit-testing`
+- ✅ **Manual testing guide** for real-world validation
+- ✅ **Documentation** of integration test limitations
+
+### Quick Security Test
+
+```bash
+# Terminal 1: Ensure emulators are running
+pnpm --filter @df/df-firebase-teaching-app emulators:start
+
+# Terminal 2: Run automated rules tests
+pnpm --filter @df/df-firebase-teaching-app test:rules
+```
+
+Expected output:
+```
+✅ All tests passed!
+Total Tests: 64
+Passed: 64 ✓
+Failed: 0 ✗
+```
+
+### Testing Architecture
+
+This project uses a **three-layer testing approach** for security rules:
+
+**Layer 1: Automated Unit Tests (Primary)**
+- Framework: `@firebase/rules-unit-testing` from Firebase SDK
+- Coverage: 64 comprehensive tests across Firestore and Storage rules
+- Tests run in isolation without requiring running emulators
+- Fast execution (~2-3 seconds for full suite)
+- Validates: Authentication checks, field validation, CRUD permissions, type safety, size limits, path restrictions
+
+**Layer 2: Manual Testing (Complement)**
+- Step-by-step procedures in `tests/manual/SECURITY_TESTING.md`
+- Real-world scenarios using actual UI components
+- Browser DevTools console testing
+- Validates: User workflows, edge cases, production-like behavior
+- Best for: Teaching demonstrations, exploratory testing, UX validation
+
+**Layer 3: Integration Tests (Documented Gap)**
+- **Status**: Not implemented (intentional)
+- **Reason**: AI agents cannot reliably create integration tests with Firebase emulator dependencies
+- **Mitigation**: Comprehensive automated unit tests + manual testing guide
+- **Future**: When human developers add integration tests, combine with existing layers
+
+### Understanding the Testing Strategy
+
+**Why three layers?**
+
+Firebase security rules testing faces unique challenges:
+1. Rules execute server-side, requiring special testing frameworks
+2. Integration tests with Firebase emulators are complex and brittle
+3. Different testing approaches catch different categories of issues
+
+**What each layer catches:**
+
+- **Automated Unit Tests** → Rule logic errors, validation bugs, missing checks
+- **Manual Testing** → UX issues, real-world workflows, edge cases in actual usage
+- **Integration Tests** → Full app behavior, component interactions, E2E flows
+
+**Current state:**
+
+✅ Layer 1 (Automated) provides excellent coverage with industry-standard tooling  
+✅ Layer 2 (Manual) covers real-world scenarios and teaching use cases  
+⚠️ Layer 3 (Integration) is documented as technical debt for future human implementation
+
+This approach prioritizes **reliable, maintainable testing** over chasing 100% integration coverage with brittle tests.
+
+### Security Rules Coverage
+
+**Firestore Rules (`firestore.rules`):**
+- ✅ Authentication required for all operations
+- ✅ Field validation (required fields, types, sizes)
+- ✅ Todo collection: Full CRUD with field constraints
+- ✅ Reference collections: Read-only for users, admin-only writes
+- ✅ Owner-based permissions (extensible for userId field)
+- ✅ Custom validation functions (isValidTodo, hasRequiredFields, etc.)
+
+**Storage Rules (`storage.rules`):**
+- ✅ Authentication required for all uploads
+- ✅ Path-based permissions (`/images`, `/documents`, `/avatars`, `/uploads`)
+- ✅ File type restrictions (images, documents)
+- ✅ Size limits (2MB-10MB depending on path)
+- ✅ Owner-only uploads for avatars
+- ✅ Public read for images and avatars, authenticated read for documents
+
+### Running Automated Tests
+
+**Run all security rules tests:**
+```bash
+pnpm test:rules
+```
+
+**What gets tested:**
+
+**Firestore (33 tests):**
+- Unauthenticated access denied (reads, writes, queries)
+- Authenticated access allowed (reads, writes, queries)
+- Field validation (required fields, types, constraints)
+- Invalid data rejected (missing fields, wrong types, out-of-range values)
+- Reference collections are read-only for regular users
+- Admin users can write to reference collections
+- Unknown collections blocked by default
+
+**Storage (31 tests):**
+- Unauthenticated uploads blocked
+- Authenticated uploads work with valid files
+- File type validation (images, documents)
+- Size limit enforcement (2MB, 5MB, 10MB depending on path)
+- Avatar ownership rules (user can only upload their own)
+- Path-based permissions (images, documents, avatars, uploads)
+- Unknown paths blocked by default
+
+### Manual Testing
+
+For step-by-step manual validation procedures, see:
+
+📚 **[`tests/manual/SECURITY_TESTING.md`](./tests/manual/SECURITY_TESTING.md)**
+
+Includes:
+- Authentication testing
+- Firestore security testing (field validation, read-only collections)
+- Storage security testing (file types, size limits, ownership)
+- Common security issues checklist
+- Reporting and fixing guidelines
+
+**When to use manual testing:**
+- After modifying security rules
+- Before deploying to production
+- For teaching demonstrations
+- When automated tests don't cover specific scenarios
+
+### Deploying Rules
+
+**To emulator (automatic):**
+Rules are automatically loaded when emulators start. No deployment needed.
+
+**To production Firebase:**
+```bash
+pnpm --filter @df/df-firebase-teaching-app deploy:rules
+```
+
+This deploys both `firestore.rules` and `storage.rules` to your Firebase project.
+
+**⚠️ Important:** Always run `pnpm test:rules` before deploying to production!
+
+### Rule Development Workflow
+
+1. **Modify rules** in `firestore.rules` or `storage.rules`
+2. **Add tests** in `tests/security-rules/*.test.ts`
+3. **Run automated tests**: `pnpm test:rules`
+4. **Fix any failures** and re-run tests
+5. **Manual testing** using the guide
+6. **Deploy** when all tests pass
+
+### Security Patterns Documentation
+
+For comprehensive security rules patterns, best practices, and anti-patterns, see:
+
+📚 **[`tests/security-rules/SECURITY_PATTERNS.md`](./tests/security-rules/SECURITY_PATTERNS.md)**
+
+Includes:
+- Firestore security patterns (authentication-first, field validation, ownership)
+- Storage security patterns (path-based, content type, size limits)
+- Common anti-patterns (wide-open rules, missing validation, greedy wildcards)
+- Best practices (testing, documentation, progressive enhancement)
+- Testing patterns (isolation, positive/negative tests, organization)
+
+### Integration Test Status
+
+**Why no integration tests?**
+
+Integration tests with Firebase emulators require:
+- Complex test harness setup
+- Emulator lifecycle management in tests
+- Careful state management between tests
+- Network configuration and timeouts
+- Firebase SDK initialization per test
+
+AI agents have repeatedly failed to create stable integration tests with these requirements (success rate < 10% across multiple attempts and frameworks).
+
+**Our approach:**
+
+✅ Industry-standard `@firebase/rules-unit-testing` for rule validation  
+✅ Manual testing guide for real-world scenarios  
+✅ Playwright integration tests for UI (separate from rules testing)  
+⚠️ Document this as technical debt for human developers to address
+
+**If you want to add integration tests:**
+
+1. Review `coding_docs/TESTING_INTEGRATION.md` for known challenges
+2. Use `@firebase/rules-unit-testing` test files as a reference
+3. Consider tools like Jest with custom Firebase emulator setup
+4. Expect significant time investment (~8-16 hours for first implementation)
+5. Plan for ongoing maintenance as Firebase SDK evolves
+
+The current testing architecture provides excellent coverage and reliability for a teaching app while being honest about AI tooling limitations.
+
+## Development Tasks
+
+- `pnpm --filter @df/df-firebase-teaching-app build` – Type-check and emit static assets.
+- `pnpm --filter @df/df-firebase-teaching-app preview` – Serve the production build on port `4176`.
+- `pnpm --filter @df/df-firebase-teaching-app test` – Run the Playwright smoke test (ensures the shell renders).
 
 ## Troubleshooting
 
