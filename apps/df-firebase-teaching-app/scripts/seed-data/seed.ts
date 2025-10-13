@@ -31,6 +31,7 @@ import {
   doc,
   setDoc,
   getDocs,
+  Timestamp,
   type Firestore,
 } from 'firebase/firestore';
 import {
@@ -356,6 +357,34 @@ async function seedAuthUsers(auth: Auth): Promise<void> {
 /**
  * Seeds a Firestore collection from a JSON file
  */
+function prepareDocumentData(collectionName: string, data: Record<string, unknown>) {
+  if (collectionName !== 'todos') {
+    return data;
+  }
+
+  const normalized = {...data};
+
+  if (typeof normalized.title === 'string') {
+    normalized.titleLower = normalized.title.toLowerCase();
+  }
+
+  const timestampFields = ['createdAt', 'updatedAt', 'dueDate'] as const;
+  for (const field of timestampFields) {
+    const value = normalized[field];
+    if (typeof value === 'string') {
+      normalized[field] = Timestamp.fromDate(new Date(value));
+    } else if (value === null || value === undefined) {
+      normalized[field] = null;
+    }
+  }
+
+  if (!Array.isArray(normalized.tags)) {
+    normalized.tags = [];
+  }
+
+  return normalized;
+}
+
 async function seedFirestoreCollection(
   db: Firestore,
   collectionName: string,
@@ -371,7 +400,8 @@ async function seedFirestoreCollection(
 
   for (const document of documents) {
     try {
-      const {id, ...data} = document;
+      const {id, ...rawData} = document;
+      const data = prepareDocumentData(collectionName, rawData);
       const docRef = doc(collectionRef, id);
 
       // Check if document already exists
@@ -406,6 +436,7 @@ async function seedFirestoreCollections(db: Firestore): Promise<void> {
     {name: 'continents', file: 'continents.json'},
     {name: 'chemicalElements', file: 'chemicalElements.json'},
     {name: 'musicalInstruments', file: 'musicalInstruments.json'},
+    {name: 'todos', file: 'todos.json'},
   ];
 
   for (const {name, file} of collections) {

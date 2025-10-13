@@ -125,11 +125,12 @@ pnpm --filter @df/df-firebase-teaching-app seed
 
 This populates the emulators with:
 - **10 authentication users** with diverse states (verified/unverified)
-- **4 Firestore collections** with 10+ documents each:
+- **5 Firestore collections** with 10+ documents each:
   - `flowers` - 12 botanical examples
   - `continents` - 7 geographic regions
   - `chemicalElements` - 13 elements from periodic table
   - `musicalInstruments` - 12 instruments from various families
+  - `todos` - 12 classroom coaching tasks for CRUD demos
 - **Storage files** - Sample images, documents, and user avatars (when available)
 
 The seed script is **idempotent** - safe to run multiple times. It skips existing data and only creates what's missing.
@@ -264,6 +265,34 @@ See [AUTHENTICATION_PATTERNS.md](./AUTHENTICATION_PATTERNS.md) for complete docu
 - Auth guard usage
 - Integration examples
 - Testing strategies
+
+## Firestore Pattern (Ticket 6: ✅ Complete)
+
+The Firestore demo showcases end-to-end CRUD flows powered by the shared todos store:
+- ✅ Base store with pagination, query switching, and real-time listeners
+- ✅ Offline persistence via IndexedDB (automatically enabled)
+- ✅ Filter UI for priority, tags, and completion state
+- ✅ Teaching-friendly todo dataset with due dates and tags
+- ✅ Reusable UI components (`df-firestore-list`, `df-firestore-item`, `df-firestore-form`, `df-firestore-delete`)
+- ✅ Playwright coverage for create → update → paginate → delete
+
+### Quick Firestore Tour
+
+1. Start the emulators: `pnpm --filter @df/df-firebase-teaching-app emulators:start`
+2. Launch the dev server: `pnpm --filter @df/df-firebase-teaching-app dev`
+3. Visit the "Firestore CRUD Pattern" section
+4. Toggle real-time updates, adjust filters, and add/edit/delete todos
+5. Switch page size to explore pagination
+
+### Offline Testing
+
+1. Enable airplane mode (or run `networksetup -setairportpower en0 off` on macOS)
+2. Reload the page — todos render from IndexedDB cache
+3. Create/edit a todo while offline
+4. Re-enable connectivity; the change syncs automatically
+
+📚 See [FIRESTORE_PATTERNS.md](./FIRESTORE_PATTERNS.md) for full documentation, including architecture
+notes and Storybook links.
 
 ## Development Tasks
 

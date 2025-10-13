@@ -59,7 +59,8 @@ scripts/seed-data/
 │   ├── flowers.json             # 12 flower documents
 │   ├── continents.json          # 7 continent documents
 │   ├── chemicalElements.json    # 13 chemical element documents
-│   └── musicalInstruments.json  # 12 musical instrument documents
+│   ├── musicalInstruments.json  # 12 musical instrument documents
+│   └── todos.json               # 12 teaching todo documents
 └── storage-files/               # Files for Storage upload testing
     ├── README.md                # Storage files documentation
     ├── images/                  # Sample images (3-5 files)
@@ -165,6 +166,27 @@ scripts/seed-data/
 - Historical data (negative years)
 - Categorical grouping (by family)
 - String contains/search patterns
+
+#### `todos` Collection
+**Count:** 12 documents  
+**Fields:**
+- `id` (string) - Document ID (kebab-case)
+- `title` (string) - Task title (teaching scenario)
+- `titleLower` (string) - Lowercase title for query range searches
+- `description` (string) - Detailed task description
+- `completed` (boolean) - Completion status
+- `priority` (string) - `'low' | 'medium' | 'high'`
+- `tags` (array) - Helpful categorisation keywords
+- `createdAt` (timestamp) - Creation time
+- `updatedAt` (timestamp) - Last update time
+- `dueDate` (timestamp|null) - Optional due date
+
+**Teaching use cases:**
+- Demonstrates CRUD mutations with realistic fields
+- Query filters (`completed`, `priority`, `tags`)
+- Pagination against time-sorted data
+- Offline writes retained via IndexedDB persistence
+- Real-time listeners reacting to collaborative edits
 
 ### Storage Files
 

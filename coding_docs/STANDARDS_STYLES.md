@@ -16,7 +16,12 @@
 - **Signals-first** – Presentation components consume state via signals exported from `@df/state`; they never own persisted data or business logic.
 
 - **Visual Only** - Web Components should primarily focus on rendering UI. Application state that needs to be persisted or shared across different parts of the application must be managed in external src/stores classes. Internal, non-persisted UI state (e.g., animation state, toggling visibility of an element) can be managed within the component itself.
-- **Material Design 3** - All web component coding to follow Material Design 3 coding standards, importing directly when available, implementing internally when not available for import from the Material Design repository.
+- **Material Design 3 (MD3) Components** - All web components MUST use Material Web Components (`@material/web`) exclusively for interactive UI elements. This is a **strictly enforced** standard.
+  - ✅ **REQUIRED**: `<md-filled-button>`, `<md-outlined-text-field>`, `<md-filled-select>`, etc.
+  - ❌ **FORBIDDEN**: Native HTML elements `<button>`, `<input>`, `<select>`, `<textarea>`
+  - 🔍 **ENFORCEMENT**: See `OUT_OF_SCOPE/FIREBASE_TEACHING_APP_ROADMAP.md` Ticket 14 for automated linting, pre-commit hooks, and CI validation
+  - 📚 **RATIONALE**: Teaching apps propagate patterns. MD3 violations multiply across all derived applications.
+  - 🎨 **STYLING**: Use MD3 design tokens (`--md-sys-color-*`) in component CSS; avoid custom styling that conflicts with Material theming
 
 ### Lit Component Implementation Patterns
 

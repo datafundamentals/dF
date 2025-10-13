@@ -5,3 +5,5 @@ export * from './practice-widget.js';
 export * from './npm-info.js';
 export * from './firebase.types.js';
 export * from './firebase-auth.types.js';
+export * from './firebase-firestore.types.js';
+export * from './firebase-todos.types.js';

@@ -3,6 +3,7 @@ import {
   connectFirestoreEmulator,
   collection,
   doc,
+  enableIndexedDbPersistence,
   getFirestore,
   type CollectionReference,
   type DocumentData,
@@ -60,6 +61,48 @@ export function makeConverter<T>(config: {
     toFirestore: config.toFirestore,
     fromFirestore: config.fromFirestore,
   };
+}
+
+const persistenceEnabled = new WeakSet<Firestore>();
+
+/**
+ * Enables IndexedDB-backed offline persistence for a Firestore instance. Safe
+ * to call multiple times; subsequent calls become no-ops.
+ */
+export async function enableFirestoreOfflinePersistence(db: Firestore): Promise<boolean> {
+  if (persistenceEnabled.has(db)) {
+    return true;
+  }
+
+  try {
+    await enableIndexedDbPersistence(db, {
+      forceOwnership: false, // Allow multiple tabs
+    });
+    persistenceEnabled.add(db);
+    console.log('[firebase/firestore] Offline persistence enabled successfully');
+    return true;
+  } catch (error) {
+    const code = (error as {code?: string} | undefined)?.code;
+    if (code === 'failed-precondition') {
+      console.warn(
+        '[firebase/firestore] Offline persistence is already enabled in another tab. Continuing with memory cache.'
+      );
+      persistenceEnabled.add(db); // Mark as "handled" so we don't retry
+      return false;
+    }
+
+    if (code === 'unimplemented') {
+      console.warn(
+        '[firebase/firestore] Offline persistence is not supported in this environment. Continuing with memory cache.'
+      );
+      persistenceEnabled.add(db); // Mark as "handled"
+      return false;
+    }
+
+    console.warn('[firebase/firestore] Failed to enable offline persistence. Continuing with memory cache:', error);
+    persistenceEnabled.add(db); // Mark as "handled"
+    return false;
+  }
 }
 
 export type {

@@ -3,3 +3,7 @@ export {DfSignUp} from './df-sign-up.js';
 export {DfSignOut} from './df-sign-out.js';
 export {DfUserProfile} from './df-user-profile.js';
 export {DfPasswordReset} from './df-password-reset.js';
+export {DfFirestoreItem} from './df-firestore-item.js';
+export {DfFirestoreForm} from './df-firestore-form.js';
+export {DfFirestoreDelete} from './df-firestore-delete.js';
+export {DfFirestoreList} from './df-firestore-list.js';
