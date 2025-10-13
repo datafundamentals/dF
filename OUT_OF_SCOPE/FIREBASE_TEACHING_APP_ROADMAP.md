@@ -261,7 +261,7 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
 - [ ] Create `scripts/seed-data/` directory structure:
   ```
   scripts/seed-data/
-  ├── auth-users.json          # 10 fake users with different roles
+  ├── auth-users.json          # 10 fake users
   ├── firestore-collections/   # Sample documents for each collection
   │   ├── todos.json
   │   ├── users.json
@@ -273,7 +273,6 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
   └── seed.ts                  # Script to populate emulators
   ```
 - [ ] Create 10 diverse auth users:
-  - Various roles (admin, user, guest)
   - Different authentication states
   - Mix of verified/unverified emails
 - [ ] Create sample Firestore data:
@@ -478,7 +477,6 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
 **Acceptance Criteria:**
 - [ ] Create `firestore.rules` with patterns:
   - Authentication requirements
-  - Role-based access (admin, user, guest)
   - Document ownership rules
   - Read vs write permissions
   - Field-level validation
@@ -492,7 +490,6 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
   - Test files in `tests/security-rules/`
 - [ ] Create comprehensive test suite:
   - Authenticated vs unauthenticated access
-  - Role-based permissions
   - Owner-only operations
   - Field validation
   - File upload restrictions
@@ -503,7 +500,6 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
 
 **Key Decisions to Document:**
 - Security rule organization
-- Role implementation approach
 - When to validate in rules vs application
 - Testing strategy for rules
 
