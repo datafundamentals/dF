@@ -1,8 +1,8 @@
 # Firebase Teaching App Roadmap
 
-**Last Updated:** 2025-01-15
+**Last Updated:** 2025-10-13
 **Version:** 1.4
-**Status:** Planning Complete - Ready for Implementation
+**Status:** Planning Complete - Ready for Implementation (Ticket 9 Architecture Finalized)
 **Target App:** `apps/df-firebase-teaching-app`
 
 ## Overview
@@ -523,52 +523,105 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
 
 #### Ticket 9: Cloud Functions Integration
 
-**Objective:** Set up Cloud Functions with TypeScript and demonstrate common patterns.
+**Objective:** Set up Cloud Functions with TypeScript and demonstrate common patterns for both app-specific and shared functions.
+
+**Architecture Decision (2025-10-13):** This ticket implements TWO function patterns as documented in `coding_docs/FUNCTIONS_PLACEMENT.md`:
+1. **App-specific functions** in `apps/df-firebase-teaching-app/functions/` (primary implementation)
+2. **Shared functions pattern** documentation and example in `services/firebase-functions-shared/` (teaching reference)
+
+**Rationale:** Teaching app must demonstrate when to use app-specific vs shared functions. Real-world use case (shared auth across 6+ apps) requires `services/` pattern, but most simple functions use app-specific pattern.
 
 **Acceptance Criteria:**
-- [ ] Set up `functions/` directory:
+
+**Part A: App-Specific Functions (Primary Implementation)**
+- [ ] Set up `apps/df-firebase-teaching-app/functions/` directory:
   ```
-  functions/
+  apps/df-firebase-teaching-app/functions/
   ├── src/
   │   ├── index.ts              # Exports
   │   ├── callable/             # Callable functions
   │   ├── triggers/             # Database triggers
   │   └── scheduled/            # Scheduled functions
-  ├── package.json
+  ├── package.json              # Separate workspace
   ├── tsconfig.json
   └── .eslintrc.js
   ```
-- [ ] Create example callable function:
-  - Accepts typed parameters
+- [ ] Create example callable function: `createTodoAdvanced`
+  - Accepts typed parameters (from `@df/types`)
   - Returns typed response
   - Includes error handling
   - Validates auth context
-- [ ] Create example HTTP function:
-  - Express-based
-  - CORS configured
+  - Demonstrates app-specific business logic
+- [ ] Create example HTTP function: `todosExportAPI`
+  - Express-based endpoint
+  - CORS configured for teaching app domain
   - Request validation
-- [ ] Create example Firestore trigger:
+  - CSV export functionality
+- [ ] Create example Firestore trigger: `onTodoCreated`
   - `onCreate` handler
-  - `onUpdate` handler
-  - `onDelete` handler
-- [ ] Create example scheduled function
+  - Demonstrates notification pattern
+  - Uses shared types from `@df/types`
+- [ ] Create example scheduled function: `cleanupExpiredTodos`
+  - Daily maintenance task
+  - Demonstrates cron scheduling
+- [ ] Configure functions as separate workspace:
+  - Add to root `package.json` workspaces
+  - Separate `tsconfig.json` with `module: "commonjs"`
+  - Independent `package.json` with firebase-admin deps
+
+**Part B: Shared Functions Pattern (Teaching Reference)**
+- [ ] Document shared functions architecture in teaching app README
+- [ ] Create example shared function structure (stub only):
+  ```
+  services/firebase-functions-shared/
+  └── src/
+      └── auth/
+          └── validateUserPermissions.ts  # Example only
+  ```
+- [ ] Document when to use `apps/*/functions/` vs `services/firebase-functions-shared/`
+- [ ] Reference `coding_docs/FUNCTIONS_PLACEMENT.md` for detailed guidance
+- [ ] Show consumption pattern from app (calling deployed shared functions)
+
+**Part C: Client Integration**
+- [ ] Create `packages/state/src/stores/functions-demo.store.ts`:
+  - Signals-based state for function calls
+  - Loading state tracking
+  - Error handling
+  - Response processing
 - [ ] Demonstrate calling functions from app using signals:
   - Loading state
   - Error handling
   - Response processing
-- [ ] Add local function testing:
-  - Unit tests for function logic
-  - Integration tests calling emulated functions
-- [ ] Document deployment workflow
+  - Typed requests/responses
+- [ ] Create UI components to demonstrate function calling patterns
 
-**Dependencies:** Ticket 6 (for Firestore triggers)
+**Part D: Testing**
+- [ ] Add local function testing:
+  - Unit tests for function logic (firebase-functions-test)
+  - Integration tests calling emulated functions
+  - Mock external dependencies
+- [ ] Document testing patterns for functions
+- [ ] Verify emulator integration works
+
+**Part E: Documentation**
+- [ ] Document deployment workflow (app-specific and shared patterns)
+- [ ] Create troubleshooting guide for functions
+- [ ] Document dependency management (firebase vs firebase-admin)
+- [ ] Cross-reference `coding_docs/FUNCTIONS_PLACEMENT.md`
+
+**Dependencies:**
+- Ticket 6 (for Firestore triggers)
+- `coding_docs/FUNCTIONS_PLACEMENT.md` (architectural foundation)
 
 **Key Decisions to Document:**
-- Functions project structure
+- ✅ Functions placement: app-specific (`apps/*/functions/`) vs shared (`services/firebase-functions-shared/`)
+- ✅ Separate workspace pattern for functions (independent package.json/tsconfig)
 - When to use callable vs HTTP functions
 - Trigger patterns and use cases
-- Testing strategy for functions
-- Deployment process
+- Testing strategy for functions (unit + integration)
+- Deployment process (app-specific vs shared)
+- Shared utilities go in `packages/firebase-admin-shared/`, not in functions directories
+- Types in `@df/types` are shared between client and functions
 
 **Testing Requirements:**
 - [ ] Functions deploy to emulator
@@ -579,10 +632,13 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
 
 **Documentation Needs:**
 - README section: "Cloud Functions"
-- Functions architecture guide
-- Calling functions from app guide
-- Functions testing guide
-- Deployment instructions
+- README section: "App-Specific vs Shared Functions" (reference FUNCTIONS_PLACEMENT.md)
+- Functions architecture guide (workspace setup, tsconfig, dependencies)
+- Calling functions from app guide (signals-based patterns)
+- Functions testing guide (unit + integration with emulators)
+- Deployment instructions (both patterns)
+- Migration guide (when to move from app-specific to shared)
+- Cross-reference: `coding_docs/FUNCTIONS_PLACEMENT.md`
 
 ---
 
@@ -1494,6 +1550,7 @@ This ticket documents its own origin story - a systemic failure where all agents
 | 1.1 | 2025-10-11 | Amended Ticket 2 with emulator-first philosophy; Added Ticket 13 for production deployment & bundle patterns | Claude/Pete |
 | 1.2 | 2025-10-12 | Added Ticket 14: Standards Enforcement System & Agent-Resistant Quality Gates - addresses systemic MD3 compliance failures discovered during Ticket 6 implementation | Claude/Pete |
 | 1.3 | 2025-10-13 | Updated Ticket 7 component names to match actual implementation: `<df-upload-link>` (not `<df-file-upload>`), `<df-file-list>` (with integrated preview), `<df-file-delete>` (progress tracking integrated into upload component) | Claude/Pete |
+| 1.4 | 2025-10-13 | **Architecture Decision**: Updated Ticket 9 with monorepo functions placement strategy. Created `coding_docs/FUNCTIONS_PLACEMENT.md` as central reference for app-specific vs shared functions patterns. Ticket 9 now demonstrates both patterns. | Claude/Pete |
 
 ## Appendix: Firebase Resources
 

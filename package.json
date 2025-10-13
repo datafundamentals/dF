@@ -5,6 +5,7 @@
   "packageManager": "pnpm@10.18.2",
   "workspaces": [
     "apps/*",
+    "apps/*/functions",
     "packages/*",
     "services/*"
   ],
