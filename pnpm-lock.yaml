@@ -339,6 +339,9 @@ importers:
       codemirror:
         specifier: ^6.0.1
         version: 6.0.2
+      firebase:
+        specifier: ^11.5.0
+        version: 11.10.0
       lit:
         specifier: ^3.3.1
         version: 3.3.1

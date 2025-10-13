@@ -35,6 +35,8 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
       max-width: 1200px;
       margin: 0 auto;
       padding: var(--df-spacing-4, 1.5rem);
+      background: white;
+      border-radius: 16px;
     }
 
     .header {

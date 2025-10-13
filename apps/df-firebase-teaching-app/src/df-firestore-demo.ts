@@ -22,6 +22,9 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
       font-family: var(--df-font-family, system-ui, sans-serif);
       width: min(1200px, 90vw);
       margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
     }
 
     .container {
@@ -30,21 +33,22 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
     }
 
     header {
-      background: linear-gradient(130deg, rgba(99, 102, 241, 0.18), rgba(79, 70, 229, 0.14));
+      background: linear-gradient(130deg, rgba(99, 102, 241, 0.08), rgba(79, 70, 229, 0.06));
       border-radius: 24px;
       padding: 2rem;
-      border: 1px solid rgba(99, 102, 241, 0.25);
+      border: 1px solid rgba(99, 102, 241, 0.2);
     }
 
     h2 {
       margin: 0 0 0.75rem;
       font-size: 1.85rem;
-      color: #1e1b4b;
+      color: #1e293b;
+      font-weight: 600;
     }
 
     p {
       margin: 0;
-      color: rgba(30, 27, 75, 0.72);
+      color: #475569;
       line-height: 1.6;
     }
 

@@ -5,8 +5,6 @@ import '@df/ui-lit/firebase';
 import {
   __setTodoDemoFilters,
   __setTodoDemoState,
-  todoCollectionState,
-  todoFilterState,
 } from '@df/state';
 import type {TodoDocument, FirestoreCollectionState, TodoFilterState} from '@df/types';
 

@@ -36,6 +36,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Run lint/typecheck commands when available
 - [ ] Never commit secrets or sensitive data
 - [ ] Verify that every command you record in docs or ticket notes matches the latest `package.json`
+- [ ] **CRITICAL: If ticket adds web components, create Storybook stories for ALL new components**
 
 ### 6. Monorepo Awareness
 - [ ] Check if changes affect other apps/shared resources
@@ -70,6 +71,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 ### 9. Code Finalization
 - [ ] Complete all active todos or document blockers
 - [ ] Run final lint/typecheck/test commands
+- [ ] **MANDATORY: If new web components were added, verify Storybook stories exist and build passes**
 - [ ] **MANDATORY: Commit all session changes to git for clean checkpoint**
 - [ ] Tag incomplete work clearly for next session
 

@@ -7,4 +7,5 @@ export * from './stores/wrong-markdown-codemirror.store.js';
 export * from './stores/firebase-auth.store.js';
 export * from './stores/firestore-base.store.js';
 export * from './stores/todos.store.js';
+export * from './stores/storage.store.js';
 export * from './utils/auth-guard.js';

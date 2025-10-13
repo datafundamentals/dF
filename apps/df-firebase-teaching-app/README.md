@@ -294,6 +294,97 @@ The Firestore demo showcases end-to-end CRUD flows powered by the shared todos s
 📚 See [FIRESTORE_PATTERNS.md](./FIRESTORE_PATTERNS.md) for full documentation, including architecture
 notes and Storybook links.
 
+## Storage Pattern (Ticket 7: ✅ Complete)
+
+The Storage demo demonstrates Firebase Storage patterns with real file upload and management capabilities:
+- ✅ File upload with progress tracking (0-100%)
+- ✅ Drag-and-drop support for file selection
+- ✅ File validation (size, type)
+- ✅ File listing with metadata (name, size, upload date)
+- ✅ Image preview with download links
+- ✅ File deletion with confirmation dialog
+- ✅ Reusable UI components (`df-storage-upload`, `df-file-list`, `df-file-preview`, `df-file-delete`)
+- ✅ Signals-based state management with reactive progress updates
+
+### Quick Storage Tour
+
+1. Start the emulators: `pnpm --filter @df/df-firebase-teaching-app emulators:start`
+2. Launch the dev server: `pnpm --filter @df/df-firebase-teaching-app dev`
+3. Visit the "Storage Pattern" section
+4. Drag-and-drop an image file or click to browse
+5. Watch the upload progress bar
+6. View uploaded files in the file list
+7. Click a file to preview it
+8. Delete files using the delete button (with confirmation)
+
+### Storage Components
+
+**Upload Component** (`df-storage-upload`):
+- Drag-and-drop zone with visual feedback
+- File validation (size limits, MIME types)
+- Real-time progress tracking (signals-based)
+- Automatic path generation with timestamps
+- Success/error state handling
+
+**File List Component** (`df-file-list`):
+- Displays all files in a directory
+- Shows thumbnails for images
+- File metadata (name, size, upload date)
+- Click to select/preview files
+- Delete button with confirmation
+
+**File Preview Component** (`df-file-preview`):
+- Image previews (full resolution)
+- PDF embedded viewer
+- File metadata display
+- Download button
+- Close button
+
+**File Delete Component** (`df-file-delete`):
+- Confirmation dialog
+- File details display
+- Warning message
+- Delete/cancel actions
+- Error handling
+
+### File Validation
+
+The storage store includes built-in validation:
+
+```typescript
+// Validate before upload
+const validation = validateFile(file, {
+  maxSizeMB: 5,  // 5MB limit
+  allowedTypes: ['image/*', 'application/pdf']
+});
+
+if (!validation.valid) {
+  console.error(validation.error);
+}
+```
+
+### Storage Path Organization
+
+Files are organized by directory:
+- `uploads/images` - User-uploaded images
+- `uploads/documents` - PDFs, text files
+- `uploads/avatars` - User profile pictures
+- `uploads/videos` - Video files
+
+Each file gets a unique timestamp-based name to prevent collisions.
+
+### Testing Storage
+
+The storage demo works with the Firebase Storage Emulator:
+
+1. Upload a file using the drag-and-drop interface
+2. Check the Emulator UI at `http://127.0.0.1:5400` → Storage tab
+3. Verify the file appears in the `uploads/images` bucket
+4. The file list automatically refreshes after upload
+5. Preview and delete operations update the UI immediately
+
+**Note:** Files uploaded to the emulator are stored in `emulator-data/storage_export/` and persist across restarts.
+
 ## Development Tasks
 
 - `pnpm --filter @df/df-firebase-teaching-app build` – Type-check and emit static assets.

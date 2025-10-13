@@ -100,16 +100,21 @@ export const ImageUpload: Story = {
     resourcePageType: 'practice',
   },
   render: (args) => html`
-    <df-upload-link
-      .resourceLinkType=${args.resourceLinkType}
-      .resourcePageType=${args.resourcePageType}
-      .linkUrl=${args.linkUrl}
-      .imageValid=${args.imageValid}
-      @upload-link-gather-url=${(event: CustomEvent) => args.onGatherUrl?.(event)}
-      @upload-link-allocate=${(event: CustomEvent) => args.onAllocate?.(event)}
-    ></df-upload-link>
+    <div style="max-width: 600px;">
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        Try uploading an image file to see the preview functionality (using mock preview image).
+      </p>
+      <df-upload-link
+        .resourceLinkType=${args.resourceLinkType}
+        .resourcePageType=${args.resourcePageType}
+        .linkUrl=${args.linkUrl}
+        .imageValid=${args.imageValid}
+        @upload-link-gather-url=${(event: CustomEvent) => args.onGatherUrl?.(event)}
+        @upload-link-allocate=${(event: CustomEvent) => args.onAllocate?.(event)}
+      ></df-upload-link>
+    </div>
     <script>
-      // Directly set the component to show Upload mode
+      // Directly set the component to show Upload mode and mock upload functionality
       setTimeout(() => {
         const component = document.querySelector('df-upload-link');
         if (component) {
@@ -119,6 +124,33 @@ export const ImageUpload: Story = {
           component.showUrlContainer = false;
           component.showLinkInput = false;
           component.requestUpdate();
+
+          // Mock the file upload to show preview
+          const fileInput = component.shadowRoot?.querySelector('input[type="file"]');
+          if (fileInput) {
+            fileInput.addEventListener('change', async (e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                // Simulate upload delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Set mock preview image URL
+                const mockUrl = 'https://picsum.photos/400/300';
+                component.linkUrl = mockUrl;
+                component.generatedLink = mockUrl;
+                component.imageValid = true;
+                component.showUrlContainer = true;
+                component.requestUpdate();
+
+                // Dispatch the gather-url event
+                component.dispatchEvent(new CustomEvent('upload-link-gather-url', {
+                  detail: { linkUrl: mockUrl },
+                  bubbles: true,
+                  composed: true
+                }));
+              }
+            });
+          }
         }
       }, 100);
     </script>
@@ -126,7 +158,7 @@ export const ImageUpload: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Configuration for uploading images to a practice page. Shows the file upload interface.',
+        story: 'Configuration for uploading images to a practice page. Shows the file upload interface with mock preview after upload.',
       },
     },
   },
@@ -277,19 +309,52 @@ export const Interactive: Story = {
         <div style="padding: 12px; border: 1px solid #fffbf0; border-radius: 8px; background: #fffbf0;">
           <h4 style="margin: 0 0 8px 0; color: #b45309;">How to test:</h4>
           <ol style="margin: 0; padding-left: 20px; font-size: 12px; color: #92400e;">
-            <li>Select "Upload" to choose a file (mock upload will generate a URL)</li>
+            <li>Select "Upload" to choose a file (mock upload will show preview with placeholder image)</li>
             <li>Select "Site" to enter a URL manually (try: https://picsum.photos/400/300)</li>
             <li>Once a valid URL is detected, click "Add" to allocate the link</li>
             <li>Watch the event information update below</li>
           </ol>
         </div>
       </div>
+      <script>
+        // Mock the file upload to show preview for Interactive story
+        setTimeout(() => {
+          const component = document.querySelector('df-upload-link');
+          if (component) {
+            const fileInput = component.shadowRoot?.querySelector('input[type="file"]');
+            if (fileInput) {
+              fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  // Simulate upload delay
+                  await new Promise(resolve => setTimeout(resolve, 500));
+
+                  // Set mock preview image URL
+                  const mockUrl = 'https://picsum.photos/400/300';
+                  component.linkUrl = mockUrl;
+                  component.generatedLink = mockUrl;
+                  component.imageValid = true;
+                  component.showUrlContainer = true;
+                  component.requestUpdate();
+
+                  // Dispatch the gather-url event
+                  component.dispatchEvent(new CustomEvent('upload-link-gather-url', {
+                    detail: { linkUrl: mockUrl },
+                    bubbles: true,
+                    composed: true
+                  }));
+                }
+              });
+            }
+          }
+        }, 100);
+      </script>
     `;
   },
   parameters: {
     docs: {
       description: {
-        story: 'Interactive example showing the complete workflow and event handling.',
+        story: 'Interactive example showing the complete workflow with mock upload preview and event handling.',
       },
     },
   },

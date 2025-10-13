@@ -7,3 +7,4 @@ export * from './firebase.types.js';
 export * from './firebase-auth.types.js';
 export * from './firebase-firestore.types.js';
 export * from './firebase-todos.types.js';
+export * from './firebase-storage.types.js';
