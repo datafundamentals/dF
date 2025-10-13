@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Callable Function: createTodoAdvanced
  *
@@ -15,43 +14,8 @@
  * For SHARED functions used by multiple apps, see services/firebase-functions-shared/
  * and reference coding_docs/FUNCTIONS_PLACEMENT.md
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTodoAdvanced = void 0;
-const functions = __importStar(require("firebase-functions/v2"));
-const firestore_1 = require("firebase-admin/firestore");
+import * as functions from 'firebase-functions/v2';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 /**
  * Estimates effort in minutes based on title and description length
  * This is example app-specific business logic
@@ -122,7 +86,7 @@ function validateTitle(title) {
  * - Firestore writes from functions
  * - Typed request/response
  */
-exports.createTodoAdvanced = functions.https.onCall({
+export const createTodoAdvanced = functions.https.onCall({
     region: 'us-central1',
     cors: true, // Allow CORS for local development
 }, async (request) => {
@@ -158,7 +122,7 @@ exports.createTodoAdvanced = functions.https.onCall({
     const urgencyScore = calculateUrgencyScore(priority, parsedDueDate);
     const now = new Date();
     // 4. Create Firestore document
-    const db = (0, firestore_1.getFirestore)();
+    const db = getFirestore();
     const todosCollection = db.collection('todos');
     const todoData = {
         title: title.trim(),
@@ -167,9 +131,9 @@ exports.createTodoAdvanced = functions.https.onCall({
         completed: false,
         priority,
         tags,
-        createdAt: firestore_1.Timestamp.fromDate(now),
-        updatedAt: firestore_1.Timestamp.fromDate(now),
-        dueDate: parsedDueDate ? firestore_1.Timestamp.fromDate(parsedDueDate) : null,
+        createdAt: Timestamp.fromDate(now),
+        updatedAt: Timestamp.fromDate(now),
+        dueDate: parsedDueDate ? Timestamp.fromDate(parsedDueDate) : null,
         // Enriched fields (app-specific)
         estimatedMinutes,
         urgencyScore,

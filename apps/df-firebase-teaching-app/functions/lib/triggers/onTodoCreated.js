@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Firestore Trigger: onTodoCreated
  *
@@ -16,43 +15,8 @@
  * - Trigger webhooks
  * - Sync to external systems
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.onTodoDeleted = exports.onTodoUpdated = exports.onTodoCreated = void 0;
-const functions = __importStar(require("firebase-functions/v2"));
-const firestore_1 = require("firebase-admin/firestore");
+import * as functions from 'firebase-functions/v2';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 /**
  * Trigger that fires when a new todo is created.
  *
@@ -62,7 +26,7 @@ const firestore_1 = require("firebase-admin/firestore");
  * 3. Add to activity log
  * 4. Calculate and store word count for analytics
  */
-exports.onTodoCreated = functions.firestore.onDocumentCreated({
+export const onTodoCreated = functions.firestore.onDocumentCreated({
     document: 'todos/{todoId}',
     region: 'us-central1',
 }, async (event) => {
@@ -79,7 +43,7 @@ exports.onTodoCreated = functions.firestore.onDocumentCreated({
         priority: todoData.priority,
         createdBy: todoData.createdBy || 'anonymous',
     });
-    const db = (0, firestore_1.getFirestore)();
+    const db = getFirestore();
     try {
         // 1. Calculate analytics (word counts for reporting)
         const titleWords = todoData.title ? todoData.title.trim().split(/\s+/).length : 0;
@@ -88,20 +52,20 @@ exports.onTodoCreated = functions.firestore.onDocumentCreated({
         // 2. Update or create analytics document
         const analyticsRef = db.collection('todoAnalytics').doc('summary');
         await analyticsRef.set({
-            totalTodos: firestore_1.FieldValue.increment(1),
-            totalWords: firestore_1.FieldValue.increment(totalWords),
-            lastCreated: todoData.createdAt || firestore_1.FieldValue.serverTimestamp(),
+            totalTodos: FieldValue.increment(1),
+            totalWords: FieldValue.increment(totalWords),
+            lastCreated: todoData.createdAt || FieldValue.serverTimestamp(),
             priorityCounts: {
-                [todoData.priority || 'medium']: firestore_1.FieldValue.increment(1),
+                [todoData.priority || 'medium']: FieldValue.increment(1),
             },
         }, { merge: true });
         // 3. If user is authenticated, update their personal stats
         if (todoData.createdBy) {
             const userStatsRef = db.collection('userStats').doc(todoData.createdBy);
             await userStatsRef.set({
-                todoCount: firestore_1.FieldValue.increment(1),
-                lastActivity: todoData.createdAt || firestore_1.FieldValue.serverTimestamp(),
-                todosCreated: firestore_1.FieldValue.arrayUnion(todoId),
+                todoCount: FieldValue.increment(1),
+                lastActivity: todoData.createdAt || FieldValue.serverTimestamp(),
+                todosCreated: FieldValue.arrayUnion(todoId),
             }, { merge: true });
             functions.logger.info('User stats updated', {
                 userId: todoData.createdBy,
@@ -116,7 +80,7 @@ exports.onTodoCreated = functions.firestore.onDocumentCreated({
             title: todoData.title,
             priority: todoData.priority,
             createdBy: todoData.createdBy || 'anonymous',
-            timestamp: firestore_1.FieldValue.serverTimestamp(),
+            timestamp: FieldValue.serverTimestamp(),
             metadata: {
                 titleWords,
                 descriptionWords,
@@ -147,7 +111,7 @@ exports.onTodoCreated = functions.firestore.onDocumentCreated({
  * - Detecting specific field changes
  * - Conditional processing
  */
-exports.onTodoUpdated = functions.firestore.onDocumentUpdated({
+export const onTodoUpdated = functions.firestore.onDocumentUpdated({
     document: 'todos/{todoId}',
     region: 'us-central1',
 }, async (event) => {
@@ -177,12 +141,12 @@ exports.onTodoUpdated = functions.firestore.onDocumentUpdated({
     });
     // If todo was marked as completed, update analytics
     if (!before.completed && after.completed) {
-        const db = (0, firestore_1.getFirestore)();
+        const db = getFirestore();
         try {
             const analyticsRef = db.collection('todoAnalytics').doc('summary');
             await analyticsRef.set({
-                completedTodos: firestore_1.FieldValue.increment(1),
-                lastCompleted: after.updatedAt || firestore_1.FieldValue.serverTimestamp(),
+                completedTodos: FieldValue.increment(1),
+                lastCompleted: after.updatedAt || FieldValue.serverTimestamp(),
             }, { merge: true });
             functions.logger.info('Todo completion recorded', { todoId });
         }
@@ -198,7 +162,7 @@ exports.onTodoUpdated = functions.firestore.onDocumentUpdated({
  * - Cleanup operations
  * - Decrementing counters
  */
-exports.onTodoDeleted = functions.firestore.onDocumentDeleted({
+export const onTodoDeleted = functions.firestore.onDocumentDeleted({
     document: 'todos/{todoId}',
     region: 'us-central1',
 }, async (event) => {
@@ -214,23 +178,23 @@ exports.onTodoDeleted = functions.firestore.onDocumentDeleted({
         title: todoData.title,
         wasCompleted: todoData.completed,
     });
-    const db = (0, firestore_1.getFirestore)();
+    const db = getFirestore();
     try {
         // Update analytics
         const analyticsRef = db.collection('todoAnalytics').doc('summary');
         const decrements = {
-            totalTodos: firestore_1.FieldValue.increment(-1),
+            totalTodos: FieldValue.increment(-1),
         };
         if (todoData.completed) {
-            decrements.completedTodos = firestore_1.FieldValue.increment(-1);
+            decrements.completedTodos = FieldValue.increment(-1);
         }
         await analyticsRef.set(decrements, { merge: true });
         // Update user stats if applicable
         if (todoData.createdBy) {
             const userStatsRef = db.collection('userStats').doc(todoData.createdBy);
             await userStatsRef.set({
-                todoCount: firestore_1.FieldValue.increment(-1),
-                todosCreated: firestore_1.FieldValue.arrayRemove(todoId),
+                todoCount: FieldValue.increment(-1),
+                todosCreated: FieldValue.arrayRemove(todoId),
             }, { merge: true });
         }
         functions.logger.info('Todo deletion processing complete', { todoId });

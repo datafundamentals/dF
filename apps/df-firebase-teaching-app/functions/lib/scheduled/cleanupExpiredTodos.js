@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Scheduled Function: cleanupExpiredTodos
  *
@@ -16,43 +15,8 @@
  * - Cache warming
  * - Periodic syncs with external systems
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.manualCleanupExpiredTodos = exports.cleanupExpiredTodos = void 0;
-const functions = __importStar(require("firebase-functions/v2"));
-const firestore_1 = require("firebase-admin/firestore");
+import * as functions from 'firebase-functions/v2';
+import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
 /**
  * Runs daily at 2:00 AM UTC to clean up expired todos.
  *
@@ -66,7 +30,7 @@ const firestore_1 = require("firebase-admin/firestore");
  * - Batch deletions
  * - Metric logging
  */
-exports.cleanupExpiredTodos = functions.scheduler.onSchedule({
+export const cleanupExpiredTodos = functions.scheduler.onSchedule({
     schedule: '0 2 * * *', // Every day at 2:00 AM UTC
     timeZone: 'UTC',
     region: 'us-central1',
@@ -76,11 +40,11 @@ exports.cleanupExpiredTodos = functions.scheduler.onSchedule({
     functions.logger.info('Starting expired todos cleanup', {
         timestamp: event.scheduleTime,
     });
-    const db = (0, firestore_1.getFirestore)();
+    const db = getFirestore();
     // Calculate cutoff date (30 days ago)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const cutoffTimestamp = firestore_1.Timestamp.fromDate(thirtyDaysAgo);
+    const cutoffTimestamp = Timestamp.fromDate(thirtyDaysAgo);
     functions.logger.info('Cleanup cutoff date', {
         cutoffDate: thirtyDaysAgo.toISOString(),
     });
@@ -112,10 +76,10 @@ exports.cleanupExpiredTodos = functions.scheduler.onSchedule({
         // Update cleanup metrics
         const metricsRef = db.collection('systemMetrics').doc('cleanup');
         await metricsRef.set({
-            lastCleanup: firestore_1.FieldValue.serverTimestamp(),
-            totalTodosDeleted: firestore_1.FieldValue.increment(deletedIds.length),
+            lastCleanup: FieldValue.serverTimestamp(),
+            totalTodosDeleted: FieldValue.increment(deletedIds.length),
             lastCleanupCount: deletedIds.length,
-            cleanupHistory: firestore_1.FieldValue.arrayUnion({
+            cleanupHistory: FieldValue.arrayUnion({
                 timestamp: new Date().toISOString(),
                 count: deletedIds.length,
             }),
@@ -131,8 +95,8 @@ exports.cleanupExpiredTodos = functions.scheduler.onSchedule({
         try {
             const metricsRef = db.collection('systemMetrics').doc('cleanup');
             await metricsRef.set({
-                lastFailure: firestore_1.FieldValue.serverTimestamp(),
-                failureCount: firestore_1.FieldValue.increment(1),
+                lastFailure: FieldValue.serverTimestamp(),
+                failureCount: FieldValue.increment(1),
             }, { merge: true });
         }
         catch (metricsError) {
@@ -147,7 +111,7 @@ exports.cleanupExpiredTodos = functions.scheduler.onSchedule({
  * Allows admins to manually trigger cleanup without waiting for schedule.
  * Demonstrates auth-based access control for administrative functions.
  */
-exports.manualCleanupExpiredTodos = functions.https.onCall({
+export const manualCleanupExpiredTodos = functions.https.onCall({
     region: 'us-central1',
 }, async (request) => {
     // Verify authentication
@@ -164,7 +128,7 @@ exports.manualCleanupExpiredTodos = functions.https.onCall({
         userId: request.auth.uid,
         daysOld: request.data?.daysOld || 30,
     });
-    const db = (0, firestore_1.getFirestore)();
+    const db = getFirestore();
     const daysOld = request.data?.daysOld || 30;
     if (daysOld < 1 || daysOld > 365) {
         throw new functions.https.HttpsError('invalid-argument', 'daysOld must be between 1 and 365');
@@ -172,7 +136,7 @@ exports.manualCleanupExpiredTodos = functions.https.onCall({
     // Calculate cutoff date
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
-    const cutoffTimestamp = firestore_1.Timestamp.fromDate(cutoffDate);
+    const cutoffTimestamp = Timestamp.fromDate(cutoffDate);
     try {
         // Query for old completed todos
         const expiredTodosQuery = db.collection('todos')

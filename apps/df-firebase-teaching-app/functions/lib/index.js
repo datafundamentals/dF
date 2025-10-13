@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Cloud Functions Entry Point
  *
@@ -19,28 +18,24 @@
  * - triggers/     - Firestore/Auth event triggers
  * - scheduled/    - Cron-scheduled functions
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.manualCleanupExpiredTodos = exports.cleanupExpiredTodos = exports.onTodoDeleted = exports.onTodoUpdated = exports.onTodoCreated = exports.todosExportAPI = exports.createTodoAdvanced = void 0;
-const app_1 = require("firebase-admin/app");
+import { initializeApp } from 'firebase-admin/app';
 // Initialize Firebase Admin SDK
 // This MUST be called before any other firebase-admin operations
-(0, app_1.initializeApp)();
+initializeApp();
 /**
  * Callable Functions
  * ==================
  * These functions are called from the client using httpsCallable().
  * They provide type-safe, authenticated RPC-style communication.
  */
-var createTodoAdvanced_js_1 = require("./callable/createTodoAdvanced.js");
-Object.defineProperty(exports, "createTodoAdvanced", { enumerable: true, get: function () { return createTodoAdvanced_js_1.createTodoAdvanced; } });
+export { createTodoAdvanced } from './callable/createTodoAdvanced.js';
 /**
  * HTTP Functions
  * ==============
  * These functions are accessed via standard HTTP requests (GET, POST, etc.).
  * Useful for webhooks, public APIs, or integration with non-Firebase clients.
  */
-var todosExportAPI_js_1 = require("./http/todosExportAPI.js");
-Object.defineProperty(exports, "todosExportAPI", { enumerable: true, get: function () { return todosExportAPI_js_1.todosExportAPI; } });
+export { todosExportAPI } from './http/todosExportAPI.js';
 /**
  * Firestore Triggers
  * ==================
@@ -48,19 +43,15 @@ Object.defineProperty(exports, "todosExportAPI", { enumerable: true, get: functi
  * updated, or deleted. Perfect for side effects like analytics, notifications,
  * or data synchronization.
  */
-var onTodoCreated_js_1 = require("./triggers/onTodoCreated.js");
-Object.defineProperty(exports, "onTodoCreated", { enumerable: true, get: function () { return onTodoCreated_js_1.onTodoCreated; } });
-Object.defineProperty(exports, "onTodoUpdated", { enumerable: true, get: function () { return onTodoCreated_js_1.onTodoUpdated; } });
-Object.defineProperty(exports, "onTodoDeleted", { enumerable: true, get: function () { return onTodoCreated_js_1.onTodoDeleted; } });
+export { onTodoCreated, onTodoUpdated, onTodoDeleted, } from './triggers/onTodoCreated.js';
 /**
  * Scheduled Functions
  * ===================
  * These functions run on a cron schedule. Ideal for maintenance tasks,
  * daily reports, cache warming, or periodic data processing.
  */
-var cleanupExpiredTodos_js_1 = require("./scheduled/cleanupExpiredTodos.js");
-Object.defineProperty(exports, "cleanupExpiredTodos", { enumerable: true, get: function () { return cleanupExpiredTodos_js_1.cleanupExpiredTodos; } });
-Object.defineProperty(exports, "manualCleanupExpiredTodos", { enumerable: true, get: function () { return cleanupExpiredTodos_js_1.manualCleanupExpiredTodos; } });
+export { cleanupExpiredTodos, manualCleanupExpiredTodos, // Callable version for manual trigger
+ } from './scheduled/cleanupExpiredTodos.js';
 /**
  * Teaching Notes:
  * ===============
