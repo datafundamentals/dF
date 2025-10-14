@@ -644,51 +644,134 @@ This teaching app demonstrates **emulator-first development** (100% offline) whi
 
 #### Ticket 10: Composite Patterns & Best Practices
 
-**Objective:** Demonstrate multiple Firebase services working together.
+**Objective:** Document how existing Firebase services work together and establish best practices for pattern reuse.
+
+**Philosophy:** Teaching value comes from documenting proven patterns, not building new features. Tickets 5-9 already demonstrate composite patterns - this ticket makes them explicit and reusable.
+
+**What Already Exists (From Tickets 5-9):**
+- ✅ Composite pattern: Todos store combines Auth + Firestore (real-time, filtered queries)
+- ✅ Pagination: `firestore-base.store.ts` implements cursor-based pagination with pageSize/hasNext/hasPrevious
+- ✅ Query/filter patterns: Todos store demonstrates where, orderBy, compound filters (priority + tags + completion)
+- ✅ Caching: Firestore offline persistence (IndexedDB) automatically caches all queries
+- ✅ Performance: Signals minimize re-renders, lazy initialization, real-time listener management
 
 **Acceptance Criteria:**
-- [ ] Create composite example: User Profile Management
-  - Auth for user identity
-  - Firestore for profile data
-  - Storage for avatar image
-  - Function for profile validation/processing
-- [ ] Implement pagination pattern:
-  - Cursor-based pagination
-  - "Load more" functionality
-  - State management for paginated data
-- [ ] Implement search/query examples:
-  - Simple queries (where, orderBy, limit)
-  - Compound queries
-  - Query caching strategy
-- [ ] Implement caching strategy:
-  - When to cache Firestore data
-  - Cache invalidation patterns
-  - Offline data handling
-- [ ] Create performance optimization examples:
-  - Lazy loading
-  - Image optimization
-  - Batch operations
-- [ ] Document composite patterns
 
-**Dependencies:** Tickets 5-9 (needs all core services)
+**Part A: Document Existing Composite Patterns**
+- [ ] Create `COMPOSITE_PATTERNS.md` guide:
+  - How todos store coordinates Auth (user context) + Firestore (CRUD + real-time)
+  - When to combine services vs keep them separate
+  - State management for multi-service features
+  - Error handling across service boundaries
+- [ ] Document the composite pattern architecture:
+  ```
+  User Action → Store Function → Multiple Firebase Services → Coordinated State Update
+  Example: addTodo() checks auth.uid → writes to Firestore → triggers real-time listener → UI updates
+  ```
+- [ ] Add examples of where composite patterns apply:
+  - User-owned data (auth.uid filters Firestore queries)
+  - File upload with metadata (Storage upload → Firestore record)
+  - Triggered workflows (Firestore write → Cloud Function → update other collections)
+
+**Part B: Document Existing Pagination Pattern**
+- [ ] Create pagination guide from `firestore-base.store.ts`:
+  - How cursor-based pagination works (startAfter anchor documents)
+  - Managing page anchors array for forward/backward navigation
+  - State management (currentPage, pageSize, hasNext, hasPrevious)
+  - Query constraint coordination (pagination + filters + ordering)
+- [ ] Add "Load More" UI pattern to Firestore demo:
+  - Extend existing `df-firestore-list` component
+  - Button shows `hasNextPage` signal state
+  - Demonstrates `loadNextPage()` vs `loadPageAt(n)`
+  - Progressive loading UX pattern
+- [ ] Document pagination best practices:
+  - When to use pagination vs load-all (collection size < 50 docs)
+  - Pagination + real-time listeners (cursor stability issues)
+  - Preserving page position during filters/query changes
+
+**Part C: Document Existing Query/Filter Patterns**
+- [ ] Create query patterns guide from `todos.store.ts`:
+  - Simple queries: `where('completed', '==', false)`
+  - Ordering: `orderBy('createdAt', 'desc')`
+  - Combining constraints: `[where(), orderBy(), limit()]`
+  - Dynamic query switching: `applyFilters()` rebuilds query array
+- [ ] Document compound filter implementation:
+  - Multi-field filters (priority + tag + completion)
+  - Query constraint builder pattern
+  - Filter state management with signals
+- [ ] Add query performance notes:
+  - Index requirements for compound queries
+  - When to filter client-side vs Firestore
+  - Query result limits (avoid fetching 1000s of docs)
+
+**Part D: Document Existing Caching Strategy**
+- [ ] Create caching guide explaining offline persistence:
+  - How `enableIndexedDbPersistence()` works (from Ticket 6)
+  - What gets cached (all query results, document snapshots)
+  - Cache invalidation (automatic on new writes, stale data never shown)
+  - Offline-first UX (reads from cache instantly, syncs when online)
+- [ ] Document when caching applies:
+  - Enabled globally per Firestore instance
+  - Works for all queries (no selective caching needed)
+  - Storage files NOT cached (fetch on-demand)
+- [ ] Add cache troubleshooting:
+  - Clearing cache (browser DevTools > Application > IndexedDB)
+  - Cache size limits (browser-dependent, ~50MB typical)
+  - Cache conflicts (rare, SDK handles automatically)
+
+**Part E: Performance Best Practices Guide**
+- [ ] Create `PERFORMANCE_PATTERNS.md`:
+  - **Lazy initialization**: Initialize stores only when needed (see `initializeTodosStore()`)
+  - **Signal-based rendering**: Computed signals prevent unnecessary re-renders
+  - **Real-time listener management**: Detach listeners when components unmount
+  - **Batch operations**: Use Firestore batch writes for multiple related changes
+  - **Optimistic updates**: Update UI immediately, confirm with server later
+- [ ] Document performance anti-patterns:
+  - ❌ Don't subscribe to real-time listeners in loops
+  - ❌ Don't fetch entire collections when pagination available
+  - ❌ Don't create new store instances per component
+  - ❌ Don't use `onSnapshot()` without cleanup
+- [ ] Add monitoring guidance:
+  - Use Firestore usage dashboard (emulator UI)
+  - Track read/write operations per feature
+  - Identify expensive queries (large result sets)
+
+**Part F: Real-World Examples Cookbook**
+- [ ] Create `FIREBASE_COOKBOOK.md` with copy-paste examples:
+  - User-owned todo list (auth + firestore composite)
+  - File upload with metadata (storage + firestore composite)
+  - Paginated search results (query + pagination)
+  - Filtered real-time updates (listeners + filters)
+  - Offline-first CRUD (offline persistence patterns)
+- [ ] Each example includes:
+  - Problem statement ("I need to...")
+  - Code snippet (copy-paste ready)
+  - Explanation (why it works this way)
+  - Related patterns (links to other examples)
+
+**Dependencies:** Tickets 5-9 (needs existing implementations to document)
 
 **Key Decisions to Document:**
-- When to use composite patterns
-- Performance optimization strategies
-- Caching approach
-- Pagination implementation
+- When to combine services (composite) vs keep separate
+- Pagination strategy selection (cursor vs offset vs load-all)
+- Query optimization (Firestore indexes, client-side filtering)
+- Caching is automatic (offline persistence), no custom strategy needed
+- Performance: Signals + lazy init + listener cleanup
 
 **Testing Requirements:**
-- [ ] Composite features work end-to-end
-- [ ] Pagination performs well
-- [ ] Caching works correctly
-- [ ] Performance meets expectations
+- [ ] All existing patterns documented have passing tests (from Tickets 5-9)
+- [ ] "Load More" UI pattern has unit test (button state, pagination calls)
+- [ ] No new integration tests needed (documentation ticket)
+- [ ] Manual testing guide includes composite pattern scenarios
 
 **Documentation Needs:**
-- README section: "Composite Patterns"
-- Performance optimization guide
-- Caching strategy document
-- Real-world examples cookbook
+- `COMPOSITE_PATTERNS.md` - Multi-service coordination guide
+- `PERFORMANCE_PATTERNS.md` - Optimization best practices
+- `FIREBASE_COOKBOOK.md` - Copy-paste examples
+- README section: "Advanced Patterns" (links to above guides)
+- Update existing component docs with composite pattern notes
+
+**Time Estimate:** 1-2 days (documentation-focused, minimal new code)
 
 ---
 
@@ -1068,11 +1151,13 @@ Standard mode better for:
 ### Time Estimates (Rough)
 - **Phase 1** (Tickets 1-4): 2-3 days - Foundation critical, take time
 - **Phase 2** (Tickets 5-8): 4-5 days - Core services, most complex
-- **Phase 3** (Tickets 9-10): 2-3 days - Integration and optimization
+- **Phase 3** (Tickets 9-10): 2-3 days - Integration and documentation
 - **Phase 4** (Tickets 11-12): 2 days - Polish and validation
 - **Phase 5** (Ticket 13): 1-2 days - Production deployment patterns
 
 **Total: ~11-15 days** for complete, production-ready teaching app with deployment
+
+**Note on Ticket 10:** Revised to focus on documenting existing patterns from Tickets 5-9 rather than building new composite features. Work effort shifts from implementation to comprehensive documentation.
 
 ---
 
@@ -1551,6 +1636,7 @@ This ticket documents its own origin story - a systemic failure where all agents
 | 1.2 | 2025-10-12 | Added Ticket 14: Standards Enforcement System & Agent-Resistant Quality Gates - addresses systemic MD3 compliance failures discovered during Ticket 6 implementation | Claude/Pete |
 | 1.3 | 2025-10-13 | Updated Ticket 7 component names to match actual implementation: `<df-upload-link>` (not `<df-file-upload>`), `<df-file-list>` (with integrated preview), `<df-file-delete>` (progress tracking integrated into upload component) | Claude/Pete |
 | 1.4 | 2025-10-13 | **Architecture Decision**: Updated Ticket 9 with monorepo functions placement strategy. Created `coding_docs/FUNCTIONS_PLACEMENT.md` as central reference for app-specific vs shared functions patterns. Ticket 9 now demonstrates both patterns. | Claude/Pete |
+| 1.5 | 2025-10-14 | **Scope Reduction**: Revised Ticket 10 from "build composite features" to "document existing patterns." Focus shifted to documenting proven patterns from Tickets 5-9 (todos composite, pagination, caching, queries) rather than building new User Profile Management feature. Maintains teaching value while reducing complexity and aligning with testing constraints (unit tests only). See `OUT_OF_SCOPE/TICKET_10_SCOPE_REDUCTION_PROPOSAL.md` for detailed analysis. | Claude/Pete |
 
 ## Appendix: Firebase Resources
 

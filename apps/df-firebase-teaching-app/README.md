@@ -385,6 +385,59 @@ The storage demo works with the Firebase Storage Emulator:
 
 **Note:** Files uploaded to the emulator are stored in `emulator-data/storage_export/` and persist across restarts.
 
+## Advanced Patterns & Guides (Ticket 10: ✅ Complete)
+
+The teaching app includes comprehensive documentation for advanced Firebase patterns, optimization strategies, and copy-paste ready code examples.
+
+### 📚 Pattern Library
+
+**[Composite Patterns Guide](./guides/COMPOSITE_PATTERNS.md)**  
+Learn how to coordinate multiple Firebase services together to create powerful features:
+- User-owned data (Auth + Firestore)
+- File uploads with metadata (Storage + Firestore)
+- Triggered workflows (Firestore → Functions → Firestore)
+- Multi-service coordination strategies
+
+**[Performance Patterns Guide](./guides/PERFORMANCE_PATTERNS.md)**  
+Optimize your Firebase app for speed, efficiency, and excellent user experience:
+- Lazy initialization strategies
+- Signal-based rendering (12.5x faster benchmarks)
+- Real-time listener lifecycle management
+- Batch operations (10-50x faster than individual writes)
+- Optimistic updates with rollback
+- Pagination and progressive loading
+
+**[Firebase Cookbook](./guides/FIREBASE_COOKBOOK.md)**  
+Copy-paste ready code examples for the most common Firebase patterns:
+- User-owned data CRUD operations
+- File upload with metadata tracking
+- Paginated list with dynamic filters
+- Filtered real-time updates
+- Offline-first CRUD with automatic sync
+- Batch operations for performance
+- Optimistic updates with rollback
+
+### 🎯 How to Use the Guides
+
+1. **Learning Path**: Start with the pattern guides (Composite, Performance) to understand the "why" and "when"
+2. **Implementation**: Use the Cookbook for ready-to-use code you can copy and adapt
+3. **Reference**: Return to the guides when making architectural decisions
+4. **Teaching**: Share the guides with team members or use them in educational settings
+
+### 📖 Navigation
+
+All guides are organized in the [`guides/`](./guides/) directory with:
+- **[guides/README.md](./guides/README.md)** - Index of all available guides
+- Cross-references between guides for easy navigation
+- Examples pulled from actual teaching app code
+- Metrics and benchmarks for performance claims
+
+### Related Documentation
+
+- [Authentication Patterns](./AUTHENTICATION_PATTERNS.md) - User login and auth flows
+- [Firestore Patterns](./FIRESTORE_PATTERNS.md) - Database queries and data modeling
+- [Function Triggers](./functions/README.md) - Cloud Functions patterns (when available)
+
 ## Development Tasks
 
 - `pnpm --filter @df/df-firebase-teaching-app build` – Type-check and emit static assets.

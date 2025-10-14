@@ -178,6 +178,29 @@ export class DfFirestoreList extends SignalWatcher(LitElement) {
       color: #b91c1c;
     }
 
+    .load-more-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+      border: 1px dashed var(--md-sys-color-primary, rgba(99, 102, 241, 0.3));
+    }
+
+    .load-more-button {
+      min-width: 200px;
+    }
+
+    .load-more-hint {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--md-sys-color-on-surface-variant, #64748b);
+      text-align: center;
+    }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -223,6 +246,7 @@ export class DfFirestoreList extends SignalWatcher(LitElement) {
   @state() private realtimeEnabled = false;
   @state() private isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
   @state() private localError: string | null = null;
+  @state() private isLoadingMore = false;
 
   private onlineListener = () => (this.isOnline = true);
   private offlineListener = () => (this.isOnline = false);
@@ -370,6 +394,21 @@ export class DfFirestoreList extends SignalWatcher(LitElement) {
                   `
                 )}
               </section>
+              
+              ${collection.hasNextPage ? html`
+                <div class="load-more-container">
+                  <md-outlined-button 
+                    class="load-more-button"
+                    @click=${this.handleLoadMore}
+                    ?disabled=${this.isLoadingMore}
+                  >
+                    ${this.isLoadingMore ? 'Loading...' : 'Load more todos'}
+                  </md-outlined-button>
+                  <p class="load-more-hint">
+                    Progressive loading: Click to append ${collection.pageSize} more items
+                  </p>
+                </div>
+              ` : nothing}
             `
           : html`<div class="empty-state">No todos match the current filters.</div>`}
 
@@ -458,6 +497,17 @@ export class DfFirestoreList extends SignalWatcher(LitElement) {
       await loadPreviousTodoPage();
     } catch (error) {
       this.showLocalError(error);
+    }
+  }
+
+  private async handleLoadMore() {
+    this.isLoadingMore = true;
+    try {
+      await loadNextTodoPage();
+    } catch (error) {
+      this.showLocalError(error);
+    } finally {
+      this.isLoadingMore = false;
     }
   }
 
