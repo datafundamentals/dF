@@ -2,7 +2,7 @@ import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {getFirebaseApp} from '@df/firebase';
-import {initializeStorage} from '@df/state';
+import {firebaseAuthState, initializeStorage} from '@df/state';
 import type {StorageFileMetadata} from '@df/types';
 import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 import {fileUploadProgress} from '@df/ui-lit/df-upload-link-store';
@@ -95,6 +95,24 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
       grid-template-columns: 1fr 1fr;
     }
 
+    .auth-hint {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 1.25rem;
+      border-radius: 12px;
+      border: 1px dashed rgba(99, 102, 241, 0.4);
+      background: rgba(99, 102, 241, 0.08);
+      color: #312e81;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .auth-hint strong {
+      font-weight: 600;
+    }
+
     @media (max-width: 768px) {
       .two-column {
         grid-template-columns: 1fr;
@@ -121,6 +139,9 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
 
   override render() {
     const progress = fileUploadProgress.get();
+    const auth = firebaseAuthState.get();
+    const isAuthenticated = auth.authState === 'authenticated';
+    const isAuthLoading = auth.authState === 'loading' || !auth.initialized;
 
     return html`
       <div class="container">
@@ -157,14 +178,27 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
 
                 <div class="demo-section">
                   <h3>Uploaded Files</h3>
-                  <df-file-list
-                    id="file-list"
-                    directory="uploads/storage/image"
-                    showDelete
-                    showPreviews
-                    @file-select=${this.handleFileSelect}
-                    @file-delete=${this.handleFileDelete}
-                  ></df-file-list>
+                  ${isAuthenticated
+                    ? html`
+                        <df-file-list
+                          id="file-list"
+                          directory="uploads/storage/image"
+                          showDelete
+                          showPreviews
+                          @file-select=${this.handleFileSelect}
+                          @file-delete=${this.handleFileDelete}
+                        ></df-file-list>
+                      `
+                    : html`
+                        <div class="auth-hint">
+                          <strong>Authentication required</strong>
+                          ${isAuthLoading
+                            ? html`Connecting to Firebase Authentication...`
+                            : html`Sign in using the Authentication demo (e.g.
+                                <code>alice.anderson@example.com</code>) to view the
+                                seeded Storage files.`}
+                        </div>
+                      `}
                 </div>
               </div>
             `}

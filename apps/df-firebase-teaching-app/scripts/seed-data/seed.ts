@@ -21,6 +21,8 @@ import {
   getAuth,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
   updateProfile,
   type Auth,
 } from 'firebase/auth';
@@ -40,10 +42,11 @@ import {
   ref,
   uploadBytes,
   type FirebaseStorage,
+  type UploadMetadata,
 } from 'firebase/storage';
 import {readFile, readdir, writeFile, mkdir} from 'fs/promises';
 import {resolve, join} from 'path';
-import {fileURLToPath} from 'url';
+import {fileURLToPath, pathToFileURL} from 'url';
 
 // --- Configuration ---
 
@@ -80,6 +83,76 @@ interface AuthUser {
 interface FirestoreDocument {
   id: string;
   [key: string]: unknown;
+}
+
+export interface SeededAuthUser extends AuthUser {
+  uid: string;
+  isAdmin?: boolean;
+}
+
+export interface AvatarUploadTask {
+  email: string;
+  password: string;
+  uid: string;
+  storagePath: string;
+  localFileName: string;
+  contentType: string;
+}
+
+const CONTENT_TYPE_MAP: Record<string, string> = {
+  svg: 'image/svg+xml',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  txt: 'text/plain',
+  md: 'text/markdown',
+  json: 'application/json',
+  pdf: 'application/pdf',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+};
+
+export function getContentTypeForFile(fileName: string): string | undefined {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  return extension ? CONTENT_TYPE_MAP[extension] : undefined;
+}
+
+export function getUploadMetadata(fileName: string): UploadMetadata | undefined {
+  const contentType = getContentTypeForFile(fileName);
+  return contentType ? {contentType} : undefined;
+}
+
+export function getAvatarFileName(email: string): string {
+  return `${email.split('@')[0]}.svg`;
+}
+
+export function getAvatarStoragePath(uid: string): string {
+  return `avatars/${uid}`;
+}
+
+export function buildAvatarUploadTasks(users: SeededAuthUser[]): AvatarUploadTask[] {
+  return users.map((user) => {
+    const localFileName = getAvatarFileName(user.email);
+    const storagePath = getAvatarStoragePath(user.uid);
+    const contentType = getContentTypeForFile(localFileName) ?? 'image/svg+xml';
+
+    return {
+      email: user.email,
+      password: user.password,
+      uid: user.uid,
+      storagePath,
+      localFileName,
+      contentType,
+    };
+  });
+}
+
+export function findAdminUser(users: SeededAuthUser[]): SeededAuthUser | undefined {
+  return (
+    users.find((user) => user.email === ADMIN_USER_EMAIL) ?? users.at(0)
+  );
 }
 
 // --- Utility Functions ---
@@ -253,9 +326,8 @@ async function generateAvatars(avatarsDir: string, users: AuthUser[]): Promise<v
     const [firstName, lastName] = user.displayName.split(' ');
     const initials = `${firstName[0]}${lastName[0]}`.toUpperCase();
     
-    // Extract filename from email (e.g., alice.anderson@example.com -> alice-anderson.svg)
-    const emailName = user.email.split('@')[0];
-    const fileName = `${emailName}.svg`;
+    // Extract filename from email (e.g., alice.anderson@example.com -> alice.anderson.svg)
+    const fileName = getAvatarFileName(user.email);
     const filePath = join(avatarsDir, fileName);
     
     const color = colors[i % colors.length];
@@ -310,38 +382,34 @@ async function ensureStorageFiles(users: AuthUser[]): Promise<void> {
 /**
  * Seeds authentication users
  */
-async function seedAuthUsers(auth: Auth): Promise<void> {
+async function seedAuthUsers(auth: Auth): Promise<SeededAuthUser[]> {
   console.log('\n📧 Seeding authentication users...');
 
   const usersFile = resolve(SEED_DATA_DIR, 'auth-users.json');
   const users = await loadJsonFile<AuthUser[]>(usersFile);
 
+  const seededUsers: SeededAuthUser[] = [];
   let created = 0;
   let skipped = 0;
 
   for (const user of users) {
+    let userCredential: Awaited<ReturnType<typeof createUserWithEmailAndPassword>> | null = null;
+
     try {
-      // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        user.email,
-        user.password
-      );
-
-      // Update profile with display name and photo
-      await updateProfile(userCredential.user, {
-        displayName: user.displayName,
-        photoURL: user.photoURL || null,
-      });
-
+      userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password);
       console.log(`  ✓ Created user: ${user.email}`);
       created++;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'code' in error) {
         const firebaseError = error as {code: string};
         if (firebaseError.code === 'auth/email-already-in-use') {
-          console.log(`  - User already exists: ${user.email}`);
-          skipped++;
+          try {
+            userCredential = await signInWithEmailAndPassword(auth, user.email, user.password);
+            console.log(`  - User already exists: ${user.email}`);
+            skipped++;
+          } catch (signInError) {
+            console.error(`  ✗ Error signing in existing user ${user.email}:`, signInError);
+          }
         } else {
           console.error(`  ✗ Error creating user ${user.email}:`, error);
         }
@@ -349,9 +417,70 @@ async function seedAuthUsers(auth: Auth): Promise<void> {
         console.error(`  ✗ Error creating user ${user.email}:`, error);
       }
     }
+
+    if (!userCredential) {
+      continue;
+    }
+
+    const {user: createdUser} = userCredential;
+    const avatarPath = getAvatarStoragePath(createdUser.uid);
+
+    try {
+      await updateProfile(createdUser, {
+        displayName: user.displayName,
+        photoURL: avatarPath,
+      });
+    } catch (profileError) {
+      console.error(`  ✗ Error updating profile for ${user.email}:`, profileError);
+    }
+
+    seededUsers.push({
+      ...user,
+      uid: createdUser.uid,
+      isAdmin: user.email === ADMIN_USER_EMAIL,
+    });
+
+    try {
+      await signOut(auth);
+    } catch (signOutError) {
+      console.warn(`  Warning: Failed to sign out after processing ${user.email}:`, signOutError);
+    }
   }
 
   console.log(`  Summary: ${created} created, ${skipped} skipped`);
+
+  return seededUsers;
+}
+
+async function assignAdminClaim(user: SeededAuthUser | undefined): Promise<void> {
+  if (!user) {
+    console.warn('  - No admin user available for custom claim assignment');
+    return;
+  }
+
+  try {
+    const response = await fetch(IDENTITY_TOOLKIT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer owner',
+      },
+      body: JSON.stringify({
+        localId: user.uid,
+        customAttributes: JSON.stringify({admin: true}),
+      }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to set admin claim (status ${response.status}): ${text}`);
+    }
+
+    user.isAdmin = true;
+    console.log(`  ✓ Assigned admin claim to ${user.email}`);
+  } catch (error) {
+    console.error(`  ✗ Error assigning admin claim to ${user.email}:`, error);
+  }
 }
 
 /**
@@ -469,7 +598,14 @@ async function seedStorageFiles(
       const fileBuffer = await readFile(filePath);
 
       const storageRef = ref(storage, `${storagePath}/${fileName}`);
-      await uploadBytes(storageRef, fileBuffer);
+      const metadata = getUploadMetadata(fileName);
+
+      if (!metadata) {
+        console.warn(`  - Skipping ${storagePath}/${fileName}: unsupported file type`);
+        continue;
+      }
+
+      await uploadBytes(storageRef, fileBuffer, metadata);
 
       console.log(`  ✓ Uploaded: ${storagePath}/${fileName}`);
       uploaded++;
@@ -484,15 +620,79 @@ async function seedStorageFiles(
 /**
  * Seeds all Storage files
  */
-async function seedStorage(storage: FirebaseStorage, users: AuthUser[]): Promise<void> {
+async function seedUserAvatars(
+  storage: FirebaseStorage,
+  auth: Auth,
+  users: SeededAuthUser[]
+): Promise<void> {
+  console.log('\n👤 Seeding avatar uploads...');
+
+  if (users.length === 0) {
+    console.warn('  - Skipping avatar upload: no seeded users available');
+    return;
+  }
+
+  const avatarsDir = resolve(SEED_DATA_DIR, 'storage-files', 'avatars');
+  const uploadTasks = buildAvatarUploadTasks(users);
+
+  let uploaded = 0;
+
+  for (const task of uploadTasks) {
+    const avatarPath = join(avatarsDir, task.localFileName);
+
+    try {
+      const fileBuffer = await readFile(avatarPath);
+      await signInWithEmailAndPassword(auth, task.email, task.password);
+
+      const storageRef = ref(storage, task.storagePath);
+      await uploadBytes(storageRef, fileBuffer, {contentType: task.contentType});
+
+      console.log(`  ✓ Uploaded avatar for ${task.email}: ${task.storagePath}`);
+      uploaded++;
+    } catch (error) {
+      console.error(`  ✗ Error uploading avatar for ${task.email}:`, error);
+    }
+  }
+
+  if (uploaded === 0) {
+    console.warn('  - No avatars uploaded. Verify auth credentials and avatar files.');
+  } else {
+    console.log(`  Summary: ${uploaded} avatars uploaded`);
+  }
+
+  try {
+    await signOut(auth);
+  } catch (signOutError) {
+    console.warn('  Warning: Failed to sign out after avatar uploads:', signOutError);
+  }
+}
+
+async function seedStorage(
+  storage: FirebaseStorage,
+  auth: Auth,
+  users: SeededAuthUser[]
+): Promise<void> {
   console.log('\n🗄️  Seeding storage files...');
-  
+
+  if (users.length === 0) {
+    console.warn('  - Skipping storage seeding: no users available');
+    return;
+  }
+
   // Ensure files exist (generate if missing)
   await ensureStorageFiles(users);
 
+  try {
+    await signInWithEmailAndPassword(auth, users[0].email, users[0].password);
+  } catch (error) {
+    console.error(`  ✗ Failed to sign in for storage uploads using ${users[0].email}:`, error);
+    return;
+  }
+
   await seedStorageFiles(storage, 'images', 'images');
   await seedStorageFiles(storage, 'documents', 'documents');
-  await seedStorageFiles(storage, 'avatars', 'avatars');
+
+  await seedUserAvatars(storage, auth, users);
 }
 
 // --- Main Script ---
@@ -531,13 +731,27 @@ async function main(): Promise<void> {
 
   // Run seeding operations
   try {
-    // Load auth users for avatar generation
-    const usersFile = resolve(SEED_DATA_DIR, 'auth-users.json');
-    const users = await loadJsonFile<AuthUser[]>(usersFile);
-    
-    await seedAuthUsers(auth);
+    const users = await seedAuthUsers(auth);
+    const adminUser = findAdminUser(users);
+    await assignAdminClaim(adminUser);
+
+    if (adminUser) {
+      try {
+        await signInWithEmailAndPassword(auth, adminUser.email, adminUser.password);
+      } catch (error) {
+        console.error(`  ✗ Failed to sign in admin user ${adminUser.email} for Firestore seeding:`, error);
+      }
+    }
+
     await seedFirestoreCollections(db);
-    await seedStorage(storage, users);
+
+    try {
+      await signOut(auth);
+    } catch (signOutError) {
+      console.warn('  Warning: Failed to sign out after Firestore seeding:', signOutError);
+    }
+
+    await seedStorage(storage, auth, users);
 
     console.log('\n✅ Seeding completed successfully!');
     console.log('\nNext steps:');
@@ -553,8 +767,16 @@ async function main(): Promise<void> {
   }
 }
 
-// Run the script
-main().catch((error) => {
-  console.error('Fatal error:', error);
-  process.exit(1);
-});
+// Run the script only when executed directly (not when imported for tests)
+const invokedPath = process.argv[1] ? resolve(process.cwd(), process.argv[1]) : null;
+const modulePath = fileURLToPath(import.meta.url);
+
+if (invokedPath && pathToFileURL(invokedPath).href === pathToFileURL(modulePath).href) {
+  main().catch((error) => {
+    console.error('Fatal error:', error);
+    process.exit(1);
+  });
+}
+const ADMIN_USER_EMAIL = 'alice.anderson@example.com';
+
+const IDENTITY_TOOLKIT_ENDPOINT = `http://${EMULATOR_CONFIG.auth.host}:${EMULATOR_CONFIG.auth.port}/identitytoolkit.googleapis.com/v1/accounts:update?key=${firebaseConfig.apiKey}`;

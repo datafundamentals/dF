@@ -21,6 +21,7 @@
 
 import {css, html, LitElement} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
+import {FirebaseError} from 'firebase/app';
 import {listFilesWithMetadata} from '@df/state';
 import type {StorageFileMetadata} from '@df/types';
 import '@material/web/icon/icon.js';
@@ -202,7 +203,13 @@ export class DfFileList extends LitElement {
     try {
       this.files = await listFilesWithMetadata(this.directory);
     } catch (error) {
-      this.error = error instanceof Error ? error.message : 'Failed to load files';
+      if (error instanceof FirebaseError && error.code === 'storage/unauthorized') {
+        this.error = 'Sign in is required to view files in this directory.';
+      } else if (error instanceof Error) {
+        this.error = error.message;
+      } else {
+        this.error = 'Failed to load files';
+      }
     } finally {
       this.loading = false;
     }

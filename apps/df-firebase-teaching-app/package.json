@@ -15,6 +15,7 @@
     "test": "pnpm test:integration",
     "test:integration": "playwright test --config ../../playwright.config.ts --project=df-firebase-teaching-app",
     "test:rules": "tsx ./tests/security-rules/run-all-tests.ts",
+    "test:seed-data": "tsx ./scripts/seed-data/seed.unit.test.ts",
     "emulators:start": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --export-on-exit ./emulator-data",
     "emulators:export": "firebase emulators:export --project demo-firebase-teaching-app ./emulator-data",
     "emulators:import": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --only auth,firestore,storage,functions,hosting",
