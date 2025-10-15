@@ -26,12 +26,16 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@df/state": "workspace:*",
     "@lit-labs/signals": "^0.1.0",
-    "@material/web": "^2.0.0",
+    "@material/web": "^2.4.0",
     "firebase": "^11.5.0",
     "lit": "^3.3.1",
     "@codemirror/lang-markdown": "^6.3.2",

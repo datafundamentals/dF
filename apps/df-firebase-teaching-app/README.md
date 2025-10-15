@@ -438,6 +438,125 @@ All guides are organized in the [`guides/`](./guides/) directory with:
 - [Firestore Patterns](./FIRESTORE_PATTERNS.md) - Database queries and data modeling
 - [Function Triggers](./functions/README.md) - Cloud Functions patterns (when available)
 
+## Testing & Documentation (Ticket 11: ✅ Complete)
+
+The teaching app now includes production-quality testing infrastructure and comprehensive documentation to support learning and development.
+
+### 🧪 Test Coverage
+
+**Unit Tests (Firebase Core Stores):**
+- ✅ **firebase-auth.store.ts**: 100% coverage (27 tests)
+- ✅ **storage.store.ts**: 95.2% coverage (32 tests)
+- ✅ Testing framework: Vitest with V8 coverage
+- ✅ Pattern demonstration: Mocking Firebase SDK functions
+- ✅ Teaching focus: Critical paths over exhaustive coverage
+
+**Coverage Results:**
+```
+File                    | % Stmts | % Branch | % Funcs | % Lines
+------------------------|---------|----------|---------|--------
+firebase-auth.store.ts  |   100   |   87.8   |   100   |   100
+storage.store.ts        |   95.2  |   80     |   100   |   95.2
+```
+
+**Run tests:**
+```bash
+# Run all tests
+pnpm --filter @df/state test
+
+# Watch mode
+pnpm --filter @df/state test:watch
+
+# Coverage report
+pnpm --filter @df/state test:coverage
+
+# Interactive UI
+pnpm --filter @df/state test:ui
+```
+
+**Test files location:** `packages/state/src/stores/__tests__/`
+
+### 📚 Documentation Guides
+
+**[Migration Guide](./guides/MIGRATION_GUIDE.md)**
+Step-by-step guide for migrating existing Firebase apps to signals-first architecture:
+- Converting from Firebase v8 compat API to v11 modular API
+- Migrating from props/context to signals
+- Moving business logic from components to stores
+- Testing with mocks vs emulators
+- Common migration challenges and solutions
+
+**[Troubleshooting Guide](./guides/TROUBLESHOOTING.md)**
+Comprehensive solutions for common Firebase errors:
+- General setup and configuration issues
+- Firebase Emulator connection problems
+- Authentication errors (invalid credentials, permissions)
+- Firestore query and permission errors
+- Storage upload/download failures
+- Cloud Functions debugging
+- Signals and reactivity troubleshooting
+- Build and TypeScript errors
+
+### 📖 API Documentation
+
+**JSDoc Comments:**
+- ✅ Comprehensive JSDoc for all firebase-auth.store functions
+- ✅ Comprehensive JSDoc for all storage.store functions
+- ✅ Usage examples in every function
+- ✅ Parameter documentation with types
+- ✅ Return value documentation
+- ✅ Throws documentation for error cases
+
+**View documentation:**
+- In your IDE: Hover over any exported function
+- In source: `packages/state/src/stores/firebase-auth.store.ts`
+- In source: `packages/state/src/stores/storage.store.ts`
+
+### 🎨 Storybook Stories
+
+**Component Stories:**
+- ✅ `df-auth-signin.stories.ts` - 5 story variants demonstrating auth patterns
+- ✅ Story variants: Default, WithInstructions, ErrorState, Minimal, WithCustomEventHandlers
+- ✅ Comprehensive component documentation in Meta description
+
+**Run Storybook:**
+```bash
+# Build Storybook
+pnpm --filter @df/df-storybook build
+
+# Dev mode (when available)
+pnpm --filter @df/df-storybook dev
+```
+
+**Stories location:** `apps/df-storybook/stories/`
+
+### 🎯 Testing Philosophy
+
+As a teaching app, we prioritize:
+- **Demonstrating testing patterns** over exhaustive coverage
+- **Critical path coverage** (auth, storage core functions)
+- **Reusable examples** that show best practices
+- **60-75% target for stores** (vs 90%+ for production apps)
+- **50-65% target for components** (vs 80%+ for production apps)
+
+This approach ensures the teaching app remains maintainable while providing excellent examples of modern Firebase testing techniques.
+
+### 📝 Test Coverage Gaps
+
+**Intentionally not tested (out of scope for teaching app):**
+- `npm-info.store.ts` - Demo widget, non-Firebase
+- `practice-widget.store.ts` - Demo widget, non-Firebase
+- `segmented-button.store.ts` - UI utility, non-Firebase
+- `todos.store.ts` - Covered by Firestore integration tests
+- `functions-demo.store.ts` - Covered by Cloud Functions tests
+- `auth-guard.ts` - Utility functions, low complexity
+
+**Future enhancements (if needed):**
+- Component testing with Web Test Runner
+- E2E tests for multi-service flows
+- Performance benchmarking tests
+- Visual regression testing with Storybook
+
 ## Development Tasks
 
 - `pnpm --filter @df/df-firebase-teaching-app build` – Type-check and emit static assets.

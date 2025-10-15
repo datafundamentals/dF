@@ -11,7 +11,7 @@
   "dependencies": {
     "@df/ui-lit": "workspace:*",
     "@lit-labs/signals": "^0.1.0",
-    "@material/web": "^2.0.0"
+    "@material/web": "^2.4.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^8.4.0",

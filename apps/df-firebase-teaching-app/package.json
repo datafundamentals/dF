@@ -30,6 +30,7 @@
     "@df/state": "workspace:*",
     "@df/ui-lit": "workspace:*",
     "@lit-labs/signals": "^0.1.0",
+    "@material/web": "^2.4.0",
     "firebase": "^11.7.0",
     "lit": "^3.3.1"
   },

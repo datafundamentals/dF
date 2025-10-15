@@ -4,6 +4,20 @@ This directory contains comprehensive guides for building production-ready Fireb
 
 ## 📚 Available Guides
 
+### [Migration Guide](./MIGRATION_GUIDE.md)
+Step-by-step guide for migrating existing Firebase apps to the teaching app's signals-first architecture.
+
+**Key Topics:**
+- Converting from Firebase v8 compat API to v11 modular API
+- Migrating from props/context to signals
+- Moving business logic from components to stores
+- Testing with mocks vs emulators
+- Common migration challenges and solutions
+
+**When to use:** When adopting this teaching app's patterns in an existing project, or when refactoring legacy Firebase code.
+
+---
+
 ### [Composite Patterns](./COMPOSITE_PATTERNS.md)
 Learn how to coordinate multiple Firebase services together to create powerful features.
 
@@ -45,6 +59,24 @@ Copy-paste ready code examples for the most common Firebase patterns.
 - Optimistic updates with rollback
 
 **Relationship to other guides:** The Cookbook focuses on **ready-to-use code snippets** you can copy directly into your app, while the Pattern guides explain **why and when** to use these techniques. Use them together: read the patterns for understanding, then grab code from the cookbook for implementation.
+
+---
+
+### [Troubleshooting Guide](./TROUBLESHOOTING.md)
+Comprehensive solutions for common Firebase errors and issues.
+
+**What's Inside:**
+- General setup and configuration issues
+- Firebase Emulator connection problems
+- Authentication errors (invalid credentials, permissions, etc.)
+- Firestore query and permission errors
+- Storage upload/download failures
+- Cloud Functions debugging
+- Signals and reactivity troubleshooting
+- Build and TypeScript errors
+- Testing issues
+
+**When to use:** When you encounter an error and need a quick solution. Organized by error message and Firebase service for easy navigation.
 
 ---
 

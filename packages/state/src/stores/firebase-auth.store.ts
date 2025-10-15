@@ -1,3 +1,38 @@
+/**
+ * Firebase Authentication Store
+ *
+ * Centralized state management for Firebase Authentication using signals.
+ * This store follows the signals-first architecture pattern for reactive state updates.
+ *
+ * @module firebase-auth.store
+ *
+ * @example Basic Usage
+ * ```typescript
+ * import {initializeAuth, signIn, firebaseAuthState} from '@df/state';
+ * import {SignalWatcher} from '@lit-labs/signals';
+ *
+ * // 1. Initialize auth (in app entry point)
+ * const app = getFirebaseApp(config);
+ * initializeAuth(app);
+ *
+ * // 2. Use in components
+ * export class MyComponent extends SignalWatcher(LitElement) {
+ *   render() {
+ *     const {authUser, authState} = firebaseAuthState.get();
+ *     return authState === 'authenticated'
+ *       ? html`<p>Welcome ${authUser?.email}</p>`
+ *       : html`<df-sign-in></df-sign-in>`;
+ *   }
+ * }
+ *
+ * // 3. Call actions
+ * await signIn({email: 'user@example.com', password: 'password123'});
+ * ```
+ *
+ * @see {@link https://github.com/lit/lit/tree/main/packages/labs/signals | @lit-labs/signals Documentation}
+ * @see {@link https://firebase.google.com/docs/auth | Firebase Auth Documentation}
+ */
+
 import {computed, signal} from '@lit-labs/signals';
 import type {FirebaseApp} from 'firebase/app';
 import type {
@@ -20,10 +55,31 @@ import {
   type Unsubscribe,
 } from '@df/firebase/auth';
 
-// Internal signal state
+/**
+ * Internal signal holding the current authenticated user.
+ * @internal
+ */
 const authUserSignal = signal<FirebaseUser | null>(null);
+
+/**
+ * Internal signal holding the current authentication state.
+ * Possible values: 'idle' | 'loading' | 'authenticated' | 'unauthenticated' | 'error'
+ * @internal
+ */
 const authStateSignal = signal<AuthState>('idle');
+
+/**
+ * Internal signal holding the most recent error message.
+ * Null when no error exists.
+ * @internal
+ */
 const errorSignal = signal<string | null>(null);
+
+/**
+ * Internal signal indicating whether auth has completed initial state check.
+ * Useful for showing loading states while auth initializes.
+ * @internal
+ */
 const initializedSignal = signal<boolean>(false);
 
 // Reference to Firebase app and auth instance
@@ -32,8 +88,26 @@ let authInstance: Auth | null = null;
 let unsubscribeAuthListener: Unsubscribe | null = null;
 
 /**
- * Computed state that combines all auth signals
- * Following the signals-first architecture pattern
+ * Computed state that combines all auth signals.
+ *
+ * This is the primary way to access authentication state in components.
+ * Automatically updates when any underlying signal changes.
+ *
+ * @returns {FirebaseAuthState} Combined auth state object
+ * @property {FirebaseUser | null} authUser - The current authenticated user or null
+ * @property {AuthState} authState - Current state: 'idle' | 'loading' | 'authenticated' | 'unauthenticated' | 'error'
+ * @property {string | null} error - Error message if authState is 'error', otherwise null
+ * @property {boolean} initialized - True after initial auth state check completes
+ *
+ * @example
+ * ```typescript
+ * const {authUser, authState, error} = firebaseAuthState.get();
+ *
+ * if (authState === 'loading') return html`<loading-spinner></loading-spinner>`;
+ * if (authState === 'error') return html`<error-message>${error}</error-message>`;
+ * if (authState === 'authenticated') return html`<p>Welcome ${authUser?.email}</p>`;
+ * return html`<sign-in-form></sign-in-form>`;
+ * ```
  */
 export const firebaseAuthState = computed<FirebaseAuthState>(() => ({
   authUser: authUserSignal.get(),
@@ -43,8 +117,44 @@ export const firebaseAuthState = computed<FirebaseAuthState>(() => ({
 }));
 
 /**
- * Initialize the auth store with a Firebase app instance
- * This sets up the auth state listener
+ * Initialize the auth store with a Firebase app instance.
+ *
+ * This function:
+ * 1. Sets up Firebase Auth instance
+ * 2. Establishes auth state listener
+ * 3. Updates signals when user signs in/out
+ * 4. Cleans up previous listener if re-initializing
+ *
+ * **Important:** Call this once in your app's entry point before rendering any components.
+ *
+ * @param {FirebaseApp} app - The initialized Firebase app instance
+ *
+ * @example
+ * ```typescript
+ * // In main.ts or index.ts
+ * import {initializeApp} from 'firebase/app';
+ * import {initializeAuth} from '@df/state';
+ *
+ * const app = initializeApp(firebaseConfig);
+ * initializeAuth(app);
+ *
+ * // Now render your app
+ * render(html`<my-app></my-app>`, document.body);
+ * ```
+ *
+ * @example With Emulator
+ * ```typescript
+ * import {getAuth, connectAuthEmulator} from 'firebase/auth';
+ *
+ * const app = initializeApp(firebaseConfig);
+ *
+ * if (import.meta.env.VITE_USE_EMULATOR === 'true') {
+ *   const auth = getAuth(app);
+ *   connectAuthEmulator(auth, 'http://127.0.0.1:9155');
+ * }
+ *
+ * initializeAuth(app);
+ * ```
  */
 export function initializeAuth(app: FirebaseApp): void {
   if (firebaseAppRef === app && unsubscribeAuthListener) {
@@ -71,7 +181,26 @@ export function initializeAuth(app: FirebaseApp): void {
 }
 
 /**
- * Clean up auth listener (useful for tests)
+ * Clean up auth listener and reset all state.
+ *
+ * Primarily used in tests to reset auth state between test cases.
+ * You generally don't need to call this in production code.
+ *
+ * @example Testing Pattern
+ * ```typescript
+ * import {describe, it, afterEach} from 'vitest';
+ * import {initializeAuth, cleanupAuth} from './firebase-auth.store';
+ *
+ * describe('My Component', () => {
+ *   afterEach(() => {
+ *     cleanupAuth(); // Reset state after each test
+ *   });
+ *
+ *   it('should render sign-in form when unauthenticated', () => {
+ *     // Test implementation
+ *   });
+ * });
+ * ```
  */
 export function cleanupAuth(): void {
   if (unsubscribeAuthListener) {
@@ -87,7 +216,41 @@ export function cleanupAuth(): void {
 }
 
 /**
- * Sign in with email and password
+ * Sign in a user with email and password.
+ *
+ * Updates auth state signals automatically on success or failure.
+ * Components using SignalWatcher will re-render when state changes.
+ *
+ * @param {SignInCredentials} credentials - Object containing email and password
+ * @param {string} credentials.email - User's email address
+ * @param {string} credentials.password - User's password (min 6 characters)
+ *
+ * @throws {Error} If auth not initialized or Firebase auth fails
+ * @returns {Promise<void>} Resolves on successful sign-in, rejects on failure
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await signIn({
+ *     email: 'user@example.com',
+ *     password: 'password123'
+ *   });
+ *   console.log('Signed in successfully');
+ *   // Navigate to protected route
+ * } catch (error) {
+ *   console.error('Sign in failed:', error);
+ *   // Error is also in firebaseAuthState.get().error
+ * }
+ * ```
+ *
+ * @example With Emulator Test Credentials
+ * ```typescript
+ * // These users exist after running seed script
+ * await signIn({
+ *   email: 'alice.anderson@example.com',
+ *   password: 'password123'
+ * });
+ * ```
  */
 export async function signIn(credentials: SignInCredentials): Promise<void> {
   if (!authInstance) {
@@ -116,7 +279,34 @@ export async function signIn(credentials: SignInCredentials): Promise<void> {
 }
 
 /**
- * Sign up (create new user) with email and password
+ * Create a new user account with email and password.
+ *
+ * Optionally sets display name if provided. Updates auth state signals
+ * automatically. User is signed in immediately after account creation.
+ *
+ * @param {SignUpData} data - Registration data
+ * @param {string} data.email - User's email address
+ * @param {string} data.password - User's password (min 6 characters)
+ * @param {string} [data.displayName] - Optional display name for user profile
+ *
+ * @throws {Error} If auth not initialized, email already exists, or Firebase auth fails
+ * @returns {Promise<void>} Resolves when account created and user signed in
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await signUp({
+ *     email: 'newuser@example.com',
+ *     password: 'securepassword',
+ *     displayName: 'John Doe'
+ *   });
+ *   console.log('Account created and signed in');
+ * } catch (error) {
+ *   if (error.code === 'auth/email-already-in-use') {
+ *     console.error('Email already registered');
+ *   }
+ * }
+ * ```
  */
 export async function signUp(data: SignUpData): Promise<void> {
   if (!authInstance) {
@@ -152,7 +342,24 @@ export async function signUp(data: SignUpData): Promise<void> {
 }
 
 /**
- * Sign out the current user
+ * Sign out the currently authenticated user.
+ *
+ * Clears auth signals and updates state to 'unauthenticated'.
+ * Components will automatically re-render to show unauthenticated UI.
+ *
+ * @throws {Error} If auth not initialized or Firebase sign-out fails
+ * @returns {Promise<void>} Resolves when user successfully signed out
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await signOut();
+ *   console.log('User signed out');
+ *   // Navigate to home page or sign-in page
+ * } catch (error) {
+ *   console.error('Sign out failed:', error);
+ * }
+ * ```
  */
 export async function signOut(): Promise<void> {
   if (!authInstance) {
@@ -176,7 +383,29 @@ export async function signOut(): Promise<void> {
 }
 
 /**
- * Send password reset email
+ * Send a password reset email to the user.
+ *
+ * Firebase will send an email with a link to reset the password.
+ * Does not sign out the current user.
+ *
+ * @param {PasswordResetRequest} request - Object containing email
+ * @param {string} request.email - Email address to send reset link to
+ *
+ * @throws {Error} If auth not initialized or email not found
+ * @returns {Promise<void>} Resolves when reset email sent successfully
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await resetPassword({email: 'user@example.com'});
+ *   console.log('Password reset email sent');
+ *   // Show success message to user
+ * } catch (error) {
+ *   if (error.code === 'auth/user-not-found') {
+ *     console.error('No account with that email');
+ *   }
+ * }
+ * ```
  */
 export async function resetPassword(request: PasswordResetRequest): Promise<void> {
   if (!authInstance) {
@@ -195,28 +424,105 @@ export async function resetPassword(request: PasswordResetRequest): Promise<void
 }
 
 /**
- * Clear any error state
+ * Clear the current error state.
+ *
+ * Useful for dismissing error messages in the UI after user acknowledges them.
+ *
+ * @example
+ * ```typescript
+ * // In a component
+ * render() {
+ *   const {error} = firebaseAuthState.get();
+ *
+ *   if (error) {
+ *     return html`
+ *       <div class="error">
+ *         <p>${error}</p>
+ *         <button @click=${clearError}>Dismiss</button>
+ *       </div>
+ *     `;
+ *   }
+ * }
+ * ```
  */
 export function clearError(): void {
   errorSignal.set(null);
 }
 
 /**
- * Get current auth user (convenience getter)
+ * Get the current authenticated user.
+ *
+ * Convenience getter that returns the authUser from firebaseAuthState.
+ * Returns null if no user is signed in.
+ *
+ * @returns {FirebaseUser | null} Current user object or null
+ *
+ * @example
+ * ```typescript
+ * const user = getCurrentAuthUser();
+ * if (user) {
+ *   console.log('User ID:', user.uid);
+ *   console.log('Email:', user.email);
+ *   console.log('Display Name:', user.displayName);
+ * }
+ * ```
  */
 export function getCurrentAuthUser(): FirebaseUser | null {
   return authUserSignal.get();
 }
 
 /**
- * Check if user is authenticated (convenience getter)
+ * Check if a user is currently authenticated.
+ *
+ * Convenience helper for conditional rendering or route guards.
+ * Returns true only if authState === 'authenticated'.
+ *
+ * @returns {boolean} True if user authenticated, false otherwise
+ *
+ * @example Guard Pattern
+ * ```typescript
+ * async function loadUserData() {
+ *   if (!isAuthenticated()) {
+ *     throw new Error('User must be signed in');
+ *   }
+ *   // Fetch user-specific data
+ * }
+ * ```
+ *
+ * @example Conditional Rendering
+ * ```typescript
+ * render() {
+ *   return isAuthenticated()
+ *     ? html`<protected-content></protected-content>`
+ *     : html`<df-sign-in></df-sign-in>`;
+ * }
+ * ```
  */
 export function isAuthenticated(): boolean {
   return authStateSignal.get() === 'authenticated';
 }
 
 /**
- * Check if auth is loading (convenience getter)
+ * Check if auth is currently in loading state.
+ *
+ * Returns true during sign-in, sign-up, sign-out operations, or initial auth check.
+ * Useful for showing loading spinners.
+ *
+ * @returns {boolean} True if loading, false otherwise
+ *
+ * @example
+ * ```typescript
+ * render() {
+ *   if (isAuthLoading()) {
+ *     return html`<md-circular-progress indeterminate></md-circular-progress>`;
+ *   }
+ *
+ *   const user = getCurrentAuthUser();
+ *   return user
+ *     ? html`<p>Welcome ${user.email}</p>`
+ *     : html`<df-sign-in></df-sign-in>`;
+ * }
+ * ```
  */
 export function isAuthLoading(): boolean {
   return authStateSignal.get() === 'loading';

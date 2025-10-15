@@ -7,6 +7,7 @@ import {
   todoCollectionState,
   __setTodoDemoState,
   __setTodoDemoFilters,
+  firebaseAuthState,
 } from '@df/state';
 import type {FirestoreCollectionState, TodoDocument, TodoFilterState} from '@df/types';
 import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
@@ -79,6 +80,32 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
 
   override render() {
     const collection = todoCollectionState.get();
+    const auth = firebaseAuthState.get();
+    const isAuthenticated = auth.authUser !== null;
+
+    // Auto-initialize when user signs in
+    if (isAuthenticated && !this.initialized) {
+      void this.initializeStore();
+    }
+
+    // Show authentication requirement message if not authenticated
+    if (!isAuthenticated && !this.initialized) {
+      return html`
+        <div class="container">
+          <header>
+            <h2>Firestore CRUD Pattern</h2>
+            <p>
+              This teaching demo initialises the shared Firestore store, enables IndexedDB persistence, and connects to
+              the emulator so you can explore create, read, update, delete flows in real-time.
+            </p>
+          </header>
+
+          <div class="callout" style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8;">
+            ℹ️ Please sign in using the Authentication widget above to access Firestore todos.
+          </div>
+        </div>
+      `;
+    }
 
     return html`
       <div class="container">
@@ -171,6 +198,14 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
         __setTodoDemoFilters(filters);
         __setTodoDemoState(state);
         this.initialized = true;
+        return;
+      }
+
+      // Wait for authentication before initializing Firestore
+      const auth = firebaseAuthState.get();
+      if (!auth.authUser) {
+        // Not authenticated yet - wait for user to sign in
+        // The component will re-render when firebaseAuthState changes
         return;
       }
 
