@@ -76,6 +76,10 @@ shared/dist/
 **/*.tsbuildinfo
 *.tsbuildinfo
 
+# Test coverage reports
+**/coverage/
+coverage/
+
 # Firebase Emulator runtime/cache (NOT the seed data)
 **/.firebase/
 **/firebase-debug.log
