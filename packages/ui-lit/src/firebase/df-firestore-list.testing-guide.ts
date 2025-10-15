@@ -7,8 +7,8 @@
  * This guide shows the testing patterns you would use if implementing component-level tests.
  * 
  * See:
- * - coding_docs/TESTING_ARCHITECTURE_PATTERNS.md for testing strategy
- * - coding_docs/TESTING_INTEGRATION.md for Playwright setup
+ * - guides/TESTING_ARCHITECTURE_PATTERNS.md for testing strategy
+ * - guides/TESTING_INTEGRATION.md for Playwright setup
  * - guides/PERFORMANCE_PATTERNS.md for pagination patterns
  */
 
@@ -241,8 +241,8 @@
  * 
  * - guides/PERFORMANCE_PATTERNS.md - Pagination implementation details
  * - guides/FIREBASE_COOKBOOK.md - Progressive loading code examples
- * - coding_docs/TESTING_INTEGRATION.md - Playwright test setup
- * - coding_docs/TESTING_ARCHITECTURE_PATTERNS.md - Testing strategy
+ * - guides/TESTING_INTEGRATION.md - Playwright test setup
+ * - guides/TESTING_ARCHITECTURE_PATTERNS.md - Testing strategy
  */
 
 export {}; // Make this a module

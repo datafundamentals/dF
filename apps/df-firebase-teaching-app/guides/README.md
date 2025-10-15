@@ -1,6 +1,8 @@
 # Firebase Teaching App - Pattern Guides
 
-This directory contains comprehensive guides for building production-ready Firebase applications using the patterns demonstrated in this teaching app.
+**Instructions for coding agents** When adding or changing the name of any guide within this folder, please make the appropriate changes below.
+
+This directory contains comprehensive guides for building production-`ready Firebase applications using the patterns demonstrated in this teaching app.
 
 ## 📚 Available Guides
 

@@ -304,4 +304,4 @@ Brief description of purpose and key features.
 
 ## Follow-up Work
 
-Implementation tasks that align the codebase with this document are tracked in `coding_docs/STANDARDIZATION_FOLLOWUPS.md`. Review that roster when planning new tickets so work stays narrow in scope and cites the relevant standards sections. For recurring alignment checks, follow the process documented in `coding_docs/STANDARDIZATION_AUDIT_PLAYBOOK.md`.
+Implementation tasks that align the codebase with this document are tracked in `guides/STANDARDIZATION_FOLLOWUPS.md`. Review that roster when planning new tickets so work stays narrow in scope and cites the relevant standards sections. For recurring alignment checks, follow the process documented in `guides/STANDARDIZATION_AUDIT_PLAYBOOK.md`.

@@ -10,7 +10,7 @@
  *
  * For SHARED functions used by multiple apps (e.g., shared auth/roles system),
  * see services/firebase-functions-shared/ and reference:
- * - coding_docs/FUNCTIONS_PLACEMENT.md
+ * - guides/FUNCTIONS_PLACEMENT.md
  *
  * Function Organization:
  * - callable/     - Functions called directly from client apps (httpsCallable)
@@ -97,7 +97,7 @@ export { cleanupExpiredTodos, manualCleanupExpiredTodos, // Callable version for
  * - Example: Setting custom claims for 6+ apps
  *
  * ## See Also:
- * - coding_docs/FUNCTIONS_PLACEMENT.md - Complete architecture guide
+ * - guides/FUNCTIONS_PLACEMENT.md - Complete architecture guide
  * - apps/df-firebase-teaching-app/README.md - App-specific documentation
- * - OUT_OF_SCOPE/FIREBASE_TEACHING_APP_ROADMAP.md - Ticket 9 details
+ * - .z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md - Ticket 9 details
  */

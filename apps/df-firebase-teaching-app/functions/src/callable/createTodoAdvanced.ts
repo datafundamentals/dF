@@ -12,7 +12,7 @@
  * because it's specific to the teaching app's todo functionality.
  *
  * For SHARED functions used by multiple apps, see services/firebase-functions-shared/
- * and reference coding_docs/FUNCTIONS_PLACEMENT.md
+ * and reference guides/FUNCTIONS_PLACEMENT.md
  */
 
 import * as functions from 'firebase-functions/v2';

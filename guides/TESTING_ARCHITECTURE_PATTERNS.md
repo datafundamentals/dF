@@ -1,6 +1,6 @@
 # Testing Architecture Patterns
 
-This file highlights the high-level approaches currently in use. For day-to-day commands, required scripts, and per-workspace details, rely on `coding_docs/TESTING_INTEGRATION.md`.
+This file highlights the high-level approaches currently in use. For day-to-day commands, required scripts, and per-workspace details, rely on `guides/TESTING_INTEGRATION.md`.
 
 ## Patterns in Use
 
@@ -20,4 +20,4 @@ This file highlights the high-level approaches currently in use. For day-to-day 
 2. Implement the script trio (`build`, `start:test`, `test`) before writing docs.
 3. Register the project in `playwright.config.ts` with the unique port and test directory.
 4. Capture critical workflows (success and failure) in Playwright specs.
-5. Update `coding_docs/TESTING_INTEGRATION.md` and the workspace README once the suite is runnable.
+5. Update `guides/TESTING_INTEGRATION.md` and the workspace README once the suite is runnable.

@@ -453,7 +453,7 @@ pnpm --filter @df/df-firebase-teaching-app seed:reset
 
 - [Firebase Emulator Suite Docs](https://firebase.google.com/docs/emulator-suite)
 - [Firebase Teaching App README](../../README.md)
-- [Ticket 4 Acceptance Criteria](../../../OUT_OF_SCOPE/FIREBASE_TEACHING_APP_ROADMAP.md#ticket-4-seed-data-foundation)
+- [Ticket 4 Acceptance Criteria](../../../.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md#ticket-4-seed-data-foundation)
 - [Storage Files README](./storage-files/README.md)
 
 ## Future Enhancements

@@ -288,5 +288,5 @@ All auth operations:
 ## References
 
 - Firebase Auth Documentation: https://firebase.google.com/docs/auth
-- Signals Architecture: `/coding_docs/WC_SHARED_DEFAULTS.md`
-- Roadmap: `/OUT_OF_SCOPE/FIREBASE_TEACHING_APP_ROADMAP.md` (Ticket 5)
+- Signals Architecture: `/guides/WC_SHARED_DEFAULTS.md`
+- Roadmap: `/.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md` (Ticket 5)

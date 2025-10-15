@@ -4,11 +4,11 @@ Use this playbook whenever you need to re-align the monorepo with the documented
 
 ## 0. Prerequisites
 - Read the canonical standards documents:
-  - `coding_docs/SHARED_WEB_COMPONENT_DEFAULTS.md`
-  - `coding_docs/CODING_STANDARDS_STYLES.md`
-  - `coding_docs/CODING_TESTING_STRATEGY.md`
-  - `coding_docs/CODING_TEST_METHODOLOGY.md`
-- Review the current follow-up roster in `coding_docs/STANDARDIZATION_FOLLOWUPS.md` and note any open items.
+  - `guides/SHARED_WEB_COMPONENT_DEFAULTS.md`
+  - `guides/CODING_STANDARDS_STYLES.md`
+  - `guides/CODING_TESTING_STRATEGY.md`
+  - `guides/CODING_TEST_METHODOLOGY.md`
+- Review the current follow-up roster in `guides/STANDARDIZATION_FOLLOWUPS.md` and note any open items.
 
 ## 1. Establish Scope & Snapshot
 1. Confirm the current branch and run `git status` to ensure a clean working tree.
@@ -16,10 +16,10 @@ Use this playbook whenever you need to re-align the monorepo with the documented
    - `ls apps/`
    - `ls packages/`
    - `ls services/`
-3. Record the audit date and participants in session notes (optional: add an entry in `coding_docs/sessions/`).
+3. Record the audit date and participants in session notes (optional: add an entry in `guides/sessions/`).
 
 ## 2. Documentation Consistency Pass
-1. Diff the standards docs against the last audit (e.g., `git diff HEAD~N -- coding_docs/` or compare to main).
+1. Diff the standards docs against the last audit (e.g., `git diff HEAD~N -- guides/` or compare to main).
 2. For each change, confirm that dependent documents were updated. Examples:
    - If `SHARED_WEB_COMPONENT_DEFAULTS.md` gains a new pattern, ensure `CODING_STANDARDS_STYLES.md` references it.
    - If testing guidance changes, verify the checklists in `TICKET_SESSION_CHECKLIST.md` and the follow-up roster reflect it.
@@ -47,11 +47,11 @@ Perform a lightweight audit of representative code from each workspace. Suggeste
    - Goal and rationale (cite the relevant standards section).
    - Affected workspaces/files.
    - Acceptance criteria (build/test expectations).
-3. Append or update entries in `coding_docs/STANDARDIZATION_FOLLOWUPS.md` so future work remains traceable.
+3. Append or update entries in `guides/STANDARDIZATION_FOLLOWUPS.md` so future work remains traceable.
 
 ## 6. Documentation Updates & Exit
 1. If the standards themselves changed during the audit, update cross-references immediately.
-2. Summarize the audit in session notes (e.g., `coding_docs/sessions/<date>-standardization-audit.md`). Include:
+2. Summarize the audit in session notes (e.g., `guides/sessions/<date>-standardization-audit.md`). Include:
    - Date & participants
    - Key decisions
    - List of follow-up tickets
@@ -65,7 +65,7 @@ You are auditing the df monorepo for standards compliance.
 1. Read the canonical docs listed in STANDARDIZATION_AUDIT_PLAYBOOK.md.
 2. Compare them with the current code in apps/, packages/, and services/.
 3. Identify mismatches or outdated guidance.
-4. Update documentation if needed and record follow-up tickets in coding_docs/STANDARDIZATION_FOLLOWUPS.md.
+4. Update documentation if needed and record follow-up tickets in guides/STANDARDIZATION_FOLLOWUPS.md.
 5. Report findings with references to files, sections, and proposed tickets.
 ```
 

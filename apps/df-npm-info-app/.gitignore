@@ -4,7 +4,6 @@
 # Node.js dependencies
 **/node_modules/
 node_modules/
-OUT_OF_SCOPE/
 
 # Build outputs
 **/dist/

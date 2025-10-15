@@ -758,7 +758,7 @@ AI agents have repeatedly failed to create stable integration tests with these r
 
 **If you want to add integration tests:**
 
-1. Review `coding_docs/TESTING_INTEGRATION.md` for known challenges
+1. Review `guides/TESTING_INTEGRATION.md` for known challenges
 2. Use `@firebase/rules-unit-testing` test files as a reference
 3. Consider tools like Jest with custom Firebase emulator setup
 4. Expect significant time investment (~8-16 hours for first implementation)

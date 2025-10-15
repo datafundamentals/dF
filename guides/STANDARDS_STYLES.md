@@ -1,6 +1,6 @@
 # Coding Standards & Styles
 
-> **See also:** `coding_docs/WC_SHARED_DEFAULTS.md` is the canonical reference for signals-first component guidance. This document supplements it with broader stylistic expectations and repo-wide conventions.
+> **See also:** `guides/WC_SHARED_DEFAULTS.md` is the canonical reference for signals-first component guidance. This document supplements it with broader stylistic expectations and repo-wide conventions.
 
 ## Typescript
 
@@ -19,7 +19,7 @@
 - **Material Design 3 (MD3) Components** - All web components MUST use Material Web Components (`@material/web`) exclusively for interactive UI elements. This is a **strictly enforced** standard.
   - ✅ **REQUIRED**: `<md-filled-button>`, `<md-outlined-text-field>`, `<md-filled-select>`, etc.
   - ❌ **FORBIDDEN**: Native HTML elements `<button>`, `<input>`, `<select>`, `<textarea>`
-  - 🔍 **ENFORCEMENT**: See `OUT_OF_SCOPE/FIREBASE_TEACHING_APP_ROADMAP.md` Ticket 14 for automated linting, pre-commit hooks, and CI validation
+  - 🔍 **ENFORCEMENT**: See `.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md` Ticket 14 for automated linting, pre-commit hooks, and CI validation
   - 📚 **RATIONALE**: Teaching apps propagate patterns. MD3 violations multiply across all derived applications.
   - 🎨 **STYLING**: Use MD3 design tokens (`--md-sys-color-*`) in component CSS; avoid custom styling that conflicts with Material theming
 
@@ -78,7 +78,7 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 - **Signal naming** – Use `camelCaseSignal` for internal writable signals and `somethingState` for exported computeds.
 - **Side effects** – Encapsulate async work inside store functions; UI layers call them but never await results directly inside templates.
 - **Lifecycle helpers** – Components extend `SignalWatcher` and read signals in `render()`; avoid manual subscriptions.
-- **Upcoming Firebase work** – Additional guidance will ship with the dedicated Firebase ticket; until then do not introduce Firebase-specific contracts into new docs. (See `future_tickets_ignore/` for planning notes.)
+- **Upcoming Firebase work** – Additional guidance will ship with the dedicated Firebase ticket; until then do not introduce Firebase-specific contracts into new docs. (See `.z_/future` for planning notes.)
 
 ## Firebase & State Management
 

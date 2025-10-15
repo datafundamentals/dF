@@ -11,7 +11,7 @@
  * ❌ FORBIDDEN:
  * - Native <button>, <input>, <select>, <textarea>
  * 
- * See: /coding_docs/STANDARDS_STYLES.md#material-design-3
+ * See: /guides/STANDARDS_STYLES.md#material-design-3
  */
 
 import {SignalWatcher} from '@lit-labs/signals';

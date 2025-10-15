@@ -5,10 +5,10 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 ## Pre-Session Setup (Start Every Session)
 
 ### 1. Context Loading
-- [ ] Read `coding_docs/TICKET_SESSION_CHECKLIST.md` (this file)
+- [ ] Read `guides/TICKET_SESSION_CHECKLIST.md` (this file)
 - [ ] Review the root `README.md` for workspace-level commands
 - [ ] Open the target app/package README for project-specific scripts
-- [ ] Scan relevant standards in `coding_docs/` (e.g., `STANDARDS_STYLES.md`, `WC_SHARED_DEFAULTS.md`, `TESTING_INTEGRATION.md`)
+- [ ] Scan relevant standards in `guides/` (e.g., `STANDARDS_STYLES.md`, `WC_SHARED_DEFAULTS.md`, `TESTING_INTEGRATION.md`)
 
 ### 2. Environment Verification
 - [ ] Confirm current working directory location
@@ -63,9 +63,9 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 ## Pre-Exit Protocols (End Every Session)
 
 ### 8. Documentation Updates (MANDATORY)
-- [ ] Update the standards or reference docs you touched inside `coding_docs/`
+- [ ] Update the standards or reference docs you touched inside `guides/`
 - [ ] Refresh the relevant app/package README when commands or workflows change
-- [ ] Record any future work or ideas in `future_tickets_ignore/` (never in `coding_docs/`)
+- [ ] Record any future work or ideas in `.z_/future/` (never in `guides/`)
 - [ ] Confirm every command in updated docs was tested or re-read directly from the associated `package.json`
 
 ### 9. Code Finalization
@@ -76,7 +76,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Tag incomplete work clearly for next session
 
 ### 10. Session Handoff Preparation
-- [ ] Capture next-session notes in your ticket or `future_tickets_ignore/` if needed
+- [ ] Capture next-session notes in your ticket or `.z_/future/` if needed
 - [ ] List immediate next priorities
 - [ ] Document any blockers or dependencies
 - [ ] Reference related shared resources
@@ -171,6 +171,6 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ## Documentation Architecture Notes
 
-- **Active references** live in `coding_docs/` and should stay relevant to the current ticket.
-- **Future planning** belongs in `/future_tickets_ignore/` so active tickets stay focused.
-- Avoid duplication between apps—consolidate shared concepts in `coding_docs/`.
+- **Active references** live in `guides/` and should stay relevant to the current ticket.
+- **Future planning** belongs in `.z_/future/` so active tickets stay focused.
+- Avoid duplication between apps—consolidate shared concepts in `guides/`.
