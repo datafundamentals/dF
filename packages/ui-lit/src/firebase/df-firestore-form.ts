@@ -89,8 +89,8 @@ export class DfFirestoreForm extends LitElement {
     }
   `;
 
-  @property({type: String}) mode: FirestoreFormMode = 'create';
-  @property({attribute: false}) todo: TodoDocument | null = null;
+  @property({type: String}) declare mode: FirestoreFormMode;
+  @property({attribute: false}) declare todo: TodoDocument | null;
 
   @state() private _title = '';
   @state() private _description = '';
@@ -98,6 +98,12 @@ export class DfFirestoreForm extends LitElement {
   @state() private _tagsInput = '';
   @state() private _dueDateValue = '';
   @state() private _error: string | null = null;
+
+  constructor() {
+    super();
+    this.mode = 'create';
+    this.todo = null;
+  }
 
   override updated(changed: Map<string, unknown>): void {
     if (changed.has('todo')) {

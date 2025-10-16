@@ -123,8 +123,14 @@ export class DfFirestoreItem extends LitElement {
     }
   `;
 
-  @property({attribute: false}) todo: TodoDocument | null = null;
-  @property({type: Boolean}) actions = true;
+  @property({attribute: false}) declare todo: TodoDocument | null;
+  @property({type: Boolean}) declare actions: boolean;
+
+  constructor() {
+    super();
+    this.todo = null;
+    this.actions = true;
+  }
 
   override render() {
     if (!this.todo) {
