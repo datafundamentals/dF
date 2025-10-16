@@ -108,7 +108,12 @@ function convertToCSV(todos: any[]): string {
  */
 export const todosExportAPI = functions.https.onRequest({
   region: 'us-central1',
-  cors: ['http://127.0.0.1:4176', 'http://localhost:4176'], // Allow local dev
+  cors: [
+    'http://127.0.0.1:4176',
+    'http://localhost:4176',
+    'https://peg-2035.web.app',
+    'https://peg-2035.firebaseapp.com',
+  ],
 }, async (request: Request, response: any) => {
   functions.logger.info('Todos export requested', {
     query: request.query,

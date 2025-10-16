@@ -758,7 +758,7 @@ AI agents have repeatedly failed to create stable integration tests with these r
 
 **If you want to add integration tests:**
 
-1. Review `guides/TESTING_INTEGRATION.md` for known challenges
+1. Review `coding_docs/TESTING_INTEGRATION.md` for known challenges
 2. Use `@firebase/rules-unit-testing` test files as a reference
 3. Consider tools like Jest with custom Firebase emulator setup
 4. Expect significant time investment (~8-16 hours for first implementation)
@@ -771,6 +771,704 @@ The current testing architecture provides excellent coverage and reliability for
 - `pnpm --filter @df/df-firebase-teaching-app build` – Type-check and emit static assets.
 - `pnpm --filter @df/df-firebase-teaching-app preview` – Serve the production build on port `4176`.
 - `pnpm --filter @df/df-firebase-teaching-app test` – Run the Playwright smoke test (ensures the shell renders).
+
+---
+
+## Production Deployment
+
+This section demonstrates how to deploy the Firebase Teaching App to production Firebase Hosting, completing the emulator-first development lifecycle. **Note:** Production deployment is OPTIONAL for teaching purposes - the app works 100% offline with emulators.
+
+### Prerequisites
+
+- Real Firebase project (create at [Firebase Console](https://console.firebase.google.com))
+- Firebase CLI installed and authenticated: `firebase login`
+- Production environment variables configured (`.env.production`)
+
+### Quick Start: First Production Deployment
+
+**Step 1: Create Firebase Project**
+
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Click "Add project"
+3. Enter project name (e.g., `my-firebase-teaching-app`)
+4. Choose free Spark plan or Blaze plan (pay-as-you-go)
+5. Wait for project creation to complete
+
+**Step 2: Register Web App**
+
+1. In Firebase Console, click "Add app" → Web (</> icon)
+2. Enter app nickname (e.g., "Teaching App Web")
+3. Check "Also set up Firebase Hosting"
+4. Click "Register app"
+5. **Copy the Firebase configuration values** - you'll need these for `.env.production`
+
+**Step 3: Configure Production Environment**
+
+Create `.env.production` file (copy from `.env.production.example`):
+
+```bash
+cd apps/df-firebase-teaching-app
+cp .env.production.example .env.production
+```
+
+Edit `.env.production` with your real Firebase project values:
+
+```bash
+# REPLACE with actual values from Firebase Console
+VITE_FIREBASE_API_KEY=AIzaSyC...your-real-api-key
+VITE_FIREBASE_AUTH_DOMAIN=my-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=my-project-id
+VITE_FIREBASE_STORAGE_BUCKET=my-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
+VITE_FIREBASE_APP_ID=1:123456789012:web:abc123def456
+
+# Must be false for production
+VITE_USE_EMULATOR=false
+
+# Not used in production but required by type definitions
+VITE_FIREBASE_EMULATOR_UI=http://127.0.0.1:5400
+```
+
+**Step 4: Initialize Firebase Project**
+
+```bash
+# From the app directory
+cd apps/df-firebase-teaching-app
+
+# Initialize (select your project when prompted)
+firebase use --add
+
+# Select your project ID and give it an alias (e.g., "production")
+# Creates .firebaserc file
+```
+
+**Step 5: Run Pre-Deployment Tests**
+
+```bash
+# Ensure security rules pass all tests
+pnpm --filter @df/df-firebase-teaching-app test:rules
+
+# Verify production build works
+pnpm --filter @df/df-firebase-teaching-app build:prod
+
+# Preview production build locally
+pnpm --filter @df/df-firebase-teaching-app preview:prod
+```
+
+**Step 6: Deploy to Production**
+
+```bash
+# Full deployment (rules + functions + hosting)
+pnpm --filter @df/df-firebase-teaching-app deploy:prod
+
+# Or deploy components individually:
+pnpm --filter @df/df-firebase-teaching-app deploy:rules      # Security rules only
+pnpm --filter @df/df-firebase-teaching-app deploy:functions  # Cloud Functions only
+pnpm --filter @df/df-firebase-teaching-app deploy:hosting    # Hosting only
+```
+
+**Step 7: Verify Deployment**
+
+1. Check Firebase Console for deployment URL (Hosting section)
+2. Open your deployed app: `https://YOUR-PROJECT.web.app`
+3. Test authentication (sign-up, sign-in, sign-out)
+4. Test Firestore operations (create, read, update, delete todos)
+5. Test Storage operations (upload, download files)
+6. Check Firebase Console for any errors
+
+### Deployment Scripts Reference
+
+| Script | Description | Use When |
+|--------|-------------|----------|
+| `build:prod` | Build app with production config | Before any deployment |
+| `preview:prod` | Preview production build locally | Testing production build before deploy |
+| `deploy:rules` | Deploy Firestore & Storage rules | Security rules changed |
+| `deploy:functions` | Deploy Cloud Functions | Functions code changed |
+| `deploy:hosting` | Build and deploy app to Hosting | App code changed |
+| `deploy:prod` | Deploy everything (runs tests first) | Full production deployment |
+| `deploy:prod:quick` | Deploy hosting without tests | Quick iteration (use sparingly) |
+
+### Production Environment Differences
+
+**What Changes in Production:**
+- ✅ Real Firebase Authentication (real user accounts)
+- ✅ Actual security rules enforcement (permission checks matter)
+- ✅ Production Firebase quotas and limits apply (see below)
+- ✅ Real billing (if on Blaze plan)
+- ✅ Data persists permanently (not emulator exports)
+- ✅ HTTPS enforced automatically
+- ✅ No emulator UI or debug tools
+
+**What Stays the Same:**
+- ✅ Application code (identical behavior to emulator)
+- ✅ Component behavior and UI
+- ✅ State management patterns (signals still work)
+- ✅ Firebase SDK API calls (same methods)
+- ✅ Security rules logic (tested in emulator)
+
+**What's Excluded:**
+- ❌ Seed data (`emulator-data/` NEVER deployed to production)
+- ❌ Emulator connection code (when `VITE_USE_EMULATOR=false`)
+- ❌ Development environment variables
+- ❌ Debug console logs
+
+### Production Data Initialization
+
+**⚠️ IMPORTANT: Production Starts Empty**
+
+Unlike the emulator (which uses seed data), your production Firebase project starts with:
+- 🔴 **Zero auth users** - users must sign up through the app
+- 🔴 **Empty Firestore database** - no pre-populated todos or data
+- 🔴 **Empty Storage bucket** - no uploaded files
+
+**This is by design:** Seed data is for teaching/testing only and should NEVER be deployed to production.
+
+**Options for Production Data:**
+
+1. **User-Driven Creation (Recommended for Teaching App)**
+   - Let users sign up and create their own data
+   - Most realistic for teaching purposes
+   - Demonstrates the full user experience
+
+2. **Admin Script for Essential Data (If Needed)**
+   - Create `scripts/init-production-data.ts` for essential config
+   - Run once after deployment: `tsx scripts/init-production-data.ts`
+   - Use sparingly - only for app-wide settings, not user data
+
+3. **Migration from Legacy System (If Applicable)**
+   - Write migration scripts using Firebase Admin SDK
+   - Run in Cloud Functions or locally with admin credentials
+   - Document in `MIGRATION_GUIDE.md`
+
+### Firebase Quotas & Cost Monitoring
+
+**Spark Plan (Free Tier) Limits:**
+
+| Service | Free Quota | Notes |
+|---------|------------|-------|
+| Firestore Reads | 50,000/day | Good for teaching/demo apps |
+| Firestore Writes | 20,000/day | Sufficient for light usage |
+| Firestore Deletes | 20,000/day | - |
+| Storage | 1GB stored | Upload limit in rules: 10MB/file |
+| Storage Bandwidth | 10GB/month | Download bandwidth |
+| Functions Invocations | 125,000/month | Generous for teaching apps |
+| Functions Compute | 40K GB-seconds, 40K CPU-seconds | Limits function complexity |
+| Hosting Storage | 10GB | Static assets |
+| Hosting Bandwidth | 360MB/day | Page loads |
+
+**When to Upgrade to Blaze Plan:**
+- Production app with real users
+- Exceeding free tier limits
+- Need outbound networking from functions (3rd party APIs)
+- Custom domain with SSL required
+
+**Setting Up Cost Monitoring:**
+
+1. Firebase Console → Project Settings → Usage and Billing
+2. Link to Google Cloud Billing account
+3. Set up budget alerts (recommended: 50%, 90%, 100%)
+4. Monitor daily in Firebase Console → Usage tab
+
+### CI/CD with GitHub Actions
+
+For automated deployments on every push to `main` branch, see the **CI/CD Setup** section below.
+
+### Alternative Hosting: Bundled Deployment
+
+If you need to deploy to non-Firebase hosting (Netlify, Vercel, traditional servers), see the **Alternative Hosting** section below.
+
+### Security Considerations
+
+**Before Production Deployment:**
+- [ ] Review security rules for production-appropriate permissions
+- [ ] Run `pnpm test:rules` and ensure all 64 tests pass
+- [ ] Verify `.env.production` is in `.gitignore` (NEVER commit credentials)
+- [ ] Consider enabling Firebase App Check (prevents abuse)
+- [ ] Configure auth providers correctly (Google, Email/Password, etc.)
+- [ ] Review CORS settings for Cloud Functions
+- [ ] Test with production Firebase project before going live
+
+**Production Security Best Practices:**
+- ✅ HTTPS only (automatic with Firebase Hosting)
+- ✅ Strict security rules (test before deploying)
+- ✅ Environment variables for secrets (never hardcode)
+- ✅ Firebase App Check enabled (prevents unauthorized access)
+- ✅ Rate limiting on Cloud Functions (prevent abuse)
+- ✅ Regular security audits of rules and code
+
+### Troubleshooting Production Deployments
+
+**⚠️ MONOREPO EXCEPTION: Cloud Functions Bundling**
+
+The functions package uses **bundled types** instead of importing from `@df/types`. This is a **deliberate exception** to the monorepo's "no copy-paste" principle.
+
+**Why:** Google Cloud Build doesn't support pnpm `workspace:*` protocol.
+
+**📚 Full explanation:** See [`guides/CLOUD_FUNCTIONS_BUNDLING.md`](./guides/CLOUD_FUNCTIONS_BUNDLING.md)
+
+**Impact:** When `packages/types/src/firebase-todos.types.ts` changes, you must manually sync `functions/src/types/bundled.ts`.
+
+---
+
+**Build Fails with "Missing environment variables":**
+- Ensure `.env.production` exists with all required variables
+- Check that `VITE_` prefix is on all variables (Vite requirement)
+- Verify no typos in variable names
+
+**Deployment Succeeds But App Shows Blank Page:**
+- Check browser console for errors
+- Verify Firebase config values in `.env.production` match project
+- Ensure `VITE_USE_EMULATOR=false` in `.env.production`
+- Check that `dist/` directory was built correctly
+
+**Authentication Doesn't Work:**
+- Verify authorized domains in Firebase Console → Authentication → Settings
+- Ensure `VITE_FIREBASE_AUTH_DOMAIN` matches Firebase project
+- Check that authentication methods are enabled in Firebase Console
+
+**Firestore Operations Fail:**
+- Check security rules are deployed: `pnpm deploy:rules`
+- Verify Firestore database is created in Firebase Console
+- Review Firebase Console → Firestore → Rules for errors
+- Check browser console for permission errors
+
+**Storage Uploads Fail:**
+- Verify storage bucket name in `.env.production`
+- Check storage rules are deployed
+- Review file size limits in `storage.rules` (default 10MB)
+- Ensure storage bucket is created in Firebase Console
+
+**Cloud Functions Not Responding:**
+- Check functions deployed: Firebase Console → Functions
+- Review function logs: Firebase Console → Functions → Logs
+- Verify CORS configuration for HTTP functions
+- Check function region matches app configuration
+
+### Production Readiness Checklist
+
+For a comprehensive pre-deployment checklist, see:
+
+📋 **[`PRODUCTION_READINESS.md`](./PRODUCTION_READINESS.md)**
+
+Includes:
+- Step-by-step pre-deployment verification
+- Security checklist
+- Testing requirements
+- Post-deployment verification steps
+- Rollback procedures
+- Cost monitoring setup
+
+---
+
+## CI/CD Pipeline (GitHub Actions)
+
+Automate production deployments using GitHub Actions.
+
+### Setup Instructions
+
+**Step 1: Create GitHub Workflow File**
+
+Create `.github/workflows/deploy-firebase-teaching-app.yml` in your repository root (already created in this repo):
+
+```yaml
+name: Deploy Firebase Teaching App to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Firebase Hosting
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build shared packages
+        run: |
+          pnpm --filter @df/types run build
+          pnpm --filter @df/state run build
+          pnpm --filter @df/firebase run build
+          pnpm --filter @df/ui-lit run build
+      
+      - name: Create .env.production from secrets
+        working-directory: apps/df-firebase-teaching-app
+        run: |
+          cat > .env.production << EOF
+          VITE_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
+          VITE_USE_EMULATOR=false
+          VITE_FIREBASE_EMULATOR_UI=http://127.0.0.1:5400
+          EOF
+      
+      - name: Run security rules tests
+        run: pnpm --filter @df/df-firebase-teaching-app test:rules
+      
+      - name: Build production app
+        run: pnpm --filter @df/df-firebase-teaching-app build:prod
+      
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          channelId: live
+          projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'
+```
+
+**Step 2: Configure GitHub Secrets**
+
+Go to your GitHub repository → Settings → Secrets and variables → Actions
+
+Add the following secrets:
+
+| Secret Name | Value | How to Get |
+|-------------|-------|------------|
+| `FIREBASE_API_KEY` | Your API key | Firebase Console → Project Settings → General → Web app config |
+| `FIREBASE_AUTH_DOMAIN` | Your auth domain | Same as above |
+| `FIREBASE_PROJECT_ID` | Your project ID | Same as above |
+| `FIREBASE_STORAGE_BUCKET` | Your storage bucket | Same as above |
+| `FIREBASE_MESSAGING_SENDER_ID` | Your sender ID | Same as above |
+| `FIREBASE_APP_ID` | Your app ID | Same as above |
+| `FIREBASE_SERVICE_ACCOUNT` | Service account JSON | Generate in Firebase Console → Project Settings → Service accounts |
+| `FIREBASE_TOKEN` | CI token | Run `firebase login:ci` locally |
+
+**Step 3: Generate Firebase Service Account**
+
+1. Firebase Console → Project Settings → Service accounts
+2. Click "Generate new private key"
+3. Download JSON file
+4. Copy entire JSON content to `FIREBASE_SERVICE_ACCOUNT` secret in GitHub
+
+**Step 4: Test the Workflow**
+
+1. Push to `main` branch (or manual trigger from Actions tab)
+2. Watch workflow run in GitHub Actions tab
+3. Verify deployment succeeds
+4. Check your Firebase Hosting URL
+
+### CI/CD Best Practices
+
+- ✅ Run tests before deployment (`test:rules`, integration tests)
+- ✅ Use branch protection rules (require CI to pass before merge)
+- ✅ Deploy to staging environment first (use Firebase Hosting preview channels)
+- ✅ Implement rollback procedures (see PRODUCTION_READINESS.md)
+- ✅ Monitor deployment status (Firebase Console + GitHub Actions)
+- ✅ Set up deployment notifications (Slack, Discord, email)
+
+---
+
+## Alternative Hosting: Bundled Deployment
+
+Deploy the app to non-Firebase hosting platforms (11ty, Netlify, Vercel, traditional servers).
+
+### Bundle Creation
+
+```bash
+# Create standalone bundle
+pnpm --filter @df/df-firebase-teaching-app build:bundle
+
+# Output: dist/ directory contains:
+# - index.html
+# - assets/*.js (JavaScript bundles)
+# - assets/*.css (Stylesheets)
+# - All Firebase SDK code bundled
+```
+
+### 11ty Integration Pattern
+
+**Use Case:** Embed Firebase Teaching App in an 11ty static site.
+
+**Step 1: Build the bundle**
+
+```bash
+pnpm --filter @df/df-firebase-teaching-app build:bundle
+```
+
+**Step 2: Copy bundle to 11ty site**
+
+```bash
+# Copy dist/ to your 11ty public directory
+cp -r apps/df-firebase-teaching-app/dist/* path/to/11ty-site/public/firebase-app/
+```
+
+**Step 3: Create 11ty page**
+
+```html
+<!-- path/to/11ty-site/src/firebase-demo.njk -->
+---
+layout: layouts/base.njk
+title: Firebase Teaching App Demo
+---
+
+<h1>Firebase Teaching App</h1>
+
+<!-- Embedded Firebase app -->
+<div id="firebase-app-container">
+  <iframe 
+    src="/firebase-app/index.html" 
+    width="100%" 
+    height="800px" 
+    frameborder="0"
+    title="Firebase Teaching App">
+  </iframe>
+</div>
+```
+
+**Alternative: Direct Embedding**
+
+```html
+<!-- Include Firebase app directly in 11ty page -->
+<div id="app"></div>
+<script type="module" src="/firebase-app/assets/index-[hash].js"></script>
+```
+
+### Netlify Deployment
+
+**Option 1: Drag & Drop**
+
+1. Build bundle: `pnpm build:bundle`
+2. Go to [Netlify](https://app.netlify.com)
+3. Drag `dist/` folder to deploy
+
+**Option 2: GitHub Integration**
+
+Create `netlify.toml` in app directory:
+
+```toml
+[build]
+  command = "pnpm install && pnpm --filter @df/df-firebase-teaching-app build:bundle"
+  publish = "apps/df-firebase-teaching-app/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+**Environment Variables in Netlify:**
+
+1. Netlify Dashboard → Site settings → Environment variables
+2. Add all `VITE_FIREBASE_*` variables
+3. Set `VITE_USE_EMULATOR=false`
+
+### Vercel Deployment
+
+**Option 1: Vercel CLI**
+
+```bash
+# Install Vercel CLI
+pnpm add -g vercel
+
+# Build and deploy
+cd apps/df-firebase-teaching-app
+pnpm build:bundle
+vercel --prod
+```
+
+**Option 2: GitHub Integration**
+
+Create `vercel.json` in app directory:
+
+```json
+{
+  "buildCommand": "pnpm install && pnpm --filter @df/df-firebase-teaching-app build:bundle",
+  "outputDirectory": "apps/df-firebase-teaching-app/dist",
+  "framework": null
+}
+```
+
+**Environment Variables in Vercel:**
+
+1. Vercel Dashboard → Project Settings → Environment Variables
+2. Add all `VITE_FIREBASE_*` variables for Production
+3. Set `VITE_USE_EMULATOR=false`
+
+### Traditional Web Server (Nginx, Apache)
+
+**Nginx Configuration Example:**
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/firebase-teaching-app;
+    index index.html;
+
+    # SPA routing - serve index.html for all routes
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+    add_header X-XSS-Protection "1; mode=block";
+}
+```
+
+**Apache .htaccess Example:**
+
+```apache
+# .htaccess in dist/ directory
+RewriteEngine On
+RewriteBase /
+
+# SPA routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]
+
+# Cache static assets
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
+  Header set Cache-Control "max-age=31536000, public, immutable"
+</FilesMatch>
+
+# Security headers
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-Content-Type-Options "nosniff"
+Header set X-XSS-Protection "1; mode=block"
+```
+
+**Deployment Steps:**
+
+1. Build bundle: `pnpm build:bundle`
+2. Upload `dist/` contents to server: `scp -r dist/* user@server:/var/www/firebase-teaching-app/`
+3. Configure web server (nginx/apache)
+4. Restart web server
+5. Test at your domain
+
+### CDN Deployment (Cloudflare, AWS CloudFront)
+
+**Cloudflare Pages:**
+
+1. Connect GitHub repository to Cloudflare Pages
+2. Build command: `pnpm install && pnpm --filter @df/df-firebase-teaching-app build:bundle`
+3. Build output directory: `apps/df-firebase-teaching-app/dist`
+4. Add environment variables in Cloudflare dashboard
+
+**AWS CloudFront + S3:**
+
+```bash
+# Build bundle
+pnpm build:bundle
+
+# Upload to S3
+aws s3 sync dist/ s3://your-bucket-name/ --delete
+
+# Invalidate CloudFront cache
+aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
+```
+
+### Bundle Portability Checklist
+
+✅ **Bundle is self-contained:**
+- All dependencies bundled (Firebase SDK included)
+- No external script references (except CDN if desired)
+- Environment config baked in at build time
+
+✅ **Works on any static hosting:**
+- No server-side rendering required
+- No Node.js runtime needed
+- Pure static HTML/CSS/JS
+
+✅ **Firebase connection:**
+- App connects to real Firebase (not emulators)
+- `VITE_USE_EMULATOR=false` in build environment
+- Security rules must be deployed to Firebase
+
+✅ **CORS considerations:**
+- Firebase automatically configures CORS
+- If using Cloud Functions, configure CORS for your domain
+
+---
+
+## Known Limitations
+
+**⚠️ Cloud Functions: Bundled Types (Monorepo Exception)**
+
+The functions package (`functions/src/types/bundled.ts`) **duplicates types** from `packages/types`. This is a **deliberate exception** to the monorepo principle of "no copy-paste."
+
+**Reason:** Google Cloud Build doesn't support pnpm's `workspace:*` dependency protocol.
+
+**Alternatives considered:**
+- ❌ File path protocol (`file:../../`) - Still fails in Cloud Build
+- ❌ Publish to npm - Overkill for teaching app  
+- ❌ Emulator-only - Doesn't demonstrate production deployment
+- ✅ Minimal bundling - Pragmatic exception (current approach)
+
+**Maintenance impact:** When `packages/types/src/firebase-todos.types.ts` changes, manually sync to `functions/src/types/bundled.ts`.
+
+**Teaching value:** Demonstrates that architectural principles sometimes yield to platform constraints. Documenting exceptions clearly is more valuable than hiding pragmatic compromises.
+
+**📚 Complete documentation:** [`guides/CLOUD_FUNCTIONS_BUNDLING.md`](./guides/CLOUD_FUNCTIONS_BUNDLING.md)
+
+---
+
+**Ticket 11-12 Gaps (Documented for Transparency):**
+
+This teaching app demonstrates production deployment patterns while acknowledging the following gaps pending future completion:
+
+⚠️ **Test Coverage Below Teaching App Targets:**
+- Current: ~30-40% estimated (4 test files total)
+- Target: 60-75% stores, 50-65% components, 70-80% functions
+- **Impact:** Code deployed with insufficient automated test validation
+- **Mitigation:** Security rules have 100% test coverage (64/64 tests passing)
+- **Future Work:** See `.z_/future/TESTING_DEBT.md` for remediation plan
+
+⚠️ **Storybook Stories Incomplete:**
+- Current: 5 stories found (auth, todos, upload, file list, file delete)
+- Expected: 10+ stories covering all Firebase components
+- **Impact:** Reduced visual regression testing and component documentation
+- **Mitigation:** Components are functional and deployed successfully
+- **Future Work:** Complete stories in follow-up ticket
+
+⚠️ **Standards Compliance Audit Pending (Ticket 12):**
+- TypeScript configuration audit not performed
+- Material Design 3 compliance not systematically verified
+- Signal/store pattern validation not documented
+- **Impact:** Unknown if code fully complies with monorepo standards
+- **Mitigation:** Code follows established patterns from reference apps
+- **Future Work:** Run comprehensive audit per Ticket 12 specification
+
+**Why Deploy Despite Gaps?**
+
+1. **Production deployment patterns are critical to document** - teaching value is high
+2. **Core functionality is solid** - emulator setup, security rules (100% tested), UI components work
+3. **Gaps don't block deployment** - missing tests/stories don't prevent successful deployment
+4. **Honesty about state** - acknowledging gaps is pedagogically valuable for teaching app
+5. **Provides path forward** - documents what needs completion for follow-up work
+
+For detailed remediation plan, see: **`.z_/future/TESTING_DEBT.md`**
+
+---
 
 ## Troubleshooting
 

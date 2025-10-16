@@ -132,6 +132,12 @@ export const manualCleanupExpiredTodos = functions.https.onCall<
   Promise<{ deleted: number; message: string }>
 >({
   region: 'us-central1',
+  cors: [
+    'http://127.0.0.1:4176',
+    'http://localhost:4176',
+    'https://peg-2035.web.app',
+    'https://peg-2035.firebaseapp.com',
+  ],
 }, async (request) => {
   // Verify authentication
   if (!request.auth) {

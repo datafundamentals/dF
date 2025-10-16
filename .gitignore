@@ -18,6 +18,9 @@ dist/
 out-tsc/
 build/
 
+# Firebase Functions compiled output
+apps/df-firebase-teaching-app/functions/lib/
+
 # Environment files
 **/.env
 **/.env.*

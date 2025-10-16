@@ -123,7 +123,12 @@ export const createTodoAdvanced = functions.https.onCall<
   Promise<CreateTodoAdvancedResponse>
 >({
   region: 'us-central1',
-  cors: true, // Allow CORS for local development
+  cors: [
+    'http://127.0.0.1:4176',
+    'http://localhost:4176',
+    'https://peg-2035.web.app',
+    'https://peg-2035.firebaseapp.com',
+  ],
 }, async (request) => {
   // 1. Verify authentication
   if (!request.auth) {
