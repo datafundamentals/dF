@@ -52,8 +52,14 @@ export class DfFirestoreDelete extends LitElement {
     /* MD3 buttons handle their own styling */
   `;
 
-  @property({type: String}) todoId = '';
-  @property({type: String}) todoTitle = '';
+  @property({type: String}) declare todoId: string;
+  @property({type: String}) declare todoTitle: string;
+
+  constructor() {
+    super();
+    this.todoId = '';
+    this.todoTitle = '';
+  }
 
   override render() {
     return html`
