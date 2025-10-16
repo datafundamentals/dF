@@ -227,10 +227,11 @@ This includes:
 2. Or resume from instructor's export: `pnpm emulators:import`
 3. Experiment freely - seed again anytime to reset
 
-## Authentication (Ticket 5: ✅ Complete)
+## Authentication (Ticket 5: ✅ Complete + Google Sign-In)
 
 The Firebase teaching app now includes complete authentication patterns demonstrating:
 - ✅ Sign in / Sign up with email and password
+- ✅ **Google Sign-In (production-ready)** 🆕
 - ✅ Sign out
 - ✅ Password reset
 - ✅ User profile display
@@ -257,6 +258,24 @@ Then:
 
 **Alternative:** You can also use production build with `pnpm build && pnpm preview` if preferred.
 
+### Google Sign-In (Production)
+
+**NEW!** Production-ready Google OAuth integration:
+
+```html
+<!-- Use anywhere in the monorepo -->
+<df-google-signin></df-google-signin>
+```
+
+**Setup (2 minutes):**
+1. Firebase Console → Authentication → Enable "Google" provider
+2. Add your domain to authorized domains
+3. Deploy - it works automatically!
+
+📚 **Complete guide:** [GOOGLE_SIGNIN_SETUP.md](./GOOGLE_SIGNIN_SETUP.md)
+
+**Note:** Google Sign-In requires production Firebase (doesn't work in emulator). For local development, use email/password authentication.
+
 ### Auth Documentation
 
 See [AUTHENTICATION_PATTERNS.md](./AUTHENTICATION_PATTERNS.md) for complete documentation including:
@@ -265,6 +284,7 @@ See [AUTHENTICATION_PATTERNS.md](./AUTHENTICATION_PATTERNS.md) for complete docu
 - Auth guard usage
 - Integration examples
 - Testing strategies
+- **Google Sign-In setup** (see [GOOGLE_SIGNIN_SETUP.md](./GOOGLE_SIGNIN_SETUP.md))
 
 ## Firestore Pattern (Ticket 6: ✅ Complete)
 

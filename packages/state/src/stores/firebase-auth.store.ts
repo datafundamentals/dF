@@ -48,6 +48,8 @@ import {
   onAuthStateChange,
   signInWithEmail,
   createUserWithEmail,
+  signInWithGoogle as firebaseSignInWithGoogle,
+  signInWithGoogleRedirect as firebaseSignInWithGoogleRedirect,
   signOut as firebaseSignOut,
   resetPassword as firebaseResetPassword,
   updateUserProfile,
@@ -526,4 +528,122 @@ export function isAuthenticated(): boolean {
  */
 export function isAuthLoading(): boolean {
   return authStateSignal.get() === 'loading';
+}
+
+/**
+ * Sign in with Google using popup window.
+ *
+ * **Production:** Opens real Google OAuth popup, user selects Google account
+ * **Emulator:** Shows test account picker (no actual Google servers involved)
+ *
+ * This is the recommended method for Google Sign-In on desktop/web.
+ * For mobile apps, consider using signInWithGoogleRedirect() instead.
+ *
+ * @param {string[]} [scopes] - Optional Google API scopes for additional permissions
+ *
+ * @throws {Error} If auth not initialized, popup blocked, or user cancels
+ * @returns {Promise<void>} Resolves when signed in successfully
+ *
+ * @example Basic Usage
+ * ```typescript
+ * // In a component
+ * async handleGoogleSignIn() {
+ *   try {
+ *     await signInWithGoogle();
+ *     console.log('Signed in with Google');
+ *     // User info available in firebaseAuthState.get().authUser
+ *   } catch (error) {
+ *     if (error.code === 'auth/popup-blocked') {
+ *       console.error('Popup blocked by browser');
+ *     } else if (error.code === 'auth/popup-closed-by-user') {
+ *       console.error('User cancelled sign-in');
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @example With Additional Scopes
+ * ```typescript
+ * // Request access to user's Google Calendar
+ * await signInWithGoogle([
+ *   'https://www.googleapis.com/auth/calendar.readonly'
+ * ]);
+ * ```
+ *
+ * @example Production Setup Required
+ * ```
+ * 1. Firebase Console → Authentication → Sign-in method
+ * 2. Enable "Google" provider
+ * 3. Add your production domain to authorized domains
+ * 4. Deploy - Google Sign-In will work automatically!
+ * ```
+ */
+export async function signInWithGoogle(scopes: string[] = []): Promise<void> {
+  if (!authInstance) {
+    throw new Error('Auth not initialized. Call initializeAuth() first.');
+  }
+
+  authStateSignal.set('loading');
+  errorSignal.set(null);
+
+  try {
+    const userCredential = await firebaseSignInWithGoogle(authInstance, scopes);
+
+    // Auth state listener will update signals
+    authUserSignal.set(userCredential.user);
+    authStateSignal.set('authenticated');
+  } catch (error) {
+    authStateSignal.set('error');
+    const errorMessage = error instanceof Error ? error.message : 'Google sign-in failed';
+    errorSignal.set(errorMessage);
+    throw error;
+  }
+}
+
+/**
+ * Sign in with Google using redirect (eliminates COOP popup warnings).
+ *
+ * **Redirect Flow:**
+ * 1. Call this function → redirects to Google OAuth
+ * 2. User authorizes → redirects back to your app
+ * 3. On return, Firebase SDK automatically detects and completes sign-in
+ *
+ * **No COOP warnings!** Since there's no popup, browser security policies don't interfere.
+ *
+ * @param {string[]} [scopes] - Optional Google API scopes for additional permissions
+ *
+ * @throws {Error} If auth not initialized
+ * @returns {Promise<void>} Redirects to Google (does not return)
+ *
+ * @example Basic Usage
+ * ```typescript
+ * // User clicks sign-in button
+ * await signInWithGoogleRedirect();
+ * // Page redirects to Google, then back
+ * // Firebase SDK handles the rest automatically
+ * ```
+ *
+ * @example Mobile-Friendly
+ * ```typescript
+ * // Perfect for mobile where popups are unreliable
+ * <df-google-signin use-redirect></df-google-signin>
+ * ```
+ */
+export async function signInWithGoogleRedirect(scopes: string[] = []): Promise<void> {
+  if (!authInstance) {
+    throw new Error('Auth not initialized. Call initializeAuth() first.');
+  }
+
+  authStateSignal.set('loading');
+  errorSignal.set(null);
+
+  try {
+    await firebaseSignInWithGoogleRedirect(authInstance, scopes);
+    // Function never returns - page redirects to Google
+  } catch (error) {
+    authStateSignal.set('error');
+    const errorMessage = error instanceof Error ? error.message : 'Google redirect sign-in failed';
+    errorSignal.set(errorMessage);
+    throw error;
+  }
 }

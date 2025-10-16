@@ -1,6 +1,14 @@
 # df
 
-datafundamentals monorepo
+datafundamentals monorepo for:
+- playing
+- learning
+- teaching
+- building apps in a day without using whacko vibe coding with dead-end non-standard libraries
+
+Read [Why???](./READ_WHY.md) for insights on what motivates the maintenance of this repository, and why you might even be interested.
+
+**extra bonus:** This thing is so full of markdown docs for coding agents, any time you get lost you can probably just ask your favorite coding agent what to do next, and it will know, just from reading all the docs.
 
 ## Workspaces
 - `apps/` – runnable front ends and local tooling (e.g., `df-lit-starter`, `df-storybook`)

@@ -8,6 +8,7 @@ import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 
 // Import auth components
 import '@df/ui-lit/firebase';
+import '@df/ui-lit/df-google-signin';
 
 /**
  * Authentication demo component for the Firebase teaching app
@@ -277,6 +278,8 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
   }
 
   private _renderCurrentView() {
+    const isEmulator = useEmulator();
+
     switch (this.currentView) {
       case 'sign-in':
         return html`
@@ -284,6 +287,27 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
             @df-sign-in-success=${this._handleSignInSuccess}
             @df-sign-in-error=${this._handleAuthError}
           ></df-sign-in>
+
+          ${!isEmulator ? html`
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e0e0e0;">
+              <h3 style="margin-bottom: 1rem; color: #1976d2;">Or sign in with Google</h3>
+              <df-google-signin
+                @google-signin-success=${this._handleGoogleSignInSuccess}
+                @google-signin-error=${this._handleAuthError}
+              ></df-google-signin>
+              <p style="margin-top: 1rem; font-size: 0.875rem; color: #666;">
+                <strong>Note:</strong> Google Sign-In works in production only.
+                In emulator mode, use email/password authentication above.
+              </p>
+            </div>
+          ` : html`
+            <div style="margin-top: 2rem; padding: 1rem; background: #fff3e0; border: 1px solid #ffb74d; border-radius: 8px;">
+              <p style="margin: 0; font-size: 0.875rem; color: #e65100;">
+                <strong>Emulator Mode:</strong> Google Sign-In is available in production only.
+                Deploy to Firebase Hosting to test real Google OAuth.
+              </p>
+            </div>
+          `}
         `;
 
       case 'sign-up':
@@ -329,6 +353,11 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
 
   private _handleResetSuccess() {
     console.log('[df-auth-demo] Password reset email sent');
+  }
+
+  private _handleGoogleSignInSuccess() {
+    console.log('[df-auth-demo] Google sign in successful');
+    this.currentView = 'profile';
   }
 
   private _handleAuthError(e: CustomEvent) {

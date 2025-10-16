@@ -4,6 +4,9 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
   updateProfile,
@@ -18,6 +21,29 @@ import type {EmulatorHostConfig} from '@df/types/firebase.types';
 import {formatEmulatorOrigin} from '../emulator-detection.js';
 
 const connectedInstances = new WeakSet<Auth>();
+
+/**
+ * Google Auth Provider instance (singleton pattern)
+ * Reuse across the app for consistent OAuth configuration
+ */
+let googleProvider: GoogleAuthProvider | null = null;
+
+/**
+ * Get or create the Google Auth Provider instance
+ * Optionally configure scopes for additional Google API access
+ */
+export function getGoogleProvider(scopes: string[] = []): GoogleAuthProvider {
+  if (!googleProvider) {
+    googleProvider = new GoogleAuthProvider();
+    // Add any default scopes here if needed
+    // googleProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
+  }
+
+  // Add additional scopes if requested
+  scopes.forEach(scope => googleProvider!.addScope(scope));
+
+  return googleProvider;
+}
 
 /** Returns the shared Auth instance for the provided Firebase app. */
 export function getFirebaseAuth(app: FirebaseApp): Auth {
@@ -96,6 +122,62 @@ export async function updateUserProfile(
   profile: {displayName?: string | null; photoURL?: string | null}
 ): Promise<void> {
   return updateProfile(user, profile);
+}
+
+/**
+ * Sign in with Google using popup window (recommended for desktop)
+ *
+ * This works in both emulator and production:
+ * - Emulator: Shows simplified test account picker (no real Google OAuth)
+ * - Production: Opens real Google OAuth popup
+ *
+ * @param auth - Firebase Auth instance
+ * @param scopes - Optional Google API scopes (e.g., ['https://www.googleapis.com/auth/calendar'])
+ * @returns UserCredential with user info and OAuth tokens
+ *
+ * @example
+ * ```typescript
+ * const auth = getFirebaseAuth(app);
+ * const credential = await signInWithGoogle(auth);
+ * console.log('User:', credential.user.displayName);
+ * console.log('Email:', credential.user.email);
+ * console.log('Photo:', credential.user.photoURL);
+ * ```
+ */
+export async function signInWithGoogle(
+  auth: Auth,
+  scopes: string[] = []
+): Promise<UserCredential> {
+  const provider = getGoogleProvider(scopes);
+  return signInWithPopup(auth, provider);
+}
+
+/**
+ * Sign in with Google using redirect (recommended for mobile)
+ *
+ * After redirect, use getRedirectResult() to retrieve the UserCredential.
+ *
+ * @param auth - Firebase Auth instance
+ * @param scopes - Optional Google API scopes
+ *
+ * @example
+ * ```typescript
+ * // Initiate redirect
+ * await signInWithGoogleRedirect(auth);
+ *
+ * // On return, retrieve result (in app initialization)
+ * const result = await getRedirectResult(auth);
+ * if (result) {
+ *   console.log('Signed in as:', result.user.email);
+ * }
+ * ```
+ */
+export async function signInWithGoogleRedirect(
+  auth: Auth,
+  scopes: string[] = []
+): Promise<void> {
+  const provider = getGoogleProvider(scopes);
+  return signInWithRedirect(auth, provider);
 }
 
 export type {Auth, IdTokenResult, Unsubscribe, User, UserCredential};
