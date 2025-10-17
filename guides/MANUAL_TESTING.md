@@ -6,12 +6,23 @@ Run through this checklist after automated suites pass and before opening a PR. 
 - `pnpm install` (run `rm -rf node_modules` first only if dependencies are behaving oddly)
 - `pnpm build`
 - `pnpm lint`
+- `lsof -ti :4174 | xargs kill -9` or 4173|4175 alt to refactoring the Playwright setup to pick ephemeral ports to get rid of: 
+    @df/df-teaching-app:test: ERROR: command finished with error: command (/Users/petecarapetyan/work/primary/df/apps/df-teaching-app) /Users/petecarapetyan/Library/pnpm/.tools/@pnpm+macos-arm64/10.18.2/bin/pnpm run test exited (1)
+    @df/df-teaching-app#test: command (/Users/petecarapetyan/work/primary/df/apps/df-teaching-app) /Users/petecarapetyan/Library/pnpm/.tools/@pnpm+macos-arm64/10.18.2/bin/pnpm run test exited (1)
+
+    Tasks:    9 successful, 10 total
+    Cached:    9 cached, 10 total
+    Time:    11.057s 
+    Failed:    @df/df-teaching-app#test
+
+    ERROR  run failed: command  exited (1)
+     ELIFECYCLE  Test failed. See above for more details.
 - `pnpm test`
 
 ## Emulator & Seed Data
 - `pnpm --filter @df/df-firebase-teaching-app emulators:start`
 - `pnpm --filter @df/df-firebase-teaching-app seed`
-- Restart the app: `pnpm --filter @df/df-firebase-teaching-app dev`
+- Restart the app: `pnpm --filter @df/df-firebase-teaching-app dev` or whatever relevant app that you are working on.
 - Hard refresh the browser, open DevTools console, and watch for unexpected logs
 - Manually exercise every relevant page/state (auth flows, data mutations, error handling, etc.)
 
