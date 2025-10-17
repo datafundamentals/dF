@@ -1,5 +1,12 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import {enforceMD3Rule} from './packages/config/eslint-rules/enforce-md3.js';
+
+const md3Plugin = {
+  rules: {
+    'enforce-md3': enforceMD3Rule,
+  },
+};
 
 export default [
   // Base configuration for all files
@@ -11,7 +18,7 @@ export default [
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
       // Core TypeScript rules
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['warn', {argsIgnorePattern: '^_'}],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -21,6 +28,27 @@ export default [
 
       // General rules
       'no-prototype-builtins': 'off',
+    },
+  },
+
+  // MD3 enforcement for UI components
+  {
+    files: [
+      'packages/ui-lit/src/**/*.ts',
+      'apps/df-firebase-teaching-app/src/**/*.ts',
+    ],
+    ignores: [
+      '**/*.spec.ts',
+      '**/*.test.ts',
+      '**/*.stories.ts',
+      '**/*.testing-guide.ts',
+      '**/*.md.ts',
+    ],
+    plugins: {
+      '@df/md3': md3Plugin,
+    },
+    rules: {
+      '@df/md3/enforce-md3': 'error',
     },
   },
 

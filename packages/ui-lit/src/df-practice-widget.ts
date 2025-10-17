@@ -1,3 +1,24 @@
+/**
+ * ⚠️ CRITICAL STANDARDS COMPLIANCE ⚠️
+ *
+ * This component MUST use Material Design 3 web components from @material/web.
+ *
+ * ✅ ALLOWED:
+ * - <md-filled-button>, <md-outlined-button>, <md-text-button>
+ * - <md-outlined-select> with <md-select-option>
+ * - <md-checkbox>
+ *
+ * ❌ FORBIDDEN:
+ * - Native <button>, <input>, <select>, <textarea>
+ *
+ * See:
+ * - /guides/STANDARDS_STYLES.md#material-design-3
+ * - /packages/ui-lit/templates/md3-component-template.ts
+ * - /packages/ui-lit/src/df-upload-link.ts (compliant example)
+ *
+ * Build will FAIL if native HTML elements are detected.
+ */
+
 import {SignalWatcher} from '@lit-labs/signals';
 import {css, html, LitElement, nothing} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
@@ -11,6 +32,13 @@ import {
   stopAutoRefresh,
 } from '@df/state';
 import type {PracticeTopic, PracticeWidgetStatus} from '@df/types';
+
+import '@material/web/button/filled-button.js';
+import '@material/web/checkbox/checkbox.js';
+import '@material/web/select/outlined-select.js';
+import '@material/web/select/select-option.js';
+import type {MdOutlinedSelect} from '@material/web/select/outlined-select.js';
+import type {MdCheckbox} from '@material/web/checkbox/checkbox.js';
 
 @customElement('df-practice-widget')
 export class DfPracticeWidget extends SignalWatcher(LitElement) {
@@ -41,19 +69,6 @@ export class DfPracticeWidget extends SignalWatcher(LitElement) {
       font-weight: 600;
     }
 
-    select,
-    button,
-    label {
-      font: inherit;
-    }
-
-    select {
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      background: rgba(248, 250, 252, 0.95);
-    }
-
     .actions {
       display: flex;
       gap: 8px;
@@ -61,19 +76,14 @@ export class DfPracticeWidget extends SignalWatcher(LitElement) {
       align-items: center;
     }
 
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 6px 12px;
-      background: var(--df-practice-primary, #2563eb);
-      color: #ffffff;
-      cursor: pointer;
-      transition: background-color 120ms ease;
+    md-outlined-select {
+      min-width: 210px;
     }
 
-    button[disabled] {
-      cursor: not-allowed;
-      background: rgba(148, 163, 184, 0.6);
+    .auto-refresh {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .status {
@@ -213,24 +223,33 @@ export class DfPracticeWidget extends SignalWatcher(LitElement) {
     return html`
       <header>
         <h2>Practice planner</h2>
-        <select @change=${this.handleTopicChange} .value=${topic} aria-label="Practice topic">
+        <md-outlined-select
+          label="Practice topic"
+          .value=${topic}
+          @change=${this.handleTopicChange}
+        >
           ${PRACTICE_TOPICS.map(
-            (option) => html`<option value=${option}>${this.formatTopic(option)}</option>`,
+            (option) => html`
+              <md-select-option value=${option}>
+                <div slot="headline">${this.formatTopic(option)}</div>
+              </md-select-option>
+            `,
           )}
-        </select>
+        </md-outlined-select>
       </header>
 
       <div class="actions">
-        <button @click=${this.handleRefresh} ?disabled=${status === 'loading'}>Refresh tasks</button>
-        <label>
-          <input
-            type="checkbox"
+        <md-filled-button @click=${this.handleRefresh} ?disabled=${status === 'loading'}>
+          Refresh tasks
+        </md-filled-button>
+        <div class="auto-refresh">
+          <md-checkbox
             @change=${this.handleAutoRefreshToggle}
-            ?checked=${isAutoRefreshing}
+            .checked=${isAutoRefreshing}
             aria-label="Auto refresh tasks"
-          />
-          Auto refresh
-        </label>
+          ></md-checkbox>
+          <span>Auto refresh</span>
+        </div>
       </div>
 
       ${this.renderStatus(status, errorMessage)}
@@ -281,8 +300,8 @@ export class DfPracticeWidget extends SignalWatcher(LitElement) {
   }
 
   private handleTopicChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const nextTopic = select.value as PracticeTopic;
+    const select = event.target as MdOutlinedSelect;
+    const nextTopic = (select.value ?? '') as PracticeTopic;
     setPracticeTopic(nextTopic);
     void loadPracticeTasks(nextTopic);
     this.dispatchEvent(
@@ -295,8 +314,8 @@ export class DfPracticeWidget extends SignalWatcher(LitElement) {
   }
 
   private handleAutoRefreshToggle(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.checked) {
+    const checkbox = event.target as MdCheckbox;
+    if (checkbox.checked) {
       startAutoRefresh(this.refreshInterval);
     } else {
       stopAutoRefresh();

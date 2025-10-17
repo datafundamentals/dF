@@ -13,7 +13,7 @@
  * - Native <button>, <input>, <select>, <textarea>
  *
  * See:
- * - /coding_docs/STANDARDS_STYLES.md#material-design-3
+ * - /guides/STANDARDS_STYLES.md#material-design-3
  * - /packages/ui-lit/templates/md3-component-template.ts
  * - /packages/ui-lit/src/df-upload-link.ts (compliant example)
  *

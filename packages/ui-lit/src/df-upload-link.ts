@@ -229,6 +229,7 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
           <div style="display: ${this.showUploader ? 'block' : 'none'};">
             <label class="file-label">
               <span>${this.fileName}</span>
+              <!-- md3-gap: native file input required to invoke OS file picker per MD3 upload guidelines -->
               <input type="file" class="file-input" @change="${this.uploadFile}"/>
             </label>
           </div>

@@ -16,12 +16,27 @@
 - **Signals-first** – Presentation components consume state via signals exported from `@df/state`; they never own persisted data or business logic.
 
 - **Visual Only** - Web Components should primarily focus on rendering UI. Application state that needs to be persisted or shared across different parts of the application must be managed in external src/stores classes. Internal, non-persisted UI state (e.g., animation state, toggling visibility of an element) can be managed within the component itself.
-- **Material Design 3 (MD3) Components** - All web components MUST use Material Web Components (`@material/web`) exclusively for interactive UI elements. This is a **strictly enforced** standard.
+- **Material Design 3 (MD3) Components** - Prefer Material Web Components (`@material/web`) for interactive UI elements. When the MD3 spec does not ship an official component (e.g., segmented buttons), implement the pattern manually using MD3 tokens and document the exemption. This is a **strictly enforced** standard.
   - ✅ **REQUIRED**: `<md-filled-button>`, `<md-outlined-text-field>`, `<md-filled-select>`, etc.
   - ❌ **FORBIDDEN**: Native HTML elements `<button>`, `<input>`, `<select>`, `<textarea>`
   - 🔍 **ENFORCEMENT**: See `.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md` Ticket 14 for automated linting, pre-commit hooks, and CI validation
   - 📚 **RATIONALE**: Teaching apps propagate patterns. MD3 violations multiply across all derived applications.
   - 🎨 **STYLING**: Use MD3 design tokens (`--md-sys-color-*`) in component CSS; avoid custom styling that conflicts with Material theming
+
+#### MD3 Gaps (Spec-Only Components)
+Some MD3 patterns do not have Material Web implementations yet. Approved custom builds must:
+
+- Follow the MD3 spec exactly (layout, typography, colors, states)
+- Keep native semantics for accessibility (e.g., `role="radio"` for segmented buttons)
+- Include an inline `// eslint-disable-next-line @df/md3/enforce-md3 -- reason + spec link` comment
+- Reference the spec in code comments for future maintainers
+- Log the pattern in `.z_/future/MD3_GAPS.md` so the exemption is easy to audit
+
+| Pattern | Spec Link | Example |
+|---------|-----------|---------|
+| Segmented buttons | https://m3.material.io/components/segmented-buttons/specs | `packages/ui-lit/src/df-segmented-button.ts`
+| Floating action button (FAB) variations | https://m3.material.io/components/floating-action-button/specs | _TBD when implemented_ |
+| Other gaps | [MD3 component catalog](https://m3.material.io/components) | Log future gaps in `.z_/future/MD3_GAPS.md` |
 
 ### Lit Component Implementation Patterns
 

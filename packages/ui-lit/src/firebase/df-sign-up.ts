@@ -1,18 +1,20 @@
-import {LitElement, html, css} from 'lit';
+/**
+ * ⚠️ CRITICAL STANDARDS COMPLIANCE ⚠️
+ *
+ * Material Design 3 sign-up form using Material Web text fields and buttons.
+ */
+
+import {LitElement, html, css, nothing} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {firebaseAuthState, signUp} from '@df/state';
 import type {SignUpData} from '@df/types';
+import '@material/web/textfield/outlined-text-field.js';
+import '@material/web/button/filled-button.js';
+import '@material/web/progress/circular-progress.js';
+import '@material/web/divider/divider.js';
+import type {MdOutlinedTextField} from '@material/web/textfield/outlined-text-field.js';
 
-/**
- * Sign-up (registration) form component
- *
- * A presentation component that allows users to create a new account
- * with email, password, and optional display name.
- *
- * @fires df-sign-up-success - Dispatched when sign-up succeeds
- * @fires df-sign-up-error - Dispatched when sign-up fails
- */
 @customElement('df-sign-up')
 export class DfSignUp extends SignalWatcher(LitElement) {
   @state() declare private email: string;
@@ -20,6 +22,7 @@ export class DfSignUp extends SignalWatcher(LitElement) {
   @state() declare private confirmPassword: string;
   @state() declare private displayName: string;
   @state() declare private validationError: string;
+  @state() declare private isSubmitting: boolean;
 
   constructor() {
     super();
@@ -28,204 +31,145 @@ export class DfSignUp extends SignalWatcher(LitElement) {
     this.confirmPassword = '';
     this.displayName = '';
     this.validationError = '';
+    this.isSubmitting = false;
   }
 
   static override styles = css`
     :host {
       display: block;
-      font-family: var(--df-font-family, system-ui, sans-serif);
+      font-family: var(--df-font-family, 'Roboto', sans-serif);
     }
 
-    .sign-up-container {
-      max-width: 400px;
-      padding: var(--df-spacing-4, 1.5rem);
-      border: 1px solid var(--df-border-color, #e0e0e0);
-      border-radius: var(--df-border-radius, 8px);
-      background: var(--df-surface-color, #fff);
+    .surface {
+      max-width: 480px;
+      padding: 28px;
+      border-radius: 18px;
+      background: var(--md-sys-color-surface, #ffffff);
+      border: 1px solid var(--md-sys-color-outline-variant, rgba(15, 23, 42, 0.12));
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1);
     }
 
-    .title {
-      margin: 0 0 var(--df-spacing-4, 1.5rem) 0;
-      font-size: var(--df-title-font-size, 1.5rem);
-      font-weight: var(--df-title-font-weight, 600);
-      color: var(--df-text-primary, #000);
+    h2 {
+      margin: 0;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface, #0f172a);
     }
 
-    .form {
+    p.description {
+      margin: 12px 0 24px;
+      font-size: 0.95rem;
+      color: var(--md-sys-color-on-surface-variant, #4b5563);
+      line-height: 1.6;
+    }
+
+    form {
       display: flex;
       flex-direction: column;
-      gap: var(--df-spacing-3, 1rem);
+      gap: 20px;
     }
 
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: var(--df-spacing-1, 0.25rem);
+    .feedback {
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.9rem;
     }
 
-    label {
-      font-size: var(--df-label-font-size, 0.875rem);
-      font-weight: var(--df-label-font-weight, 500);
-      color: var(--df-text-secondary, #666);
+    .feedback.error {
+      background: var(--md-sys-color-error-container, rgba(186, 26, 26, 0.12));
+      color: var(--md-sys-color-on-error-container, #410e0b);
     }
 
-    input {
-      padding: var(--df-input-padding, 0.75rem);
-      border: 1px solid var(--df-input-border-color, #ccc);
-      border-radius: var(--df-input-border-radius, 4px);
-      font-size: var(--df-input-font-size, 1rem);
-      font-family: inherit;
-      transition: border-color 0.2s;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--df-primary-color, #1976d2);
-      box-shadow: 0 0 0 2px var(--df-primary-color-alpha, rgba(25, 118, 210, 0.1));
-    }
-
-    input:disabled {
-      background-color: var(--df-disabled-bg, #f5f5f5);
-      cursor: not-allowed;
-    }
-
-    .button {
-      padding: var(--df-button-padding, 0.75rem 1.5rem);
-      border: none;
-      border-radius: var(--df-button-border-radius, 4px);
-      background: var(--df-primary-color, #1976d2);
-      color: var(--df-button-text-color, #fff);
-      font-size: var(--df-button-font-size, 1rem);
-      font-weight: var(--df-button-font-weight, 500);
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .button:hover:not(:disabled) {
-      background: var(--df-primary-color-hover, #1565c0);
-    }
-
-    .button:disabled {
-      background: var(--df-disabled-bg, #ccc);
-      cursor: not-allowed;
-    }
-
-    .error {
-      padding: var(--df-spacing-2, 0.5rem);
-      border-radius: var(--df-border-radius, 4px);
-      background: var(--df-error-bg, #ffebee);
-      color: var(--df-error-text, #c62828);
-      font-size: var(--df-error-font-size, 0.875rem);
-    }
-
-    .loading {
-      text-align: center;
-      color: var(--df-text-secondary, #666);
-      font-size: var(--df-loading-font-size, 0.875rem);
-    }
-
-    .hint {
-      font-size: var(--df-hint-font-size, 0.75rem);
-      color: var(--df-text-tertiary, #999);
+    md-circular-progress {
+      display: block;
+      margin: 16px auto 0;
     }
   `;
 
   override render() {
     const authState = firebaseAuthState.get();
-    const isLoading = authState.authState === 'loading';
-    const error = authState.error || this.validationError;
+    const error = authState.error;
 
     return html`
-      <div class="sign-up-container">
-        <h2 class="title">Create Account</h2>
+      <div class="surface">
+        <h2>Create an account</h2>
+        <p class="description">
+          Provide your email address and a strong password. You can optionally add a display name now or update it later.
+        </p>
 
-        ${error ? html`<div class="error">${error}</div>` : ''}
+        ${error ? html`<div class="feedback error" role="alert">${error}</div>` : nothing}
+        ${this.validationError ? html`<div class="feedback error" role="alert">${this.validationError}</div>` : nothing}
 
-        <form class="form" @submit=${this._handleSubmit}>
-          <div class="form-field">
-            <label for="displayName">Display Name (optional)</label>
-            <input
-              type="text"
-              id="displayName"
-              .value=${this.displayName}
-              @input=${this._handleDisplayNameInput}
-              ?disabled=${isLoading}
-              autocomplete="name"
-            />
-          </div>
+        <form @submit=${this._handleSubmit}>
+          <md-outlined-text-field
+            label="Display name"
+            supporting-text="Optional"
+            .value=${this.displayName}
+            ?disabled=${this.isSubmitting}
+            @input=${this._handleDisplayNameInput}
+          ></md-outlined-text-field>
 
-          <div class="form-field">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              .value=${this.email}
-              @input=${this._handleEmailInput}
-              ?disabled=${isLoading}
-              required
-              autocomplete="email"
-            />
-          </div>
+          <md-divider></md-divider>
 
-          <div class="form-field">
-            <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              .value=${this.password}
-              @input=${this._handlePasswordInput}
-              ?disabled=${isLoading}
-              required
-              minlength="6"
-              autocomplete="new-password"
-            />
-            <span class="hint">At least 6 characters</span>
-          </div>
+          <md-outlined-text-field
+            type="email"
+            label="Email"
+            .value=${this.email}
+            autocomplete="email"
+            ?disabled=${this.isSubmitting}
+            required
+            @input=${this._handleEmailInput}
+          ></md-outlined-text-field>
 
-          <div class="form-field">
-            <label for="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              .value=${this.confirmPassword}
-              @input=${this._handleConfirmPasswordInput}
-              ?disabled=${isLoading}
-              required
-              minlength="6"
-              autocomplete="new-password"
-            />
-          </div>
+          <md-outlined-text-field
+            type="password"
+            label="Password"
+            supporting-text="Minimum 6 characters"
+            .value=${this.password}
+            autocomplete="new-password"
+            ?disabled=${this.isSubmitting}
+            required
+            minlength="6"
+            @input=${this._handlePasswordInput}
+          ></md-outlined-text-field>
 
-          <button
-            type="submit"
-            class="button"
-            ?disabled=${isLoading}
-          >
-            ${isLoading ? 'Creating Account...' : 'Sign Up'}
-          </button>
+          <md-outlined-text-field
+            type="password"
+            label="Confirm password"
+            .value=${this.confirmPassword}
+            autocomplete="new-password"
+            ?disabled=${this.isSubmitting}
+            required
+            minlength="6"
+            @input=${this._handleConfirmPasswordInput}
+          ></md-outlined-text-field>
 
-          ${isLoading ? html`<div class="loading">Please wait...</div>` : ''}
+          <md-filled-button type="submit" ?disabled=${this.isSubmitting}>
+            ${this.isSubmitting ? 'Creating account…' : 'Sign Up'}
+          </md-filled-button>
+
+          ${this.isSubmitting ? html`<md-circular-progress indeterminate></md-circular-progress>` : nothing}
         </form>
       </div>
     `;
   }
 
-  private _handleDisplayNameInput(e: Event) {
-    this.displayName = (e.target as HTMLInputElement).value;
+  private _handleDisplayNameInput(event: Event) {
+    this.displayName = (event.target as MdOutlinedTextField).value ?? '';
   }
 
-  private _handleEmailInput(e: Event) {
-    this.email = (e.target as HTMLInputElement).value;
+  private _handleEmailInput(event: Event) {
+    this.email = (event.target as MdOutlinedTextField).value ?? '';
     this._clearValidationError();
   }
 
-  private _handlePasswordInput(e: Event) {
-    this.password = (e.target as HTMLInputElement).value;
+  private _handlePasswordInput(event: Event) {
+    this.password = (event.target as MdOutlinedTextField).value ?? '';
     this._clearValidationError();
   }
 
-  private _handleConfirmPasswordInput(e: Event) {
-    this.confirmPassword = (e.target as HTMLInputElement).value;
+  private _handleConfirmPasswordInput(event: Event) {
+    this.confirmPassword = (event.target as MdOutlinedTextField).value ?? '';
     this._clearValidationError();
   }
 
@@ -233,41 +177,37 @@ export class DfSignUp extends SignalWatcher(LitElement) {
     this.validationError = '';
   }
 
-  private async _handleSubmit(e: Event) {
-    e.preventDefault();
+  private async _handleSubmit(event: Event) {
+    event.preventDefault();
 
-    // Validate passwords match
     if (this.password !== this.confirmPassword) {
       this.validationError = 'Passwords do not match';
       return;
     }
 
-    const signUpData: SignUpData = {
+    const payload: SignUpData = {
       email: this.email,
       password: this.password,
       displayName: this.displayName || undefined,
     };
 
-    try {
-      await signUp(signUpData);
+    this.isSubmitting = true;
 
-      // Dispatch success event
+    try {
+      await signUp(payload);
       this.dispatchEvent(
         new CustomEvent('df-sign-up-success', {
           detail: {email: this.email, displayName: this.displayName},
           bubbles: true,
           composed: true,
-        })
+        }),
       );
-
-      // Clear form
       this.email = '';
       this.password = '';
       this.confirmPassword = '';
       this.displayName = '';
       this.validationError = '';
     } catch (error) {
-      // Dispatch error event
       this.dispatchEvent(
         new CustomEvent('df-sign-up-error', {
           detail: {
@@ -275,8 +215,10 @@ export class DfSignUp extends SignalWatcher(LitElement) {
           },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
+    } finally {
+      this.isSubmitting = false;
     }
   }
 }

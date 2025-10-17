@@ -1,2 +1,1 @@
-// Placeholder config package module; add shared configuration exports here.
-export {};
+export {enforceMD3Rule} from '../eslint-rules/enforce-md3.js';

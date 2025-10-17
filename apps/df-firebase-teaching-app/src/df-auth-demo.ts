@@ -1,3 +1,10 @@
+/**
+ * ⚠️ CRITICAL STANDARDS COMPLIANCE ⚠️
+ *
+ * Navigation controls use Material Design 3 buttons. If Material Web lacks a
+ * component for a pattern demonstrated here, reference guides/STANDARDS_STYLES.md#md3-gaps.
+ */
+
 import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
@@ -9,6 +16,8 @@ import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 // Import auth components
 import '@df/ui-lit/firebase';
 import '@df/ui-lit/df-google-signin';
+import '@material/web/button/filled-tonal-button.js';
+import '@material/web/button/filled-button.js';
 
 /**
  * Authentication demo component for the Firebase teaching app
@@ -85,28 +94,14 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
       gap: var(--df-spacing-2, 0.5rem);
     }
 
-    .nav-button {
-      padding: var(--df-spacing-3, 1rem);
-      border: 1px solid var(--df-border-color, #e0e0e0);
-      border-radius: var(--df-border-radius, 8px);
-      background: var(--df-surface-color, #fff);
-      color: var(--df-text-primary, #000);
-      font-size: 1rem;
-      font-weight: 500;
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.2s;
+    md-filled-tonal-button {
+      width: 100%;
+      justify-content: flex-start;
     }
 
-    .nav-button:hover {
-      background: var(--df-hover-bg, #f5f5f5);
-      border-color: var(--df-primary-color, #1976d2);
-    }
-
-    .nav-button[data-active='true'] {
-      background: var(--df-primary-color-light, #e3f2fd);
-      border-color: var(--df-primary-color, #1976d2);
-      color: var(--df-primary-color, #1976d2);
+    md-filled-tonal-button[data-active='true'] {
+      --md-filled-tonal-button-container-color: var(--md-sys-color-primary-container, #e0e7ff);
+      --md-filled-tonal-button-label-text-color: var(--md-sys-color-on-primary-container, #1d4ed8);
     }
 
     .main-content {
@@ -224,35 +219,31 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
           ` : ''}
 
           <nav class="nav">
-            <button
-              class="nav-button"
+            <md-filled-tonal-button
               data-active=${this.currentView === 'sign-in'}
-              @click=${() => this.currentView = 'sign-in'}
+              @click=${() => (this.currentView = 'sign-in')}
             >
               Sign In
-            </button>
-            <button
-              class="nav-button"
+            </md-filled-tonal-button>
+            <md-filled-tonal-button
               data-active=${this.currentView === 'sign-up'}
-              @click=${() => this.currentView = 'sign-up'}
+              @click=${() => (this.currentView = 'sign-up')}
             >
               Sign Up
-            </button>
-            <button
-              class="nav-button"
+            </md-filled-tonal-button>
+            <md-filled-tonal-button
               data-active=${this.currentView === 'reset'}
-              @click=${() => this.currentView = 'reset'}
+              @click=${() => (this.currentView = 'reset')}
             >
               Reset Password
-            </button>
+            </md-filled-tonal-button>
             ${isAuthenticated ? html`
-              <button
-                class="nav-button"
+              <md-filled-tonal-button
                 data-active=${this.currentView === 'profile'}
-                @click=${() => this.currentView = 'profile'}
+                @click=${() => (this.currentView = 'profile')}
               >
                 Protected Content
-              </button>
+              </md-filled-tonal-button>
             ` : ''}
           </nav>
         </aside>

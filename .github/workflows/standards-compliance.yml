@@ -1,0 +1,42 @@
+name: Standards Compliance
+
+on:
+  pull_request:
+    branches: ['*']
+  push:
+    branches: ['main']
+
+jobs:
+  md3-compliance:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.18.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: MD3 compliance scanner
+        run: ./scripts/check-md3-compliance.sh
+
+      - name: Standards documentation check
+        run: ./scripts/check-standards-docs.sh
+
+      - name: Forbidden patterns check
+        run: ./scripts/check-forbidden-patterns.sh
+
+      - name: Run lint suite
+        run: pnpm lint

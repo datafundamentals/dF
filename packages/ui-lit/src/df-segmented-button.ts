@@ -1,6 +1,22 @@
-import { css, html, LitElement } from 'lit';
-import { classMap } from 'lit/directives/class-map.js';
-import { customElement, property } from 'lit/decorators.js';
+/**
+ * ⚠️ CRITICAL STANDARDS COMPLIANCE ⚠️
+ *
+ * This component implements the Material Design 3 segmented button pattern. The
+ * Material Web library does not provide an out-of-the-box segmented button, so
+ * we follow the official MD3 spec with custom rendering while keeping native
+ * semantics for keyboard accessibility.
+ *
+ * ✅ ALLOWED: Custom MD3 implementations when no Material Web component exists.
+ * ❌ FORBIDDEN: Diverging from MD3 typography, color, and interaction specs.
+ *
+ * See:
+ * - https://m3.material.io/components/segmented-buttons/specs
+ * - /guides/STANDARDS_STYLES.md#material-design-3
+ */
+
+import {css, html, LitElement} from 'lit';
+import {classMap} from 'lit/directives/class-map.js';
+import {customElement, property} from 'lit/decorators.js';
 
 @customElement('df-segmented-button')
 export class DfSegmentedButton extends LitElement {
@@ -128,14 +144,21 @@ export class DfSegmentedButton extends LitElement {
     return html`
       <div class="container">
         ${options
-          .filter(({ value }) => !this.disabledOptions.includes(value)) /* Hide disabled options */
-          .map(
-            ({ value, label, icon }) => html`
-              <button class="${classMap({ button: true, selected: this.selected === value })}" @click=${() => this.handleSelect(value)}>
+          .filter(({value}) => !this.disabledOptions.includes(value))
+          .map(({value, label, icon}) => {
+            // md3-gap: segmented button spec https://m3.material.io/components/segmented-buttons/specs
+            return html`
+              <button
+                class=${classMap({button: true, selected: this.selected === value})}
+                type="button"
+                role="radio"
+                aria-checked=${this.selected === value}
+                @click=${() => this.handleSelect(value)}
+              >
                 ${icon ? html`<span class="icon">${icon}</span>` : ''} ${label}
               </button>
-            `,
-          )}
+            `;
+          })}
       </div>
     `;
   }

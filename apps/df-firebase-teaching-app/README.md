@@ -200,6 +200,25 @@ This script tests logging in with all 10 users and displays their authentication
   pnpm --filter @df/df-firebase-teaching-app emulators:clear
   ```
 
+## Standards Enforcement System
+
+The Firebase teaching app is the reference implementation for Material Design 3 (MD3) compliance. Automation prevents native HTML from entering the UI layer.
+
+| Layer | Command | Purpose |
+|-------|---------|---------|
+| ESLint | `pnpm lint` | Fails the build when native `<button>/<input>/<select>/<textarea>` tags are detected inside Lit templates |
+| Scanner | `pnpm scan:compliance` | Human-readable report of MD3 violations (also used in CI) |
+| Pre-commit | Git hook | Runs `pnpm scan:compliance:staged` before every commit; aborts on violations |
+| CI | `Standards Compliance` workflow | Blocks PR merges if `pnpm scan:compliance` or lint fails |
+
+### Workflow Expectations
+- Always start new components from `packages/ui-lit/templates/md3-component-template.ts`
+- Reference the [Ticket Completion Checklist](../../guides/TICKET_COMPLETION_CHECKLIST.md) before marking a ticket "done"
+- Legitimate exemptions must follow the [Standards Exemption Process](../../guides/STANDARDS_EXEMPTION_PROCESS.md)
+- Document unresolved issues in `.z_/future/` so the standards dashboard stays accurate
+
+Resolving MD3 violations locally before opening a PR keeps quality gates fast and predictable for the entire monorepo.
+
 ### Seed Data Documentation
 
 For detailed information about seed data structure, adding new data, or troubleshooting:
@@ -778,7 +797,7 @@ AI agents have repeatedly failed to create stable integration tests with these r
 
 **If you want to add integration tests:**
 
-1. Review `coding_docs/TESTING_INTEGRATION.md` for known challenges
+1. Review `guides/TESTING_INTEGRATION.md` for known challenges
 2. Use `@firebase/rules-unit-testing` test files as a reference
 3. Consider tools like Jest with custom Firebase emulator setup
 4. Expect significant time investment (~8-16 hours for first implementation)
