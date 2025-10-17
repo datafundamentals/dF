@@ -6,7 +6,8 @@ Run through this checklist after automated suites pass and before opening a PR. 
 - `pnpm install` (run `rm -rf node_modules` first only if dependencies are behaving oddly)
 - `pnpm build`
 - `pnpm lint`
-- `lsof -ti :4174 | xargs kill -9` or 4173|4175 alt to refactoring the Playwright setup to pick ephemeral ports to get rid of: 
+- `lsof -ti :4175 | xargs kill -9 && lsof -ti :4174 | xargs kill -9 && lsof -ti :4173 | xargs kill -9 && pnpm test`
+- use above `lsof -ti :4174 | xargs kill -9` or 4173|4175 alt to refactoring the Playwright setup to pick ephemeral ports to get rid of: 
     @df/df-teaching-app:test: ERROR: command finished with error: command (/Users/petecarapetyan/work/primary/df/apps/df-teaching-app) /Users/petecarapetyan/Library/pnpm/.tools/@pnpm+macos-arm64/10.18.2/bin/pnpm run test exited (1)
     @df/df-teaching-app#test: command (/Users/petecarapetyan/work/primary/df/apps/df-teaching-app) /Users/petecarapetyan/Library/pnpm/.tools/@pnpm+macos-arm64/10.18.2/bin/pnpm run test exited (1)
 

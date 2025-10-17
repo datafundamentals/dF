@@ -6,10 +6,10 @@ test.describe('df-practice-app integrations', () => {
   test('loads tasks on startup and supports resetting from the host shell', async ({page}) => {
     await page.goto('/');
 
-    await expect(page.getByRole('heading', {level: 1, name: 'Practice runtime harness'})).toBeVisible();
-    await expect(page.getByText('Loading tasks…')).toBeVisible();
+    await expect(page.locator('df-practice-app h1')).toContainText('Practice runtime harness');
+    await expect(page.locator('df-practice-widget .status')).toContainText('Loading tasks…');
 
-    const taskItems = page.locator('df-practice-widget li');
+    const taskItems = page.locator('df-practice-widget ul li');
     await expect(taskItems).toHaveCount(3);
 
     const storeSnapshot = page.locator('[aria-label="store-state"] pre');
@@ -54,7 +54,7 @@ test.describe('df-practice-app integrations', () => {
 
     await page.getByRole('button', {name: 'Refresh tasks', exact: true}).click();
     await expect(page.locator('df-practice-widget .status')).toContainText('Loading tasks…');
-    await expect(page.locator('df-practice-widget li')).toHaveCount(3);
+    await expect(page.locator('df-practice-widget ul li')).toHaveCount(3);
     await expect(storeSnapshot).toContainText('"status": "ready"');
   });
 });

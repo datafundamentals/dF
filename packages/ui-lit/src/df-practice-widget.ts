@@ -103,7 +103,7 @@ export class DfPracticeWidget extends SignalWatcher(LitElement) {
       animation: pulse 1.2s ease-in-out infinite;
     }
 
-    ul {
+    ul.task-list {
       list-style: none;
       margin: 0;
       padding: 0;
@@ -257,7 +257,7 @@ export class DfPracticeWidget extends SignalWatcher(LitElement) {
       ${status === 'error'
         ? nothing
         : html`
-            <ul>
+            <ul class="task-list">
               ${tasks.map(
                 (task) => html`
                   <li>
