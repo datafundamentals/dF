@@ -17,7 +17,16 @@
 
 import * as functions from 'firebase-functions/v2';
 import {getFirestore, Timestamp} from 'firebase-admin/firestore';
-import type {TodoDraft, TodoPriority} from '@df/types';
+import type {TodoPriority} from '../types/bundled.js';
+
+// TodoDraft not in bundled types, define locally
+interface TodoDraft {
+  title: string;
+  description: string;
+  priority?: TodoPriority;
+  tags?: string[];
+  dueDate?: string | null;
+}
 
 /** Request payload for creating an advanced todo */
 export interface CreateTodoAdvancedRequest {
