@@ -1,5 +1,11 @@
 # Bundle Deployment Guide
 
+> **Tier:** 4 (Human Only)
+>
+> **For Agents:** Skip this guide entirely. Bundle deployment is a human operations task.
+>
+> **For Humans:** This guide explains how to deploy any DF monorepo app bundle to external static sites (11ty, Astro, Hugo, etc.).
+
 This guide explains how to deploy any DF monorepo app bundle to external static sites (11ty, Astro, Hugo, etc.).
 
 ## DANGER WILL ROBINSON

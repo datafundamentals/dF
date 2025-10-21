@@ -1,5 +1,14 @@
 # Standards Compliance Troubleshooting
 
+> **Tier:** 3 (Load on Demand)
+>
+> **For Agents:** Load this guide ONLY if:
+> - `pnpm lint` or `pnpm scan:compliance` returns errors
+> - You receive "compliance" or "MD3 enforcement" in error output
+> - You are explicitly instructed to troubleshoot standards violations
+>
+> Otherwise, proceed with normal implementation following `guides/STANDARDS_STYLES.md`.
+
 Use this guide whenever lint, the compliance scanner, or CI fails due to MD3 enforcement.
 
 ## 1. Understand the Failure Output

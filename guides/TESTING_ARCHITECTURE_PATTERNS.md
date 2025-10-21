@@ -1,5 +1,11 @@
 # Testing Architecture Patterns
 
+> **Tier:** 2 (Load by Task)
+>
+> **For Agents:** Load this guide when setting up tests for a new workspace or understanding testing patterns.
+>
+> **For Humans:** Load this guide when planning test architecture.
+
 This file highlights the high-level approaches currently in use. For day-to-day commands, required scripts, and per-workspace details, rely on `guides/TESTING_INTEGRATION.md`.
 
 ## Patterns in Use

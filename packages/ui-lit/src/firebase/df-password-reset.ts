@@ -9,9 +9,6 @@ import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {firebaseAuthState, resetPassword} from '@df/state';
 import type {PasswordResetRequest} from '@df/types';
-import '@material/web/textfield/outlined-text-field.js';
-import '@material/web/button/filled-button.js';
-import '@material/web/progress/circular-progress.js';
 import type {MdOutlinedTextField} from '@material/web/textfield/outlined-text-field.js';
 
 @customElement('df-password-reset')

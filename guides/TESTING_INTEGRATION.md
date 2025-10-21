@@ -1,5 +1,11 @@
 # Integration Testing in the DF monorepo
 
+> **Tier:** 2 (Load by Task)
+>
+> **For Agents:** Load this guide when writing integration tests.
+>
+> **For Humans:** Load this guide when testing or setting up test infrastructure.
+
 This guide explains how browser-level tests are organised today, how to run them, and what to do when adding coverage for a new app or package.
 
 ## Tooling Overview

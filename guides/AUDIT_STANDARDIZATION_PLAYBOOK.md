@@ -1,5 +1,14 @@
 # Standardization Audit Playbook
 
+> **Tier:** 3 (Load on Demand)
+>
+> **For Agents:** Load this guide ONLY if:
+> - You are explicitly tasked with conducting a standardization audit
+> - The ticket explicitly mentions "audit" or "standards health check"
+> - You are running a pre-migration compliance check
+>
+> Typical usage: Monthly audits, before large refactors, or when asked to assess codebase compliance.
+
 Use this playbook whenever you need to re-align the monorepo with the documented coding standards, or as a recurring health check (monthly or before large migrations). It translates the work from the September 2025 consistency ticket into a repeatable process.
 
 ## 0. Prerequisites

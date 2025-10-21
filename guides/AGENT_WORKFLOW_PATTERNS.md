@@ -1,5 +1,16 @@
 # Agent Workflow Patterns
 
+> **Tier:** 3 (Load on Demand)
+>
+> **For Agents:** Load this guide ONLY if:
+> - You are running multi-step automation with multiple audit passes
+> - You are delegating a complex ticket to another agent with explicit phases
+> - You are explicitly instructed to use "two-phase" or "multi-phase prompting"
+>
+> For single-phase work (most tickets), follow `guides/TICKET_SESSION_CHECKLIST.md` instead.
+>
+> **For Humans:** Use this when coordinating complex multi-agent tasks or automating workflows.
+
 These prompt frameworks keep MD3 standards top-of-mind for both human and AI collaborators. Use them when running multi-step automation or delegating complex tickets.
 
 ## Two-Phase Prompting

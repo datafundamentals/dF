@@ -1,5 +1,11 @@
 # Adding New Standards Rules
 
+> **Tier:** 2 (Load by Task)
+>
+> **For Agents:** Load this guide when implementing new standards rules or extending enforcement.
+>
+> **For Humans:** Load this guide when planning new standards automation.
+
 This repo treats standards automation as code. Follow the checklist below whenever you extend enforcement beyond MD3 (e.g., typography, spacing, accessibility rules).
 
 ## 1. Define the Rule

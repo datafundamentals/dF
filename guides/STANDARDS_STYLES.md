@@ -1,5 +1,9 @@
 # Coding Standards & Styles
 
+> **Tier:** 1 (Always Load)
+>
+> **For Agents & Humans:** Load this guide in every session. These are the active standards for all code.
+>
 > **See also:** `guides/WC_SHARED_DEFAULTS.md` is the canonical reference for signals-first component guidance. This document supplements it with broader stylistic expectations and repo-wide conventions.
 
 ## Typescript

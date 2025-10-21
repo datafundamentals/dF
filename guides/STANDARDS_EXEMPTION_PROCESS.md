@@ -1,5 +1,14 @@
 # Standards Exemption Process
 
+> **Tier:** 3 (Load on Demand)
+>
+> **For Agents:** Load this guide ONLY if:
+> - You encounter a legitimate case where MD3 components cannot be used
+> - You are filing a standards exemption request
+> - You need to document an approved exemption
+>
+> Otherwise, always use MD3 components as specified in `guides/STANDARDS_STYLES.md`.
+
 Automation blocks native HTML from entering the codebase by default. Rare exceptions are allowed but must be **explicitly justified** so future contributors understand the trade-off.
 
 ## When an Exemption Is Allowed

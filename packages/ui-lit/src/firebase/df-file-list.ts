@@ -24,9 +24,6 @@ import {customElement, property, state} from 'lit/decorators.js';
 import {FirebaseError} from 'firebase/app';
 import {listFilesWithMetadata} from '@df/state';
 import type {StorageFileMetadata} from '@df/types';
-import '@material/web/icon/icon.js';
-import '@material/web/button/text-button.js';
-import '@material/web/progress/circular-progress.js';
 
 /**
  * Display a list of files from Firebase Storage

@@ -1,5 +1,11 @@
 # New v Existing Web Components - an Coding Standards addendum
 
+> **Tier:** 2 (Load by Task)
+>
+> **For Agents:** Load this guide when deciding whether to create a new component or extend an existing one.
+>
+> **For Humans:** Load this guide for component design guidance.
+
 **TL;DR:** When in doubt, make a new UI component, rather than adding a widget inside your existing UI component.
 
 Read further if the above statement doesn't make sense.

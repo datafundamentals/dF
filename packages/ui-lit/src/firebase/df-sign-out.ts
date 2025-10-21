@@ -8,8 +8,6 @@ import {LitElement, html, css, nothing} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {firebaseAuthState, signOut} from '@df/state';
-import '@material/web/button/filled-button.js';
-import '@material/web/button/text-button.js';
 
 @customElement('df-sign-out')
 export class DfSignOut extends SignalWatcher(LitElement) {

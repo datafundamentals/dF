@@ -1,5 +1,11 @@
 # Creating Compliant UI Components
 
+> **Tier:** 2 (Load by Task)
+>
+> **For Agents:** Load this guide when building UI components for `@df/ui-lit`.
+>
+> **For Humans:** Load this guide when designing or reviewing UI components.
+
 This playbook distills the MD3 standards that govern every Lit component shipped from `@df/ui-lit`. Use it alongside `packages/ui-lit/templates/md3-component-template.ts` and the automated tooling (`pnpm scan:compliance`).
 
 ## 1. Start With the Template

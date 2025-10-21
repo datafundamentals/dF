@@ -17,14 +17,6 @@ import {
 } from '@df/state';
 import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 
-// Import Material Design 3 components
-import '@material/web/button/filled-button.js';
-import '@material/web/button/outlined-button.js';
-import '@material/web/textfield/outlined-text-field.js';
-import '@material/web/select/filled-select.js';
-import '@material/web/select/select-option.js';
-import '@material/web/progress/circular-progress.js';
-
 @customElement('df-functions-demo')
 export class DfFunctionsDemo extends SignalWatcher(LitElement) {
   static override styles = css`

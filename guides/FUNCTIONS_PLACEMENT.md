@@ -1,5 +1,11 @@
 # Cloud Functions Placement in Monorepo
 
+> **Tier:** 2 (Load by Task)
+>
+> **For Agents:** Load this guide when adding or modifying Cloud Functions.
+>
+> **For Humans:** Load this guide when planning function architecture.
+
 **Status:** ✅ Adopted
 **Last Updated:** 2025-10-13
 **Applies To:** All Firebase Cloud Functions in this monorepo

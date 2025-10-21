@@ -16,9 +16,6 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
-import '@material/web/button/filled-button.js';
-import '@material/web/button/outlined-button.js';
-
 @customElement('df-firestore-delete')
 export class DfFirestoreDelete extends LitElement {
   static override styles = css`

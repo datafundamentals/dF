@@ -1,5 +1,16 @@
 # Multi-Agent Review Protocol
 
+> **Tier:** 3 (Load on Demand)
+>
+> **For Agents:** Load this guide ONLY if:
+> - Multiple agents are reviewing a single PR or changeset
+> - You are assigned as Agent A (Builder), Agent B (Reviewer), or Agent C (Standards Auditor)
+> - You are explicitly told to follow the three-agent review workflow
+>
+> For single-agent reviews, follow normal `TICKET_SESSION_CHECKLIST.md` → PR flow.
+>
+> **For Humans:** Use this when coordinating complex reviews across specialized agents.
+
 Break reviews into specialised passes so no one forgets MD3 standards.
 
 ## Roles

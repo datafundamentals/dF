@@ -16,8 +16,6 @@ import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 // Import auth components
 import '@df/ui-lit/firebase';
 import '@df/ui-lit/df-google-signin';
-import '@material/web/button/filled-tonal-button.js';
-import '@material/web/button/filled-button.js';
 
 /**
  * Authentication demo component for the Firebase teaching app

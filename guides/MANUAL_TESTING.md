@@ -1,5 +1,11 @@
 # Manual Testing Guide
 
+> **Tier:** 4 (Human Only)
+>
+> **For Agents:** Skip this guide entirely. Manual testing is a human QA responsibility after automated tests pass.
+>
+> **For Humans:** Use this checklist after automated suites pass and before opening a PR. It mirrors the workflow I follow today.
+
 Run through this checklist after automated suites pass and before opening a PR. It mirrors the workflow I follow today.
 
 ## Fresh Workspace Setup

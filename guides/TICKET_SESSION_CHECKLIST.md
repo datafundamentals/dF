@@ -1,5 +1,9 @@
 # Ticket Session Checklist for Monorepo Management
 
+> **Tier:** 1 (Always Load)
+>
+> **For Agents & Humans:** Load this guide at the start of every ticket session. Essential for consistent workflow.
+
 Usage: `Ticket` is used in this document as you would also use pull request or story or github issue or jira task.
 
 ## Pre-Session Setup (Start Every Session)

@@ -17,8 +17,6 @@ import {LitElement, html, css} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import type {TodoDocument} from '@df/types';
 
-import '@material/web/button/outlined-button.js';
-
 export interface FirestoreItemToggleDetail {
   id: string;
   completed: boolean;

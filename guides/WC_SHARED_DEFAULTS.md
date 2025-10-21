@@ -1,5 +1,11 @@
 # Shareable Web Component Coding Standards
 
+> **Tier:** 2 (Load by Task)
+>
+> **For Agents:** Load this guide when building components intended for reuse across apps.
+>
+> **For Humans:** Load this guide as the canonical reference for component design patterns.
+
 ## 1\. The Prime Directive: Design for Reusability
 
 Our single most important architectural goal is to make every visual component **shareable** across different applications within the monorepo. To achieve this, components must be designed as **presentation-only** ("dumb") components whenever reasonably practical. The guidance in this document reflects the current state of `@df/state`, `@df/ui-lit`, and the teaching apps in this repo; revisit the upstream article [Reactive State with Signals in Lit](https://justinfagnani.com/2024/10/09/reactive-state-with-signals-in-lit/) for additional theory.

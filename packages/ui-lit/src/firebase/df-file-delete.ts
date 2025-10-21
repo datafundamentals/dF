@@ -23,10 +23,6 @@ import {css, html, LitElement} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {deleteFile} from '@df/state';
 import type {StorageFileMetadata} from '@df/types';
-import '@material/web/button/filled-button.js';
-import '@material/web/button/text-button.js';
-import '@material/web/icon/icon.js';
-import '@material/web/dialog/dialog.js';
 
 /**
  * Delete confirmation component for files from Firebase Storage

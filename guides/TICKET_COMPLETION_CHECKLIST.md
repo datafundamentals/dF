@@ -1,5 +1,11 @@
 # 🎫 Ticket Completion Verification
 
+> **Tier:** 2 (Load by Task)
+>
+> **For Agents:** Load this guide before marking a ticket as complete or opening a PR.
+>
+> **For Humans:** Copy this checklist into the ticket closing comment (or PR template) and confirm every item before calling work "done".
+
 Copy this checklist into the ticket closing comment (or PR template) and confirm every item before calling work "done".
 
 ## Standards Compliance

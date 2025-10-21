@@ -18,13 +18,6 @@ import {LitElement, html, css, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import type {TodoDocument, TodoDraft, TodoPriority} from '@df/types';
 
-// MD3 Component Imports
-import '@material/web/button/filled-button.js';
-import '@material/web/button/outlined-button.js';
-import '@material/web/textfield/outlined-text-field.js';
-import '@material/web/select/filled-select.js';
-import '@material/web/select/select-option.js';
-
 type FirestoreFormMode = 'create' | 'edit';
 
 export interface FirestoreFormSubmitDetail {

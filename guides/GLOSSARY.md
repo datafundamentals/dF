@@ -1,4 +1,8 @@
 # Glossary
 
+> **Tier:** 1 (Always Load)
+>
+> **For Agents & Humans:** Load this guide in every session for consistent terminology.
+
 - **WIP** Work in progress, or a ticket being worked on in present time
 - **ticket** Analogous to pull request, jira task, github issue, agile story, or similar. Defined unit of work that gets merged into dev, when completed and accepted.
