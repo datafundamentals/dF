@@ -6,13 +6,38 @@
 
 Usage: `Ticket` is used in this document as you would also use pull request or story or github issue or jira task.
 
+## How to Use This Checklist
+
+- Treat this file as the canonical Tier 1 entry point before any coding work begins.
+- Distinguish responsibilities: humans add clarifications and approve scope; coding agents execute steps, surface questions, and record outcomes.
+- Follow the tiering model: Tier 1 docs always load, Tier 2 docs load when triggered by scope, Tier 3 docs are optional references for edge cases.
+- Re-run the tier evaluation whenever objectives shift, blockers appear, or a misunderstanding surfaces.
+- Highlight opportunities to refine this checklist: surface suggestions in session notes, share them in chat, or draft proposed edits so humans can review and merge improvements quickly.
+
 ## Pre-Session Setup (Start Every Session)
 
 ### 1. Context Loading
-- [ ] Read `guides/TICKET_SESSION_CHECKLIST.md` (this file)
-- [ ] Review the root `README.md` for workspace-level commands
-- [ ] Open the target app/package README for project-specific scripts
-- [ ] Scan relevant standards in `guides/` (e.g., `STANDARDS_STYLES.md`, `WC_SHARED_DEFAULTS.md`, `TESTING_INTEGRATION.md`)
+- [ ] Identify ticket source and objective
+	- GitHub issue / PR: capture link, copy stated objective into session notes, confirm any acceptance criteria
+	- Chat / ad-hoc request: restate the user objective in session notes and secure human confirmation
+- [ ] Confirm the current ticket objective is committed to notes or tracker before reading additional docs
+- [ ] Apply the Tier Selection Matrix (below); load every Tier 2 doc whose trigger is met, then skim related Tier 3 references as needed
+- [ ] Review the root `README.md` for workspace-level commands once per session (Tier 1)
+- [ ] Open the target app/package README for project-specific scripts (Tier 1)
+- [ ] Record which docs were loaded this cycle so resets can revisit them later
+
+#### Tier Selection Matrix
+
+| Trigger | Tier | Required Docs to Load | Notes |
+| --- | --- | --- | --- |
+| Building or editing Lit web components | Tier 2 | `guides/WC_SHARED_DEFAULTS.md`, `guides/STANDARDS_STYLES.md`, `guides/CREATING_COMPLIANT_UI_COMPONENTS.md` | Add `guides/AUDIT_STANDARDIZATION_PLAYBOOK.md` if aligning legacy code |
+| Work touches shared UI packages or needs Storybook updates | Tier 2 | `packages/ui-lit/README.md`, `apps/df-storybook/README.md` | Confirm exports checklist before coding |
+| Firebase-related changes (state, emulators, rules) | Tier 2 | `apps/df-firebase-teaching-app/guides/FIREBASE_PATTERNS.md` | Add auth/storage guides from same folder as required |
+| Feature requires integration or Playwright tests | Tier 2 | `guides/TESTING_INTEGRATION.md`, `guides/TESTING_ARCHITECTURE_PATTERNS.md` | Load app-specific `tests/` README if present |
+| Changes span multiple apps/services | Tier 2 | `guides/AUDIT_STANDARDIZATION_PLAYBOOK.md`, relevant service/app READMEs | Note cross-project impacts in session notes |
+| Unsure which doc applies | Tier 3 | `guides/README.md` | Use to locate additional guides quickly |
+
+> Re-run the matrix whenever scope expands, blockers emerge, or a reset is triggered. Log newly loaded docs in session notes.
 
 ### 2. Environment Verification
 - [ ] Confirm current working directory location
@@ -22,9 +47,10 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ### 3. Session Scope Definition
 - [ ] Define clear session objective (1-3 features max)
-- [ ] Identify if this is: Shared Resource / Project-Specific / Integration session
+- [ ] Identify if this is: Shared Resource / Project-Specific / Integration session, and ensure the ticket source (issue vs chat) aligns with that classification
 - [ ] Set session boundaries (what will NOT be done)
 - [ ] Capture a lightweight task list (TodoWrite or equivalent notes)
+- [ ] If scope changes mid-session, pause to re-run the Tier Selection Matrix before continuing
 
 ## During Session (Active Development)
 
@@ -41,6 +67,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Never commit secrets or sensitive data
 - [ ] Verify that every command you record in docs or ticket notes matches the latest `package.json`
 - [ ] **CRITICAL: If ticket adds web components, create Storybook stories for ALL new components**
+- [ ] On any new discovery (e.g., work must be shared across apps), stop coding, reload the Tier Selection Matrix, and add missing guides to context before resuming
 
 ### 6. Monorepo Awareness
 - [ ] Check if changes affect other apps/shared resources
@@ -63,6 +90,15 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Switching between projects
 - [ ] Token window getting heavy
 - [ ] Major architectural changes needed
+- [ ] Any exit or pause triggers a context reset: document current status, identify which tiers are now required, and reload missing guides upon return
+
+## Context Reset Protocol
+
+- Stop coding when objectives, scope, or terminology become unclear, or when a human/agent misalignment is detected.
+- Summarize the current understanding in session notes and request confirmation from the human partner.
+- Re-run the Tier Selection Matrix; load any newly relevant Tier 2/Tier 3 docs (e.g., discovering a component must be shared → load `guides/WC_SHARED_DEFAULTS.md`).
+- Record the reset event (time, reason, docs loaded) to aid future audits.
+- Resume work only after objectives, scope, and required docs are confirmed.
 
 ## Pre-Exit Protocols (End Every Session)
 
@@ -71,6 +107,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Refresh the relevant app/package README when commands or workflows change
 - [ ] Record any future work or ideas in `.z_/future/` (never in `guides/`)
 - [ ] Confirm every command in updated docs was tested or re-read directly from the associated `package.json`
+- [ ] Note which Tier 2/Tier 3 docs were loaded so the next session can resume with the same context quickly
 
 ### 9. Code Finalization
 - [ ] Complete all active todos or document blockers
