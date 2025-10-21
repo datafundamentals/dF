@@ -6,6 +6,14 @@
 
 Usage: `Ticket` is used in this document as you would also use pull request or story or github issue or jira task.
 
+## Quick Start (TL;DR)
+
+**For Agents:** Do sections 1-3 first → use the Tier Selection Matrix to load targeted docs → create a TodoWrite task list → begin coding. Check sections 8-10 before exit.
+
+**For Humans:** Provide clear objectives in the ticket or chat. Approve scope before coding starts. Review session handoff notes before the next session.
+
+---
+
 ## How to Use This Checklist
 
 - Treat this file as the canonical Tier 1 entry point before any coding work begins.
@@ -35,9 +43,9 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 | Firebase-related changes (state, emulators, rules) | Tier 2 | `apps/df-firebase-teaching-app/guides/FIREBASE_PATTERNS.md` | Add auth/storage guides from same folder as required |
 | Feature requires integration or Playwright tests | Tier 2 | `guides/TESTING_INTEGRATION.md`, `guides/TESTING_ARCHITECTURE_PATTERNS.md` | Load app-specific `tests/` README if present |
 | Changes span multiple apps/services | Tier 2 | `guides/AUDIT_STANDARDIZATION_PLAYBOOK.md`, relevant service/app READMEs | Note cross-project impacts in session notes |
-| Unsure which doc applies | Tier 3 | `guides/README.md` | Use to locate additional guides quickly |
+| **Trigger not listed above** | Tier 3 | `guides/README.md` | Scan the directory structure and cross-reference your objective. Most guides cluster by theme (testing, components, monorepo patterns). If still unclear, ask the human. |
 
-> Re-run the matrix whenever scope expands, blockers emerge, or a reset is triggered. Log newly loaded docs in session notes.
+> **Protocol:** Re-run the matrix whenever scope expands, blockers emerge, or a reset is triggered. Log newly loaded docs in session notes.
 
 ### 2. Environment Verification
 - [ ] Confirm current working directory location
@@ -45,11 +53,13 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Verify which project/app you're working on
 - [ ] Confirm required services are running (if applicable)
 
-### 3. Session Scope Definition
+### 3. Session Scope Definition — **START HERE**
+- [ ] **[FIRST ACTION] Create a TodoWrite task list** with 3–5 objectives. This captures your scope and prevents drift.
+  - If objectives are unclear, list them as questions and request human clarification before proceeding.
+  - If the ticket says "investigate" or "explore," note that as a distinct objective and timebox it (e.g., "Investigate performance issues — 30 min max").
 - [ ] Define clear session objective (1-3 features max)
 - [ ] Identify if this is: Shared Resource / Project-Specific / Integration session, and ensure the ticket source (issue vs chat) aligns with that classification
 - [ ] Set session boundaries (what will NOT be done)
-- [ ] Capture a lightweight task list (TodoWrite or equivalent notes)
 - [ ] If scope changes mid-session, pause to re-run the Tier Selection Matrix before continuing
 
 ## During Session (Active Development)
@@ -102,18 +112,20 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ## Pre-Exit Protocols (End Every Session)
 
+**⚠️ BLOCKER: Do NOT exit session until sections 8-10 are complete. These prevent context loss and ensure smooth continuity.**
+
 ### 8. Documentation Updates (MANDATORY)
-- [ ] Update the standards or reference docs you touched inside `guides/`
-- [ ] Refresh the relevant app/package README when commands or workflows change
+- [ ] **✓ Update the standards or reference docs you touched inside `guides/`**
+- [ ] **✓ Refresh the relevant app/package README when commands or workflows change**
 - [ ] Record any future work or ideas in `.z_/future/` (never in `guides/`)
-- [ ] Confirm every command in updated docs was tested or re-read directly from the associated `package.json`
+- [ ] **✓ Confirm every command in updated docs was tested or re-read directly from the associated `package.json`**
 - [ ] Note which Tier 2/Tier 3 docs were loaded so the next session can resume with the same context quickly
 
-### 9. Code Finalization
-- [ ] Complete all active todos or document blockers
-- [ ] Run final lint/typecheck/test commands
-- [ ] **MANDATORY: If new web components were added, verify Storybook stories exist and build passes**
-- [ ] **MANDATORY: Commit all session changes to git for clean checkpoint**
+### 9. Code Finalization (MANDATORY)
+- [ ] **✓ Complete all active todos or document blockers**
+- [ ] **✓ Run final lint/typecheck/test commands** — fix any failures before exit
+- [ ] **✓ If new web components were added: verify Storybook stories exist and build passes**
+- [ ] **✓ Commit all session changes to git for clean checkpoint**
 - [ ] Tag incomplete work clearly for next session
 
 ### 10. Session Handoff Preparation
