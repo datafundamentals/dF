@@ -2,7 +2,7 @@
 
 _This monorepo wonders:_ **What would happen if I just _quit throwing coding obstacles in front of myself?_**
 
-**TL;DR:** Do things in a logical way. Design a system that plays well with others.
+**TL;DR:** Do things in a logical way. Design a system where parts play well with other parts. The net net: I get my personal time back. That's something I wanted.
 
 <a id="top"></a>
 ## Table of Contents
@@ -60,15 +60,15 @@ The idea is simple - fix everything at the architectural level, then replicate t
 
 ## Standards Standards Standards!!
 
-Vibe coding is bad vibes, in my world. React, Nextjs, even the awesome industry darling Svelte is all non-standard, from where I live. If something has migrated to the browser standard, I use that. If your stack insists on remaining non-standard, heh, you go your way, I'll go mine. _**Abandonware**_, in the making.
+Write with standards, or your software is probably future abandonware.
 
-Decade after decade, fads come, fads go. _Not interested._ Only because I have written so much allegedly really cool cutting edge code that isn't even runnable, 5 years later, because the industry moves on and doesn't support it. Flash anyone? Java Swing? Powerbuilder? Yeah, it's all amazing - until it isn't. 
+Decade after decade, fads come, fads go. _Not interested._ Only because I have written so much allegedly really cool cutting edge code that isn't even runnable, 5 years later, because the industry moves on and doesn't support it. Flash anyone? Java Swing? Powerbuilder? JQuery? Yeah, it's all amazing - until it isn't. _There's n years of my professional life I'll never get back..._
 
-Here's what i do:
+Vibe coding is bad vibes, in my world. React, Nextjs, even the awesome industry darling Svelte is all non-standard, from where I live. If something has migrated to the browser standard, I use that. If your stack insists on remaining non-standard, heh, you go your way, I'll go mine. _**Abandonware**, in the making._
 
-Look for every tech i can that seems to be in aggressive pursuit of all the latest standards - Like Lit, for example.
+Here's what i do - I scour for every tech i can that seems to be in _**aggressive pursuit of all the latest standards**_ - Like Lit, for example.
 
-I also follow the people themselves, that have the patience and strength to work towards consensus on these same standards, often for 5 or 10 years just on one standard! The google chrome team, and the guys at Open-wc like Thomas Allmer and Benny Powers and Westbrook Johnson.
+I also follow the people themselves, that have the patience and strength to work towards consensus on these same standards, often for 5 or 10 years just on one standard! The previous(?) google chrome team, and the guys at Open-wc like Thomas Allmer and Benny Powers and Westbrook Johnson.
 
 [Justin Fagnini](https://justinfagnani.com/) is my ultimate hero. Drafting standards, researching future stacks such as Signals, architect of Lit, big thinker and low level coder, patient participant with the years that it takes to build concensus on standards bodies such as W3C.
 
@@ -80,21 +80,23 @@ I also follow the people themselves, that have the patience and strength to work
 
 I want to use all the most **powerful** back end tech, I just **don't want to pay for it** until it hits scale, as a commercial app.
 
-Firebase gives me that exact thing. There are other options than, just make sure you get everything that Firebase gives you, like:
+Firebase gives me that exact thing. Don't think about Firebase as THE option, just do pick AN option such as Firebase that provides:
 
-- _**The free tier**_ is plenty big enough to get your skills up and the bugs worked out of anything you build.
-- _**Documentation**_ and tooling is sweet, easy, well maintained and comes and in many forms. Coding agents love it, too.
-- These are very _**mature stacks**_. Years and years of bug fixes and iterative releases.
+- _**Free tier**_ is plenty big enough to get your skills up and the bugs worked out of anything you build.
+- _**Documentation**_ and tooling that is sweet, easy, well maintained and comes and in many forms. Coding agents love that, too.
+- _**Mature stacks**_. Years and years of bug fixes and iterative releases.
 - _**Features**_ so broad that it takes some studying just to fully understand everything that is being offered.
 
-Examples (there's tons more):
+Feature Examples (there's tons more):
   - hosting
   - file storage
-  - firestore database
+  - database (firestore)
   - messaging (pub-sub)
-  - local 
-  - a serverless functions layer
+  - local emulator
+  - a serverless functions
   - analytics
+  - authentication
+  - back end security rules
 
 [Firebase site](https://firebase.google.com/)
 

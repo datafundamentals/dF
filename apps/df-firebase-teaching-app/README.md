@@ -1218,6 +1218,25 @@ Add the following secrets:
 
 ---
 
+## External Deployment (11ty, Astro, Hugo, etc.)
+
+Copy the bundle to your static site in two commands:
+
+```bash
+# From root of monorepo
+
+# builds bundle
+pnpm --filter @df/df-firebase-teaching-app build:bundle
+
+# deploys bundle
+./scripts/copy-app-bundle.sh df-firebase-teaching-app /path/to/your/site/target-dir
+```
+
+📚 **Integration guide:** [guides/BUNDLE_INTEGRATION.md](./guides/BUNDLE_INTEGRATION.md)
+📚 **General deployment patterns:** [/guides/BUNDLE_DEPLOYMENT.md](../../guides/BUNDLE_DEPLOYMENT.md)
+
+---
+
 ## Alternative Hosting: Bundled Deployment
 
 Deploy the app to non-Firebase hosting platforms (11ty, Netlify, Vercel, traditional servers).
@@ -1235,7 +1254,7 @@ pnpm --filter @df/df-firebase-teaching-app build:bundle
 # - All Firebase SDK code bundled
 ```
 
-### 11ty Integration Pattern
+### 11ty Integration Pattern (default)
 
 **Use Case:** Embed Firebase Teaching App in an 11ty static site.
 
