@@ -2,6 +2,63 @@
 
 Offline-friendly host application for teaching Firebase development patterns with all other monorepo patterns, Firebase,  and the Firebase Emulator Suite running locally, and added seed data.
 
+## 🎯 Two Workflows: Canonical vs Educational
+
+This teaching app demonstrates **two distinct authentication approaches** with clear guidance on which to follow:
+
+### ✅ Workflow 1: CANONICAL PATTERN (Copy This!)
+
+**File:** [`index-canonical.html`](./index-canonical.html)
+
+**What it shows:**
+- Production Google Sign-In via `df-auth-wrapper` component
+- Firestore, Storage, and Functions running on emulators
+- Clean separation: auth (production) + features (emulator)
+- **This is the pattern you should copy for all apps in the DF monorepo**
+
+**Why it's canonical:**
+- Minimizes differentiation between apps
+- Tests real OAuth flow during development
+- Production-ready authentication
+- Reusable `df-auth-wrapper` component
+- Signals-first architecture throughout
+
+**When to use:**
+- ✅ Every new app you create
+- ✅ Any feature that needs authentication
+- ✅ Production deployments
+- ✅ Teaching authentication best practices
+
+**Demo pages:**
+- [`index-canonical.html`](./index-canonical.html) - Main canonical demo
+- [`auth-wrapper-demo.html`](./auth-wrapper-demo.html) - Interactive df-auth-wrapper demo
+- [`auth-wrapper-standalone.html`](./auth-wrapper-standalone.html) - Standalone usage example
+
+### ⚠️ Workflow 2: EDUCATIONAL ONLY (Don't Copy This!)
+
+**File:** [`index.html`](./index.html) (emulator auth section at bottom)
+
+**What it shows:**
+- Firebase Auth Emulator with custom UI (`<df-auth-demo>`)
+- Proves that emulator auth is technically possible
+- Isolated in quarantined section with warnings
+
+**Why it's an anti-pattern:**
+- Creates unnecessary differentiation between apps
+- Doesn't match production authentication flow
+- Emulator auth has known issues and limitations
+- Doesn't use reusable `df-auth-wrapper` component
+
+**When to use:**
+- ❌ Never in production apps
+- ✅ Only for understanding emulator auth capabilities
+- ✅ Teaching "what not to do"
+- ✅ Historical reference (we proved it works, now move on)
+
+**Key principle:** If you're building a new app or feature that needs authentication, **always use `df-auth-wrapper`** (Workflow 1). Any deviation from this pattern is considered an anti-pattern in our monorepo.
+
+---
+
 ## Setting Up Firebase Emulators
 
 1. Install workspace dependencies:

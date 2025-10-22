@@ -1,0 +1,86 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "🔥 Firebase Teaching App" [level=1] [ref=e4]
+    - paragraph [ref=e5]: Choose your authentication workflow
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e9]: ✅ Copy This Pattern
+      - 'heading "Workflow 1: Canonical Pattern" [level=2] [ref=e10]'
+      - paragraph [ref=e11]:
+        - strong [ref=e12]: Production Google Sign-In + Emulator-Based Features
+        - text: This is the recommended architecture for ALL apps in the DF monorepo.
+      - list [ref=e13]:
+        - listitem [ref=e14]:
+          - text: ✓ Production-ready
+          - code [ref=e15]: df-auth-wrapper
+          - text: component
+        - listitem [ref=e16]: ✓ Real Google OAuth flow (tests actual authentication)
+        - listitem [ref=e17]: ✓ Firestore, Storage, and Functions on emulators (fast development)
+        - listitem [ref=e18]: "✓ Clean separation: production auth + emulator features"
+        - listitem [ref=e19]: ✓ Reusable pattern across all monorepo apps
+        - listitem [ref=e20]: ✓ Minimizes unnecessary differentiation
+      - generic [ref=e21]:
+        - link "🎯 Main Canonical Demo See df-auth-wrapper protecting emulator-based Firebase features" [ref=e22] [cursor=pointer]:
+          - /url: /index-canonical.html
+          - heading "🎯 Main Canonical Demo" [level=3] [ref=e23] [cursor=pointer]
+          - paragraph [ref=e24] [cursor=pointer]: See df-auth-wrapper protecting emulator-based Firebase features
+        - link "🎮 Interactive Demo Toggle modes, view events, test authentication flows" [ref=e25] [cursor=pointer]:
+          - /url: /auth-wrapper-demo.html
+          - heading "🎮 Interactive Demo" [level=3] [ref=e26] [cursor=pointer]
+          - paragraph [ref=e27] [cursor=pointer]: Toggle modes, view events, test authentication flows
+        - link "📦 Standalone Example Copy-paste ready implementation for any app" [ref=e28] [cursor=pointer]:
+          - /url: /auth-wrapper-standalone.html
+          - heading "📦 Standalone Example" [level=3] [ref=e29] [cursor=pointer]
+          - paragraph [ref=e30] [cursor=pointer]: Copy-paste ready implementation for any app
+      - link "Start with Canonical Demo →" [ref=e31] [cursor=pointer]:
+        - /url: /index-canonical.html
+    - generic [ref=e32]:
+      - generic [ref=e34]: ⚠️ Educational Only
+      - 'heading "Workflow 2: Auth Emulator (Don''t Copy!)" [level=2] [ref=e35]'
+      - paragraph [ref=e36]:
+        - strong [ref=e37]: Firebase Auth Emulator with Custom UI
+        - text: Proves emulator auth is possible, but it's an anti-pattern for our architecture.
+      - list [ref=e38]:
+        - listitem [ref=e39]: ⚠ Custom auth emulator UI (cute demo component)
+        - listitem [ref=e40]: ⚠ Proves technical feasibility of emulator auth
+        - listitem [ref=e41]: ⚠ Creates unnecessary differentiation between apps
+        - listitem [ref=e42]: ⚠ Doesn't match production authentication flow
+        - listitem [ref=e43]: ⚠ Known emulator auth limitations and issues
+        - listitem [ref=e44]:
+          - text: ⚠
+          - strong [ref=e45]: Use df-auth-wrapper instead!
+      - paragraph [ref=e46]:
+        - strong [ref=e47]: Why show this?
+        - text: To demonstrate what NOT to do. It's valuable to understand that emulator auth is possible, but you should never replicate this pattern in production apps. Always use the canonical pattern (Workflow 1) instead.
+      - link "View Anti-Pattern Demo →" [ref=e48] [cursor=pointer]:
+        - /url: /demo-all.html
+  - generic [ref=e49]:
+    - heading "📚 Additional Resources" [level=2] [ref=e50]
+    - generic [ref=e51]:
+      - link "🎪 Full Demo (All Components) See all Firebase patterns in one page (includes quarantined emulator auth)" [ref=e52] [cursor=pointer]:
+        - /url: /demo-all.html
+        - heading "🎪 Full Demo (All Components)" [level=3] [ref=e53] [cursor=pointer]
+        - paragraph [ref=e54] [cursor=pointer]: See all Firebase patterns in one page (includes quarantined emulator auth)
+      - link "🔧 Firebase Emulator UI Browse Auth, Firestore, Storage data in the emulator admin interface" [ref=e55] [cursor=pointer]:
+        - /url: http://127.0.0.1:5400
+        - heading "🔧 Firebase Emulator UI" [level=3] [ref=e56] [cursor=pointer]
+        - paragraph [ref=e57] [cursor=pointer]: Browse Auth, Firestore, Storage data in the emulator admin interface
+      - link "📖 GitHub Repository View source code, documentation, and implementation details" [ref=e58] [cursor=pointer]:
+        - /url: https://github.com/datafundamentals/df/tree/main/apps/df-firebase-teaching-app
+        - heading "📖 GitHub Repository" [level=3] [ref=e59] [cursor=pointer]
+        - paragraph [ref=e60] [cursor=pointer]: View source code, documentation, and implementation details
+  - generic [ref=e61]:
+    - paragraph [ref=e62]:
+      - strong [ref=e63]: "Quick Start:"
+      - text: "Terminal 1:"
+      - code [ref=e64]: pnpm emulators:start
+      - text: "| Terminal 2:"
+      - code [ref=e65]: pnpm dev
+    - paragraph [ref=e66]:
+      - text: For detailed setup instructions, see
+      - link "README.md" [ref=e67] [cursor=pointer]:
+        - /url: https://github.com/datafundamentals/df/tree/main/apps/df-firebase-teaching-app#readme
+```

@@ -32,6 +32,7 @@ initializeApp();
  * They provide type-safe, authenticated RPC-style communication.
  */
 export {createTodoAdvanced} from './callable/createTodoAdvanced.js';
+export {exchangeGoogleToken} from './callable/exchangeGoogleToken.js';
 
 /**
  * HTTP Functions
