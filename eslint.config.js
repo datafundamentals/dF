@@ -36,6 +36,10 @@ export default [
     files: [
       'packages/ui-lit/src/**/*.ts',
       'apps/df-firebase-teaching-app/src/**/*.ts',
+      'apps/df-firebase-teaching-app2/src/**/*.ts',
+      'apps/df-firebase-teaching-app3/src/**/*.ts',
+      'apps/df-firebase-teaching-app4/src/**/*.ts',
+      'apps/df-firebase-teaching-app5/src/**/*.ts',
     ],
     ignores: [
       '**/*.spec.ts',

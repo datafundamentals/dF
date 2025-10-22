@@ -1,0 +1,14 @@
+Firebase Storage User Guide
+===========================
+
+Welcome to Firebase Storage!
+
+This is a sample document for teaching Firebase Storage concepts.
+
+Key Features:
+- Store and serve user-generated content
+- Secure file uploads and downloads
+- Integration with Firebase Authentication
+- Powerful security rules
+
+For more information, visit the Firebase documentation.

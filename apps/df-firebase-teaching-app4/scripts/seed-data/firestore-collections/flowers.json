@@ -1,0 +1,122 @@
+[
+  {
+    "id": "rose",
+    "commonName": "Rose",
+    "latinName": "Rosa",
+    "family": "Rosaceae",
+    "color": "Red",
+    "nativeTo": ["Asia", "Europe", "North America"],
+    "bloomingSeason": "Spring to Fall",
+    "sunRequirement": "Full sun"
+  },
+  {
+    "id": "tulip",
+    "commonName": "Tulip",
+    "latinName": "Tulipa",
+    "family": "Liliaceae",
+    "color": "Yellow",
+    "nativeTo": ["Central Asia"],
+    "bloomingSeason": "Spring",
+    "sunRequirement": "Full sun to partial shade"
+  },
+  {
+    "id": "sunflower",
+    "commonName": "Sunflower",
+    "latinName": "Helianthus annuus",
+    "family": "Asteraceae",
+    "color": "Yellow",
+    "nativeTo": ["North America"],
+    "bloomingSeason": "Summer to Fall",
+    "sunRequirement": "Full sun"
+  },
+  {
+    "id": "orchid",
+    "commonName": "Orchid",
+    "latinName": "Orchidaceae",
+    "family": "Orchidaceae",
+    "color": "Purple",
+    "nativeTo": ["Asia", "South America", "Africa"],
+    "bloomingSeason": "Year-round",
+    "sunRequirement": "Indirect light"
+  },
+  {
+    "id": "lily",
+    "commonName": "Lily",
+    "latinName": "Lilium",
+    "family": "Liliaceae",
+    "color": "White",
+    "nativeTo": ["Northern Hemisphere"],
+    "bloomingSeason": "Summer",
+    "sunRequirement": "Full sun to partial shade"
+  },
+  {
+    "id": "daisy",
+    "commonName": "Daisy",
+    "latinName": "Bellis perennis",
+    "family": "Asteraceae",
+    "color": "White",
+    "nativeTo": ["Europe"],
+    "bloomingSeason": "Spring to Fall",
+    "sunRequirement": "Full sun"
+  },
+  {
+    "id": "lavender",
+    "commonName": "Lavender",
+    "latinName": "Lavandula",
+    "family": "Lamiaceae",
+    "color": "Purple",
+    "nativeTo": ["Mediterranean"],
+    "bloomingSeason": "Summer",
+    "sunRequirement": "Full sun"
+  },
+  {
+    "id": "marigold",
+    "commonName": "Marigold",
+    "latinName": "Tagetes",
+    "family": "Asteraceae",
+    "color": "Orange",
+    "nativeTo": ["North America", "South America"],
+    "bloomingSeason": "Summer to Fall",
+    "sunRequirement": "Full sun"
+  },
+  {
+    "id": "chrysanthemum",
+    "commonName": "Chrysanthemum",
+    "latinName": "Chrysanthemum",
+    "family": "Asteraceae",
+    "color": "Various",
+    "nativeTo": ["Asia"],
+    "bloomingSeason": "Fall",
+    "sunRequirement": "Full sun"
+  },
+  {
+    "id": "iris",
+    "commonName": "Iris",
+    "latinName": "Iris",
+    "family": "Iridaceae",
+    "color": "Blue",
+    "nativeTo": ["Northern Hemisphere"],
+    "bloomingSeason": "Spring to Summer",
+    "sunRequirement": "Full sun to partial shade"
+  },
+  {
+    "id": "peony",
+    "commonName": "Peony",
+    "latinName": "Paeonia",
+    "family": "Paeoniaceae",
+    "color": "Pink",
+    "nativeTo": ["Asia", "Europe", "North America"],
+    "bloomingSeason": "Spring to Summer",
+    "sunRequirement": "Full sun to partial shade"
+  },
+  {
+    "id": "daffodil",
+    "commonName": "Daffodil",
+    "latinName": "Narcissus",
+    "family": "Amaryllidaceae",
+    "color": "Yellow",
+    "nativeTo": ["Europe", "North Africa"],
+    "bloomingSeason": "Spring",
+    "sunRequirement": "Full sun to partial shade"
+  }
+]

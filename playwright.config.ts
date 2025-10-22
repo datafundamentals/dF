@@ -32,6 +32,30 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
+  'df-firebase-teaching-app2': {
+    command: 'pnpm --filter @df/df-firebase-teaching-app2 run start:test',
+    url: 'http://127.0.0.1:4176',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
+  'df-firebase-teaching-app3': {
+    command: 'pnpm --filter @df/df-firebase-teaching-app3 run start:test',
+    url: 'http://127.0.0.1:4176',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
+  'df-firebase-teaching-app4': {
+    command: 'pnpm --filter @df/df-firebase-teaching-app4 run start:test',
+    url: 'http://127.0.0.1:4176',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
+  'df-firebase-teaching-app5': {
+    command: 'pnpm --filter @df/df-firebase-teaching-app5 run start:test',
+    url: 'http://127.0.0.1:4176',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 };
 
 function parseRequestedProjects(argv: string[]): string[] {
@@ -107,6 +131,38 @@ export default defineConfig({
     {
       name: 'df-firebase-teaching-app',
       testDir: 'apps/df-firebase-teaching-app/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4176',
+      },
+    },
+    {
+      name: 'df-firebase-teaching-app2',
+      testDir: 'apps/df-firebase-teaching-app2/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4176',
+      },
+    },
+    {
+      name: 'df-firebase-teaching-app3',
+      testDir: 'apps/df-firebase-teaching-app3/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4176',
+      },
+    },
+    {
+      name: 'df-firebase-teaching-app4',
+      testDir: 'apps/df-firebase-teaching-app4/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4176',
+      },
+    },
+    {
+      name: 'df-firebase-teaching-app5',
+      testDir: 'apps/df-firebase-teaching-app5/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4176',

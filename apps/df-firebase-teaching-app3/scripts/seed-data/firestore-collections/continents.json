@@ -1,0 +1,65 @@
+[
+  {
+    "id": "asia",
+    "name": "Asia",
+    "area_sq_km": 44579000,
+    "population": 4641054775,
+    "countries": 48,
+    "largestCity": "Tokyo",
+    "highestPoint": "Mount Everest"
+  },
+  {
+    "id": "africa",
+    "name": "Africa",
+    "area_sq_km": 30370000,
+    "population": 1340598147,
+    "countries": 54,
+    "largestCity": "Cairo",
+    "highestPoint": "Mount Kilimanjaro"
+  },
+  {
+    "id": "north-america",
+    "name": "North America",
+    "area_sq_km": 24709000,
+    "population": 592072212,
+    "countries": 23,
+    "largestCity": "Mexico City",
+    "highestPoint": "Denali"
+  },
+  {
+    "id": "south-america",
+    "name": "South America",
+    "area_sq_km": 17840000,
+    "population": 430759766,
+    "countries": 12,
+    "largestCity": "São Paulo",
+    "highestPoint": "Aconcagua"
+  },
+  {
+    "id": "antarctica",
+    "name": "Antarctica",
+    "area_sq_km": 14200000,
+    "population": 0,
+    "countries": 0,
+    "largestCity": "McMurdo Station (research)",
+    "highestPoint": "Vinson Massif"
+  },
+  {
+    "id": "europe",
+    "name": "Europe",
+    "area_sq_km": 10180000,
+    "population": 747636026,
+    "countries": 44,
+    "largestCity": "Istanbul",
+    "highestPoint": "Mount Elbrus"
+  },
+  {
+    "id": "australia",
+    "name": "Australia/Oceania",
+    "area_sq_km": 8600000,
+    "population": 42677813,
+    "countries": 14,
+    "largestCity": "Sydney",
+    "highestPoint": "Puncak Jaya"
+  }
+]

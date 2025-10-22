@@ -1,0 +1,110 @@
+[
+  {
+    "id": "guitar",
+    "name": "Guitar",
+    "family": "String",
+    "origin": "Spain",
+    "isAcoustic": true,
+    "yearInvented": 1500,
+    "typicalRange": "E2-E5"
+  },
+  {
+    "id": "piano",
+    "name": "Piano",
+    "family": "Percussion",
+    "origin": "Italy",
+    "isAcoustic": true,
+    "yearInvented": 1700,
+    "typicalRange": "A0-C8"
+  },
+  {
+    "id": "violin",
+    "name": "Violin",
+    "family": "String",
+    "origin": "Italy",
+    "isAcoustic": true,
+    "yearInvented": 1555,
+    "typicalRange": "G3-E7"
+  },
+  {
+    "id": "drums",
+    "name": "Drums",
+    "family": "Percussion",
+    "origin": "Ancient (various)",
+    "isAcoustic": true,
+    "yearInvented": -3000,
+    "typicalRange": "Various"
+  },
+  {
+    "id": "trumpet",
+    "name": "Trumpet",
+    "family": "Brass",
+    "origin": "Ancient (various)",
+    "isAcoustic": true,
+    "yearInvented": 1500,
+    "typicalRange": "E3-D6"
+  },
+  {
+    "id": "flute",
+    "name": "Flute",
+    "family": "Woodwind",
+    "origin": "Ancient (various)",
+    "isAcoustic": true,
+    "yearInvented": -40000,
+    "typicalRange": "C4-D7"
+  },
+  {
+    "id": "saxophone",
+    "name": "Saxophone",
+    "family": "Woodwind",
+    "origin": "Belgium",
+    "isAcoustic": true,
+    "yearInvented": 1840,
+    "typicalRange": "Bb3-F6"
+  },
+  {
+    "id": "cello",
+    "name": "Cello",
+    "family": "String",
+    "origin": "Italy",
+    "isAcoustic": true,
+    "yearInvented": 1530,
+    "typicalRange": "C2-C6"
+  },
+  {
+    "id": "synthesizer",
+    "name": "Synthesizer",
+    "family": "Electronic",
+    "origin": "United States",
+    "isAcoustic": false,
+    "yearInvented": 1964,
+    "typicalRange": "C0-C8"
+  },
+  {
+    "id": "harp",
+    "name": "Harp",
+    "family": "String",
+    "origin": "Ancient (various)",
+    "isAcoustic": true,
+    "yearInvented": -3000,
+    "typicalRange": "C1-G7"
+  },
+  {
+    "id": "clarinet",
+    "name": "Clarinet",
+    "family": "Woodwind",
+    "origin": "Germany",
+    "isAcoustic": true,
+    "yearInvented": 1690,
+    "typicalRange": "D3-C7"
+  },
+  {
+    "id": "electric-guitar",
+    "name": "Electric Guitar",
+    "family": "String",
+    "origin": "United States",
+    "isAcoustic": false,
+    "yearInvented": 1931,
+    "typicalRange": "E2-E5"
+  }
+]

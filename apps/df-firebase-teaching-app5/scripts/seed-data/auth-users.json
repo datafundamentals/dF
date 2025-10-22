@@ -1,0 +1,72 @@
+[
+  {
+    "email": "alice.anderson@example.com",
+    "password": "password123",
+    "displayName": "Alice Anderson",
+    "emailVerified": true,
+    "photoURL": "avatars/alice.jpg"
+  },
+  {
+    "email": "bob.builder@example.com",
+    "password": "password123",
+    "displayName": "Bob Builder",
+    "emailVerified": true,
+    "photoURL": "avatars/bob.jpg"
+  },
+  {
+    "email": "carol.chen@example.com",
+    "password": "password123",
+    "displayName": "Carol Chen",
+    "emailVerified": false,
+    "photoURL": "avatars/carol.jpg"
+  },
+  {
+    "email": "david.davis@example.com",
+    "password": "password123",
+    "displayName": "David Davis",
+    "emailVerified": true,
+    "photoURL": "avatars/david.jpg"
+  },
+  {
+    "email": "emma.evans@example.com",
+    "password": "password123",
+    "displayName": "Emma Evans",
+    "emailVerified": false,
+    "photoURL": "avatars/emma.jpg"
+  },
+  {
+    "email": "frank.fisher@example.com",
+    "password": "password123",
+    "displayName": "Frank Fisher",
+    "emailVerified": true,
+    "photoURL": "avatars/frank.jpg"
+  },
+  {
+    "email": "grace.garcia@example.com",
+    "password": "password123",
+    "displayName": "Grace Garcia",
+    "emailVerified": true,
+    "photoURL": "avatars/grace.jpg"
+  },
+  {
+    "email": "henry.harris@example.com",
+    "password": "password123",
+    "displayName": "Henry Harris",
+    "emailVerified": false,
+    "photoURL": "avatars/henry.jpg"
+  },
+  {
+    "email": "iris.ikeda@example.com",
+    "password": "password123",
+    "displayName": "Iris Ikeda",
+    "emailVerified": true,
+    "photoURL": "avatars/iris.jpg"
+  },
+  {
+    "email": "jack.johnson@example.com",
+    "password": "password123",
+    "displayName": "Jack Johnson",
+    "emailVerified": true,
+    "photoURL": "avatars/jack.jpg"
+  }
+]

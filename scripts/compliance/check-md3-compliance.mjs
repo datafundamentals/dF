@@ -9,6 +9,10 @@ const PROJECT_ROOT = resolve(process.cwd());
 const TARGET_DIRECTORIES = [
   'packages/ui-lit/src/',
   'apps/df-firebase-teaching-app/src/',
+  'apps/df-firebase-teaching-app2/src/',
+  'apps/df-firebase-teaching-app3/src/',
+  'apps/df-firebase-teaching-app4/src/',
+  'apps/df-firebase-teaching-app5/src/',
 ];
 const EXCLUDED_GLOBS = ['.spec.ts', '.test.ts', '.stories.ts', '.testing-guide.ts', '.md.ts'];
 

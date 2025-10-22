@@ -1,0 +1,15 @@
+{
+  "exportDate": "2025-10-17T11:48:45.490Z",
+  "version": "1.0",
+  "description": "Sample JSON document for Firebase Storage",
+  "data": {
+    "records": 42,
+    "categories": [
+      "flowers",
+      "continents",
+      "elements",
+      "instruments"
+    ],
+    "status": "active"
+  }
+}
