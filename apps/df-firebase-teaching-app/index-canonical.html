@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Firebase Teaching App - Canonical Pattern</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" href="/favicon.ico" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .page-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        min-height: calc(100vh - 40px);
+      }
+
+      .canonical-banner {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        color: white;
+        padding: 24px 32px;
+        text-align: center;
+        border-bottom: 4px solid #388e3c;
+      }
+
+      .canonical-banner h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        font-weight: 500;
+      }
+
+      .canonical-banner p {
+        margin: 0;
+        font-size: 1.1rem;
+        opacity: 0.95;
+      }
+
+      .canonical-banner .badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.3);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        margin-top: 12px;
+        font-weight: 500;
+      }
+
+      .setup-warning {
+        padding: 24px 32px;
+        background: #fff3cd;
+        border-bottom: 4px solid #ffc107;
+      }
+
+      .setup-warning h2 {
+        margin: 0 0 12px;
+        color: #856404;
+        font-size: 1.25rem;
+      }
+
+      .setup-warning p {
+        margin: 0 0 8px;
+        color: #856404;
+        line-height: 1.6;
+      }
+
+      .setup-warning code {
+        background: rgba(0, 0, 0, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+
+      .setup-warning ul {
+        margin: 12px 0 0;
+        padding-left: 24px;
+        color: #856404;
+      }
+
+      .setup-warning li {
+        margin: 4px 0;
+      }
+
+      .info-section {
+        padding: 32px;
+        background: #f5f9ff;
+        border-bottom: 2px solid #e3f2fd;
+      }
+
+      .info-section h2 {
+        margin: 0 0 16px;
+        color: #1976d2;
+        font-size: 1.5rem;
+      }
+
+      .info-section p {
+        margin: 0 0 12px;
+        color: #455a64;
+        line-height: 1.6;
+      }
+
+      .info-section ul {
+        margin: 16px 0;
+        padding-left: 24px;
+        color: #455a64;
+      }
+
+      .info-section li {
+        margin: 8px 0;
+        line-height: 1.6;
+      }
+
+      .info-section code {
+        background: rgba(25, 118, 210, 0.1);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-family: 'Monaco', 'Courier New', monospace;
+        font-size: 0.9rem;
+        color: #1976d2;
+      }
+
+      .protected-content {
+        padding: 32px;
+      }
+
+      .protected-content h2 {
+        margin: 0 0 24px;
+        color: #1976d2;
+      }
+
+      df-auth-wrapper {
+        display: block;
+        width: 100%;
+      }
+
+      df-firestore-demo,
+      df-storage-demo,
+      df-functions-demo {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+      }
+
+      .feature-card {
+        padding: 24px;
+        background: #f5f5f5;
+        border-radius: 12px;
+        border: 2px solid #e0e0e0;
+      }
+
+      .feature-card h3 {
+        margin: 0 0 12px;
+        color: #424242;
+        font-size: 1.25rem;
+      }
+
+      .feature-card p {
+        margin: 0 0 16px;
+        color: #616161;
+        line-height: 1.5;
+      }
+
+      .feature-card .status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .status.ready {
+        background: #c8e6c9;
+        color: #2e7d32;
+      }
+
+      .status.emulator {
+        background: #fff9c4;
+        color: #f57f17;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-container">
+      <div class="canonical-banner">
+        <h1>✅ Canonical Firebase Pattern</h1>
+        <p>Production Google Sign-In + Emulator-Based Features</p>
+        <span class="badge">COPY THIS PATTERN FOR ALL APPS</span>
+      </div>
+
+      <div class="setup-warning">
+        <h2>⚠️ Production Firebase Required</h2>
+        <p>
+          <strong>Google Sign-In requires production Firebase credentials.</strong> The emulator placeholder values in <code>.env.emulator</code> won't work.
+        </p>
+        <p>To use this demo, create <code>.env.local</code> with your real Firebase project credentials:</p>
+        <ul>
+          <li>Copy <code>.env.production.example</code> to <code>.env.local</code></li>
+          <li>Fill in your actual Firebase config from Firebase Console</li>
+          <li>Set <code>VITE_USE_EMULATOR=false</code> (for auth only - other services use emulators)</li>
+          <li>Restart the dev server: <code>pnpm dev</code></li>
+        </ul>
+        <p><strong>Note:</strong> <code>.env.local</code> overrides <code>.env.development</code> and is gitignored (safe for real credentials).</p>
+      </div>
+
+      <div class="info-section">
+        <h2>🎯 What Makes This Canonical?</h2>
+        <p>
+          This demo shows the <strong>recommended architecture</strong> for all apps in the DF monorepo.
+          It combines production-ready authentication with fast local development using Firebase emulators.
+        </p>
+        <ul>
+          <li>
+            <strong>Production Google Sign-In:</strong> Uses <code>df-auth-wrapper</code> with real Firebase Auth (no emulator)
+          </li>
+          <li>
+            <strong>Emulator-Based Features:</strong> Firestore, Storage, and Functions run on local emulators for fast iteration
+          </li>
+          <li>
+            <strong>Clean Separation:</strong> Auth wrapper handles authentication, other features slot inside
+          </li>
+          <li>
+            <strong>Reusable Pattern:</strong> Every app should follow this architecture - minimizes differentiation
+          </li>
+        </ul>
+        <p>
+          <strong>Key Principle:</strong> Any auth implementation that doesn't use <code>df-auth-wrapper</code> 
+          is considered an anti-pattern in our monorepo.
+        </p>
+      </div>
+
+      <!-- 
+        THE CANONICAL PATTERN: 
+        Everything that needs authentication is wrapped in df-auth-wrapper.
+        All emulator-based features (Firestore, Storage, Functions) are protected.
+      -->
+      <df-auth-wrapper>
+        <div class="protected-content">
+          <h2>🔐 Protected Firebase Features</h2>
+          <p>
+            You're now authenticated with Google. All the features below are protected by 
+            <code>df-auth-wrapper</code> and run on Firebase emulators for fast development.
+          </p>
+
+          <!-- Working Firebase Demo Widgets -->
+          <df-firestore-demo style="display: block; margin: 32px 0;"></df-firestore-demo>
+          <df-storage-demo style="display: block; margin: 32px 0;"></df-storage-demo>
+          <df-functions-demo style="display: block; margin: 32px 0;"></df-functions-demo>
+
+          <div style="margin-top: 48px; padding: 24px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+            <h3 style="margin: 0 0 12px; color: #2e7d32;">💡 Why This Architecture?</h3>
+            <ul style="margin: 12px 0; padding-left: 20px; color: #2e7d32;">
+              <li><strong>Fast Development:</strong> Emulators start instantly, no cloud latency</li>
+              <li><strong>Real Auth Testing:</strong> Test actual Google OAuth flow during development</li>
+              <li><strong>Consistent Patterns:</strong> Same auth wrapper across all apps = less cognitive load</li>
+              <li><strong>Production-Ready:</strong> Same auth code works in dev and production</li>
+            </ul>
+          </div>
+
+          <div style="margin-top: 24px; padding: 20px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
+            <h3 style="margin: 0 0 12px; color: #e65100;">⚠️ Anti-Pattern Warning</h3>
+            <p style="margin: 0; color: #e65100; line-height: 1.6;">
+              Do NOT use the emulator auth UI pattern from the old demos. While it's cute and proves
+              emulator auth is possible, it creates unnecessary differentiation between apps.
+              <strong>Always use <code>df-auth-wrapper</code> for production-ready authentication.</strong>
+            </p>
+          </div>
+        </div>
+      </df-auth-wrapper>
+    </div>
+
+    <script type="module">
+      import {initializeGoogleAuthForTeachingApp} from './src/init-google-auth.ts';
+      import '@df/ui-lit/df-auth-wrapper';
+      import './src/df-firestore-demo.ts';
+      import './src/df-storage-demo.ts';
+      import './src/df-functions-demo.ts';
+
+      // Initialize Google Auth with teaching app's config
+      // This follows the "Consumer Configures" pattern:
+      // - Teaching app provides its own .env.production config
+      // - df-auth-wrapper package stays decoupled from app configs
+      await initializeGoogleAuthForTeachingApp();
+    </script>
+  </body>
+</html>

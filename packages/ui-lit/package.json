@@ -23,6 +23,8 @@
     "./df-markdown-codemirror.js": "./dist/df-markdown-codemirror.js",
     "./df-google-signin": "./dist/df-google-signin.js",
     "./df-google-signin.js": "./dist/df-google-signin.js",
+    "./df-auth-wrapper": "./dist/df-auth-wrapper.js",
+    "./df-auth-wrapper.js": "./dist/df-auth-wrapper.js",
     "./firebase": "./dist/firebase/index.js",
     "./firebase/index.js": "./dist/firebase/index.js"
   },

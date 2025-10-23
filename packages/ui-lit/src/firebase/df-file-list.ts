@@ -183,7 +183,12 @@ export class DfFileList extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.loadFiles();
+    // Delay initial load to allow time for auth initialization
+    // This prevents 403 errors when using token exchange patterns
+    // Increased delay to ensure token exchange completes first
+    setTimeout(() => {
+      this.loadFiles();
+    }, 500);
   }
 
   override updated(changedProperties: Map<string, unknown>) {

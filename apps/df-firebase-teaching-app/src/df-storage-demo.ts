@@ -2,10 +2,11 @@ import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {getFirebaseApp} from '@df/firebase';
-import {firebaseAuthState, initializeStorage} from '@df/state';
+import {firebaseAuthState, googleAuthUser, initializeStorage} from '@df/state';
 import type {StorageFileMetadata} from '@df/types';
 import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 import {fileUploadProgress} from '@df/ui-lit/df-upload-link-store';
+import {getAuth} from 'firebase/auth';
 
 // Ensure Storage UI components are registered
 import '@df/ui-lit/firebase';
@@ -140,8 +141,18 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
   override render() {
     const progress = fileUploadProgress.get();
     const auth = firebaseAuthState.get();
-    const isAuthenticated = auth.authState === 'authenticated';
-    const isAuthLoading = auth.authState === 'loading' || !auth.initialized;
+    const googleUser = googleAuthUser.get();
+    
+    // Get teaching app's Auth to check if token exchange completed
+    const config = getFirebaseConfig();
+    const app = getFirebaseApp(config);
+    const teachingAuth = getAuth(app);
+    const hasTeachingAppUser = teachingAuth.currentUser !== null;
+    
+    // For Storage/Firestore operations, we need the teaching app to have a signed-in user
+    // This ensures token exchange has completed before allowing data operations
+    const isAuthenticated = auth.authState === 'authenticated' || hasTeachingAppUser || useEmulator();
+    const isAuthLoading = (auth.authState === 'loading' || !auth.initialized) && googleUser === null && !useEmulator();
 
     return html`
       <div class="container">

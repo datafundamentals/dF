@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Auth Wrapper Demo - Standalone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', 'Arial', sans-serif;
+      background: #f5f5f5;
+    }
+    .page-header {
+      background: #1976d2;
+      color: white;
+      padding: 24px;
+      text-align: center;
+    }
+    .page-header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>Welcome to My Protected App</h1>
+  </div>
+  
+  <!-- The auth wrapper protects all content inside it -->
+  <df-auth-wrapper>
+    <div style="padding: 40px; max-width: 800px; margin: 0 auto;">
+      <h2>🎉 You're Signed In!</h2>
+      <p>This content is only visible after Google authentication.</p>
+      
+      <h3>Protected Features:</h3>
+      <ul>
+        <li>View your personalized dashboard</li>
+        <li>Access premium content</li>
+        <li>Manage your account settings</li>
+        <li>Connect with other users</li>
+      </ul>
+
+      <p><strong>Your user ID and auth token are available in:</strong></p>
+      <ul>
+        <li><code>localStorage.getItem('User')</code> - Full user object</li>
+        <li><code>sessionStorage.getItem('Authorization')</code> - Bearer token</li>
+        <li><code>document.cookie</code> - Auth token cookie</li>
+      </ul>
+
+      <h3>Accessing User Info in JavaScript:</h3>
+      <pre style="background: #f0f0f0; padding: 16px; border-radius: 8px; overflow-x: auto;">
+// Get the auth wrapper element
+const authWrapper = document.querySelector('df-auth-wrapper');
+
+// Listen for user changes
+authWrapper.addEventListener('df-auth-wrapper-user-changed', (e) => {
+  const user = e.detail.newValue;
+  if (user) {
+    console.log('User signed in:', user.displayName, user.email);
+    console.log('User ID:', user.uid);
+  } else {
+    console.log('User signed out');
+  }
+});
+
+// Access user from localStorage
+const userJson = localStorage.getItem('User');
+if (userJson) {
+  const user = JSON.parse(userJson);
+  console.log('User UID:', user.uid);
+}
+
+// Access auth token
+const authHeader = sessionStorage.getItem('Authorization');
+console.log('Auth header:', authHeader); // "Bearer <token>"
+      </pre>
+    </div>
+  </df-auth-wrapper>
+
+  <!-- 
+    PATTERN: "Consumer Configures"
+    
+    To use this component in ANY app:
+    1. Build the bundle: pnpm --filter @df/ui-lit run build
+    2. Create an init file in your app (see teaching app's init-google-auth.ts)
+    3. Your app provides its own Firebase config (from .env.production or hardcoded)
+    4. Initialize before rendering components (see script below)
+    
+    Key principle: The df-auth-wrapper package never references app-level configs.
+    Each consuming app creates its own initialization file.
+  -->
+  
+  <script type="module">
+    // For teaching app: use centralized init
+    import {initializeGoogleAuthForTeachingApp} from './src/init-google-auth.ts';
+    import '@df/ui-lit/df-auth-wrapper';
+
+    // Initialize Google Auth with teaching app's config
+    await initializeGoogleAuthForTeachingApp();
+
+    /* 
+     * FOR OTHER APPS: Create your own init file like this:
+     * 
+     * // your-app/src/init-google-auth.ts
+     * import {initializeApp} from 'firebase/app';
+     * import {initializeGoogleAuth} from '@df/state';
+     * 
+     * export async function initializeGoogleAuthForYourApp() {
+     *   const config = {
+     *     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+     *     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+     *     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+     *     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+     *     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+     *     appId: import.meta.env.VITE_FIREBASE_APP_ID,
+     *   };
+     *   const app = initializeApp(config);
+     *   await initializeGoogleAuth(app);
+     * }
+     * 
+     * Then in your HTML:
+     * import {initializeGoogleAuthForYourApp} from './src/init-google-auth.js';
+     * await initializeGoogleAuthForYourApp();
+     */
+  </script>
+</body>
+</html>

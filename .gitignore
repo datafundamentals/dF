@@ -113,3 +113,6 @@ apps/df-firebase-teaching-app/scripts/seed-data/storage-files/avatars/*.png
 # Package manager
 **/package-lock.json.bak
 **/yarn.lock.bak
+
+# Generated Google Auth config (auto-generated from .env.production)
+packages/state/src/stores/google-auth-config.ts

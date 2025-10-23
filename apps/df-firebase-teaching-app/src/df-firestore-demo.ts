@@ -8,6 +8,7 @@ import {
   __setTodoDemoState,
   __setTodoDemoFilters,
   firebaseAuthState,
+  googleAuthUser,
 } from '@df/state';
 import type {FirestoreCollectionState, TodoDocument, TodoFilterState} from '@df/types';
 import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
@@ -81,14 +82,18 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
   override render() {
     const collection = todoCollectionState.get();
     const auth = firebaseAuthState.get();
-    const isAuthenticated = auth.authUser !== null;
+    const googleUser = googleAuthUser.get();
+    
+    // Check BOTH auth systems - emulator auth OR Google auth
+    // In emulator mode, we're more permissive since emulators don't enforce auth
+    const isAuthenticated = auth.authUser !== null || googleUser !== null || useEmulator();
 
-    // Auto-initialize when user signs in
+    // Auto-initialize when user signs in OR when using emulator
     if (isAuthenticated && !this.initialized) {
       void this.initializeStore();
     }
 
-    // Show authentication requirement message if not authenticated
+    // Show authentication requirement message if not authenticated (and not using emulator)
     if (!isAuthenticated && !this.initialized) {
       return html`
         <div class="container">
@@ -202,10 +207,14 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
       }
 
       // Wait for authentication before initializing Firestore
+      // In emulator mode, we allow unauthenticated access
       const auth = firebaseAuthState.get();
-      if (!auth.authUser) {
+      const googleUser = googleAuthUser.get();
+      
+      // Check BOTH auth systems, or allow if using emulator
+      if (!auth.authUser && !googleUser && !useEmulator()) {
         // Not authenticated yet - wait for user to sign in
-        // The component will re-render when firebaseAuthState changes
+        // The component will re-render when either auth state changes
         return;
       }
 

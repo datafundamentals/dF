@@ -25,11 +25,18 @@ Turbo and pnpm see every workspace via `pnpm-workspace.yaml`, so all standard co
 
 ### Shared UI Components (`packages/ui-lit`)
 - Houses reusable Lit elements consumed by multiple apps.
+- Key components include:
+  - `df-auth-wrapper` – Google Sign-In authentication wrapper for protecting content
+  - Firebase auth components (`df-sign-in`, `df-sign-out`, `df-user-profile`)
+  - Firestore components (`df-firestore-list`, `df-firestore-form`)
+  - File storage components (`df-file-list`, `df-file-delete`)
+  - Utility components (`df-segmented-button`, `df-upload-link`, `df-practice-widget`)
 - Build output lives in `packages/ui-lit/dist`; regenerate it with `pnpm --filter @df/ui-lit run build`.
 - Lint before publishing changes: `pnpm --filter @df/ui-lit run lint`.
 - There is no standalone test script today; component behavior is covered through the consuming app harnesses.
 - TypeScript consumers import via `@df/ui-lit/...` (for example `import '@df/ui-lit/my-element'`); apps consume the built output from `dist` while local harnesses point at source.
 - When iterating on components, run `pnpm --filter @df/ui-lit run build --watch` in a second terminal so dependent apps pick up the latest `dist` output.
+- **All components have Storybook stories** in `apps/df-storybook/stories/` for visual documentation and testing.
 
 ### Storybook (`apps/df-storybook`)
 - Runs `@storybook/web-components-vite` against the shared components in `packages/ui-lit`.
