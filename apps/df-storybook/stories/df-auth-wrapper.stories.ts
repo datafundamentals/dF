@@ -39,13 +39,13 @@ Authentication data is automatically stored in three locations:
 ## Usage
 
 \`\`\`typescript
-import {initializeApp} from 'firebase/app';
+import {loadFirebaseConfig} from '@df/firebase/firebase-config';
 import {initializeGoogleAuth} from '@df/state';
 import '@df/ui-lit/df-auth-wrapper';
 
-// Initialize Firebase and Google Auth
-const app = initializeApp(firebaseConfig);
-initializeGoogleAuth(app);
+// Load Firebase config from environment variables
+const config = loadFirebaseConfig();
+await initializeGoogleAuth(config);
 \`\`\`
 
 \`\`\`html
@@ -470,12 +470,12 @@ VITE_FIREBASE_APP_ID=your-app-id</code></pre>
 
       <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
         <h3 style="margin: 0 0 12px 0; color: #1976d2;">3️⃣ Initialize in Your App</h3>
-        <pre style="background: #f5f5f5; padding: 16px; border-radius: 4px; overflow-x: auto; font-size: 13px;"><code>import {initializeApp} from 'firebase/app';
+        <pre style="background: #f5f5f5; padding: 16px; border-radius: 4px; overflow-x: auto; font-size: 13px;"><code>import {loadFirebaseConfig} from '@df/firebase/firebase-config';
 import {initializeGoogleAuth} from '@df/state';
 import '@df/ui-lit/df-auth-wrapper';
 
-const app = initializeApp(firebaseConfig);
-initializeGoogleAuth(app);</code></pre>
+const config = loadFirebaseConfig();
+await initializeGoogleAuth(config);</code></pre>
       </div>
 
       <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px;">

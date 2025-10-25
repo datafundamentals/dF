@@ -10,9 +10,14 @@
     "./auth": "./dist/auth/index.js",
     "./firestore": "./dist/firestore/index.js",
     "./storage": "./dist/storage/index.js",
-    "./functions": "./dist/functions/index.js"
+    "./functions": "./dist/functions/index.js",
+    "./firebase-config": "./dist/firebase-config.js",
+    "./init": "./dist/init.js",
+    "./emulator-config": "./dist/emulator-config.js",
+    "./app-firebase-config": "./dist/app-firebase-config.js"
   },
   "scripts": {
+    "prebuild": "tsx scripts/generate-emulator-config.ts",
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
@@ -20,6 +25,7 @@
     "firebase": "^11.7.0"
   },
   "devDependencies": {
+    "tsx": "^4.19.2",
     "typescript": "^5.9.2"
   }
 }

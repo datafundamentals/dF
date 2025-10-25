@@ -4,3 +4,7 @@ export * from './auth/index.js';
 export * from './firestore/index.js';
 export * from './storage/index.js';
 export * from './functions/index.js';
+export * from './firebase-config.js';
+export * from './init.js';
+export * from './emulator-config.js';
+export * from './app-firebase-config.js';

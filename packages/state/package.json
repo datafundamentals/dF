@@ -7,7 +7,6 @@
   "types": "./dist/src/index.d.ts",
   "scripts": {
     "lint": "echo 'No lint targets yet'",
-    "prebuild": "node scripts/generate-auth-config.mjs",
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",

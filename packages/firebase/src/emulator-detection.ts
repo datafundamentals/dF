@@ -4,7 +4,7 @@ import {getFirestore, connectFirestoreEmulator, type Firestore} from 'firebase/f
 import {getStorage, connectStorageEmulator, type FirebaseStorage} from 'firebase/storage';
 import {getFunctions, connectFunctionsEmulator, type Functions} from 'firebase/functions';
 
-import type {EmulatorConfig, EmulatorHostConfig} from '@df/types/firebase.types';
+import type {EmulatorHostConfig_Deprecated, EmulatorHostConfig} from '@df/types/firebase.types';
 
 const DEFAULT_HOST = '127.0.0.1';
 const DEFAULT_FUNCTIONS_REGION = 'us-central1';
@@ -34,7 +34,7 @@ export interface ConnectEmulatorOptions {
  * Determines whether emulator connections should be attempted based on the
  * provided configuration and optional override flag.
  */
-export function shouldUseEmulators(config?: EmulatorConfig | null, override?: boolean): boolean {
+export function shouldUseEmulators(config?: EmulatorHostConfig_Deprecated | null, override?: boolean): boolean {
   if (typeof override === 'boolean') {
     return override;
   }
@@ -56,7 +56,7 @@ export function shouldUseEmulators(config?: EmulatorConfig | null, override?: bo
  */
 export function connectFirebaseEmulators(
   app: FirebaseApp,
-  config: EmulatorConfig,
+  config: EmulatorHostConfig_Deprecated,
   options: ConnectEmulatorOptions = {}
 ): ConnectedServices {
   if (!shouldUseEmulators(config)) {

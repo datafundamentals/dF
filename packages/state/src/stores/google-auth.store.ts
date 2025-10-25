@@ -31,6 +31,7 @@
 import {signal} from '@lit-labs/signals';
 import {initializeApp, type FirebaseApp} from 'firebase/app';
 import type {User} from 'firebase/auth';
+import type {FirebaseConfig} from '@df/types/firebase.types';
 import {
   getFirebaseAuth,
   onAuthStateChange,
@@ -39,7 +40,6 @@ import {
   type Auth,
   type Unsubscribe,
 } from '@df/firebase/auth';
-import {GOOGLE_AUTH_FIREBASE_CONFIG} from './google-auth-config.js';
 
 /**
  * Signal holding the current Google authenticated user.
@@ -82,29 +82,27 @@ function clearAuthToken(): void {
 
 /**
  * Initialize Google authentication.
- * Creates a separate Firebase app instance for Google auth (using config from .env.production)
- * and sets up the auth state listener.
+ * Creates a Firebase app instance for Google auth and sets up the auth state listener.
  *
- * IMPORTANT: This uses a SEPARATE Firebase project from your app's main Firebase config.
- * The Google auth config is read from packages/state/.env.production at build time.
- *
+ * @param config - Firebase configuration (from loadFirebaseConfig() in @df/firebase)
+ * 
  * @example
  * ```typescript
  * import {initializeGoogleAuth} from '@df/state';
+ * import {loadFirebaseConfig} from '@df/firebase/firebase-config';
  *
- * // No parameters needed - uses built-in config
- * await initializeGoogleAuth();
+ * const config = loadFirebaseConfig();
+ * await initializeGoogleAuth(config);
  * ```
  */
-export async function initializeGoogleAuth(): Promise<void> {
+export async function initializeGoogleAuth(config: FirebaseConfig): Promise<void> {
   if (firebaseAppRef) {
     console.warn('Google auth already initialized');
     return;
   }
 
-  // Initialize separate Firebase app for Google auth
-  // This uses the config from packages/state/.env.production (generated at build time)
-  firebaseAppRef = initializeApp(GOOGLE_AUTH_FIREBASE_CONFIG, 'google-auth-app');
+  // Initialize Firebase app for Google auth
+  firebaseAppRef = initializeApp(config, 'google-auth-app');
   authInstance = getFirebaseAuth(firebaseAppRef);
 
   // Set up auth state listener
