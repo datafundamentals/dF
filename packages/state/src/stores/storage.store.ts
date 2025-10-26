@@ -54,11 +54,15 @@ import type {
   StorageUploadState,
   StorageUploadStatus,
 } from '@df/types';
+import {
+  getInitializedFirebaseApp,
+  shouldUseEmulatorForService,
+} from './firebase-init.js';
 
 /** Storage emulator host for local development */
 const STORAGE_HOST = '127.0.0.1';
 
-/** Storage emulator port for local development */
+/** Storage emulator port for local development - matches firebase.json */
 const STORAGE_PORT = 9390;
 
 /**
@@ -87,6 +91,27 @@ const uploadedFileSignal = signal<StorageFileMetadata | null>(null);
 
 /** Singleton storage instance */
 let storageInstance: FirebaseStorage | null = null;
+
+/**
+ * Ensures storage is initialized with lazy loading.
+ * Safe to call multiple times - will only initialize once.
+ * 
+ * @internal
+ */
+function ensureStorageInitialized(): void {
+  if (storageInstance) {
+    // Already initialized
+    return;
+  }
+
+  const app = getInitializedFirebaseApp();
+  storageInstance = getStorage(app);
+
+  // Connect to emulator if configured
+  if (shouldUseEmulatorForService('storage')) {
+    connectStorageEmulator(storageInstance, STORAGE_HOST, STORAGE_PORT);
+  }
+}
 
 /**
  * Computed state combining all storage upload signals.
@@ -178,8 +203,10 @@ export function initializeStorage(app: FirebaseApp, useEmulator: boolean): Fireb
  * ```
  */
 export function getStorageInstance(): FirebaseStorage {
+  ensureStorageInitialized();
+  
   if (!storageInstance) {
-    throw new Error('Storage not initialized. Call initializeStorage() first.');
+    throw new Error('Storage initialization failed');
   }
   return storageInstance;
 }

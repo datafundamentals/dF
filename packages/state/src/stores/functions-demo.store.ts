@@ -23,6 +23,10 @@ import {
   type Functions,
 } from '@df/firebase/functions';
 import type {TodoPriority} from '@df/types';
+import {
+  getInitializedFirebaseApp,
+  shouldUseEmulatorForService,
+} from './firebase-init.js';
 
 // Function call state types
 export interface FunctionCallState<T = unknown> {
@@ -301,14 +305,27 @@ export function resetExportState(): void {
 }
 
 /**
- * Ensure the Functions instance is initialized
+ * Ensure the Functions instance is initialized with lazy loading.
+ * Safe to call multiple times - will only initialize once.
  */
 function ensureFunctions(): Functions {
-  const functions = functionsInstanceSignal.get();
+  let functions = functionsInstanceSignal.get();
+  
   if (!functions) {
-    throw new Error(
-      'Functions store has not been initialized. Call initializeFunctionsStore() first.'
-    );
+    // Lazy initialization
+    const app = getInitializedFirebaseApp();
+    functions = getFirebaseFunctions(app, 'us-central1');
+
+    // Connect to emulator if configured
+    if (shouldUseEmulatorForService('functions')) {
+      connectFunctionsToEmulator(functions, {
+        host: '127.0.0.1',
+        port: 5501, // matches firebase.json
+      });
+    }
+
+    functionsInstanceSignal.set(functions);
   }
+  
   return functions;
 }

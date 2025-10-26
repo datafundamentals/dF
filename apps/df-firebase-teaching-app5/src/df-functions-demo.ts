@@ -1,9 +1,7 @@
 import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {getFirebaseApp} from '@df/firebase';
 import {
-  initializeFunctionsStore,
   callCreateTodoAdvanced,
   callManualCleanup,
   callTodosExport,
@@ -15,7 +13,6 @@ import {
   resetExportState,
   type CreateTodoAdvancedRequest,
 } from '@df/state';
-import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 
 @customElement('df-functions-demo')
 export class DfFunctionsDemo extends SignalWatcher(LitElement) {
@@ -440,19 +437,8 @@ export class DfFunctionsDemo extends SignalWatcher(LitElement) {
       return;
     }
 
-    try {
-      const config = getFirebaseConfig();
-      const app = getFirebaseApp(config);
-
-      // Functions emulator typically runs on port 5501
-      initializeFunctionsStore(app, useEmulator(), '127.0.0.1', 5501);
-
-      this.initialized = true;
-    } catch (error) {
-      console.error('[df-functions-demo] Failed to initialize Functions demo:', error);
-      this.initError =
-        'Unable to initialize Functions demo. Ensure the emulators are running and reload the page.';
-    }
+    // Functions auto-initialize when accessed
+    this.initialized = true;
   }
 
   private async handleCreateTodo() {

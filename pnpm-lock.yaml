@@ -593,9 +593,6 @@ importers:
         specifier: ^11.7.0
         version: 11.10.0
     devDependencies:
-      tsx:
-        specifier: ^4.19.2
-        version: 4.20.6
       typescript:
         specifier: ^5.9.2
         version: 5.9.3

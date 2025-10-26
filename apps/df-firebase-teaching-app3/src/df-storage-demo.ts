@@ -1,10 +1,8 @@
 import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {getFirebaseApp} from '@df/firebase';
-import {firebaseAuthState, initializeStorage} from '@df/state';
+import {firebaseAuthState} from '@df/state';
 import type {StorageFileMetadata} from '@df/types';
-import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 import {fileUploadProgress} from '@df/ui-lit/df-upload-link-store';
 
 // Ensure Storage UI components are registered
@@ -132,16 +130,16 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
   @state() private selectedFile: StorageFileMetadata | null = null;
   @state() private uploadedUrl = '';
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    void this.initializeStorageStore();
-  }
-
   override render() {
     const progress = fileUploadProgress.get();
     const auth = firebaseAuthState.get();
     const isAuthenticated = auth.authState === 'authenticated';
     const isAuthLoading = auth.authState === 'loading' || !auth.initialized;
+
+    // Auto-initialize on first render (storage auto-initializes when accessed)
+    if (!this.initialized) {
+      this.initialized = true;
+    }
 
     return html`
       <div class="container">
@@ -204,23 +202,6 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
             `}
       </div>
     `;
-  }
-
-  private async initializeStorageStore(): Promise<void> {
-    if (this.initialized) {
-      return;
-    }
-
-    try {
-      const config = getFirebaseConfig();
-      const app = getFirebaseApp(config);
-      initializeStorage(app, useEmulator());
-      this.initialized = true;
-    } catch (error) {
-      console.error('[df-storage-demo] Failed to initialize Storage demo:', error);
-      this.initError =
-        'Unable to initialize Storage demo. Ensure the emulators are running and reload the page.';
-    }
   }
 
   private async handleUploadComplete(e: CustomEvent) {

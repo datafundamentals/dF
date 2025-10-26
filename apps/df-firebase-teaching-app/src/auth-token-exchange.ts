@@ -1,4 +1,10 @@
 /**
+ * THIS IS PROBABLY AFU PLEASE SEE .z_/future/FIX_DF_AUTH_IDEAS.md
+ * 
+ * You probably have tons of other rethinking on this whole piece
+ * 
+ * Like, google auth? Or firebase? So many things might be AFU, and this is just the entry point
+ * 
  * Google Auth to Teaching App Token Exchange
  *
  * This module bridges authentication between two Firebase projects:
@@ -18,7 +24,8 @@ import {googleAuthUser} from '@df/state';
 import {getAuth, signInWithCustomToken, type Auth} from 'firebase/auth';
 import {getFunctions, httpsCallable, connectFunctionsEmulator} from 'firebase/functions';
 import {getFirebaseApp} from '@df/firebase';
-import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
+import {loadFirebaseConfig, useEmulator} from '@df/firebase';
+import {EMULATOR_CONFIG} from './config/firebase.config.js';
 
 let isExchanging = false;
 let hasExchanged = false;
@@ -42,7 +49,7 @@ let teachingAuthInstance: Auth | null = null;
 
 function getTeachingAuth(): Auth {
   if (!teachingAuthInstance) {
-    const config = getFirebaseConfig();
+    const config = loadFirebaseConfig();
     const app = getFirebaseApp(config);
     teachingAuthInstance = getAuth(app);
     console.log('[token-exchange] Teaching app Auth initialized (no emulator)');
@@ -55,12 +62,12 @@ function getTeachingAuth(): Auth {
  * Exchanges Google Auth ID Token for Teaching App Custom Token
  */
 async function exchangeToken(idToken: string): Promise<string> {
-  const config = getFirebaseConfig();
+  const config = loadFirebaseConfig();
   const app = getFirebaseApp(config);
   const functions = getFunctions(app);
 
   // Connect to emulator if configured
-  if (useEmulator()) {
+  if (useEmulator(EMULATOR_CONFIG)) {
     connectFunctionsEmulator(functions, '127.0.0.1', 5501);
   }
 

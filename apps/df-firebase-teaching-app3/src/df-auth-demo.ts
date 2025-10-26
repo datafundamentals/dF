@@ -8,10 +8,8 @@
 import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {initializeAuth, firebaseAuthState} from '@df/state';
-import {getFirebaseApp} from '@df/firebase';
-import {connectAuthToEmulator} from '@df/firebase/auth';
-import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
+import {firebaseAuthState} from '@df/state';
+import {EMULATOR_CONFIG} from './config/firebase.config.js';
 
 // Import auth components
 import '@df/ui-lit/firebase';
@@ -147,55 +145,9 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
     }
   `;
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    void this._initializeFirebaseAuth();
-  }
-
-  private async _initializeFirebaseAuth(): Promise<void> {
-    try {
-      const config = getFirebaseConfig();
-      const app = getFirebaseApp(config);
-
-      // Connect to emulator if in emulator mode
-      if (useEmulator()) {
-        // Check if emulator is available before connecting
-        try {
-          const emulatorCheck = await fetch('http://127.0.0.1:5400');
-          if (emulatorCheck.ok) {
-            const auth = getFirebaseAuth(app);
-            connectAuthToEmulator(auth, {
-              host: '127.0.0.1',
-              port: 9155, // From firebase.json
-            });
-
-            // Initialize auth store only if emulator is available
-            initializeAuth(app);
-          } else {
-            console.warn('[df-auth-demo] Emulator not available. Auth demo will not be functional.');
-          }
-        } catch (emulatorError) {
-          console.warn('[df-auth-demo] Emulator not available. Auth demo will not be functional.', emulatorError);
-        }
-      } else {
-        // Production mode - initialize normally
-        initializeAuth(app);
-      }
-    } catch (error) {
-      console.error('[df-auth-demo] Failed to initialize Firebase Auth:', error);
-    }
-  }
-
   override render() {
-    // Check if auth is initialized before accessing state
-    let isAuthenticated = false;
-    try {
-      const authState = firebaseAuthState.get();
-      isAuthenticated = authState.authState === 'authenticated';
-    } catch {
-      // Auth not initialized - show login by default
-      isAuthenticated = false;
-    }
+    const authState = firebaseAuthState.get(); // Auto-initializes!
+    const isAuthenticated = authState.authState === 'authenticated';
 
     return html`
       <div class="header">
@@ -267,7 +219,8 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
   }
 
   private _renderCurrentView() {
-    const isEmulator = useEmulator();
+    // Google Sign-In only works in production (not with auth emulator)
+    const isEmulator = EMULATOR_CONFIG.auth;
 
     switch (this.currentView) {
       case 'sign-in':
@@ -353,9 +306,6 @@ export class DfAuthDemo extends SignalWatcher(LitElement) {
     console.error('[df-auth-demo] Auth error:', e.detail.error);
   }
 }
-
-// Import getFirebaseAuth for emulator connection
-import {getFirebaseAuth} from '@df/firebase/auth';
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -1,7 +1,7 @@
 import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {getFirebaseApp} from '@df/firebase';
+import {getInitializedFirebaseApp, shouldUseEmulatorForService} from '@df/state';
 import {
   initializeTodosStore,
   todoCollectionState,
@@ -10,7 +10,6 @@ import {
   firebaseAuthState,
 } from '@df/state';
 import type {FirestoreCollectionState, TodoDocument, TodoFilterState} from '@df/types';
-import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 
 // Ensure Firestore UI components are registered
 import '@df/ui-lit/firebase';
@@ -209,9 +208,10 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
         return;
       }
 
-      const config = getFirebaseConfig();
-      const app = getFirebaseApp(config);
-      await initializeTodosStore(app, useEmulator());
+      await initializeTodosStore(
+        getInitializedFirebaseApp(),
+        shouldUseEmulatorForService('firestore')
+      );
       this.initialized = true;
     } catch (error) {
       console.error('[df-firestore-demo] Failed to initialise Firestore demo:', error);

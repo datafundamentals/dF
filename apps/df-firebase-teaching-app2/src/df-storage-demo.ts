@@ -1,10 +1,8 @@
 import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {getFirebaseApp} from '@df/firebase';
-import {firebaseAuthState, initializeStorage} from '@df/state';
+import {firebaseAuthState} from '@df/state';
 import type {StorageFileMetadata} from '@df/types';
-import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 import {fileUploadProgress} from '@df/ui-lit/df-upload-link-store';
 
 // Ensure Storage UI components are registered
@@ -134,7 +132,7 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    void this.initializeStorageStore();
+    void this.initializeStore();
   }
 
   override render() {
@@ -206,21 +204,13 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
     `;
   }
 
-  private async initializeStorageStore(): Promise<void> {
+  private initializeStore(): void {
     if (this.initialized) {
       return;
     }
 
-    try {
-      const config = getFirebaseConfig();
-      const app = getFirebaseApp(config);
-      initializeStorage(app, useEmulator());
-      this.initialized = true;
-    } catch (error) {
-      console.error('[df-storage-demo] Failed to initialize Storage demo:', error);
-      this.initError =
-        'Unable to initialize Storage demo. Ensure the emulators are running and reload the page.';
-    }
+    // Storage auto-initializes when accessed
+    this.initialized = true;
   }
 
   private async handleUploadComplete(e: CustomEvent) {

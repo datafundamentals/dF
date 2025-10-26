@@ -1,7 +1,7 @@
 import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {getFirebaseApp} from '@df/firebase';
+import {getInitializedFirebaseApp, shouldUseEmulatorForService} from '@df/state';
 import {
   initializeTodosStore,
   todoCollectionState,
@@ -11,7 +11,6 @@ import {
   googleAuthUser,
 } from '@df/state';
 import type {FirestoreCollectionState, TodoDocument, TodoFilterState} from '@df/types';
-import {getFirebaseConfig, useEmulator} from './config/firebase.config.js';
 
 // Ensure Firestore UI components are registered
 import '@df/ui-lit/firebase';
@@ -86,7 +85,7 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
     
     // Check BOTH auth systems - emulator auth OR Google auth
     // In emulator mode, we're more permissive since emulators don't enforce auth
-    const isAuthenticated = auth.authUser !== null || googleUser !== null || useEmulator();
+    const isAuthenticated = auth.authUser !== null || googleUser !== null || shouldUseEmulatorForService('firestore');
 
     // Auto-initialize when user signs in OR when using emulator
     if (isAuthenticated && !this.initialized) {
@@ -212,15 +211,16 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
       const googleUser = googleAuthUser.get();
       
       // Check BOTH auth systems, or allow if using emulator
-      if (!auth.authUser && !googleUser && !useEmulator()) {
+      if (!auth.authUser && !googleUser && !shouldUseEmulatorForService('firestore')) {
         // Not authenticated yet - wait for user to sign in
         // The component will re-render when either auth state changes
         return;
       }
 
-      const config = getFirebaseConfig();
-      const app = getFirebaseApp(config);
-      await initializeTodosStore(app, useEmulator());
+      await initializeTodosStore(
+        getInitializedFirebaseApp(),
+        shouldUseEmulatorForService('firestore')
+      );
       this.initialized = true;
     } catch (error) {
       console.error('[df-firestore-demo] Failed to initialise Firestore demo:', error);

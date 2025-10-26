@@ -17,7 +17,7 @@
     "./app-firebase-config": "./dist/app-firebase-config.js"
   },
   "scripts": {
-    "prebuild": "tsx scripts/generate-emulator-config.ts",
+    "prebuild": "node scripts/generate-emulator-config.mjs",
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
@@ -25,7 +25,6 @@
     "firebase": "^11.7.0"
   },
   "devDependencies": {
-    "tsx": "^4.19.2",
     "typescript": "^5.9.2"
   }
 }

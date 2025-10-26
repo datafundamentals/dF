@@ -53,9 +53,14 @@ import {
   signOut as firebaseSignOut,
   resetPassword as firebaseResetPassword,
   updateUserProfile,
+  connectAuthToEmulator,
   type Auth,
   type Unsubscribe,
 } from '@df/firebase/auth';
+import {
+  getInitializedFirebaseApp,
+  shouldUseEmulatorForService,
+} from './firebase-init.js';
 
 /**
  * Internal signal holding the current authenticated user.
@@ -90,6 +95,51 @@ let authInstance: Auth | null = null;
 let unsubscribeAuthListener: Unsubscribe | null = null;
 
 /**
+ * Ensures auth is initialized with lazy loading.
+ * Safe to call multiple times - will only initialize once.
+ * 
+ * @internal
+ */
+function ensureAuthInitialized(): void {
+  if (authInstance && unsubscribeAuthListener) {
+    // Already initialized
+    return;
+  }
+
+  const app = getInitializedFirebaseApp();
+
+  if (firebaseAppRef === app && unsubscribeAuthListener) {
+    // Already initialized with this app
+    return;
+  }
+
+  // Clean up previous listener if exists
+  if (unsubscribeAuthListener) {
+    unsubscribeAuthListener();
+  }
+
+  firebaseAppRef = app;
+  authInstance = getFirebaseAuth(app);
+
+  // Connect to emulator if configured
+  if (shouldUseEmulatorForService('auth')) {
+    connectAuthToEmulator(authInstance, {
+      host: '127.0.0.1',
+      port: 9155,
+    });
+  }
+
+  // Set up auth state listener
+  authStateSignal.set('loading');
+  unsubscribeAuthListener = onAuthStateChange(app, (user) => {
+    authUserSignal.set(user);
+    authStateSignal.set(user ? 'authenticated' : 'unauthenticated');
+    initializedSignal.set(true);
+    errorSignal.set(null);
+  });
+}
+
+/**
  * Computed state that combines all auth signals.
  *
  * This is the primary way to access authentication state in components.
@@ -111,12 +161,17 @@ let unsubscribeAuthListener: Unsubscribe | null = null;
  * return html`<sign-in-form></sign-in-form>`;
  * ```
  */
-export const firebaseAuthState = computed<FirebaseAuthState>(() => ({
-  authUser: authUserSignal.get(),
-  authState: authStateSignal.get(),
-  error: errorSignal.get(),
-  initialized: initializedSignal.get(),
-}));
+export const firebaseAuthState = computed<FirebaseAuthState>(() => {
+  // Lazy initialization on first access
+  ensureAuthInitialized();
+  
+  return {
+    authUser: authUserSignal.get(),
+    authState: authStateSignal.get(),
+    error: errorSignal.get(),
+    initialized: initializedSignal.get(),
+  };
+});
 
 /**
  * Initialize the auth store with a Firebase app instance.
@@ -255,8 +310,10 @@ export function cleanupAuth(): void {
  * ```
  */
 export async function signIn(credentials: SignInCredentials): Promise<void> {
+  ensureAuthInitialized();
+  
   if (!authInstance) {
-    throw new Error('Auth not initialized. Call initializeAuth() first.');
+    throw new Error('Auth initialization failed');
   }
 
   authStateSignal.set('loading');
@@ -311,8 +368,10 @@ export async function signIn(credentials: SignInCredentials): Promise<void> {
  * ```
  */
 export async function signUp(data: SignUpData): Promise<void> {
+  ensureAuthInitialized();
+  
   if (!authInstance) {
-    throw new Error('Auth not initialized. Call initializeAuth() first.');
+    throw new Error('Auth initialization failed');
   }
 
   authStateSignal.set('loading');
@@ -364,8 +423,10 @@ export async function signUp(data: SignUpData): Promise<void> {
  * ```
  */
 export async function signOut(): Promise<void> {
+  ensureAuthInitialized();
+  
   if (!authInstance) {
-    throw new Error('Auth not initialized. Call initializeAuth() first.');
+    throw new Error('Auth initialization failed');
   }
 
   authStateSignal.set('loading');
@@ -410,8 +471,10 @@ export async function signOut(): Promise<void> {
  * ```
  */
 export async function resetPassword(request: PasswordResetRequest): Promise<void> {
+  ensureAuthInitialized();
+  
   if (!authInstance) {
-    throw new Error('Auth not initialized. Call initializeAuth() first.');
+    throw new Error('Auth initialization failed');
   }
 
   errorSignal.set(null);
@@ -579,8 +642,10 @@ export function isAuthLoading(): boolean {
  * ```
  */
 export async function signInWithGoogle(scopes: string[] = []): Promise<void> {
+  ensureAuthInitialized();
+  
   if (!authInstance) {
-    throw new Error('Auth not initialized. Call initializeAuth() first.');
+    throw new Error('Auth initialization failed');
   }
 
   authStateSignal.set('loading');
@@ -630,8 +695,10 @@ export async function signInWithGoogle(scopes: string[] = []): Promise<void> {
  * ```
  */
 export async function signInWithGoogleRedirect(scopes: string[] = []): Promise<void> {
+  ensureAuthInitialized();
+  
   if (!authInstance) {
-    throw new Error('Auth not initialized. Call initializeAuth() first.');
+    throw new Error('Auth initialization failed');
   }
 
   authStateSignal.set('loading');
