@@ -8,5 +8,5 @@ export const EMULATOR_CONFIG: EmulatorConfig = {
   auth: true,
   firestore: true,
   storage: true,
-  functions: false, // Production functions
+  functions: true,
 };
