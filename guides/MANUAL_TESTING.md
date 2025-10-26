@@ -27,20 +27,20 @@ Run through this checklist after automated suites pass and before opening a PR. 
 - `pnpm test`
 
 ## Emulator & Seed Data
-- `pnpm --filter @df/df-firebase-teaching-app emulators:start`
-- `pnpm --filter @df/df-firebase-teaching-app seed`
-- Restart the app: `pnpm --filter @df/df-firebase-teaching-app dev` or whatever relevant app that you are working on.
+- `pnpm --filter @df/df-firebase-teaching-app0 emulators:start`
+- `pnpm --filter @df/df-firebase-teaching-app0 seed`
+- Restart the app: `pnpm --filter @df/df-firebase-teaching-app0 dev` or whatever relevant app that you are working on.
 - Hard refresh the browser, open DevTools console, and watch for unexpected logs
 - Manually exercise every relevant page/state (auth flows, data mutations, error handling, etc.)
 
 ## Production Smoke (when applicable)
-- `pnpm --filter @df/df-firebase-teaching-app deploy:prod`
+- `pnpm --filter @df/df-firebase-teaching-app0 deploy:prod`
 - Hard refresh production, check DevTools console, spot-check key user flows
 
 ## Standards & Reporting
 - `pnpm scan:compliance`
 - `pnpm lint`
-- `pnpm --filter @df/df-firebase-teaching-app test`
+- `pnpm --filter @df/df-firebase-teaching-app0 test`
 - `pnpm generate:compliance-report` (expect 100% clean)
 - `pnpm standards:dashboard` → currently fails because of legacy console/comment debt; capture the output and ensure failures match `.z_/future/STANDARDS_FORBIDDEN_PATTERNS_CLEANUP.md`
 

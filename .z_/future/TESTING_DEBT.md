@@ -29,7 +29,7 @@ This document tracks known gaps in the Firebase Teaching App identified during T
 - **Found:** 4 test files total
   - 3 test files in `packages/state`
   - 1 test file in `packages/ui-lit`
-  - 0 test files in `apps/df-firebase-teaching-app/functions`
+  - 0 test files in `apps/df-firebase-teaching-app0/functions`
 - **Estimated Coverage:** 30-40% (not measured)
 - **What's Missing:**
   - Store tests for auth, Firestore, storage, functions stores
@@ -303,7 +303,7 @@ pnpm add -D vitest @vitest/ui c8 happy-dom @testing-library/dom
 ## Gap 4: Cloud Functions Implementation Status Unclear
 
 ### Current State
-- **Directory Structure:** ✅ Exists (`apps/df-firebase-teaching-app/functions/`)
+- **Directory Structure:** ✅ Exists (`apps/df-firebase-teaching-app0/functions/`)
 - **Workspace Configuration:** ✅ Separate package.json and tsconfig.json
 - **Function Implementations:** ❓ Unknown (not verified)
   - Callable functions: Unknown
@@ -456,8 +456,8 @@ The technical debt is considered resolved when:
 - **Ticket 11:** `.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md` (lines 1050-1250)
 - **Ticket 12:** `.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md` (lines 1250-1400)
 - **Ticket 13:** `.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md` (lines 1400-1650)
-- **Testing Guide:** `apps/df-firebase-teaching-app/README.md` (Security Rules Testing section)
-- **Guides Directory:** `apps/df-firebase-teaching-app/guides/` (7 Firebase pattern guides)
+- **Testing Guide:** `apps/df-firebase-teaching-app0/README.md` (Security Rules Testing section)
+- **Guides Directory:** `apps/df-firebase-teaching-app0/guides/` (7 Firebase pattern guides)
 
 ---
 

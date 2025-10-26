@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-`apps/df-firebase-teaching-app/src/auth-token-exchange.ts` implements cross-project Google OAuth token exchange but violates signals-first architecture and contains several anti-patterns. This module is currently only used in `df-firebase-teaching-app` (app1) and was part of a previous attempt to create a separate `df-auth-wrapper`.
+`apps/df-firebase-teaching-app0/src/auth-token-exchange.ts` implements cross-project Google OAuth token exchange but violates signals-first architecture and contains several anti-patterns. This module is currently only used in `df-firebase-teaching-app` (app1) and was part of a previous attempt to create a separate `df-auth-wrapper`.
 
 **Current Issues:**
 1. **Polling anti-pattern** - Uses `setInterval` every 500ms instead of reactive signals

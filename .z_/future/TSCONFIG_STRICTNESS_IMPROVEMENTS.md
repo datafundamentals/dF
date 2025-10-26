@@ -239,7 +239,7 @@ Low test coverage (22.52% overall in `packages/state`) means **strictness improv
 
 ### Analysis
 
-**File:** `apps/df-firebase-teaching-app/functions/tsconfig.json`
+**File:** `apps/df-firebase-teaching-app0/functions/tsconfig.json`
 
 **Current Config:**
 ```json

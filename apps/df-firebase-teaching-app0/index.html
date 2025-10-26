@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DF Firebase Teaching App - Navigation</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" href="/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 60px;
+      }
+
+      .header h1 {
+        margin: 0 0 16px;
+        font-size: 3rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .header p {
+        margin: 0;
+        font-size: 1.25rem;
+        opacity: 0.95;
+        font-weight: 300;
+      }
+
+      .workflows {
+        display: grid;
+        gap: 32px;
+        margin-bottom: 60px;
+      }
+
+      .workflow-card {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .workflow-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+      }
+
+      .workflow-card.canonical {
+        border: 4px solid #4caf50;
+        background: linear-gradient(135deg, #f1f8e9 0%, #ffffff 100%);
+      }
+
+      .workflow-card.antipattern {
+        border: 4px solid #ff9800;
+        background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);
+      }
+
+      .workflow-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .workflow-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .badge-canonical {
+        background: #4caf50;
+        color: white;
+      }
+
+      .badge-antipattern {
+        background: #ff9800;
+        color: white;
+      }
+
+      .workflow-card h2 {
+        margin: 0;
+        font-size: 2rem;
+        color: #1a1a1a;
+      }
+
+      .workflow-card p {
+        margin: 0 0 24px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #555;
+      }
+
+      .demos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      .demo-link {
+        display: block;
+        padding: 20px;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+
+      .demo-link:hover {
+        border-color: #667eea;
+        background: #f5f7ff;
+        transform: translateY(-2px);
+      }
+
+      .demo-link h3 {
+        margin: 0 0 8px;
+        color: #667eea;
+        font-size: 1.25rem;
+      }
+
+      .demo-link p {
+        margin: 0;
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+
+      .features-list {
+        margin: 24px 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .features-list li {
+        padding: 8px 0;
+        padding-left: 32px;
+        position: relative;
+        color: #555;
+        line-height: 1.5;
+      }
+
+      .features-list li::before {
+        content: "✓";
+        position: absolute;
+        left: 8px;
+        color: #4caf50;
+        font-weight: bold;
+        font-size: 1.2rem;
+      }
+
+      .workflow-card.antipattern .features-list li::before {
+        content: "⚠";
+        color: #ff9800;
+      }
+
+      .cta {
+        display: inline-block;
+        padding: 16px 32px;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: background 0.2s;
+        margin-top: 16px;
+      }
+
+      .cta:hover {
+        background: #5568d3;
+      }
+
+      .cta.secondary {
+        background: #ff9800;
+      }
+
+      .cta.secondary:hover {
+        background: #f57c00;
+      }
+
+      .additional-demos {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .additional-demos h2 {
+        margin: 0 0 24px;
+        color: #1a1a1a;
+        font-size: 1.75rem;
+      }
+
+      .footer {
+        text-align: center;
+        color: white;
+        margin-top: 60px;
+        padding: 20px;
+        opacity: 0.9;
+      }
+
+      .footer a {
+        color: white;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔥 Firebase Teaching App</h1>
+        <p>Choose your authentication workflow</p>
+      </div>
+
+      <div class="workflows">
+        <!-- CANONICAL WORKFLOW -->
+        <div class="workflow-card canonical">
+          <div class="workflow-header">
+            <span class="workflow-badge badge-canonical">✅ Copy This Pattern</span>
+          </div>
+          <h2>Workflow 1: Canonical Pattern</h2>
+          <p>
+            <strong>Production Google Sign-In + Emulator-Based Features</strong><br>
+            This is the recommended architecture for ALL apps in the DF monorepo.
+          </p>
+
+          <ul class="features-list">
+            <li>Production-ready <code>df-auth-wrapper</code> component</li>
+            <li>Real Google OAuth flow (tests actual authentication)</li>
+            <li>Firestore, Storage, and Functions on emulators (fast development)</li>
+            <li>Clean separation: production auth + emulator features</li>
+            <li>Reusable pattern across all monorepo apps</li>
+            <li>Minimizes unnecessary differentiation</li>
+          </ul>
+
+          <div class="demos-grid">
+            <a href="/index-canonical.html" class="demo-link">
+              <h3>🎯 Main Canonical Demo</h3>
+              <p>Working Firebase demos (Firestore, Storage, Functions) protected by df-auth-wrapper</p>
+            </a>
+
+            <a href="/demo-all.html" class="demo-link">
+              <h3>📚 Full Component Demo</h3>
+              <p>All teaching components in one page (includes emulator auth quarantined)</p>
+            </a>
+          </div>
+
+          <a href="/index-canonical.html" class="cta">Start with Canonical Demo →</a>
+        </div>
+
+        <!-- ANTIPATTERN WORKFLOW -->
+        <div class="workflow-card antipattern">
+          <div class="workflow-header">
+            <span class="workflow-badge badge-antipattern">⚠️ Educational Only</span>
+          </div>
+          <h2>Workflow 2: Auth Emulator (Don't Copy!)</h2>
+          <p>
+            <strong>Firebase Auth Emulator with Custom UI</strong><br>
+            Proves emulator auth is possible, but it's an anti-pattern for our architecture.
+          </p>
+
+          <ul class="features-list">
+            <li>Custom auth emulator UI (cute demo component)</li>
+            <li>Proves technical feasibility of emulator auth</li>
+            <li>Creates unnecessary differentiation between apps</li>
+            <li>Doesn't match production authentication flow</li>
+            <li>Known emulator auth limitations and issues</li>
+            <li><strong>Use df-auth-wrapper instead!</strong></li>
+          </ul>
+
+          <p style="margin-top: 24px; padding: 16px; background: rgba(255, 152, 0, 0.1); border-left: 4px solid #ff9800; border-radius: 4px;">
+            <strong>Why show this?</strong> To demonstrate what NOT to do. It's valuable to understand
+            that emulator auth is possible, but you should never replicate this pattern in production apps.
+            Always use the canonical pattern (Workflow 1) instead.
+          </p>
+
+          <a href="/auth-wrapper-demo.html" class="cta secondary">View Auth Emulator Anti-Pattern →</a>
+        </div>
+      </div>
+
+      <!-- ADDITIONAL DEMOS -->
+      <div class="additional-demos">
+        <h2>📚 Additional Resources</h2>
+        <div class="demos-grid">
+          <a href="/demo-all.html" class="demo-link">
+            <h3>🎪 Full Demo (All Components)</h3>
+            <p>See all Firebase patterns in one page (includes quarantined emulator auth)</p>
+          </a>
+
+          <a href="http://127.0.0.1:5400" class="demo-link" target="_blank">
+            <h3>🔧 Firebase Emulator UI</h3>
+            <p>Browse Auth, Firestore, Storage data in the emulator admin interface</p>
+          </a>
+
+          <a href="https://github.com/datafundamentals/df/tree/main/apps/df-firebase-teaching-app0" class="demo-link" target="_blank">
+            <h3>📖 GitHub Repository</h3>
+            <p>View source code, documentation, and implementation details</p>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>
+          <strong>Quick Start:</strong> 
+          Terminal 1: <code>pnpm emulators:start</code> &nbsp;|&nbsp; 
+          Terminal 2: <code>pnpm dev</code>
+        </p>
+        <p>
+          For detailed setup instructions, see 
+          <a href="https://github.com/datafundamentals/df/tree/main/apps/df-firebase-teaching-app0#readme">README.md</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

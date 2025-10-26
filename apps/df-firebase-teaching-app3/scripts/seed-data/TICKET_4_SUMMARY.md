@@ -83,7 +83,7 @@
 ## Files Created
 
 ```
-apps/df-firebase-teaching-app/scripts/seed-data/
+apps/df-firebase-teaching-app0/scripts/seed-data/
 ├── README.md                           # Comprehensive seed data documentation
 ├── seed.ts                             # Main seeding script (TypeScript)
 ├── auth-users.json                     # 10 authentication users
@@ -102,7 +102,7 @@ apps/df-firebase-teaching-app/scripts/seed-data/
 ## Files Modified
 
 ```
-apps/df-firebase-teaching-app/
+apps/df-firebase-teaching-app0/
 ├── package.json                        # Added seed scripts, tsx, @types/node
 └── README.md                           # Expanded seed data section
 ```
@@ -119,12 +119,12 @@ apps/df-firebase-teaching-app/
 
 2. **Start Emulators:**
    ```bash
-   pnpm --filter @df/df-firebase-teaching-app emulators:start
+   pnpm --filter @df/df-firebase-teaching-app0 emulators:start
    ```
 
 3. **Run Seed Script:**
    ```bash
-   pnpm --filter @df/df-firebase-teaching-app seed
+   pnpm --filter @df/df-firebase-teaching-app0 seed
    ```
 
 4. **Verify in Emulator UI:**
@@ -135,13 +135,13 @@ apps/df-firebase-teaching-app/
 
 5. **Test Idempotency:**
    ```bash
-   pnpm --filter @df/df-firebase-teaching-app seed
+   pnpm --filter @df/df-firebase-teaching-app0 seed
    ```
    Should skip existing data and report summary
 
 6. **Test Reset:**
    ```bash
-   pnpm --filter @df/df-firebase-teaching-app seed:reset
+   pnpm --filter @df/df-firebase-teaching-app0 seed:reset
    ```
    Should clear and repopulate
 

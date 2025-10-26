@@ -2,10 +2,10 @@
 
 ## Problem Statement
 
-Firebase emulator ports are currently hardcoded in **multiple locations** across the codebase, violating DRY principles and causing maintenance issues. During recent refactoring, port mismatches between `apps/df-firebase-teaching-app/firebase.json` (intentionally non-default ports) and store initialization code caused connection failures.
+Firebase emulator ports are currently hardcoded in **multiple locations** across the codebase, violating DRY principles and causing maintenance issues. During recent refactoring, port mismatches between `apps/df-firebase-teaching-app0/firebase.json` (intentionally non-default ports) and store initialization code caused connection failures.
 
 **Current Duplication (Per App):**
-1. `apps/df-firebase-teaching-app/firebase.json` - Emulator configuration
+1. `apps/df-firebase-teaching-app0/firebase.json` - Emulator configuration
 2. `apps/*/scripts/seed-data/seed.ts` - Seed script emulator connection
 3. `packages/state/src/stores/firebase-auth.store.ts` - Auth emulator connection (hardcoded 9155)
 4. `packages/state/src/stores/storage.store.ts` - Storage emulator connection (hardcoded 9390)
@@ -100,7 +100,7 @@ const EMULATOR_CONFIG = {
 ```
 
 Update in all 5 teaching apps:
-- `apps/df-firebase-teaching-app/scripts/seed-data/seed.ts`
+- `apps/df-firebase-teaching-app0/scripts/seed-data/seed.ts`
 - `apps/df-firebase-teaching-app2/scripts/seed-data/seed.ts`
 - `apps/df-firebase-teaching-app3/scripts/seed-data/seed.ts`
 - `apps/df-firebase-teaching-app4/scripts/seed-data/seed.ts`
@@ -138,7 +138,7 @@ const config = {
 
 Update all port references in documentation:
 - `guides/BUNDLE_INTEGRATION.md` - Replace hardcoded port list with import reference
-- `apps/df-firebase-teaching-app/guides/*` - Reference `FIREBASE_EMULATOR_PORTS` constant
+- `apps/df-firebase-teaching-app0/guides/*` - Reference `FIREBASE_EMULATOR_PORTS` constant
 - README files mentioning emulator ports
 
 Example documentation pattern:
@@ -159,7 +159,7 @@ Create test to ensure all ports match:
 // tests/integration/firebase-ports.spec.ts
 import { test, expect } from '@playwright/test';
 import { FIREBASE_EMULATOR_PORTS } from '@df/types';
-import firebaseConfig from '../../apps/df-firebase-teaching-app/firebase.json';
+import firebaseConfig from '../../apps/df-firebase-teaching-app0/firebase.json';
 
 test('firebase.json ports match FIREBASE_EMULATOR_PORTS constants', () => {
   expect(firebaseConfig.emulators.auth.port).toBe(FIREBASE_EMULATOR_PORTS.auth);

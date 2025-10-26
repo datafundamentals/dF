@@ -64,7 +64,7 @@ While functions themselves aren't packages, their **shared utilities** are:
 
 **Structure:**
 ```
-apps/df-firebase-teaching-app/
+apps/df-firebase-teaching-app0/
 ├── src/                        # Frontend code
 │   └── ui/
 │       └── todo-list.ts        # Calls functions
@@ -85,7 +85,7 @@ apps/df-firebase-teaching-app/
 
 **Deployment:**
 ```bash
-cd apps/df-firebase-teaching-app
+cd apps/df-firebase-teaching-app0
 firebase deploy --only functions --project df-teaching-app
 ```
 
@@ -97,7 +97,7 @@ firebase deploy --only functions --project df-teaching-app
 
 **Example:**
 ```typescript
-// apps/df-firebase-teaching-app/functions/src/callable/createTodoAdvanced.ts
+// apps/df-firebase-teaching-app0/functions/src/callable/createTodoAdvanced.ts
 import * as functions from 'firebase-functions/v2';
 import { getFirestore } from 'firebase-admin/firestore';
 import type { Todo } from '@df/types';
@@ -396,10 +396,10 @@ Premature abstraction is worse than duplication. Wait for real multi-app need be
 
 ### App-Specific Functions
 
-`apps/df-firebase-teaching-app/functions/package.json`:
+`apps/df-firebase-teaching-app0/functions/package.json`:
 ```json
 {
-  "name": "@df/df-firebase-teaching-app-functions",
+  "name": "@df/df-firebase-teaching-app0-functions",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -554,7 +554,7 @@ Premature abstraction is worse than duplication. Wait for real multi-app need be
 
 **Deploy with app:**
 ```bash
-cd apps/df-firebase-teaching-app
+cd apps/df-firebase-teaching-app0
 firebase use df-teaching-app
 firebase deploy --only functions
 ```

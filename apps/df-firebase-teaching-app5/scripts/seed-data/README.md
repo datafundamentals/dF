@@ -231,7 +231,7 @@ scripts/seed-data/
 
 1. **Firebase Emulators running:**
    ```bash
-   pnpm --filter @df/df-firebase-teaching-app emulators:start
+   pnpm --filter @df/df-firebase-teaching-app0 emulators:start
    ```
 
 2. **Dependencies installed:**
@@ -244,7 +244,7 @@ scripts/seed-data/
 #### Initial Seed
 Populate emulators with seed data:
 ```bash
-pnpm --filter @df/df-firebase-teaching-app seed
+pnpm --filter @df/df-firebase-teaching-app0 seed
 ```
 
 **What it does:**
@@ -256,7 +256,7 @@ pnpm --filter @df/df-firebase-teaching-app seed
 #### Reset and Reseed
 Clear all data and repopulate:
 ```bash
-pnpm --filter @df/df-firebase-teaching-app seed:reset
+pnpm --filter @df/df-firebase-teaching-app0 seed:reset
 ```
 
 **What it does:**
@@ -278,7 +278,7 @@ Navigate to:
 ### Export Seed Data
 Save current emulator state for sharing:
 ```bash
-pnpm --filter @df/df-firebase-teaching-app emulators:export
+pnpm --filter @df/df-firebase-teaching-app0 emulators:export
 ```
 
 This exports to `emulator-data/` for version control.
@@ -423,7 +423,7 @@ pnpm install
 ### "Not connected to Firebase emulators" error
 **Solution:** Start emulators first:
 ```bash
-pnpm --filter @df/df-firebase-teaching-app emulators:start
+pnpm --filter @df/df-firebase-teaching-app0 emulators:start
 ```
 
 ### Users created but not visible in Emulator UI
@@ -446,7 +446,7 @@ pnpm --filter @df/df-firebase-teaching-app emulators:start
 
 To start fresh:
 ```bash
-pnpm --filter @df/df-firebase-teaching-app seed:reset
+pnpm --filter @df/df-firebase-teaching-app0 seed:reset
 ```
 
 ## Related Documentation

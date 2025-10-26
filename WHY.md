@@ -50,7 +50,7 @@ When you start seeing numbers like this, performance starts to matter. _A lot._
   </tbody>
 </table>
 
-The above is just a snippet from [_this internal doc_](apps/df-firebase-teaching-app/guides/PERFORMANCE_PATTERNS.md)
+The above is just a snippet from [_this internal doc_](apps/df-firebase-teaching-app0/guides/PERFORMANCE_PATTERNS.md)
 
 
 The idea is simple - fix everything at the architectural level, then replicate that across all your apps! This is even easier, with a monorepo such as this.

@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - 'apps/df-firebase-teaching-app/**'
+      - 'apps/df-firebase-teaching-app0/**'
       - 'packages/**'
       - '.github/workflows/deploy-firebase-teaching-app.yml'
   workflow_dispatch:
@@ -72,7 +72,7 @@ jobs:
           pnpm --filter @df/ui-lit run build
       
       - name: Create .env.production from secrets
-        working-directory: apps/df-firebase-teaching-app
+        working-directory: apps/df-firebase-teaching-app0
         run: |
           cat > .env.production << EOF
           VITE_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
@@ -86,14 +86,14 @@ jobs:
           EOF
       
       - name: Run security rules tests
-        run: pnpm --filter @df/df-firebase-teaching-app test:rules
+        run: pnpm --filter @df/df-firebase-teaching-app0 test:rules
       
       - name: Build production app
-        run: pnpm --filter @df/df-firebase-teaching-app build:prod
+        run: pnpm --filter @df/df-firebase-teaching-app0 build:prod
       
       - name: Check build output
         run: |
-          ls -la apps/df-firebase-teaching-app/dist/
+          ls -la apps/df-firebase-teaching-app0/dist/
           echo "Build completed successfully"
       
       - name: Deploy to Firebase Hosting
@@ -109,14 +109,14 @@ jobs:
       
       - name: Deploy Cloud Functions
         if: success()
-        working-directory: apps/df-firebase-teaching-app
+        working-directory: apps/df-firebase-teaching-app0
         run: |
           npm install -g firebase-tools
           firebase deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID }} --token ${{ secrets.FIREBASE_TOKEN }}
       
       - name: Deploy Security Rules
         if: success()
-        working-directory: apps/df-firebase-teaching-app
+        working-directory: apps/df-firebase-teaching-app0
         run: |
           firebase deploy --only firestore:rules,storage --project ${{ secrets.FIREBASE_PROJECT_ID }} --token ${{ secrets.FIREBASE_TOKEN }}
       
@@ -179,7 +179,7 @@ jobs:
           pnpm --filter @df/ui-lit run build
       
       - name: Create .env.production from secrets
-        working-directory: apps/df-firebase-teaching-app
+        working-directory: apps/df-firebase-teaching-app0
         run: |
           cat > .env.production << EOF
           VITE_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
@@ -193,7 +193,7 @@ jobs:
           EOF
       
       - name: Build production app
-        run: pnpm --filter @df/df-firebase-teaching-app build:prod
+        run: pnpm --filter @df/df-firebase-teaching-app0 build:prod
       
       - name: Deploy to preview channel
         uses: FirebaseExtended/action-hosting-deploy@v0

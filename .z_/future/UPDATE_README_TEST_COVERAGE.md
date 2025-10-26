@@ -46,7 +46,7 @@ Per Ticket 11's philosophy, the teaching app prioritizes **demonstrating testing
 
 ### 1. Add Test Coverage Section to README
 
-**Location:** `apps/df-firebase-teaching-app/README.md`  
+**Location:** `apps/df-firebase-teaching-app0/README.md`  
 **Section:** After "Testing" section (around line 500-550)
 
 **Content to Add:**
@@ -184,7 +184,7 @@ See `.z_/future/ADD_FIRESTORE_STORE_TESTS.md` for planned test coverage improvem
 
 ### 2. Update Testing Section
 
-**Location:** `apps/df-firebase-teaching-app/README.md` (existing "Testing" section)
+**Location:** `apps/df-firebase-teaching-app0/README.md` (existing "Testing" section)
 
 **Changes:**
 - [ ] Add link to new "Test Coverage Status" section
@@ -216,7 +216,7 @@ For detailed coverage status and philosophy, see [Test Coverage Status](#test-co
 
 ### 3. Add Coverage Commands to package.json
 
-**Location:** `apps/df-firebase-teaching-app/package.json`
+**Location:** `apps/df-firebase-teaching-app0/package.json`
 
 **Verify these scripts exist (add if missing):**
 ```json
@@ -225,8 +225,8 @@ For detailed coverage status and philosophy, see [Test Coverage Status](#test-co
     "test": "pnpm test:integration",
     "test:integration": "playwright test --config ../../playwright.config.ts --project=df-firebase-teaching-app",
     "test:rules": "pnpm test:rules:firestore && pnpm test:rules:storage",
-    "test:rules:firestore": "firebase emulators:exec --only firestore 'pnpm --filter @df/df-firebase-teaching-app test:firestore-rules'",
-    "test:rules:storage": "firebase emulators:exec --only storage 'pnpm --filter @df/df-firebase-teaching-app test:storage-rules'",
+    "test:rules:firestore": "firebase emulators:exec --only firestore 'pnpm --filter @df/df-firebase-teaching-app0 test:firestore-rules'",
+    "test:rules:storage": "firebase emulators:exec --only storage 'pnpm --filter @df/df-firebase-teaching-app0 test:storage-rules'",
     "test:firestore-rules": "node --experimental-vm-modules node_modules/.bin/jest tests/security-rules/firestore.rules.test.ts",
     "test:storage-rules": "node --experimental-vm-modules node_modules/.bin/jest tests/security-rules/storage.rules.test.ts"
   }
@@ -248,7 +248,7 @@ For detailed coverage status and philosophy, see [Test Coverage Status](#test-co
 
 ### 4. Add Coverage Badge (Optional)
 
-**Location:** `apps/df-firebase-teaching-app/README.md` (top of file)
+**Location:** `apps/df-firebase-teaching-app0/README.md` (top of file)
 
 **If using GitHub Actions for CI:**
 ```markdown
@@ -372,7 +372,7 @@ Copy actual coverage percentages into README (update with real numbers after Fir
 
 - **Source Audit:** `.z_/WIP/COMPLIANCE_CHECKLIST.md` (Section E: Test Coverage Validation)
 - **Ticket 11:** Testing & Documentation Finalization (revised coverage targets)
-- **Current README:** `apps/df-firebase-teaching-app/README.md` (781 lines)
+- **Current README:** `apps/df-firebase-teaching-app0/README.md` (781 lines)
 - **Related Ticket:** `.z_/future/ADD_FIRESTORE_STORE_TESTS.md`
 
 ---

@@ -294,7 +294,7 @@ await addTodo({
 
 **Server-side: Cloud Function Trigger**
 
-**File:** `apps/df-firebase-teaching-app/functions/src/triggers/onTodoCreated.ts`
+**File:** `apps/df-firebase-teaching-app0/functions/src/triggers/onTodoCreated.ts`
 
 ```typescript
 import * as functions from 'firebase-functions/v2';
@@ -643,16 +643,16 @@ export async function compositeOperation(): Promise<void> {
 
 **Auth + Firestore Composite:**
 - `packages/state/src/stores/todos.store.ts` - User-owned todos pattern
-- `apps/df-firebase-teaching-app/src/df-firestore-demo.ts` - UI integration
+- `apps/df-firebase-teaching-app0/src/df-firestore-demo.ts` - UI integration
 
 **Storage + Firestore Composite:**
 - `packages/state/src/stores/storage.store.ts` - File upload patterns
-- `apps/df-firebase-teaching-app/src/df-storage-demo.ts` - Metadata tracking
+- `apps/df-firebase-teaching-app0/src/df-storage-demo.ts` - Metadata tracking
 
 **Firestore Triggers:**
-- `apps/df-firebase-teaching-app/functions/src/triggers/onTodoCreated.ts`
-- `apps/df-firebase-teaching-app/functions/src/triggers/onTodoUpdated.ts`
-- `apps/df-firebase-teaching-app/functions/src/triggers/onTodoDeleted.ts`
+- `apps/df-firebase-teaching-app0/functions/src/triggers/onTodoCreated.ts`
+- `apps/df-firebase-teaching-app0/functions/src/triggers/onTodoUpdated.ts`
+- `apps/df-firebase-teaching-app0/functions/src/triggers/onTodoDeleted.ts`
 
 ---
 

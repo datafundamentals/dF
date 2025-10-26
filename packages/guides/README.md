@@ -18,4 +18,4 @@
 - `guides/` — repo-wide standards that apply to every ticket
 - `packages/firebase/guides/` — firebase-specific helpers shared across packages
 - `services/guides/` — backend/service execution patterns
-- `apps/df-firebase-teaching-app/guides/` — teaching app patterns and examples
+- `apps/df-firebase-teaching-app0/guides/` — teaching app patterns and examples

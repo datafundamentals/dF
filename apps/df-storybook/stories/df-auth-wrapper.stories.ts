@@ -441,7 +441,7 @@ export const SetupInstructions: Story = {
           function without proper Firebase initialization.
         </p>
         <p style="margin: 0; color: #856404;">
-          For a working demo, see: <code>apps/df-firebase-teaching-app/auth-wrapper-demo.html</code>
+          For a working demo, see: <code>apps/df-firebase-teaching-app0/auth-wrapper-demo.html</code>
         </p>
       </div>
 

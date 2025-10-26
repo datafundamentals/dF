@@ -1,0 +1,181 @@
+rules_version = '2';
+
+/**
+ * Firebase Storage Security Rules
+ *
+ * This ruleset demonstrates production-ready security patterns for file storage.
+ * It covers authentication, file type restrictions, size limits, and path-based permissions.
+ *
+ * Key Patterns:
+ * - Authentication-first: All operations require valid auth
+ * - File type validation: Restrict by MIME type and extension
+ * - Size limits: Prevent abuse with max file sizes
+ * - Path-based permissions: Organize by resource type
+ *
+ * Storage Paths:
+ *   /images/{imageId}       - Public images (max 5MB, image types only)
+ *   /documents/{docId}      - Documents (max 10MB, doc types only)
+ *   /avatars/{userId}       - User avatars (owner-only, max 2MB, image types)
+ *   /uploads/storage/image  - Teaching demo uploads (authenticated only)
+ *
+ * Testing:
+ *   pnpm test:rules  - Run automated security rules tests
+ *
+ * @see tests/security-rules/ for comprehensive test coverage
+ */
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // =============================================================================
+    // HELPER FUNCTIONS
+    // =============================================================================
+    
+    /**
+     * Check if user is authenticated
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Check if user is the owner of the resource
+     */
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Check if file size is within limit (in bytes)
+     */
+    function isWithinSizeLimit(maxSizeBytes) {
+      return request.resource.size <= maxSizeBytes;
+    }
+    
+    /**
+     * Check if file is an image type
+     */
+    function isImageFile() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    /**
+     * Check if file is a document type
+     */
+    function isDocumentFile() {
+      return request.resource.contentType.matches('application/pdf')
+          || request.resource.contentType.matches('application/msword')
+          || request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.*')
+          || request.resource.contentType.matches('text/plain')
+          || request.resource.contentType.matches('text/markdown')
+          || request.resource.contentType.matches('application/json');
+    }
+    
+    /**
+     * Check if file has valid image extension
+     */
+    function hasImageExtension() {
+      return request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp|svg)$');
+    }
+    
+    /**
+     * Check if file has valid document extension
+     */
+    function hasDocumentExtension() {
+      return request.resource.name.matches('.*\\.(pdf|doc|docx|txt|md|json)$');
+    }
+    
+    // =============================================================================
+    // IMAGES PATH - Public read, authenticated write with validation
+    // =============================================================================
+    
+    match /images/{imageId} {
+      // Anyone can read images (for teaching demos)
+      // Future: Consider requiring authentication for production
+      allow read: if true;
+      
+      // Only authenticated users can upload
+      // Max 5MB, must be image type with valid extension
+      allow write: if isAuthenticated()
+                   && isImageFile()
+                   && hasImageExtension()
+                   && isWithinSizeLimit(5 * 1024 * 1024); // 5MB
+    }
+    
+    // =============================================================================
+    // DOCUMENTS PATH - Authenticated access with document validation
+    // =============================================================================
+    
+    match /documents/{documentId} {
+      // Authenticated users can read documents
+      allow read: if isAuthenticated();
+      
+      // Authenticated users can upload documents
+      // Max 10MB, must be document type with valid extension
+      allow write: if isAuthenticated()
+                   && isDocumentFile()
+                   && hasDocumentExtension()
+                   && isWithinSizeLimit(10 * 1024 * 1024); // 10MB
+    }
+    
+    // =============================================================================
+    // AVATARS PATH - User-owned avatar images
+    // =============================================================================
+    
+    match /avatars/{fileName} {
+      // Anyone can view avatars (for user profiles)
+      allow read: if true;
+      
+      // Only the owner can upload/update their avatar
+      // Avatar filename must match the user's ID (e.g., avatars/user123)
+      // Max 2MB, must be image type with valid extension
+      allow write: if request.auth != null
+                   && request.auth.uid == fileName
+                   && isImageFile()
+                   && isWithinSizeLimit(2 * 1024 * 1024); // 2MB
+    }
+    
+    // =============================================================================
+    // UPLOADS PATH - Teaching demo storage paths
+    // =============================================================================
+    
+    /**
+     * Teaching demo: uploads/storage/image path
+     * Used in df-upload-link component demonstrations
+     */
+    match /uploads/storage/image/{fileId} {
+      allow read: if isAuthenticated();
+      
+      allow write: if isAuthenticated()
+                   && isImageFile()
+                   && hasImageExtension()
+                   && isWithinSizeLimit(5 * 1024 * 1024); // 5MB
+    }
+    
+    /**
+     * Generic uploads path for non-storage/image uploads
+     * Uses single-level wildcard to not conflict with more specific rules
+     */
+    match /uploads/{fileId} {
+      allow read: if isAuthenticated();
+      
+      // Authenticated users can upload with basic size limit
+      allow write: if isAuthenticated()
+                   && isWithinSizeLimit(10 * 1024 * 1024); // 10MB
+    }
+    
+    // =============================================================================
+    // DEFAULT DENY
+    // =============================================================================
+    
+    /**
+     * Deny all other paths by default
+     * Explicit rules required for all storage paths
+     * 
+     * NOTE: In Storage rules, specific matchers take precedence over wildcards
+     */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

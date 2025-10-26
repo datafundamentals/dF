@@ -41,7 +41,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 | --- | --- | --- | --- |
 | Building or editing Lit web components | Tier 2 | `guides/WC_SHARED_DEFAULTS.md`, `guides/STANDARDS_STYLES.md`, `guides/CREATING_COMPLIANT_UI_COMPONENTS.md` | Add `guides/AUDIT_STANDARDIZATION_PLAYBOOK.md` if aligning legacy code |
 | Work touches shared UI packages or needs Storybook updates | Tier 2 | `packages/ui-lit/README.md`, `apps/df-storybook/README.md` | Confirm exports checklist before coding |
-| Firebase-related changes (state, emulators, rules) | Tier 2 | `apps/df-firebase-teaching-app/guides/FIREBASE_PATTERNS.md` | Add auth/storage guides from same folder as required |
+| Firebase-related changes (state, emulators, rules) | Tier 2 | `apps/df-firebase-teaching-app0/guides/FIREBASE_PATTERNS.md` | Add auth/storage guides from same folder as required |
 | Feature requires integration or Playwright tests | Tier 2 | `guides/TESTING_INTEGRATION.md`, `guides/TESTING_ARCHITECTURE_PATTERNS.md` | Load app-specific `tests/` README if present |
 | Changes span multiple apps/services | Tier 2 | `guides/AUDIT_STANDARDIZATION_PLAYBOOK.md`, relevant service/app READMEs | Note cross-project impacts in session notes |
 | **Trigger not listed above** | Tier 3 | `guides/README.md` | Scan the directory structure and cross-reference your objective. Most guides cluster by theme (testing, components, monorepo patterns). If still unclear, ask the human. |

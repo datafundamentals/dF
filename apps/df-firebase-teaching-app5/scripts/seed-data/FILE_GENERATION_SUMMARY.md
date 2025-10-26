@@ -102,7 +102,7 @@ Updated root `.gitignore` to:
 
 ### Key Code Additions
 
-**Location:** `/apps/df-firebase-teaching-app/scripts/seed-data/seed.ts`
+**Location:** `/apps/df-firebase-teaching-app0/scripts/seed-data/seed.ts`
 
 **Added imports:**
 ```typescript
@@ -144,7 +144,7 @@ import {readFile, readdir, writeFile, mkdir} from 'fs/promises';
 
 ## 📚 Related Documentation
 
-- **Main README:** `apps/df-firebase-teaching-app/README.md`
+- **Main README:** `apps/df-firebase-teaching-app0/README.md`
 - **Seed Data README:** `scripts/seed-data/README.md`
 - **Storage Files README:** `scripts/seed-data/storage-files/README.md`
 - **Ticket Summary:** `scripts/seed-data/TICKET_4_SUMMARY.md`

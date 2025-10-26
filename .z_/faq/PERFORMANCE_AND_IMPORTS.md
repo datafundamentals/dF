@@ -281,7 +281,7 @@ Once deployed:
 ### Development Mode (`pnpm dev`)
 
 ```typescript
-// apps/df-firebase-teaching-app/vite.config.ts
+// apps/df-firebase-teaching-app0/vite.config.ts
 // Uses Vite's fast dev server (no minification, full imports loaded)
 // Everything is imported for debuggability
 ```
@@ -341,13 +341,13 @@ Both Rollup and Terser perform tree-shaking, so unused Material Design component
 
 ```bash
 # Build production bundle
-pnpm --filter @df/df-firebase-teaching-app build:prod
+pnpm --filter @df/df-firebase-teaching-app0 build:prod
 
 # Install bundle analyzer (optional)
 npm install -g source-map-explorer
 
 # Analyze what's in the bundle
-source-map-explorer 'apps/df-firebase-teaching-app/dist/**/*.js'
+source-map-explorer 'apps/df-firebase-teaching-app0/dist/**/*.js'
 ```
 
 This shows you exactly which Material Design components made it into the final bundle. You'll see only the ones you actually use.

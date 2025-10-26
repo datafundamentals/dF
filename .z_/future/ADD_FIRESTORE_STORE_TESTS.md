@@ -295,7 +295,7 @@ it('should create a document', async () => {
    - Document emulator setup for tests
 
 2. **Create Testing Guide**
-   - `apps/df-firebase-teaching-app/guides/FIRESTORE_TESTING.md`
+   - `apps/df-firebase-teaching-app0/guides/FIRESTORE_TESTING.md`
    - Copy-paste examples for common scenarios
    - Troubleshooting emulator issues
 

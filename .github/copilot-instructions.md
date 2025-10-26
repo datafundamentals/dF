@@ -259,7 +259,7 @@ const data = await loader.value; // Returns undefined!
 - **`WC_NEW_V_EXISTING.md`** – When to create new components vs modify existing
 - **`GLOSSARY.md`** – Terminology and concept definitions
 
-### Firebase Guides (`/apps/df-firebase-teaching-app/guides/`)
+### Firebase Guides (`/apps/df-firebase-teaching-app0/guides/`)
 - **`FIREBASE_PATTERNS.md`** – Package organization, decision trees, common mistakes
 - **`AUTHENTICATION_PATTERNS.md`** – Auth state, SignalWatcher usage, boundary enforcement
 - **`FIREBASE_COOKBOOK.md`** – Practical recipes for common Firebase operations

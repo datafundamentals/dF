@@ -1,0 +1,53 @@
+{
+  "name": "@df/df-firebase-teaching-app0",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "build:prod": "vite build --mode production",
+    "build:bundle": "vite build --mode production",
+    "dev": "vite",
+    "preview": "vite preview --host 127.0.0.1 --port 4176",
+    "preview:prod": "vite preview --mode production --host 127.0.0.1 --port 4176",
+    "serve": "vite",
+    "start:test": "pnpm build && vite dev --host 127.0.0.1 --port 4176 --strictPort --mode test --logLevel error",
+    "pretest": "pnpm build",
+    "test": "pnpm test:integration",
+    "test:integration": "playwright test --config ../../playwright.config.ts --project=df-firebase-teaching-app0",
+    "test:rules": "tsx ./tests/security-rules/run-all-tests.ts",
+    "test:seed-data": "tsx ./scripts/seed-data/seed.unit.test.ts",
+    "emulators:start": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --export-on-exit ./emulator-data",
+    "emulators:export": "firebase emulators:export --project demo-firebase-teaching-app ./emulator-data",
+    "emulators:import": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --only auth,firestore,storage,functions,hosting",
+    "emulators:clear": "node ./scripts/clear-emulator-data.mjs",
+    "seed": "tsx ./scripts/seed-data/seed.ts",
+    "seed:reset": "pnpm emulators:clear && pnpm seed",
+    "test:auth": "tsx ./scripts/test-auth.ts",
+    "deploy:rules": "firebase deploy --only firestore:rules,storage",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:hosting": "pnpm build:prod && firebase deploy --only hosting",
+    "deploy:prod": "pnpm test:rules && pnpm build:prod && firebase deploy --only firestore:rules,storage,functions,hosting",
+    "deploy:prod:quick": "pnpm build:prod && firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "@df/firebase": "workspace:*",
+    "@df/state": "workspace:*",
+    "@df/ui-lit": "workspace:*",
+    "@lit-labs/signals": "^0.1.0",
+    "@material/web": "^2.4.0",
+    "firebase": "^11.7.0",
+    "lit": "^3.3.1"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "@types/node": "^22.0.0",
+    "firebase-tools": "^13.29.1",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2",
+    "vite": "^5.4.10"
+  }
+}
