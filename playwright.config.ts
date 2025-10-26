@@ -62,6 +62,12 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
+  'df-activity-log': {
+    command: 'pnpm --filter @df/df-activity-log run start:test',
+    url: 'http://127.0.0.1:4180',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 };
 
 function parseRequestedProjects(argv: string[]): string[] {
@@ -180,6 +186,14 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4176',
+      },
+    },
+    {
+      name: 'df-activity-log',
+      testDir: 'apps/df-activity-log/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4180',
       },
     },
   ],
