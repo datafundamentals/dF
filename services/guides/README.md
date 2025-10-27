@@ -18,4 +18,4 @@
 - `guides/` — repo-wide standards
 - `packages/guides/` — reusable library guidance
 - `packages/firebase/guides/` — shared firebase helper documentation
-- `apps/df-firebase-teaching-app0/guides/` — front-end teaching patterns that may consume services
+- `guides/firebase-teaching/` — front-end teaching patterns that may consume services

@@ -21,7 +21,7 @@ This entire monorepo exists to **eliminate copy-paste code** through shared pack
 packages/types/             → Single source of truth
   └─ src/todo.types.ts
   
-apps/df-firebase-teaching-app0/
+apps/df-firebase-teaching-app5/
   └─ Uses @df/types via import    ← No duplication
   
 functions/
@@ -185,7 +185,7 @@ export const onTodoCreated = onDocumentCreated(
 3. **Test Locally:**
    ```bash
    # Emulators use bundled types
-   pnpm --filter @df/df-firebase-teaching-app0 emulators:start
+   pnpm --filter @df/df-firebase-teaching-app5 emulators:start
    
    # Test affected functions
    # (Create/update/delete todos, call HTTP functions, etc.)
@@ -194,10 +194,10 @@ export const onTodoCreated = onDocumentCreated(
 4. **Build and Deploy:**
    ```bash
    # Build functions with bundled types
-   pnpm --filter @df/df-firebase-teaching-app0-functions build
+   pnpm --filter @df/df-firebase-teaching-app5-functions build
    
    # Deploy to production
-   pnpm --filter @df/df-firebase-teaching-app0 deploy:functions
+   pnpm --filter @df/df-firebase-teaching-app5 deploy:functions
    ```
 
 **Synchronization Checklist:**

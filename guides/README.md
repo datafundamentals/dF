@@ -78,4 +78,4 @@ Example: `.z_/faq/PERFORMANCE_AND_IMPORTS.md` (read if you're worried about bund
 - packages/guides
 - services/guides
 - packages/firebase/guides
-- apps/df-firebase-teaching-app0/guides
+- guides/firebase-teaching

@@ -102,7 +102,7 @@ await cleanup();
 
 ```bash
 # Terminal 1: Start emulators
-cd apps/df-firebase-teaching-app0
+cd apps/df-firebase-teaching-app5
 pnpm emulators:start
 
 # Terminal 2: Watch TypeScript compilation
@@ -124,7 +124,7 @@ pnpm run build:watch
 ```bash
 # In terminal 1: Emulators running
 # In terminal 2: Dev server
-cd apps/df-firebase-teaching-app0
+cd apps/df-firebase-teaching-app5
 pnpm dev
 
 # Open http://127.0.0.1:4176
@@ -149,7 +149,7 @@ curl "http://127.0.0.1:5501/peg-2035/us-central1/todosExportAPI?format=json"
 
 **Deploy all functions:**
 ```bash
-cd apps/df-firebase-teaching-app0
+cd apps/df-firebase-teaching-app5
 pnpm deploy:functions
 ```
 

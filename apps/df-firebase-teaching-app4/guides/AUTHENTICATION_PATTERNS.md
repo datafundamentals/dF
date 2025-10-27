@@ -170,7 +170,7 @@ if (canAccess) return html`<protected-content></protected-content>`;
 
 ## Integration Example
 
-See `apps/df-firebase-teaching-app0/src/df-auth-demo.ts` for a complete working example that demonstrates:
+See `apps/df-firebase-teaching-app4/src/df-auth-demo.ts` for a complete working example that demonstrates:
 
 1. **Initialization:**
 ```typescript
@@ -226,7 +226,7 @@ Authentication works seamlessly with Firebase Emulators:
 
 1. **Start emulators:**
 ```bash
-pnpm --filter @df/df-firebase-teaching-app0 emulators:start
+pnpm --filter @df/df-firebase-teaching-app4 emulators:start
 ```
 
 2. **Test credentials** (from seed data):

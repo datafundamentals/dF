@@ -21,7 +21,7 @@ Single-page Lit app that demonstrates Firebase Authentication + Firestore writes
    ```
 4. Open `http://127.0.0.1:4180` and authenticate with the built-in widgets. Entries appear in `activity/<uid>/pushups` inside the Emulator UI (`http://127.0.0.1:5400`).
 
-> **Need the original teaching app seed data?** The emulator persists writes to `apps/df-activity-log/emulator-data/`, so once you create accounts/entries they stick around. If you prefer the pre-seeded data from `df-firebase-teaching-app0`, just copy that workspace’s `emulator-data/` directory into this app’s folder before starting the suite.
+> **Need the canonical seed data?** The emulator persists writes to `apps/df-activity-log/emulator-data/`, so once you create accounts/entries they stick around. If you prefer the shared classroom dataset, copy `packages/firebase-emulator/emulator-data/` into this app’s folder (or rerun `pnpm --filter @df/firebase-emulator seed`) before starting the suite.
 
 ## Environment Files
 - `.env.emulator` (committed) targets the `demo-firebase-teaching-app` placeholder project and sets `VITE_USE_EMULATOR=true`

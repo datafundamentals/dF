@@ -124,6 +124,6 @@ This teaches the real-world workflow: every developer has their own Firebase pro
 
 ## Related Documentation
 
-- [Teaching App Setup](../../apps/df-firebase-teaching-app0/README.md#google-sign-in-production)
-- [Firebase Patterns](../../apps/df-firebase-teaching-app0/guides/FIREBASE_PATTERNS.md)
+- [Teaching App Setup](../../apps/df-firebase-teaching-app1/README.md#google-sign-in-production)
+- [Firebase Patterns](../../guides/firebase-teaching/FIREBASE_PATTERNS.md)
 - [Component Documentation](../ui-lit/DF_AUTH_WRAPPER_README.md)

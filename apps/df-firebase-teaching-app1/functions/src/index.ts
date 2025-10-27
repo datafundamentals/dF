@@ -5,7 +5,7 @@
  *
  * Architecture Pattern: APP-SPECIFIC FUNCTIONS
  * ============================================
- * These functions live in apps/df-firebase-teaching-app0/functions/ because they are
+ * These functions live in apps/df-firebase-teaching-app1/functions/ because they are
  * specific to the teaching app's functionality.
  *
  * For SHARED functions used by multiple apps (e.g., shared auth/roles system),
@@ -111,6 +111,6 @@ export {
  *
  * ## See Also:
  * - guides/FUNCTIONS_PLACEMENT.md - Complete architecture guide
- * - apps/df-firebase-teaching-app0/README.md - App-specific documentation
+ * - apps/df-firebase-teaching-app1/README.md - App-specific documentation
  * - .z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md - Ticket 9 details
  */

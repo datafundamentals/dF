@@ -49,7 +49,7 @@ git checkout -b 42-cloud-functions-demo
 # "I'm working on Issue #42. According to guides/FUNCTIONS_PLACEMENT.md, 
 # where should I place app-specific callable functions?"
 
-# Copilot suggests: apps/df-firebase-teaching-app0/functions/src/callable/
+# Copilot suggests: apps/df-firebase-teaching-app1/functions/src/callable/
 
 # Code with Copilot assistance
 # Commit frequently
@@ -130,7 +130,7 @@ Create `.github/ISSUE_TEMPLATE/feature.md`:
 
 ## Package Location
 - [ ] `packages/ui-lit/` (shared component)
-- [ ] `apps/df-firebase-teaching-app0/` (app-specific)
+- [ ] `apps/df-firebase-teaching-app1/` (app-specific)
 
 ## Branch Name
 `<issue-number>-<feature-name>`
@@ -203,7 +203,7 @@ None / [describe if any]
    ```
    "I'm implementing Issue #99. Based on guides/FIREBASE_PATTERNS.md, 
    should this component go in packages/ui-lit/ or 
-   apps/df-firebase-teaching-app0/src/components/?"
+   apps/df-firebase-teaching-app1/src/components/?"
    ```
 
 4. **Code with Copilot**

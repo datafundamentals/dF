@@ -1,0 +1,22 @@
+{
+  "name": "@df/firebase-emulator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "tsx ./scripts/seed-data/seed.ts",
+    "seed:reset": "pnpm emulators:clear && pnpm seed",
+    "emulators:clear": "node ./scripts/clear-emulator-data.mjs",
+    "ensure-ports": "node ./scripts/ensure-emulator-ports.mjs",
+    "test:auth": "tsx ./scripts/test-auth.ts",
+    "test:seed-data": "tsx ./scripts/seed-data/seed.unit.test.ts"
+  },
+  "dependencies": {
+    "firebase": "^11.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2"
+  }
+}

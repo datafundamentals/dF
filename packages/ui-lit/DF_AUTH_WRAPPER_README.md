@@ -195,8 +195,8 @@ VITE_FIREBASE_APP_ID=your-app-id
 - ✅ Reusable across multiple apps with different Firebase projects
 
 **Reference Implementation:**
-- See `apps/df-firebase-teaching-app0/src/init-google-auth.ts` for complete example
-- See `apps/df-firebase-teaching-app0/auth-wrapper-demo.html` for usage
+- See `packages/ui-lit/examples/src/init-google-auth.ts` for complete example
+- See `packages/ui-lit/examples/auth-wrapper-demo.html` for usage
 
 ### 3. Add Authorized Domains
 
@@ -208,7 +208,7 @@ In Firebase Console → Authentication → Settings → Authorized domains:
 
 ### Interactive Demo
 ```bash
-cd apps/df-firebase-teaching-app0
+cd packages/ui-lit/examples
 pnpm dev
 # Open http://127.0.0.1:4176/auth-wrapper-demo.html
 ```

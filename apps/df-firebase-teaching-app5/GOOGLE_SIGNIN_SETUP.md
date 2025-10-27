@@ -59,10 +59,10 @@ Firebase automatically authorizes:
 
 ```bash
 # Build for production
-pnpm --filter @df/df-firebase-teaching-app0 build:prod
+pnpm --filter @df/df-firebase-teaching-app5 build:prod
 
 # Deploy to Firebase Hosting
-pnpm --filter @df/df-firebase-teaching-app0 deploy:hosting
+pnpm --filter @df/df-firebase-teaching-app5 deploy:hosting
 ```
 
 **Google Sign-In now works!** No code changes required.

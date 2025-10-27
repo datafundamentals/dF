@@ -79,7 +79,7 @@ export const isAuthenticated = computed(() => firebaseUser.value !== null);
 
 ### App-Specific Code
 
-#### What Belongs in `apps/df-firebase-teaching-app0/`
+#### What Belongs in `apps/df-firebase-teaching-app4/`
 
 **Environment Configuration (App-Specific):**
 - `.env.example` - Template for all required variables
@@ -88,7 +88,7 @@ export const isAuthenticated = computed(() => firebaseUser.value !== null);
 
 **Config Readers (App-Specific, but imports shared types):**
 ```typescript
-// ✅ CORRECT - apps/df-firebase-teaching-app0/src/config/firebase.config.ts
+// ✅ CORRECT - apps/df-firebase-teaching-app4/src/config/firebase.config.ts
 import type { FirebaseConfig, EmulatorConfig } from '@df/types/firebase.types';
 
 export const firebaseConfig: FirebaseConfig = {
@@ -127,15 +127,15 @@ Need to add Firebase code?
 │  │  └─ YES → Add to packages/ui-lit/
 │  │           Import: import '@df/ui-lit/component-name'
 │  └─ Is it teaching/demo-specific only?
-│     └─ YES → Add to apps/df-firebase-teaching-app0/src/components/
+│     └─ YES → Add to apps/df-firebase-teaching-app4/src/components/
 │
 ├─ Is it ENVIRONMENT CONFIGURATION?
 │  └─ YES → App-specific files (.env.example, .env.emulator)
 │           Config reader imports types from packages/types
 │
 └─ Is it SEED DATA or TEACHING EXAMPLES?
-   └─ YES → apps/df-firebase-teaching-app0/emulator-data/
-            or apps/df-firebase-teaching-app0/scripts/
+   └─ YES → packages/firebase-emulator/emulator-data/
+            or apps/df-firebase-teaching-app4/scripts/
 ```
 
 ## Common Mistakes to Avoid
@@ -144,7 +144,7 @@ Need to add Firebase code?
 
 **WRONG:**
 ```typescript
-// apps/df-firebase-teaching-app0/src/config/firebase.config.ts
+// apps/df-firebase-teaching-app4/src/config/firebase.config.ts
 export interface FirebaseConfig {  // ❌ Already exists in packages/types
   apiKey: string;
   authDomain: string;
@@ -155,7 +155,7 @@ export interface FirebaseConfig {  // ❌ Already exists in packages/types
 
 **CORRECT:**
 ```typescript
-// apps/df-firebase-teaching-app0/src/config/firebase.config.ts
+// apps/df-firebase-teaching-app4/src/config/firebase.config.ts
 import type { FirebaseConfig } from '@df/types/firebase.types';  // ✅
 
 export const firebaseConfig: FirebaseConfig = {
@@ -168,7 +168,7 @@ export const firebaseConfig: FirebaseConfig = {
 
 **WRONG:**
 ```typescript
-// apps/df-firebase-teaching-app0/src/utils/firebase-init.ts
+// apps/df-firebase-teaching-app4/src/utils/firebase-init.ts
 import { initializeApp } from 'firebase/app';
 
 export function initializeFirebase() {  // ❌ Should be in packages/firebase
@@ -186,7 +186,7 @@ export function initializeFirebase(config: FirebaseConfig) {  // ✅
   return initializeApp(config);
 }
 
-// apps/df-firebase-teaching-app0/src/main.ts
+// apps/df-firebase-teaching-app4/src/main.ts
 import { initializeFirebase } from '@df/firebase';  // ✅ Import from package
 import { firebaseConfig } from './config/firebase.config.js';
 
@@ -197,7 +197,7 @@ initializeFirebase(firebaseConfig);
 
 **WRONG:**
 ```typescript
-// apps/df-firebase-teaching-app0/src/config/firebase.config.ts
+// apps/df-firebase-teaching-app4/src/config/firebase.config.ts
 export const emulatorConfig = {  // ❌ Hardcoded, not typed
   auth: { host: 'localhost', port: 9099 },
   firestore: { host: 'localhost', port: 8080 },
@@ -207,7 +207,7 @@ export const emulatorConfig = {  // ❌ Hardcoded, not typed
 
 **CORRECT:**
 ```typescript
-// apps/df-firebase-teaching-app0/src/config/firebase.config.ts
+// apps/df-firebase-teaching-app4/src/config/firebase.config.ts
 import type { EmulatorConfig } from '@df/types/firebase.types';  // ✅
 
 export const emulatorConfig: EmulatorConfig = {  // ✅ Typed
@@ -287,7 +287,7 @@ When migrating Firebase code from `.z_/WIP/approach/`:
 2. **Extract utilities** → Add to `packages/firebase/`
 3. **Extract state patterns** → Add to `packages/state/src/stores/`
 4. **Rebuild UI with signals** → Presentation-only components in `packages/ui-lit/`
-5. **Wire it up in teaching app** → Demo the patterns in `apps/df-firebase-teaching-app0/`
+5. **Wire it up in teaching app** → Demo the patterns in `apps/df-firebase-teaching-app4/`
 
 ## Testing Firebase Code
 
@@ -297,7 +297,7 @@ When migrating Firebase code from `.z_/WIP/approach/`:
 - `packages/ui-lit/` - Component tests with mocked Firebase state
 
 **App Integration Tests:**
-- `apps/df-firebase-teaching-app0/tests/integration/` - End-to-end flows with emulators
+- `apps/df-firebase-teaching-app4/tests/integration/` - End-to-end flows with emulators
 - Test against emulator data, not production
 
 ## Related Documentation
@@ -313,5 +313,5 @@ If you're unsure where Firebase code belongs:
 
 1. **Read this guide's decision tree** (above)
 2. **Look at existing Firebase packages** for similar patterns
-3. **Check the Firebase Teaching App** (`apps/df-firebase-teaching-app0/`) for examples
+3. **Check the Firebase Teaching App** (`apps/df-firebase-teaching-app4/`) for examples
 4. **When in doubt:** Put it in `packages/` if it could ever be reused

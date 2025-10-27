@@ -266,7 +266,7 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
         <p class="lead">
           Log your pushup reps against the Firebase emulator. Every entry is stored beneath
           <code class="collection-path">activity/&lt;uid&gt;/pushups</code> so it stays scoped to your account.
-          Start the emulator suite from <code>apps/df-firebase-teaching-app0</code> and keep an eye on the dashboard at
+          Start the emulator suite (see <code>guides/firebase-emulator-workflow.md</code>) and keep an eye on the dashboard at
           <a href=${emulatorUi} target="_blank" rel="noreferrer">${emulatorUi}</a> to inspect writes in real time.
         </p>
       </header>

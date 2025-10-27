@@ -10,11 +10,11 @@
 ## How
 
 - author markdown that mirrors the exported package APIs and stays versioned with the code
-- avoid duplicating the higher-level firebase patterns covered in `apps/df-firebase-teaching-app0/guides/`
+- avoid duplicating the higher-level firebase patterns covered in `guides/firebase-teaching/`
 - keep docs declarative and conflict-free with the root `guides/`
 
 ## Related locations
 
 - `guides/` — repo-wide standards used by every ticket
 - `packages/guides/` — shared library documentation beyond firebase
-- `apps/df-firebase-teaching-app0/guides/` — teaching app usage patterns that demonstrate these helpers
+- `guides/firebase-teaching/` — teaching app usage patterns that demonstrate these helpers

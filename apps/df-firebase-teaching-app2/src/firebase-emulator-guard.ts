@@ -14,7 +14,7 @@ async function pingEmulator(): Promise<boolean> {
     console.warn(
       '[firebase-emulators] Expected Firebase Emulator Suite on',
       emulatorUiUrl,
-      'but it does not appear to be running. Run `pnpm --filter @df/df-firebase-teaching-app0 emulators:start` in another terminal.'
+      'but it does not appear to be running. Run `pnpm --filter @df/df-firebase-teaching-app2 emulators:start` in another terminal.'
     );
     console.debug('[firebase-emulators] ping error', error);
     return false;

@@ -8,7 +8,6 @@ import {stdin as input, stdout as output} from 'node:process';
 const PROJECT_ROOT = resolve(process.cwd());
 const TARGET_DIRECTORIES = [
   'packages/ui-lit/src/',
-  'apps/df-firebase-teaching-app0/src/',
   'apps/df-firebase-teaching-app1/src/',
   'apps/df-firebase-teaching-app2/src/',
   'apps/df-firebase-teaching-app3/src/',

@@ -1,0 +1,10 @@
+{
+  "extends": "../../ts.config.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["scripts/**/*.ts"],
+  "references": []
+}
