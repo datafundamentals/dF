@@ -5,8 +5,8 @@ import type {EmulatorConfig} from '@df/types';
  * Local data stores with production cloud functions
  */
 export const EMULATOR_CONFIG: EmulatorConfig = {
-  auth: true,
+  auth: false, // disallowed except for app1 as courtesy to users
   firestore: true,
   storage: true,
-  functions: false, // Production functions
+  functions: true,
 };
