@@ -8,7 +8,7 @@
 import {LitElement, html, css, nothing} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {googleAuthUser, googleSignIn, googleSignOut} from '@df/state';
+import {firebaseAuthState, signInWithGoogle, signOut} from '@df/state';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/text-button.js';
 
@@ -122,9 +122,9 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
   `;
 
   override render() {
-    const user = googleAuthUser.get();
+    const {authUser, authState} = firebaseAuthState.get();
 
-    if (!user) {
+    if (authState !== 'authenticated' || !authUser) {
       return this._renderLoginScreen();
     }
 
@@ -133,8 +133,8 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
     }
 
     return html`
-      ${this._renderHeader(user)}
-      ${this.showHideUser ? this._renderUserJson(user) : nothing}
+      ${this._renderHeader(authUser)}
+      ${this.showHideUser ? this._renderUserJson(authUser) : nothing}
       <slot></slot>
     `;
   }
@@ -193,8 +193,9 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
 
   private async _handleLoginClick() {
     try {
-      await googleSignIn();
-      this._dispatchUserChanged(googleAuthUser.get());
+      await signInWithGoogle();
+      const {authUser} = firebaseAuthState.get();
+      this._dispatchUserChanged(authUser);
     } catch (error) {
       console.error('Login failed:', error);
       alert(error instanceof Error ? error.message : 'Login failed');
@@ -209,7 +210,7 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
     }
 
     try {
-      await googleSignOut();
+      await signOut();
       this._dispatchUserChanged(null);
     } catch (error) {
       console.error('Logout failed:', error);

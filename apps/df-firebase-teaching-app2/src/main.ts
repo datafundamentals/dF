@@ -1,5 +1,6 @@
 import {initializeFirebaseForApp} from '@df/state';
 import {EMULATOR_CONFIG} from './config/firebase.config.js';
+import '@df/ui-lit/df-auth-wrapper';
 import './df-firebase-teaching-app.js';
 
 // Initialize Firebase with emulator configuration

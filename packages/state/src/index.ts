@@ -4,7 +4,6 @@ export * from './stores/practice-widget.store.js';
 export * from './stores/segmented-button.store.js';
 export * from './stores/upload-link.store.js';
 export * from './stores/firebase-auth.store.js';
-export * from './stores/google-auth.store.js';
 export * from './stores/firestore-base.store.js';
 export * from './stores/todos.store.js';
 export * from './stores/storage.store.js';

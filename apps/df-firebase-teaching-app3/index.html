@@ -47,11 +47,13 @@
     </style>
   </head>
   <body>
-    <df-firebase-teaching-app></df-firebase-teaching-app>
-    <df-auth-demo></df-auth-demo>
-    <df-firestore-demo></df-firestore-demo>
-    <df-storage-demo></df-storage-demo>
-    <df-functions-demo></df-functions-demo>
+    <df-auth-wrapper headless>
+      <df-firebase-teaching-app></df-firebase-teaching-app>
+      <df-auth-demo></df-auth-demo>
+      <df-firestore-demo></df-firestore-demo>
+      <df-storage-demo></df-storage-demo>
+      <df-functions-demo></df-functions-demo>
+    </df-auth-wrapper>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

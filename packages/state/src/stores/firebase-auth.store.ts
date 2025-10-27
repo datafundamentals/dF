@@ -95,9 +95,40 @@ let authInstance: Auth | null = null;
 let unsubscribeAuthListener: Unsubscribe | null = null;
 
 /**
+ * Stores user info and auth token in browser storage.
+ * Token stored for external integrations to consume.
+ *
+ * **Note:** app1 exception - Uses Auth Emulator for email/password development.
+ * See `apps/df-firebase-teaching-app1` for details.
+ *
+ * @internal
+ */
+async function storeAuthToken(user: FirebaseUser): Promise<void> {
+  try {
+    const idToken = await user.getIdToken(true);
+    localStorage.setItem('User', JSON.stringify(user));
+    sessionStorage.setItem('Authorization', `Bearer ${idToken}`);
+    document.cookie = `authToken=${idToken}; path=/; secure; samesite=strict; max-age=3600`;
+  } catch (error) {
+    console.error('Error storing auth token:', error);
+  }
+}
+
+/**
+ * Clears user info and auth token from browser storage.
+ *
+ * @internal
+ */
+function clearAuthToken(): void {
+  localStorage.removeItem('User');
+  sessionStorage.removeItem('Authorization');
+  document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+}
+
+/**
  * Ensures auth is initialized with lazy loading.
  * Safe to call multiple times - will only initialize once.
- * 
+ *
  * @internal
  */
 function ensureAuthInitialized(): void {
@@ -131,11 +162,18 @@ function ensureAuthInitialized(): void {
 
   // Set up auth state listener
   authStateSignal.set('loading');
-  unsubscribeAuthListener = onAuthStateChange(app, (user) => {
+  unsubscribeAuthListener = onAuthStateChange(app, async (user) => {
     authUserSignal.set(user);
     authStateSignal.set(user ? 'authenticated' : 'unauthenticated');
     initializedSignal.set(true);
     errorSignal.set(null);
+
+    // Store or clear auth token based on user state
+    if (user) {
+      await storeAuthToken(user);
+    } else {
+      clearAuthToken();
+    }
   });
 }
 
@@ -227,13 +265,28 @@ export function initializeAuth(app: FirebaseApp): void {
   firebaseAppRef = app;
   authInstance = getFirebaseAuth(app);
 
+  // Connect to emulator if configured
+  if (shouldUseEmulatorForService('auth')) {
+    connectAuthToEmulator(authInstance, {
+      host: '127.0.0.1',
+      port: 9155,
+    });
+  }
+
   // Set up auth state listener
   authStateSignal.set('loading');
-  unsubscribeAuthListener = onAuthStateChange(app, (user) => {
+  unsubscribeAuthListener = onAuthStateChange(app, async (user) => {
     authUserSignal.set(user);
     authStateSignal.set(user ? 'authenticated' : 'unauthenticated');
     initializedSignal.set(true);
     errorSignal.set(null);
+
+    // Store or clear auth token based on user state
+    if (user) {
+      await storeAuthToken(user);
+    } else {
+      clearAuthToken();
+    }
   });
 }
 
@@ -311,7 +364,7 @@ export function cleanupAuth(): void {
  */
 export async function signIn(credentials: SignInCredentials): Promise<void> {
   ensureAuthInitialized();
-  
+
   if (!authInstance) {
     throw new Error('Auth initialization failed');
   }
@@ -329,6 +382,7 @@ export async function signIn(credentials: SignInCredentials): Promise<void> {
     // Auth state listener will update signals
     authUserSignal.set(userCredential.user);
     authStateSignal.set('authenticated');
+    await storeAuthToken(userCredential.user);
   } catch (error) {
     authStateSignal.set('error');
     const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
@@ -369,7 +423,7 @@ export async function signIn(credentials: SignInCredentials): Promise<void> {
  */
 export async function signUp(data: SignUpData): Promise<void> {
   ensureAuthInitialized();
-  
+
   if (!authInstance) {
     throw new Error('Auth initialization failed');
   }
@@ -394,6 +448,7 @@ export async function signUp(data: SignUpData): Promise<void> {
     // Auth state listener will update signals
     authUserSignal.set(userCredential.user);
     authStateSignal.set('authenticated');
+    await storeAuthToken(userCredential.user);
   } catch (error) {
     authStateSignal.set('error');
     const errorMessage = error instanceof Error ? error.message : 'Sign up failed';
@@ -424,7 +479,7 @@ export async function signUp(data: SignUpData): Promise<void> {
  */
 export async function signOut(): Promise<void> {
   ensureAuthInitialized();
-  
+
   if (!authInstance) {
     throw new Error('Auth initialization failed');
   }
@@ -437,6 +492,7 @@ export async function signOut(): Promise<void> {
     // Auth state listener will update signals
     authUserSignal.set(null);
     authStateSignal.set('unauthenticated');
+    clearAuthToken();
   } catch (error) {
     authStateSignal.set('error');
     const errorMessage = error instanceof Error ? error.message : 'Sign out failed';
@@ -643,7 +699,7 @@ export function isAuthLoading(): boolean {
  */
 export async function signInWithGoogle(scopes: string[] = []): Promise<void> {
   ensureAuthInitialized();
-  
+
   if (!authInstance) {
     throw new Error('Auth initialization failed');
   }
@@ -657,6 +713,7 @@ export async function signInWithGoogle(scopes: string[] = []): Promise<void> {
     // Auth state listener will update signals
     authUserSignal.set(userCredential.user);
     authStateSignal.set('authenticated');
+    await storeAuthToken(userCredential.user);
   } catch (error) {
     authStateSignal.set('error');
     const errorMessage = error instanceof Error ? error.message : 'Google sign-in failed';
@@ -696,7 +753,7 @@ export async function signInWithGoogle(scopes: string[] = []): Promise<void> {
  */
 export async function signInWithGoogleRedirect(scopes: string[] = []): Promise<void> {
   ensureAuthInitialized();
-  
+
   if (!authInstance) {
     throw new Error('Auth initialization failed');
   }
@@ -707,6 +764,7 @@ export async function signInWithGoogleRedirect(scopes: string[] = []): Promise<v
   try {
     await firebaseSignInWithGoogleRedirect(authInstance, scopes);
     // Function never returns - page redirects to Google
+    // Token will be stored by auth state listener on return
   } catch (error) {
     authStateSignal.set('error');
     const errorMessage = error instanceof Error ? error.message : 'Google redirect sign-in failed';

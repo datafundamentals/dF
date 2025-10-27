@@ -32,7 +32,9 @@
     </style>
   </head>
   <body>
-    <df-activity-log-app></df-activity-log-app>
+    <df-auth-wrapper headless>
+      <df-activity-log-app></df-activity-log-app>
+    </df-auth-wrapper>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

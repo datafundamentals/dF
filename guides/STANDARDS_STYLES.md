@@ -124,13 +124,13 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 - **Error handling** - Fire-and-forget operations should include error alerts for user feedback (acceptable anti-pattern for MVP)
 
 ## Authentication
-- **Component protection** - Use conditional rendering based on `isLoggedIn.get()` signal
-- **SignalWatcher pattern** - Components accessing auth state must extend `SignalWatcher(LitElement)`
-- **Login UI** - Provide clear login prompts and user info when authenticated
-- **No Authentication Emulator** - Use direct, non-emulated firebase authentication, not the emulator, even when other emulators are in use.
+- **Component protection** - Use conditional rendering based on `firebaseAuthState` signal
 - **SignalWatcher pattern** – Any component that consumes authentication state must extend `SignalWatcher(LitElement)`.
-- **Boundary enforcement** – Authentication guards belong in host shells or wrappers, never in presentation components.
+- **Login UI** - Provide clear login prompts and user info when authenticated
+- **No Authentication Emulator** - Auth Emulator remains forbidden for general development—**except one use case**: `apps/df-firebase-teaching-app1` for email/password user creation testing. See app-specific docs for details. Rationale: "Authentication with email/password is burdensome for users"
+- **Boundary enforcement** – Authentication guards belong in host shells or wrappers (e.g., `df-auth-wrapper`), never in presentation components.
 - **UI feedback** – Provide clear prompts for logged-out states and visible, accessible sign-out affordances.
+- **Consolidated auth** - Use `firebaseAuthState` from `@df/state` as the single source of truth for all apps. Token storage (localStorage, sessionStorage, cookies) is handled automatically in the store, and is a YAGNI style enhancement for future use.
 
 ## Development Environment
 - **Vite dev servers** – Each app exposes `dev`/`preview`/`start:test` scripts that launch Vite on a dedicated port.
