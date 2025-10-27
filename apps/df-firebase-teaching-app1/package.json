@@ -9,7 +9,7 @@
     "build:watch": "tsc -p tsconfig.json --watch",
     "build:prod": "vite build --mode production",
     "build:bundle": "vite build --mode production",
-    "dev": "vite",
+  "dev": "vite --mode emulator",
     "preview": "vite preview --host 127.0.0.1 --port 4176",
     "preview:prod": "vite preview --mode production --host 127.0.0.1 --port 4176",
     "serve": "vite",

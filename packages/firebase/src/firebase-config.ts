@@ -74,6 +74,11 @@ function validateFirebaseEnv(): void {
 export function loadFirebaseConfig(): FirebaseConfig {
   validateFirebaseEnv();
 
+  // Use production Auth config if VITE_USE_EMULATOR is true but EMULATOR_CONFIG.auth is false
+  // This logic should be handled in the app entry point, so here we just use the current env vars
+  // Apps should set VITE_FIREBASE_API_KEY and VITE_FIREBASE_AUTH_DOMAIN to production values if Google login is needed
+  // and emulators for other services are enabled
+
   return {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
