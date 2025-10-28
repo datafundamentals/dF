@@ -30,6 +30,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "build:rollup": "pnpm build && rollup -c",
     "lint": "eslint src",
     "test": "vitest run",
     "test:watch": "vitest",

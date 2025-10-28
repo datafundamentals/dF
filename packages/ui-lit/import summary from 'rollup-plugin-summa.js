@@ -3,6 +3,7 @@ import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import {visualizer} from 'rollup-plugin-visualizer';
+
 /* global console */ 
 export default {
   input: 'dist/df-auth-wrapper.js',
@@ -37,7 +38,7 @@ export default {
       open: true,
       gzipSize: true,
       brotliSize: true,
-      template: 'treemap',
+      template: 'treemap', // Better visualization
     }),
   ],
 };

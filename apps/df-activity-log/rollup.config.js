@@ -4,7 +4,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 /* global console */ 
 export default {
-  input: 'dist/df-activity-log.js',
+  input: 'dist/df-activity-log-app.js',
   output: {
     file: 'dist/df-activity-log.bundled.js',
     format: 'esm',
