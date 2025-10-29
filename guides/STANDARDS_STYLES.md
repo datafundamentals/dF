@@ -141,11 +141,13 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 - **Environment detection** - Use `import.meta.env.DEV` or `location.hostname === 'localhost'` for dev-specific code
 
 ## Code Organization
-- **Micro-iterations** - Implement features in small, discrete steps with frequent git commits
+- **Micro-iterations** - Implement features in small, discrete steps (commits reviewed by humans only)
 - **Progressive complexity** - Start with simple implementations, refactor later as needs evolve
 - **Todo tracking** - Use TodoWrite tool to track implementation progress for complex features
 - **No commented-out code** - Commented-out code is not allowed except for brief periods between commits during active development. All dead code must be removed before committing to maintain code clarity and prevent confusion
 - **Console log cleanup** - All `console.log()`, `console.debug()`, `console.warn()` statements must be removed before work is considered complete and checkpointed, except for essential error logging (`console.error()`) for production debugging. Temporary debug logs are acceptable during active development but must be cleaned up before task completion
+
+> **Note for Coding Agents:** Never commit to git. Leave all changes in pending for human review and approval. See `TICKET_SESSION_CHECKLIST.md` for full policy.
 
 ## File Naming Conventions
 

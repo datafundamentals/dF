@@ -1,32 +1,35 @@
-import summary from 'rollup-plugin-summary';
 import terser from '@rollup/plugin-terser';
+import summary from 'rollup-plugin-summary';
+import {visualizer} from 'rollup-plugin-visualizer';
 import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-/* global console */ 
+
 export default {
-  input: 'dist/df-activity-log-app.js',
+  input: 'dist/main.js',
   output: {
-    file: 'dist/df-activity-log.bundled.js',
+    file: 'dist/bundle/df-activity-log.js',
     format: 'esm',
-  },
-  onwarn(warning) {
-    if (warning.code !== 'THIS_IS_UNDEFINED') {
-      console.error(`(!) ${warning.message}`);
-    }
+    sourcemap: true,
   },
   plugins: [
-    replace({preventAssignment: false, 'Reflect.decorate': 'undefined'}),
     resolve(),
+    replace({
+      preventAssignment: true,
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    }),
     terser({
       ecma: 2021,
       module: true,
       warnings: true,
-      mangle: {
-        properties: {
-          regex: /^__/,
-        },
-      },
     }),
-    summary(),
+    summary({
+      showBrotliSize: true,
+      showGzippedSize: true,
+    }),
+    visualizer({
+      filename: 'dist/bundle/stats.html',
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
 };

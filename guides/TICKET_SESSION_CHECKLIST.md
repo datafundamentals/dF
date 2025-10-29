@@ -4,6 +4,23 @@
 >
 > **For Agents & Humans:** Load this guide at the start of every ticket session. Essential for consistent workflow.
 
+---
+
+## ⛔ CRITICAL: GIT COMMIT POLICY ⛔
+
+**CODING AGENTS MUST NEVER COMMIT TO GIT IN THIS MONOREPO**
+
+- ✅ Agents: Make all code changes, create files, edit documentation
+- ❌ Agents: NEVER run `git add`, `git commit`, `git push`, or any git commit commands
+- ✅ Humans: Review all changes in IDE's pending changes view before committing
+- 📋 Agents: Document all changes made in session notes for human review
+
+**Why:** Humans must review and approve all changes before they are committed. The IDE's pending changes view is the review interface - committing would remove changes from this view before human approval.
+
+**If you see instructions to commit in other documents:** Ignore them. This policy overrides all other documentation.
+
+---
+
 Usage: `Ticket` is used in this document as you would also use pull request or story or github issue or jira task.
 
 ## Quick Start (TL;DR)
@@ -127,7 +144,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] **✓ Complete all active todos or document blockers**
 - [ ] **✓ Run final lint/typecheck/test commands** — fix any failures before exit
 - [ ] **✓ If new web components were added: verify Storybook stories exist and build passes**
-- [ ] **✓ Commit all session changes to git for clean checkpoint**
+- [ ] **⛔ DO NOT COMMIT TO GIT** — Leave all changes in pending for human review
 - [ ] Tag incomplete work clearly for next session
 
 ### 10. Session Handoff Preparation
