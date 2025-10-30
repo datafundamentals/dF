@@ -12,7 +12,7 @@
 
 import type {FirebaseApp} from 'firebase/app';
 import {loadFirebaseConfig, useEmulator, getFirebaseApp} from '@df/firebase';
-import type {EmulatorConfig} from '@df/types';
+import type {EmulatorConfig, FirebaseConfig} from '@df/types';
 
 /**
  * Singleton Firebase app instance
@@ -25,6 +25,12 @@ let firebaseAppInstance: FirebaseApp | null = null;
  * Must be set via setEmulatorConfig() before stores initialize
  */
 let emulatorConfig: EmulatorConfig | null = null;
+
+/**
+ * Optional hardcoded Firebase configuration
+ * If set, this will be used instead of loadFirebaseConfig() from environment variables
+ */
+let firebaseConfig: FirebaseConfig | null = null;
 
 /**
  * Set the emulator configuration for Firebase services.
@@ -45,6 +51,26 @@ let emulatorConfig: EmulatorConfig | null = null;
  */
 export function setEmulatorConfig(config: EmulatorConfig): void {
   emulatorConfig = config;
+}
+
+/**
+ * Set hardcoded Firebase configuration (alternative to .env)
+ * 
+ * This allows apps to bypass import.meta.env and provide config directly.
+ * Useful for bundled deployments where .env is not available.
+ * 
+ * @param config - Firebase project configuration
+ * 
+ * @example
+ * ```typescript
+ * import {setFirebaseConfig} from '@df/state/stores/firebase-init';
+ * import {FIREBASE_CONFIG} from './config/firebase.config';
+ * 
+ * setFirebaseConfig(FIREBASE_CONFIG);
+ * ```
+ */
+export function setFirebaseConfig(config: FirebaseConfig): void {
+  firebaseConfig = config;
 }
 
 /**
@@ -70,10 +96,10 @@ export function getEmulatorConfig(): EmulatorConfig {
  * Get or initialize the shared Firebase app instance.
  * 
  * Uses singleton pattern - returns existing instance if already initialized.
- * Automatically loads Firebase config from environment variables.
+ * Loads config from hardcoded firebaseConfig if available, otherwise from environment variables.
  * 
  * @returns {FirebaseApp} Initialized Firebase app instance
- * @throws {Error} If Firebase config environment variables are missing
+ * @throws {Error} If Firebase config not provided and environment variables are missing
  * 
  * @example
  * ```typescript
@@ -89,7 +115,7 @@ export function getEmulatorConfig(): EmulatorConfig {
  */
 export function getInitializedFirebaseApp(): FirebaseApp {
   if (!firebaseAppInstance) {
-    const config = loadFirebaseConfig();
+    const config = firebaseConfig || loadFirebaseConfig();
     firebaseAppInstance = getFirebaseApp(config);
   }
   return firebaseAppInstance;
@@ -143,4 +169,5 @@ export function hasAnyEmulatorEnabled(): boolean {
 export function resetFirebaseInit(): void {
   firebaseAppInstance = null;
   emulatorConfig = null;
+  firebaseConfig = null;
 }

@@ -6,6 +6,23 @@
 >
 > **For Humans:** Use this as a guide for negotiating all things issues/chats/agents/PRs
 
+---
+
+## ⛔ CRITICAL: GIT OPERATIONS IN THIS WORKFLOW ⛔
+
+**This document was written before the no-commit policy was established.**
+
+All references to `git commit`, `git push`, and PR creation commands in this document are **FOR HUMANS ONLY**.
+
+**Coding agents must NEVER:**
+- Run `git add`, `git commit`, `git push` commands
+- Create pull requests
+- Perform any git operations
+
+**See `TICKET_SESSION_CHECKLIST.md` for the authoritative git commit policy.**
+
+---
+
 ## Understanding GitHub Issues + Copilot Agent Workflow
 
 This document answers the general question of using github issues in the context of coding agents: **managing context across multiple tools**. This guide explains how GitHub Issues and Copilot chat sessions work together without competing.
