@@ -2,7 +2,7 @@
 
 > **Tier:** 1 (Always Load)
 >
-> **For Agents & Humans:** Load this guide at the start of every ticket session. Essential for consistent workflow.
+> **For Agents & User:** Load this guide at the start of every ticket session. Essential for consistent workflow.
 
 ---
 
@@ -12,39 +12,39 @@
 
 - ✅ Agents: Make all code changes, create files, edit documentation
 - ❌ Agents: NEVER run `git add`, `git commit`, `git push`, or any git commit commands
-- ✅ Humans: Review all changes in IDE's pending changes view before committing
-- 📋 Agents: Document all changes made in session notes for human review
+- ✅ User: Review all changes in IDE's pending changes view before committing
+- 📋 Agents: Document all changes made in session notes for User review
 
-**Why:** Humans must review and approve all changes before they are committed. The IDE's pending changes view is the review interface - committing would remove changes from this view before human approval.
+**Why:** User must review and approve all changes before they are committed. The IDE's pending changes view is the review interface - committing would remove changes from this view before User approval.
 
 **If you see instructions to commit in other documents:** Ignore them. This policy overrides all other documentation.
 
 ---
 
-Usage: `Ticket` is used in this document as you would also use pull request or story or github issue or jira task.
+Usage: `Ticket` is used in this document as you would also use pull request or story or github issue or jira task. `Agent` is used in this document as coding agent (claude code, codex, copilot, cursor, or other)
 
 ## Quick Start (TL;DR)
 
 **For Agents:** 1) Skim sections 1-3, 2) run the Tier Selection Matrix to load targeted docs, 3) launch TodoWrite (`todowrite` from repo root) to capture 3-5 objectives, 4) begin coding. Check sections 8-10 before exit.
 
-**For Humans:** Provide clear objectives in the ticket or chat. Approve scope before coding starts. Review session handoff notes before the next session.
+**For User:** Provide clear objectives in the ticket or chat. Approve scope before coding starts. Review session handoff notes before the next session.
 
 ---
 
 ## How to Use This Checklist
 
 - Treat this file as the canonical Tier 1 entry point before any coding work begins.
-- Distinguish responsibilities: humans add clarifications and approve scope; coding agents execute steps, surface questions, and record outcomes.
+- Distinguish responsibilities: Users add clarifications and approve scope; coding agents execute steps, surface questions, and record outcomes.
 - Follow the tiering model: Tier 1 docs always load, Tier 2 docs load when triggered by scope, Tier 3 docs are optional references for edge cases.
 - Re-run the tier evaluation whenever objectives shift, blockers appear, or a misunderstanding surfaces.
-- Highlight opportunities to refine this checklist: surface suggestions in session notes, share them in chat, or draft proposed edits so humans can review and merge improvements quickly.
+- Highlight opportunities to refine this checklist: surface suggestions in session notes, share them in chat, or draft proposed edits so User can review and merge improvements quickly.
 
 ## Pre-Session Setup (Start Every Session)
 
 ### 1. Context Loading
 - [ ] Identify ticket source and objective
 	- GitHub issue / PR: capture link, copy stated objective into session notes, confirm any acceptance criteria
-	- Chat / ad-hoc request: restate the user objective in session notes and secure human confirmation
+	- Chat / ad-hoc request: restate the user objective in session notes and secure User confirmation
 - [ ] Confirm the current ticket objective is committed to notes or tracker before reading additional docs
 - [ ] Apply the Tier Selection Matrix (below); load every Tier 2 doc whose trigger is met, then skim related Tier 3 references as needed
 - [ ] Review the root `README.md` for workspace-level commands once per session (Tier 1)
@@ -61,7 +61,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 | Firebase-related changes (state, emulators, rules) | Tier 2 | `guides/firebase-teaching/FIREBASE_PATTERNS.md` | Add auth/storage guides from same folder as required |
 | Feature requires integration or Playwright tests | Tier 2 | `guides/TESTING_INTEGRATION.md`, `guides/TESTING_ARCHITECTURE_PATTERNS.md` | Load app-specific `tests/` README if present |
 | Changes span multiple apps/services | Tier 2 | `guides/AUDIT_STANDARDIZATION_PLAYBOOK.md`, relevant service/app READMEs | Note cross-project impacts in session notes |
-| **Trigger not listed above** | Tier 3 | `guides/README.md` | Scan the directory structure and cross-reference your objective. Most guides cluster by theme (testing, components, monorepo patterns). If still unclear, ask the human. |
+| **Trigger not listed above** | Tier 3 | `guides/README.md` | Scan the directory structure and cross-reference your objective. Most guides cluster by theme (testing, components, monorepo patterns). If still unclear, ask the User. |
 
 > **Protocol:** Re-run the matrix whenever scope expands, blockers emerge, or a reset is triggered. Log newly loaded docs in session notes.
 
@@ -73,8 +73,8 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ### 3. Session Scope Definition — **START HERE**
 - [ ] **[FIRST ACTION] Create a TodoWrite task list** with 3–5 objectives. This captures your scope and prevents drift.
-	- Launch TodoWrite from the repo root (`todowrite`) to open the shared session note before adding tasks; if the command is unavailable, ask the human partner for the correct launch path
-  - If objectives are unclear, list them as questions and request human clarification before proceeding.
+	- Launch TodoWrite from the repo root (`todowrite`) to open the shared session note before adding tasks; if the command is unavailable, ask the User for the correct launch path
+  - If objectives are unclear, list them as questions and request User clarification before proceeding.
   - If the ticket says "investigate" or "explore," note that as a distinct objective and timebox it (e.g., "Investigate performance issues — 30 min max").
 - [ ] Define clear session objective (1-3 features max)
 - [ ] Identify if this is: Shared Resource / Project-Specific / Integration session, and ensure the ticket source (issue vs chat) aligns with that classification
@@ -123,8 +123,8 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ## Context Reset Protocol
 
-- Stop coding when objectives, scope, or terminology become unclear, or when a human/agent misalignment is detected.
-- Summarize the current understanding in session notes and request confirmation from the human partner.
+- Stop coding when objectives, scope, or terminology become unclear, or when a user/agent misalignment is detected.
+- Summarize the current understanding in session notes and request confirmation from the User partner.
 - Re-run the Tier Selection Matrix; load any newly relevant Tier 2/Tier 3 docs (e.g., discovering a component must be shared → load `guides/WC_SHARED_DEFAULTS.md`).
 - Record the reset event (time, reason, docs loaded) to aid future audits.
 - Resume work only after objectives, scope, and required docs are confirmed.
@@ -144,7 +144,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] **✓ Complete all active todos or document blockers**
 - [ ] **✓ Run final lint/typecheck/test commands** — fix any failures before exit
 - [ ] **✓ If new web components were added: verify Storybook stories exist and build passes**
-- [ ] **⛔ DO NOT COMMIT TO GIT** — Leave all changes in pending for human review
+- [ ] **⛔ DO NOT COMMIT TO GIT** — Leave all changes in pending for User review
 - [ ] Tag incomplete work clearly for next session
 
 ### 10. Session Handoff Preparation
