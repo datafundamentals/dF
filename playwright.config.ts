@@ -32,6 +32,12 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
+  'df-chat-tmp-test-app': {
+    command: 'pnpm --filter @df/df-chat-tmp-test-app run start:test',
+    url: 'http://127.0.0.1:4177',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
   'df-firebase-teaching-app2': {
     command: 'pnpm --filter @df/df-firebase-teaching-app2 run start:test',
     url: 'http://127.0.0.1:4176',
@@ -140,6 +146,14 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4176',
+      },
+    },
+    {
+      name: 'df-chat-tmp-test-app',
+      testDir: 'apps/df-chat-tmp-test-app/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4177',
       },
     },
     {

@@ -36,6 +36,7 @@ export default [
     files: [
       'packages/ui-lit/src/**/*.ts',
       'apps/df-firebase-teaching-app1/src/**/*.ts',
+      'apps/df-chat-tmp-test-app/src/**/*.ts',
       'apps/df-firebase-teaching-app2/src/**/*.ts',
       'apps/df-firebase-teaching-app3/src/**/*.ts',
       'apps/df-firebase-teaching-app4/src/**/*.ts',
