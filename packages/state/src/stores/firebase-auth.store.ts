@@ -89,6 +89,8 @@ const errorSignal = signal<string | null>(null);
  */
 const initializedSignal = signal<boolean>(false);
 
+let demoMode = false;
+
 // Reference to Firebase app and auth instance
 let firebaseAppRef: FirebaseApp | null = null;
 let authInstance: Auth | null = null;
@@ -132,6 +134,10 @@ function clearAuthToken(): void {
  * @internal
  */
 function ensureAuthInitialized(): void {
+  if (demoMode) {
+    return;
+  }
+
   if (authInstance && unsubscribeAuthListener) {
     // Already initialized
     return;
@@ -151,6 +157,7 @@ function ensureAuthInitialized(): void {
 
   firebaseAppRef = app;
   authInstance = getFirebaseAuth(app);
+  demoMode = false;
 
   // Connect to emulator if configured
   if (shouldUseEmulatorForService('auth')) {
@@ -319,6 +326,31 @@ export function cleanupAuth(): void {
   }
   firebaseAppRef = null;
   authInstance = null;
+  authUserSignal.set(null);
+  authStateSignal.set('idle');
+  errorSignal.set(null);
+  initializedSignal.set(false);
+  demoMode = false;
+}
+
+export function __setAuthDemoState(state: FirebaseAuthState): void {
+  if (firebaseAppRef || authInstance || unsubscribeAuthListener) {
+    throw new Error('Cannot set auth demo state after auth has been initialized.');
+  }
+
+  demoMode = true;
+  authUserSignal.set(state.authUser);
+  authStateSignal.set(state.authState);
+  errorSignal.set(state.error);
+  initializedSignal.set(state.initialized);
+}
+
+export function __resetAuthDemoState(): void {
+  if (!demoMode) {
+    return;
+  }
+
+  demoMode = false;
   authUserSignal.set(null);
   authStateSignal.set('idle');
   errorSignal.set(null);
