@@ -19,6 +19,8 @@
     "./df-practice-widget.js": "./dist/df-practice-widget.js",
     "./df-npm-info-widget": "./dist/df-npm-info-widget.js",
     "./df-npm-info-widget.js": "./dist/df-npm-info-widget.js",
+    "./df-chat-widget": "./dist/df-chat-widget.js",
+    "./df-chat-widget.js": "./dist/df-chat-widget.js",
     "./df-markdown-codemirror": "./dist/df-markdown-codemirror.js",
     "./df-markdown-codemirror.js": "./dist/df-markdown-codemirror.js",
     "./df-google-signin": "./dist/df-google-signin.js",
