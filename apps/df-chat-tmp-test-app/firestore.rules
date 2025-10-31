@@ -132,7 +132,56 @@ service cloud.firestore {
        */
       allow delete: if isAuthenticated();
     }
-    
+
+    // =============================================================================
+    // CHAT MESSAGES COLLECTION
+    // =============================================================================
+
+    match /chatMessage/{messageId} {
+
+      /**
+       * Validate chat message document structure and field types
+       */
+      function isValidChatMessage() {
+        let required = ['userId', 'userDisplayName', 'userPhotoURL', 'text', 'createdAt'];
+        let allowed = ['userId', 'userDisplayName', 'userPhotoURL', 'text', 'createdAt'];
+
+        return hasRequiredFields(required)
+            && hasOnlyAllowedFields(allowed)
+            && isValidType('userId', 'string')
+            && isValidType('userDisplayName', 'string')
+            && (isValidType('userPhotoURL', 'string') || isValidType('userPhotoURL', 'null'))
+            && isValidType('text', 'string')
+            && (isValidType('createdAt', 'timestamp') || isValidType('createdAt', 'null'))
+            && request.resource.data.userId.size() > 0
+            && request.resource.data.userDisplayName.size() > 0
+            && request.resource.data.text.size() > 0
+            && request.resource.data.text.size() <= 1000;
+      }
+
+      /**
+       * Allow reads for authenticated users. Chat is intentionally open to the classroom.
+       */
+      allow read: if isAuthenticated();
+
+      /**
+       * Allow creates when message is valid and authored by the current user.
+       */
+      allow create: if isAuthenticated()
+        && request.auth.uid == request.resource.data.userId
+        && isValidChatMessage();
+
+      /**
+       * Disallow direct updates. Messages are immutable once sent.
+       */
+      allow update: if false;
+
+      /**
+       * Allow deletes for admins so moderation can remove inappropriate content.
+       */
+      allow delete: if isAdmin();
+    }
+
     // =============================================================================
     // READ-ONLY REFERENCE DATA COLLECTIONS
     // =============================================================================
