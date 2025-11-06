@@ -68,6 +68,12 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
+  'df-chat-app': {
+    command: 'pnpm --filter @df/df-chat-app run start:test',
+    url: 'http://127.0.0.1:4181',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 };
 
 function parseRequestedProjects(argv: string[]): string[] {
@@ -194,6 +200,14 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4180',
+      },
+    },
+    {
+      name: 'df-chat-app',
+      testDir: 'apps/df-chat-app/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4181',
       },
     },
   ],

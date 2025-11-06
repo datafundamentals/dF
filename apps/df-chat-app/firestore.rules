@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function hasRequiredChatFields() {
+      return request.resource.data.keys().hasAll([
+        'text',
+        'userId',
+        'userDisplayName',
+        'userPhotoURL',
+        'createdAt',
+      ]);
+    }
+
+    function hasOnlyAllowedChatFields() {
+      return request.resource.data.keys().hasOnly([
+        'text',
+        'userId',
+        'userDisplayName',
+        'userPhotoURL',
+        'createdAt',
+      ]);
+    }
+
+    function isValidChatMessage() {
+      return hasRequiredChatFields()
+        && hasOnlyAllowedChatFields()
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 1000
+        && request.resource.data.userId is string
+        && request.resource.data.userId.size() > 0
+        && request.resource.data.userDisplayName is string
+        && request.resource.data.userDisplayName.size() > 0
+        && (request.resource.data.userPhotoURL is string || request.resource.data.userPhotoURL == null)
+        && (request.resource.data.createdAt is timestamp || request.resource.data.createdAt == null);
+    }
+
+    match /chatMessage/{messageId} {
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated()
+        && request.auth.uid == request.resource.data.userId
+        && isValidChatMessage();
+
+      allow update: if false;
+
+      allow delete: if false;
+    }
+  }
+}
