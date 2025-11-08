@@ -194,7 +194,7 @@ export class DfChatWidget extends SignalWatcher(LitElement) {
 
   constructor() {
     super();
-    this.heading = 'Classroom Chat';
+    this.heading = 'Mon Wed Chat';
     this.submitOnEnter = true;
     this.autoFocus = false;
   }
