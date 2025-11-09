@@ -916,8 +916,6 @@ Is this a Cloud Function?
 
 ## References
 
-- **Ticket 9**: `.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md#ticket-9-cloud-functions-integration`
-- **Monorepo Context**: `.claude/CLAUDE.md`
 - **Firebase Functions Docs**: https://firebase.google.com/docs/functions
 - **Monorepo Best Practices**: https://monorepo.tools/
 
