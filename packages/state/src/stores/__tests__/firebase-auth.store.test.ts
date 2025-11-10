@@ -36,6 +36,7 @@ vi.mock('@df/firebase/auth', () => ({
   signOut: vi.fn(),
   resetPassword: vi.fn(),
   updateUserProfile: vi.fn(),
+  connectAuthToEmulator: vi.fn(),
 }));
 
 // Import mocked functions for assertions

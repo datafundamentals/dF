@@ -159,11 +159,23 @@ export function hasAnyEmulatorEnabled(): boolean {
 }
 
 /**
+ * Reset only the Firebase app instance.
+ *
+ * Used in tests to reset the app between test cases while keeping
+ * emulator config in place (set during test setup).
+ *
+ * @internal
+ */
+export function resetFirebaseAppInstance(): void {
+  firebaseAppInstance = null;
+}
+
+/**
  * Reset Firebase app and emulator config.
- * 
+ *
  * Primarily used in tests to reset state between test cases.
  * Not typically needed in production code.
- * 
+ *
  * @internal
  */
 export function resetFirebaseInit(): void {
