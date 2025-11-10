@@ -23,7 +23,7 @@ We have **4 competing workflows** that currently conflict:
 
 ## Investigation Findings
 
-See `.z_/future/teaching-apps-investigation.md` for complete analysis.
+See `.z_/future/teaching-apps-investigation.md` for partial analysis, some analysis came after that doc was created, and some remains ongoing.
 
 **Key Discoveries:**
 1. ✅ Rollup bundling is in `df-activity-log` and `df-chat-app` (not teaching apps - safe)
@@ -68,8 +68,8 @@ MD3 is a **design specification** with **partial implementation** via `@material
 **Goal**: Verify reference implementations don't teach anti-patterns
 
 **Apps to audit:**
-- `df-lit-starter` - Legacy 11ty reference (may use old patterns)
-- `df-npm-info-app` - Cited as reference implementation (should be gold standard)
+- `df-lit-starter` - Legacy 11ty reference (primarily used for basic folder structure - this is modified version of the Lit team's starter)
+- `df-npm-info-app` - AsyncComputed author's reference implementation of the Signals and state store patterns, including AsyncComputed
 - `df-teaching-app` - Host shell for auto-refresh (meta-app)
 
 **Audit checklist:**
@@ -82,7 +82,7 @@ MD3 is a **design specification** with **partial implementation** via `@material
 **Actions based on findings:**
 - If passes → Mark as "✅ Reference Implementation"
 - If minor issues → Create fix tickets
-- If major issues → Add warning, mark as "Legacy Example"
+- If major issues → Add warning, mark as "Legacy Example" and not to use as a pattern.
 
 ### Phase 1: Build Infrastructure
 
