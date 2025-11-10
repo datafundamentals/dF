@@ -5,6 +5,7 @@ import '@df/ui-lit/df-auth-wrapper';
 interface DfAuthWrapperStoryArgs {
   headless?: boolean;
   showHideUser?: boolean;
+  emailPw?: boolean;
   onUserChanged?: (event: CustomEvent) => void;
 }
 
@@ -21,13 +22,18 @@ const meta: Meta<DfAuthWrapperStoryArgs> = {
 A wrapper component that protects content behind Google Sign-In authentication.
 Content inside the wrapper is only visible after successful authentication.
 
+> 💡 **Developer toggle:** enable \`<df-auth-wrapper emailPw>\` to surface the
+> emulator-only email/password UI used when writing Auth-triggered Firebase
+> Functions.
+
 ## Key Features
-- **Google Sign-In only** - Uses popup-based OAuth flow
-- **Production Firebase** - Requires real Firebase (no emulator support)
-- **Auto token storage** - Stores tokens in localStorage, sessionStorage, and cookies
-- **Two display modes** - Header with user info or headless
-- **Material Design 3** - Uses MD3 buttons for authentication UI
-- **Event-driven** - Dispatches custom events for auth state changes
+- **Google Sign-In (default)** – Popup-based OAuth flow
+- **Production Firebase** – Requires real Firebase (no emulator support)
+- **Auto token storage** – Stores tokens in localStorage, sessionStorage, and cookies
+- **Two display modes** – Header with user info or headless
+- **Developer email/password panel** – Optional UI for Auth Emulator workflows
+- **Material Design 3** – Uses MD3 buttons for authentication UI
+- **Event-driven** – Dispatches custom events for auth state changes
 
 ## Storage
 
@@ -59,6 +65,11 @@ await initializeGoogleAuth(config);
 <df-auth-wrapper headless>
   <div>Protected content without header</div>
 </df-auth-wrapper>
+
+<!-- Developer email/password panel (Auth Emulator only) -->
+<df-auth-wrapper emailPw>
+  <p>Use this when writing auth-triggered Cloud Functions locally.</p>
+</df-auth-wrapper>
 \`\`\`
 
 ## Events
@@ -68,6 +79,7 @@ await initializeGoogleAuth(config);
 ## Properties
 - \`headless\` (boolean): Hide header with user info/logout
 - \`showHideUser\` (boolean): Show raw user JSON for debugging
+- \`emailPw\` (boolean): Enable the developer-only email/password UI (Auth Emulator only)
 
 ## Debug Mode
 Alt+Click the logout button to toggle display of raw user JSON.
@@ -96,6 +108,7 @@ Based on \`boltup-authentication\` component with modernizations:
   args: {
     headless: false,
     showHideUser: false,
+    emailPw: false,
   },
   argTypes: {
     headless: {
@@ -108,6 +121,13 @@ Based on \`boltup-authentication\` component with modernizations:
     showHideUser: {
       control: 'boolean',
       description: 'Show raw user JSON for debugging (or Alt+Click logout)',
+      table: {
+        defaultValue: {summary: 'false'},
+      },
+    },
+    emailPw: {
+      control: 'boolean',
+      description: 'Enable the developer-only email/password panel (Auth Emulator workflows)',
       table: {
         defaultValue: {summary: 'false'},
       },
@@ -125,6 +145,7 @@ export const Default: Story = {
   render: (args) => html`
     <df-auth-wrapper
       ?headless=${args.headless}
+      ?emailPw=${args.emailPw}
       ?showHideUser=${args.showHideUser}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => {
         args.onUserChanged?.(event);
@@ -175,6 +196,7 @@ export const Headless: Story = {
   render: (args) => html`
     <df-auth-wrapper
       ?headless=${args.headless}
+      ?emailPw=${args.emailPw}
       ?showHideUser=${args.showHideUser}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => {
         args.onUserChanged?.(event);
@@ -225,6 +247,7 @@ export const WithDebugMode: Story = {
   render: (args) => html`
     <df-auth-wrapper
       ?headless=${args.headless}
+      ?emailPw=${args.emailPw}
       ?showHideUser=${args.showHideUser}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => {
         args.onUserChanged?.(event);
@@ -267,6 +290,7 @@ export const WithDebugMode: Story = {
 export const MinimalExample: Story = {
   render: (args) => html`
     <df-auth-wrapper
+      ?emailPw=${args.emailPw}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => args.onUserChanged?.(event)}
     >
       <div style="padding: 24px; text-align: center;">
@@ -288,6 +312,7 @@ export const EventLogging: Story = {
   render: (args) => html`
     <df-auth-wrapper
       ?headless=${args.headless}
+      ?emailPw=${args.emailPw}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => {
         args.onUserChanged?.(event);
         const user = event.detail.newValue;
@@ -350,11 +375,51 @@ const cookies = document.cookie;</code></pre>
   },
 };
 
+export const DeveloperEmailPassword: Story = {
+  args: {
+    emailPw: true,
+  },
+  render: (args) => html`
+    <df-auth-wrapper
+      ?headless=${args.headless}
+      ?emailPw=${args.emailPw}
+      @df-auth-wrapper-user-changed=${(event: CustomEvent) => args.onUserChanged?.(event)}
+    >
+      <div style="padding: 32px; max-width: 960px; margin: 0 auto;">
+        <h2 style="margin: 0 0 12px 0; color: #1d4ed8;">Developer Email/Password Panel</h2>
+        <p style="margin: 0 0 16px 0; color: #475569;">
+          This emulator-only UI lets you create throwaway accounts that trigger
+          <code>functions.auth.user()</code> handlers. Ship with <code>emailPw</code>
+          disabled to keep it hidden from real users.
+        </p>
+        <ol style="margin: 0 0 16px 1.25rem; color: #334155; line-height: 1.6;">
+          <li>Run the Firebase Auth Emulator.</li>
+          <li>Set <code>emailPw</code> on <code>&lt;df-auth-wrapper></code>.</li>
+          <li>Create or sign in with seeded accounts (e.g., alice.anderson@example.com).</li>
+          <li>Observe your Cloud Functions firing locally.</li>
+        </ol>
+        <div style="background: #fef3c7; border-radius: 12px; padding: 16px; color: #92400e;">
+          <strong>Reminder:</strong> This is intentionally non-standard and should only ship in
+          developer/tutor experiences, never in production UI.
+        </div>
+      </div>
+    </df-auth-wrapper>
+  `,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates the new developer-only email/password toggle used when the Auth Emulator is required.',
+      },
+    },
+  },
+};
+
 export const RealWorldLayout: Story = {
   render: (args) => html`
     <div style="min-height: 100vh; background: #f5f5f5;">
       <df-auth-wrapper
         ?headless=${args.headless}
+        ?emailPw=${args.emailPw}
         ?showHideUser=${args.showHideUser}
         @df-auth-wrapper-user-changed=${(event: CustomEvent) => args.onUserChanged?.(event)}
       >

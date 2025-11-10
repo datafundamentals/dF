@@ -11,6 +11,7 @@ A reusable Firebase Google Authentication wrapper component that protects conten
 - ✅ **Event-Driven** - Dispatches custom events for user state changes
 - ✅ **Material Design 3** - Uses MD3 components for consistent styling
 - ✅ **Standalone or Bundled** - Use within monorepo or bundle for external sites
+- ✅ **Developer Email/Password Panel** - Opt-in UI for Auth Emulator + Cloud Functions workflows
 
 ## Usage
 
@@ -51,6 +52,19 @@ Shows only login button or content (no header):
 ```html
 <df-auth-wrapper headless>
   <div>Your protected content here</div>
+</df-auth-wrapper>
+```
+
+### Developer Email/Password Panel (Auth Emulator)
+
+Set the `emailPw` attribute to surface a developer-only panel that bundles the
+`df-sign-in`, `df-sign-up`, and `df-password-reset` components. This UI exists
+solely for Auth Emulator workflows (for example, triggering
+`functions.auth.user().onCreate`). **Do not expose it to production users.**
+
+```html
+<df-auth-wrapper emailPw>
+  <p>Use me when writing Firebase Functions triggered by auth create/delete.</p>
 </df-auth-wrapper>
 ```
 
@@ -95,6 +109,7 @@ Alt+Click the logout button to toggle display of the raw user JSON object.
 |----------|------|---------|-------------|
 | `headless` | `boolean` | `false` | Hide header with user info and logout button |
 | `showHideUser` | `boolean` | `false` | Show raw user JSON for debugging |
+| `emailPw` | `boolean` | `false` | Enable the developer-only email/password Auth Emulator panel |
 
 ## Events
 

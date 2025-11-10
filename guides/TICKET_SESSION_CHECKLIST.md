@@ -25,7 +25,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ## Quick Start (TL;DR)
 
-**For Agents:** 1) Skim sections 1-3, 2) run the Tier Selection Matrix to load targeted docs, 3) launch TodoWrite (`todowrite` from repo root) to capture 3-5 objectives, 4) begin coding. Check sections 8-10 before exit.
+**For Agents:** 1) Skim sections 1-3, 2) run the Tier Selection Matrix to load targeted docs, 3) launch TodoWrite (`todowrite` from repo root) to capture 3-5 objectives, 4) begin coding. Check sections 8-10 before exit. If you do not have todowrite please use appropriate functionality to acclomplish similar objectives.
 
 **For User:** Provide clear objectives in the ticket or chat. Approve scope before coding starts. Review session handoff notes before the next session.
 
@@ -50,7 +50,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 - [ ] Review the root `README.md` for workspace-level commands once per session (Tier 1)
 - [ ] Open the target app/package README for project-specific scripts (Tier 1)
 - [ ] Record which docs were loaded this cycle so resets can revisit them later
-	- Log the list inside your current TodoWrite session note under a "Docs loaded" heading so the next reset spots it quickly
+	- Log the list inside your current TodoWrite session note under a "Docs loaded" heading so the next reset spots it quickly. If you do not have todowrite please use appropriate functionality to acclomplish similar objectives.
 
 #### Tier Selection Matrix
 
@@ -73,7 +73,7 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 
 ### 3. Session Scope Definition — **START HERE**
 - [ ] **[FIRST ACTION] Create a TodoWrite task list** with 3–5 objectives. This captures your scope and prevents drift.
-	- Launch TodoWrite from the repo root (`todowrite`) to open the shared session note before adding tasks; if the command is unavailable, ask the User for the correct launch path
+	- Launch TodoWrite from the repo root (`todowrite`) to open the shared session note before adding tasks;  If you do not have todowrite please use appropriate functionality to acclomplish similar objectives.
   - If objectives are unclear, list them as questions and request User clarification before proceeding.
   - If the ticket says "investigate" or "explore," note that as a distinct objective and timebox it (e.g., "Investigate performance issues — 30 min max").
 - [ ] Define clear session objective (1-3 features max)
@@ -199,13 +199,13 @@ Usage: `Ticket` is used in this document as you would also use pull request or s
 ## Emergency Protocols
 
 ### If Session Gets Derailed
-- [ ] Use TodoWrite to capture current state
+- [ ] Use TodoWrite to capture current state. If you do not have todowrite please use appropriate functionality to acclomplish similar objectives.
 - [ ] Document what went wrong in session notes
 - [ ] Exit cleanly with clear handoff documentation
 - [ ] Start fresh session with lessons learned
 
 ### If Context Window Becomes Heavy
-- [ ] Summarize current progress in TodoWrite
+- [ ] Summarize current progress in TodoWrite.  If you do not have todowrite please use appropriate functionality to acclomplish similar objectives.
 - [ ] Exit session immediately
 - [ ] Create detailed handoff documentation
 - [ ] Start new session with clean context

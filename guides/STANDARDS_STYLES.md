@@ -143,7 +143,7 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 ## Code Organization
 - **Micro-iterations** - Implement features in small, discrete steps (commits reviewed by humans only)
 - **Progressive complexity** - Start with simple implementations, refactor later as needs evolve
-- **Todo tracking** - Use TodoWrite tool to track implementation progress for complex features
+- **Todo tracking** - Use TodoWrite tool to track implementation progress for complex features, or equivalent functionality within your toolset
 - **No commented-out code** - Commented-out code is not allowed except for brief periods between commits during active development. All dead code must be removed before committing to maintain code clarity and prevent confusion
 - **Console log cleanup** - All `console.log()`, `console.debug()`, `console.warn()` statements must be removed before work is considered complete and checkpointed, except for essential error logging (`console.error()`) for production debugging. Temporary debug logs are acceptable during active development but must be cleaned up before task completion
 

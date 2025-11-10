@@ -26,7 +26,7 @@ Turbo and pnpm see every workspace via `pnpm-workspace.yaml`, so all standard co
 ### Shared UI Components (`packages/ui-lit`)
 - Houses reusable Lit elements consumed by multiple apps.
 - Key components include:
-  - `df-auth-wrapper` – Google Sign-In authentication wrapper for protecting content
+- `df-auth-wrapper` – Google Sign-In authentication wrapper for protecting content (enable the developer-only Auth Emulator panel with the `emailPw` attribute)
   - Firebase auth components (`df-sign-in`, `df-sign-out`, `df-user-profile`)
   - Firestore components (`df-firestore-list`, `df-firestore-form`)
   - File storage components (`df-file-list`, `df-file-delete`)
