@@ -11,67 +11,67 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
   'df-npm-info-app': {
     command: 'pnpm --filter @df/df-npm-info-app run start:test',
     url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-teaching-app': {
     command: 'pnpm --filter @df/df-teaching-app run start:test',
     url: 'http://127.0.0.1:4174',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-lit-starter': {
     command: 'pnpm --filter @df/df-lit-starter run start:test',
     url: 'http://127.0.0.1:4175',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-firebase-teaching-app1': {
     command: 'pnpm --filter @df/df-firebase-teaching-app1 run start:test',
     url: 'http://127.0.0.1:4176',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-chat-tmp-test-app': {
     command: 'pnpm --filter @df/df-chat-tmp-test-app run start:test',
     url: 'http://127.0.0.1:4177',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-firebase-teaching-app2': {
     command: 'pnpm --filter @df/df-firebase-teaching-app2 run start:test',
-    url: 'http://127.0.0.1:4176',
-    reuseExistingServer: !process.env.CI,
+    url: 'http://127.0.0.1:4182',
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-firebase-teaching-app3': {
     command: 'pnpm --filter @df/df-firebase-teaching-app3 run start:test',
-    url: 'http://127.0.0.1:4176',
-    reuseExistingServer: !process.env.CI,
+    url: 'http://127.0.0.1:4183',
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-firebase-teaching-app4': {
     command: 'pnpm --filter @df/df-firebase-teaching-app4 run start:test',
-    url: 'http://127.0.0.1:4176',
-    reuseExistingServer: !process.env.CI,
+    url: 'http://127.0.0.1:4184',
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-firebase-teaching-app5': {
     command: 'pnpm --filter @df/df-firebase-teaching-app5 run start:test',
-    url: 'http://127.0.0.1:4176',
-    reuseExistingServer: !process.env.CI,
+    url: 'http://127.0.0.1:4185',
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-activity-log': {
     command: 'pnpm --filter @df/df-activity-log run start:test',
     url: 'http://127.0.0.1:4180',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   'df-chat-app': {
     command: 'pnpm --filter @df/df-chat-app run start:test',
     url: 'http://127.0.0.1:4181',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120_000,
   },
 };
@@ -167,7 +167,7 @@ export default defineConfig({
       testDir: 'apps/df-firebase-teaching-app2/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4176',
+        baseURL: 'http://127.0.0.1:4182',
       },
     },
     {
@@ -175,7 +175,7 @@ export default defineConfig({
       testDir: 'apps/df-firebase-teaching-app3/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4176',
+        baseURL: 'http://127.0.0.1:4183',
       },
     },
     {
@@ -183,7 +183,7 @@ export default defineConfig({
       testDir: 'apps/df-firebase-teaching-app4/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4176',
+        baseURL: 'http://127.0.0.1:4184',
       },
     },
     {
@@ -191,7 +191,7 @@ export default defineConfig({
       testDir: 'apps/df-firebase-teaching-app5/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4176',
+        baseURL: 'http://127.0.0.1:4185',
       },
     },
     {

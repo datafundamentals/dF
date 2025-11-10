@@ -8,11 +8,11 @@ export default defineConfig({
   publicDir: resolve(__dirname, '../../public'),
   server: {
     host: '127.0.0.1',
-    port: 4176,
+    port: 4185,
   },
   preview: {
     host: '127.0.0.1',
-    port: 4176,
+    port: 4185,
   },
   plugins: [
     {

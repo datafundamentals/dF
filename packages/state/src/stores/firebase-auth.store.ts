@@ -207,9 +207,6 @@ function ensureAuthInitialized(): void {
  * ```
  */
 export const firebaseAuthState = computed<FirebaseAuthState>(() => {
-  // Lazy initialization on first access
-  ensureAuthInitialized();
-  
   return {
     authUser: authUserSignal.get(),
     authState: authStateSignal.get(),
