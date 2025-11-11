@@ -62,6 +62,12 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
     reuseExistingServer: true,
     timeout: 120_000,
   },
+  'auth-triggered-function-tool': {
+    command: 'pnpm --filter @df/auth-triggered-function-tool run start:test',
+    url: 'http://127.0.0.1:4184',
+    reuseExistingServer: true,
+    timeout: 120_000,
+  },
   'df-activity-log': {
     command: 'pnpm --filter @df/df-activity-log run start:test',
     url: 'http://127.0.0.1:4180',
@@ -192,6 +198,14 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4185',
+      },
+    },
+    {
+      name: 'auth-triggered-function-tool',
+      testDir: 'apps/auth-triggered-function-tool/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4184',
       },
     },
     {

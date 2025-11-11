@@ -1,0 +1,51 @@
+{
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20",
+    "predeploy": [
+      "pnpm --filter @df/types run build",
+      "pnpm --filter @df/auth-triggered-function-tool-functions run build"
+    ]
+  },
+  "emulators": {
+    "auth": {
+      "host": "127.0.0.1",
+      "port": 9156
+    },
+    "firestore": {
+      "host": "127.0.0.1",
+      "port": 8280
+    },
+    "functions": {
+      "host": "127.0.0.1",
+      "port": 5502
+    },
+    "hosting": {
+      "host": "127.0.0.1",
+      "port": 5510
+    },
+    "ui": {
+      "host": "127.0.0.1",
+      "port": 5410
+    }
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "unsafe-none"
+          }
+        ]
+      }
+    ]
+  }
+}

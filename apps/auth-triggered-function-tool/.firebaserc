@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "prod": "demo-auth-function-tool",
+    "production": "demo-auth-function-tool"
+  },
+  "targets": {},
+  "etags": {}
+}
