@@ -57,6 +57,25 @@ import {
   type Auth,
   type Unsubscribe,
 } from '@df/firebase/auth';
+
+/**
+ * Default Auth emulator connection target. Apps can override the host/port by
+ * setting `globalThis.__DF_AUTH_EMULATOR_HOST__` and/or
+ * `globalThis.__DF_AUTH_EMULATOR_PORT__` before initializing Firebase.
+ */
+const DEFAULT_AUTH_EMULATOR_HOST = '127.0.0.1';
+const DEFAULT_AUTH_EMULATOR_PORT = 9155;
+
+declare global {
+  var __DF_AUTH_EMULATOR_HOST__: string | undefined;
+  var __DF_AUTH_EMULATOR_PORT__: number | undefined;
+}
+
+function resolveAuthEmulatorEndpoint(): {host: string; port: number} {
+  const host = globalThis.__DF_AUTH_EMULATOR_HOST__ ?? DEFAULT_AUTH_EMULATOR_HOST;
+  const port = globalThis.__DF_AUTH_EMULATOR_PORT__ ?? DEFAULT_AUTH_EMULATOR_PORT;
+  return {host, port};
+}
 import {
   getInitializedFirebaseApp,
   shouldUseEmulatorForService,
@@ -161,10 +180,8 @@ function ensureAuthInitialized(): void {
 
   // Connect to emulator if configured
   if (shouldUseEmulatorForService('auth')) {
-    connectAuthToEmulator(authInstance, {
-      host: '127.0.0.1',
-      port: 9155,
-    });
+    const endpoint = resolveAuthEmulatorEndpoint();
+    connectAuthToEmulator(authInstance, endpoint);
   }
 
   // Set up auth state listener
