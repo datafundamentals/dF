@@ -457,28 +457,6 @@ importers:
         specifier: ^5.4.10
         version: 5.4.20(@types/node@22.18.10)(terser@5.44.0)
 
-  apps/df-firebase-teaching-app3/functions:
-    dependencies:
-      firebase-admin:
-        specifier: ^12.0.0
-        version: 12.7.0(encoding@0.1.13)
-      firebase-functions:
-        specifier: ^5.1.1
-        version: 5.1.1(firebase-admin@12.7.0(encoding@0.1.13))
-    devDependencies:
-      '@types/express':
-        specifier: ^4.17.21
-        version: 4.17.23
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.18.10
-      firebase-functions-test:
-        specifier: ^3.3.0
-        version: 3.4.1(firebase-admin@12.7.0(encoding@0.1.13))(firebase-functions@5.1.1(firebase-admin@12.7.0(encoding@0.1.13)))(jest@30.2.0(@types/node@22.18.10)(esbuild-register@3.6.0(esbuild@0.25.10)))
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.3
-
   apps/df-firebase-teaching-app4:
     dependencies:
       '@df/firebase':
