@@ -1,5 +1,6 @@
 import {initializeFirebaseForApp} from '@df/state';
 import {EMULATOR_CONFIG} from './config/firebase.config.js';
+import '@df/ui-lit/remove-replace-me';
 import '@df/ui-lit/df-auth-wrapper';
 import './df-firebase-teaching-app.js';
 
