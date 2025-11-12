@@ -1,4 +1,15 @@
-# NORMALIZE TEACHING APP 4
+# NORMALIZE TEACHING APP 3
+
+⚠️ **CRITICAL REMINDER TO CODING AGENT:**
+Each step in this ticket **REQUIRES USER VALIDATION** before proceeding to the next step. After completing a step and running tests, you MUST:
+1. Mark the step as complete in the todo list
+2. **STOP AND WAIT** - Do NOT read ahead or start the next step
+3. Output: "STEP [N] COMPLETE - AWAITING YOUR VALIDATION"
+4. Wait for explicit user approval before continuing to the next step
+
+This is not optional. The user has explicitly requested this workflow.
+
+---
 
 TL;DR: This ticket takes partial steps to prepare an abandoned app for later usage as an app template.
 
@@ -7,8 +18,7 @@ The primary goals of this ticket center around specific easier to implement fixe
 ### Done manually by user before handing to coding agent:
 
 1. remove all guides
-2. remove functions folder entirely
-3. clean (empty?) README.md
+2. cleaned up README.md
 
 ### Noted Scope Exclusions for this ticket:
 
@@ -20,7 +30,7 @@ The primary goals of this ticket center around specific easier to implement fixe
 
 This is just a summary, please follow the actual steps enumerated below this section
 
-1. create and install <remove-replace-me> placeholder - your shared web components go here
+1. verify and install <remove-replace-me> in packages/ui-lit/src/remove-replace-me.ts
 2. remove Web Components that do not belong in a starter template
 3. refactor app container component
 3. install rollup configuration
@@ -34,7 +44,7 @@ This is just a summary, please follow the actual steps enumerated below this sec
 4. later steps: does the rollup bundle run?
 5. later steps: can the bundle be used in a web page?
 
-## Step 1 - Create and install <remove-replace-me> placeholder
+## Step 1 - Verify and install <remove-replace-me> placeholder
 
 This work must be done following all applicable standards as set in guides/WC_SHARED_DEFAULTS.md
 
@@ -42,7 +52,7 @@ Hints:
 - If you are not creating this web component in packages/ui-lit you are doing something wrong
 - If the new web component does not get added to storybook as a part of this step, you are doing something wrong
 
-You are to create a new web component <remove-replace-me> with nothing other than this simple content "placeholder - your shared web components go here"
+You are to verify as OK, this new web component <remove-replace-me> with nothing other than this simple content "placeholder - your shared web components go here"
 
 This web component is then installed as follows in index.html
 
@@ -62,13 +72,13 @@ This web component is then installed as follows in index.html
 Once the app is working with this new web component, this step is complete.
 
 
-Coding Agent stops all work here and allows User to validate work so far for:
+⚠️ Coding Agent stops all work here and allows User to validate work so far for:
   - code and design compliance
   - broken builds etc
   - does it work, so far?
   - is the new shared component visible in storybook?
 
-## Step 2 - Remove Web Components that do not belong
+## Step 2 - Remove Web Components and functions that do not belong
 
 All of the web components listed below are completely and totally removed from this app, including code.
 
@@ -76,7 +86,11 @@ All of the web components listed below are completely and totally removed from t
       <df-storage-demo></df-storage-demo>
       <df-functions-demo></df-functions-demo>
 
-Coding Agent stops all work here and allows User to validate work so far for:
+apps/df-firebase-teaching-app3/functions should be deleted
+
+The app must be left completely runnable, at this point.
+
+⚠️ Coding Agent stops all work here and allows User to validate work so far for:
   - code and design compliance
   - broken builds etc
   - does it work, so far?
@@ -99,7 +113,7 @@ Coding Agent stops all work here and allows User to validate work so far for:
 
 Once the app is working with this refactored web component, this step is complete.
 
-Coding Agent stops all work here and allows User to validate work so far for:
+⚠️ Coding Agent stops all work here and allows User to validate work so far for:
   - code and design compliance
   - broken builds etc
   - does it work, so far?
@@ -108,7 +122,7 @@ Coding Agent stops all work here and allows User to validate work so far for:
 
 Using code copied from apps/df-activity-log, and then making all necessary adjustments, provide rollup functionality such that the entire bundle can be built and deployed externally in an html file, either as an SPA or part of an MPA.
 
-Coding Agent stops all work here and allows User to validate work so far for:
+⚠️ Coding Agent stops all work here and allows User to validate work so far for:
   - code and design compliance
   - broken builds etc
   - does it work, so far?
@@ -117,11 +131,11 @@ Coding Agent stops all work here and allows User to validate work so far for:
 
 ## Step 5 - Refactor name to df-app-starter-template 
 
-Refactor from apps/df-firebase-teaching-app4 to apps/df-app-starter-template
+Refactor from apps/df-firebase-teaching-app3 to apps/df-app-starter-template
 
 - make sure that all other references are refactored as well, from pnpm turbo and package.json references to any other not mentioned.
 
-Coding Agent stops all work here and allows User to validate work so far for:
+⚠️ Coding Agent stops all work here and allows User to validate work so far for:
   - code and design compliance
   - broken builds etc
   - does it work, so far?

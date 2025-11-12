@@ -9,6 +9,7 @@
 // Import Material Design 3 components ONCE, before exporting any components
 import './material-design-init.js';
 
+export * from './remove-replace-me.js';
 export * from './my-element.js';
 export * from './df-segmented-button.js';
 export * from './df-upload-link.js';
