@@ -1,12 +1,4 @@
 {
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs20",
-    "predeploy": [
-      "pnpm --filter @df/types run build",
-      "pnpm --filter @df/df-firebase-teaching-app3-functions run build"
-    ]
-  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
@@ -26,10 +18,6 @@
     "storage": {
       "host": "127.0.0.1",
       "port": 9390
-    },
-    "functions": {
-      "host": "127.0.0.1",
-      "port": 5501
     },
     "hosting": {
       "host": "127.0.0.1",

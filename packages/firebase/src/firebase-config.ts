@@ -53,7 +53,7 @@ function validateFirebaseEnv(): void {
         `  cp .env.example .env.local\n\n` +
         `For emulator mode: Placeholder values are sufficient.\n` +
         `For production: Use real values from Firebase Console.\n\n` +
-        `See apps/df-firebase-teaching-app3/README.md for details.`
+        `See apps/df-app-starter-template/README.md for details.`
     );
   }
 }

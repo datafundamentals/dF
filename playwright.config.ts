@@ -44,8 +44,8 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
     reuseExistingServer: true,
     timeout: 120_000,
   },
-  'df-firebase-teaching-app3': {
-    command: 'pnpm --filter @df/df-firebase-teaching-app3 run start:test',
+  'df-app-starter-template': {
+    command: 'pnpm --filter @df/df-app-starter-template run start:test',
     url: 'http://127.0.0.1:4183',
     reuseExistingServer: true,
     timeout: 120_000,
@@ -177,8 +177,8 @@ export default defineConfig({
       },
     },
     {
-      name: 'df-firebase-teaching-app3',
-      testDir: 'apps/df-firebase-teaching-app3/tests/integration',
+      name: 'df-app-starter-template',
+      testDir: 'apps/df-app-starter-template/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4183',
