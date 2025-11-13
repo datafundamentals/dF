@@ -42,6 +42,9 @@ export const ENVIRONMENT_CONFIGS: Record<FirebaseEnvironment, EnvironmentConfig>
 /**
  * Resolves the current Firebase environment configuration the app should use.
  * Defaults to `fb-emulator` when the Vite env var is missing or invalid.
+ *
+ * @deprecated Use `shouldUseEmulators()` with `getEmulatorConfigForRuntime()` instead.
+ * This function exists for backward compatibility and will be removed after migration.
  */
 export function getFirebaseEnvironmentConfig(): EnvironmentConfig {
   const env = import.meta.env?.VITE_FIREBASE_ENV as FirebaseEnvironment | undefined;
@@ -49,4 +52,18 @@ export function getFirebaseEnvironmentConfig(): EnvironmentConfig {
     return ENVIRONMENT_CONFIGS['fb-emulator'];
   }
   return ENVIRONMENT_CONFIGS[env];
+}
+
+/**
+ * Returns the appropriate emulator configuration based on the VITE_USE_EMULATOR flag.
+ * Replaces the legacy VITE_FIREBASE_ENV switching mechanism.
+ *
+ * **Principle:** Runtime defaults to cloud. Only when VITE_USE_EMULATOR=true
+ * will emulators be enabled. Production builds omit this flag, defaulting to cloud.
+ *
+ * @returns EmulatorConfig with per-service flags set based on VITE_USE_EMULATOR
+ */
+export function getEmulatorConfigForRuntime(): EnvironmentConfig {
+  const useEmulator = import.meta.env.VITE_USE_EMULATOR === 'true';
+  return useEmulator ? ENVIRONMENT_CONFIGS['fb-emulator'] : ENVIRONMENT_CONFIGS['fb-cloud'];
 }

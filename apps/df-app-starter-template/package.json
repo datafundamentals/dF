@@ -10,7 +10,7 @@
     "build:prod": "vite build --mode production",
     "build:bundle": "vite build --mode production",
     "build:rollup": "pnpm build && rollup -c",
-    "dev": "vite --mode production",
+    "dev": "vite",
     "preview": "vite preview --host 127.0.0.1 --port 4183",
     "preview:prod": "vite preview --mode production --host 127.0.0.1 --port 4183",
     "serve": "vite",

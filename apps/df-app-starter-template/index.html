@@ -31,10 +31,17 @@
     </style>
   </head>
   <body>
-    <df-environment-banner></df-environment-banner>
+    <!-- Environment banner shown only in dev mode (when VITE_USE_EMULATOR=true) -->
+    <df-environment-banner id="env-banner"></df-environment-banner>
     <df-auth-wrapper headless>
       <rename-me-app-container></rename-me-app-container>
     </df-auth-wrapper>
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      // Hide banner in production (when VITE_USE_EMULATOR is false or missing)
+      if (import.meta.env.VITE_USE_EMULATOR !== 'true') {
+        document.getElementById('env-banner').style.display = 'none';
+      }
+    </script>
   </body>
 </html>

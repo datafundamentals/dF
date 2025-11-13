@@ -1,11 +1,26 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import type {FirebaseEnvironment} from '@df/firebase';
-import {ENVIRONMENT_CONFIGS, getFirebaseEnvironmentConfig} from '@df/firebase';
+import {ENVIRONMENT_CONFIGS, getEmulatorConfigForRuntime} from '@df/firebase';
 
 /**
  * Displays the active Firebase connection mode so developers do not
  * accidentally run destructive operations against production data.
+ *
+ * **Updated for v4:** Now uses VITE_USE_EMULATOR to determine environment
+ * instead of VITE_FIREBASE_ENV. Apps can conditionally render this banner
+ * only when in development mode by checking `VITE_USE_EMULATOR` in HTML:
+ *
+ * ```html
+ * <!-- In index.html -->
+ * <df-environment-banner id="env-banner"></df-environment-banner>
+ * <script>
+ *   // Only show banner in dev (when VITE_USE_EMULATOR=true)
+ *   if (import.meta.env.VITE_USE_EMULATOR !== 'true') {
+ *     document.getElementById('env-banner').style.display = 'none';
+ *   }
+ * </script>
+ * ```
  */
 @customElement('df-environment-banner')
 export class DfEnvironmentBanner extends LitElement {
@@ -17,9 +32,10 @@ export class DfEnvironmentBanner extends LitElement {
 
   /**
    * Cache the default environment configuration so repeated renders
-   * do not re-read the Vite env variable.
+   * do not re-read the Vite env variable. Uses the new runtime detection
+   * based on VITE_USE_EMULATOR.
    */
-  private readonly defaultConfig = getFirebaseEnvironmentConfig();
+  private readonly defaultConfig = getEmulatorConfigForRuntime();
 
   /**
    * Uses the override value when provided, otherwise falls back to the

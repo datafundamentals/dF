@@ -1,72 +1,162 @@
 # Firebase Environment Switching
 
-Use this guide whenever you need to toggle an app between the local Firebase Emulator Suite and the live cloud services. The workflow is intentionally simple: one environment variable selects the backend and a persistent UI banner makes the active state obvious.
+Use this guide to toggle an app between the local Firebase Emulator Suite and live cloud services. The updated v4 workflow uses a single boolean flag (`VITE_USE_EMULATOR`) instead of named environment switching, with a persistent UI banner showing the active state.
 
 ## Supported Modes
 
-| Environment | Identifier | Auth | Firestore | Storage | Functions | Banner Color |
-|-------------|------------|------|-----------|---------|-----------|--------------|
-| Emulator Mode | `fb-emulator` | Production | Emulator | Emulator | Emulator | Yellow |
-| Cloud Mode | `fb-cloud` | Production | Production | Production | Production | Red |
+| Configuration | VITE_USE_EMULATOR | Auth | Firestore | Storage | Functions | Banner Color |
+|---------------|-------------------|------|-----------|---------|-----------|--------------|
+| Emulator Mode | `true` | Production | Emulator | Emulator | Emulator | Yellow |
+| Cloud Mode | `false` (or omitted) | Production | Production | Production | Production | Red |
 
 - Auth never uses an emulator in this monorepo; Google Sign-In always points at production.
-- When the `VITE_FIREBASE_ENV` variable is missing or invalid the system defaults to `fb-emulator` to keep development safe.
+- **Runtime defaults to cloud.** Only when `VITE_USE_EMULATOR=true` are emulators used.
+- **Production bundles are safe.** The flag is omitted during `firebase deploy`, so there is zero risk of shipping emulator connections.
 
-## Shared Configuration Helper
+## Quick Start
 
-`packages/firebase/src/environment-config.ts` centralizes the configuration for each environment.
+### Development (with emulators)
 
-```ts
-import {getFirebaseEnvironmentConfig} from '@df/firebase';
+```bash
+# Copy the emulator template (if not already done)
+cp .env.emulator .env.local  # Not necessary—Vite loads .env.emulator by default
 
-const ENVIRONMENT_CONFIG = getFirebaseEnvironmentConfig();
-initializeFirebaseForApp(ENVIRONMENT_CONFIG);
+# Run dev server
+pnpm dev
 ```
 
-- The helper reads `import.meta.env.VITE_FIREBASE_ENV` at runtime.
-- Returned objects extend `EmulatorConfig`, so existing Firebase initialization logic keeps working.
+By default, Vite loads `.env.emulator` which includes `VITE_USE_EMULATOR=true`. Apps connect to emulators and the yellow banner appears.
 
-## Visual Banner
+### Testing Cloud Firebase While Running Dev Server
 
-`<df-environment-banner>` ships from `@df/ui-lit` to show the active environment at the top of every app shell.
-
-```ts
-import '@df/ui-lit/df-environment-banner';
-
-render() {
-  return html`
-    <df-environment-banner></df-environment-banner>
-    <main>...</main>
-  `;
-}
+```bash
+# Temporarily override the emulator flag
+VITE_USE_EMULATOR=false pnpm dev
 ```
 
-- Yellow banner = emulator (safe for iterative development).
-- Red banner = cloud (use extra caution; you are touching live data).
-- The component can be forced into either mode via an `environment="fb-cloud"` attribute for Storybook demos or tests.
-- Mount the element in `index.html` (outside your Lit host component) so you can easily comment it out or delete it before bundling for production without touching app code.
+Or edit `.env.local`:
+```env
+VITE_USE_EMULATOR=false
+```
 
-## Switching Environments Per App
+Then restart the dev server. The red banner will appear, and the app uses live Firebase services.
 
-1. **Create a `.env.local` up front** – Even though the code defaults to `fb-emulator`, drop this file beside the app’s `package.json` so developers always see the available options:
+### Production Deployment
 
-   ```env
-   VITE_FIREBASE_ENV=fb-cloud
-   # VITE_FIREBASE_ENV=fb-emulator
+```bash
+# Build and deploy
+pnpm build
+firebase deploy
+```
+
+The production build **omits** `VITE_USE_EMULATOR`, so the app defaults to cloud mode. This is safe because:
+1. The flag is not present in `.env.production` (which contains live credentials).
+2. Rollup removes the variable during bundling.
+3. No emulator configuration is baked into the bundle.
+
+## How It Works
+
+### Environment Files
+
+- **`.env.emulator`** (loaded by Vite dev server by default)
+  ```env
+  VITE_USE_EMULATOR=true
+  VITE_FIREBASE_API_KEY=demo-api-key-for-emulator-development
+  # ... other placeholder credentials
+  ```
+
+- **`.env.production`** (used for `pnpm build`)
+  ```env
+  VITE_USE_EMULATOR=false
+  VITE_FIREBASE_API_KEY=AIzaSy...  # Real Firebase credentials
+  # ... other production credentials
+  ```
+
+### Configuration Helper
+
+`packages/firebase/src/environment-config.ts` provides runtime detection:
+
+```ts
+import { getEmulatorConfigForRuntime } from '@df/firebase';
+
+// Returns EmulatorConfig with services enabled/disabled based on VITE_USE_EMULATOR
+const config = getEmulatorConfigForRuntime();
+initializeFirebaseForApp(config);  // Now optional—auto-detects from env
+```
+
+Or use the new simplified initialization (auto-detects from environment):
+
+```ts
+import { initializeFirebaseForApp } from '@df/state';
+
+// Automatically detects VITE_USE_EMULATOR and configures emulators
+initializeFirebaseForApp();
+```
+
+### Visual Banner
+
+The `<df-environment-banner>` component displays the active mode:
+
+```html
+<!-- In index.html -->
+<df-environment-banner id="env-banner"></df-environment-banner>
+
+<script>
+  // Hide banner in production (when VITE_USE_EMULATOR !== 'true')
+  if (import.meta.env.VITE_USE_EMULATOR !== 'true') {
+    document.getElementById('env-banner').style.display = 'none';
+  }
+</script>
+```
+
+- **Yellow banner** = Emulator Mode (safe for iterative development)
+- **Red banner** = Cloud Mode (live data—use caution)
+- The component reads `VITE_USE_EMULATOR` at runtime, so no rebuild needed when toggling.
+
+## Migration from Legacy Approach (VITE_FIREBASE_ENV)
+
+The old system used `VITE_FIREBASE_ENV` with named environments (`fb-emulator` vs `fb-cloud`). This has been replaced with the simpler boolean flag.
+
+### If You're on the Old System
+
+1. **Update `.env.emulator`**: Ensure it includes `VITE_USE_EMULATOR=true`
+2. **Update `.env.production`**: Ensure it includes `VITE_USE_EMULATOR=false`
+3. **Remove `.env.local` overrides**: Delete any `VITE_FIREBASE_ENV=...` lines
+4. **Update `main.ts`**: Change from explicit config passing to auto-detection:
+   ```ts
+   // Old
+   import { EMULATOR_CONFIG, FIREBASE_CONFIG } from './config/firebase.config';
+   initializeFirebaseForApp(EMULATOR_CONFIG, FIREBASE_CONFIG);
+
+   // New
+   initializeFirebaseForApp();  // Auto-detects VITE_USE_EMULATOR
    ```
+5. **Update `index.html`**: Add the conditional banner script shown above
 
-   Leave the mode you are *not* using commented out so the toggle stays obvious.
+### Backward Compatibility
 
-2. **Default (no action required)** – If the file is missing, apps still fall back to emulator mode.
-3. **Switch modes** – Uncomment the desired line (cloud vs. emulator), save the file, and restart Vite so it reads the new value.
-4. **Cleanup** – Delete the `.env.local` file only if you no longer want overrides on that machine.
-
-> `.env.local` stays gitignored so per-developer overrides never leak into commits.
+The legacy `getFirebaseEnvironmentConfig()` function still works but is deprecated. Use `getEmulatorConfigForRuntime()` for new code.
 
 ## Verification Checklist
 
-- Launch the app with `pnpm --filter <app> dev`. The banner should read “Emulator Mode (fb-emulator)” by default.
-- Create `.env.local` with `VITE_FIREBASE_ENV=fb-cloud`, restart the dev server, and confirm the banner switches to “Cloud Mode (fb-cloud)”.
-- Remove the override file and restart to ensure the app returns to emulator mode.
+- [ ] Run `pnpm dev` (with default `.env.emulator`): Yellow banner appears, emulators work
+- [ ] Run `VITE_USE_EMULATOR=false pnpm dev`: Red banner appears, uses live Firebase
+- [ ] Run `pnpm build`: Build succeeds, banner is hidden in production bundle
+- [ ] After `firebase deploy`: Banner does not appear on deployed app, uses cloud Firebase
 
-This tool is totally optional but it does allow you to maintain constant visibility of whether you are working against the emulator or production back ends.
+## Troubleshooting
+
+**Q: The banner doesn't appear or shows wrong environment**
+- Restart the dev server: `pnpm dev`
+- Check that `.env.emulator` has `VITE_USE_EMULATOR=true`
+- Verify that `.env.production` has `VITE_USE_EMULATOR=false`
+
+**Q: I want to test cloud Firebase locally**
+- Run: `VITE_USE_EMULATOR=false pnpm dev`
+- Or temporarily edit `.env.local` and restart the server
+
+**Q: The banner appears in production**
+- This should not happen. Verify that:
+  1. You ran `pnpm build` (not `pnpm dev`)
+  2. The `index.html` script correctly hides the banner when `VITE_USE_EMULATOR !== 'true'`
+  3. The bundled code does not contain the `VITE_USE_EMULATOR` variable
