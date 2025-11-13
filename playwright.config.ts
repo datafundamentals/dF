@@ -64,7 +64,7 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
   },
   'df-auth-trigd-func-tool': {
     command: 'pnpm --filter @df/df-auth-trigd-func-tool run start:test',
-    url: 'http://127.0.0.1:4184',
+    url: 'http://127.0.0.1:4186',
     reuseExistingServer: true,
     timeout: 120_000,
   },
@@ -205,7 +205,7 @@ export default defineConfig({
       testDir: 'apps/df-auth-trigd-func-tool/tests/integration',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4184',
+        baseURL: 'http://127.0.0.1:4186',
       },
     },
     {

@@ -29,6 +29,8 @@
     "./df-google-signin.js": "./dist/df-google-signin.js",
     "./df-auth-wrapper": "./dist/df-auth-wrapper.js",
     "./df-auth-wrapper.js": "./dist/df-auth-wrapper.js",
+    "./df-environment-banner": "./dist/df-environment-banner.js",
+    "./df-environment-banner.js": "./dist/df-environment-banner.js",
     "./firebase": "./dist/firebase/index.js",
     "./firebase/index.js": "./dist/firebase/index.js"
   },
@@ -42,6 +44,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@df/firebase": "workspace:*",
     "@df/state": "workspace:*",
     "@lit-labs/signals": "^0.1.0",
     "@material/web": "^2.4.0",

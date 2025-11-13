@@ -7,5 +7,6 @@ export * from './functions/index.js';
 export * from './firebase-config.js';
 export * from './init.js';
 export * from './emulator-config.js';
+export * from './environment-config.js';
 // App-level configuration utilities
 export * from './app-firebase-config.js';

@@ -6,7 +6,7 @@ Minimal Firebase emulator harness focused on auth-triggered Cloud Functions. Pro
 - Firebase Emulator Suite scoped to **Auth**, **Firestore** (for future use), and **Functions**
 - `df-auth-wrapper emailPw` mounted on an otherwise empty page
 - Ports isolated from the other teaching apps (Auth 9156, Functions 5001, Emulator UI 5410)
-- Playwright entry on port 4184 for smoke tests
+- Playwright entry on port 4186 for smoke tests
 
 ## Quick Start
 ```bash
@@ -22,7 +22,7 @@ pnpm --filter @df/df-auth-trigd-func-tool dev
 | --- | --- |
 | `pnpm --filter @df/df-auth-trigd-func-tool dev` | Run the Vite server (emulator mode) |
 | `pnpm --filter @df/df-auth-trigd-func-tool build` | Type-check the harness |
-| `pnpm --filter @df/df-auth-trigd-func-tool start:test` | Launch the Playwright server on port 4184 |
+| `pnpm --filter @df/df-auth-trigd-func-tool start:test` | Launch the Playwright server on port 4186 |
 | `pnpm --filter @df/df-auth-trigd-func-tool test` | Run the Playwright smoke test |
 | `pnpm --filter @df/df-auth-trigd-func-tool emulators:start` | Start Auth + Firestore + Functions emulators |
 | `pnpm --filter @df/auth-functions build` | Compile the Cloud Functions |

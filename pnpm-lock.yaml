@@ -856,6 +856,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.36.2
         version: 6.38.6
+      '@df/firebase':
+        specifier: workspace:*
+        version: link:../firebase
       '@df/state':
         specifier: workspace:*
         version: link:../state

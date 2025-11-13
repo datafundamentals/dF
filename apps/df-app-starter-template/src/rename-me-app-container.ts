@@ -8,10 +8,18 @@ export class RenameMeAppContainer extends LitElement {
       display: block;
       width: 100%;
     }
+
+    .content {
+      padding: 1.5rem;
+    }
   `;
 
   override render() {
-    return html`<remove-replace-me></remove-replace-me>`;
+    return html`
+      <div class="content">
+        <remove-replace-me></remove-replace-me>
+      </div>
+    `;
   }
 }
 

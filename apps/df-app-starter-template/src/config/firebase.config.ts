@@ -1,14 +1,16 @@
+import type {EnvironmentConfig} from '@df/firebase';
 import type {EmulatorConfig} from '@df/types';
+import {getFirebaseEnvironmentConfig} from '@df/firebase';
+
+const environmentConfig = getFirebaseEnvironmentConfig();
 
 /**
- * Firebase App Starter Template - Minimal emulator configuration
- * Uses emulator for data services (firestore, storage)
- * Does NOT use auth emulator (connects to production Firebase Auth)
- * Does NOT use functions (app has no Cloud Functions)
+ * Resolved Firebase environment configuration for this app.
+ * Defaults to emulator mode unless VITE_FIREBASE_ENV overrides it.
  */
-export const EMULATOR_CONFIG: EmulatorConfig = {
-  auth: false, // Template app uses production Auth - no emulator needed
-  firestore: true,
-  storage: true,
-  functions: false, // App has no Cloud Functions
-};
+export const ENVIRONMENT_CONFIG: EnvironmentConfig = environmentConfig;
+
+/**
+ * Backwards compatible alias consumed by initializeFirebaseForApp.
+ */
+export const EMULATOR_CONFIG: EmulatorConfig = environmentConfig;

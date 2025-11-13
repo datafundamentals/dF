@@ -74,7 +74,7 @@ export function initializeAppFirebase(emulatorConfig: EmulatorConfig) {
  * Legacy compatibility: Environment configuration interface
  * Provided for backward compatibility with existing code
  */
-export interface EnvironmentConfig {
+export interface LegacyEnvironmentConfig {
   firebase: FirebaseConfig;
   useEmulator: boolean;
   emulatorUiUrl: string;
@@ -86,7 +86,9 @@ export interface EnvironmentConfig {
  * 
  * @param emulatorConfig - App-specific emulator configuration
  */
-export function getEnvironmentConfig(emulatorConfig: EmulatorConfig): EnvironmentConfig {
+export function getEnvironmentConfig(
+  emulatorConfig: EmulatorConfig,
+): LegacyEnvironmentConfig {
   return {
     firebase: getFirebaseConfig(),
     useEmulator: useEmulator(emulatorConfig),

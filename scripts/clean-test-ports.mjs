@@ -22,6 +22,7 @@ const TEST_PORTS = [
   4183, // df-firebase-teaching-app3
   4184, // df-firebase-teaching-app4
   4185, // df-firebase-teaching-app5
+  4186, // df-auth-trigd-func-tool
 ];
 
 console.log('Cleaning up test ports...');
