@@ -29,10 +29,6 @@
         width: min(960px, 90vw);
       }
 
-      df-auth-demo {
-        width: min(1200px, 90vw);
-      }
-
       df-firestore-demo {
         width: min(1200px, 90vw);
       }
@@ -47,11 +43,20 @@
     </style>
   </head>
   <body>
-    <df-firebase-teaching-app></df-firebase-teaching-app>
-    <df-auth-demo></df-auth-demo>
-    <df-firestore-demo></df-firestore-demo>
-    <df-storage-demo></df-storage-demo>
-    <df-functions-demo></df-functions-demo>
+    <!-- Environment banner shown only in dev mode (when VITE_USE_EMULATOR=true) -->
+    <df-environment-banner id="env-banner"></df-environment-banner>
+    <df-auth-wrapper headless>
+      <df-firebase-teaching-app></df-firebase-teaching-app>
+      <df-firestore-demo></df-firestore-demo>
+      <df-storage-demo></df-storage-demo>
+      <df-functions-demo></df-functions-demo>
+    </df-auth-wrapper>
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      // Hide banner in production (when VITE_USE_EMULATOR is false or missing)
+      if (import.meta.env.VITE_USE_EMULATOR !== 'true') {
+        document.getElementById('env-banner').style.display = 'none';
+      }
+    </script>
   </body>
 </html>

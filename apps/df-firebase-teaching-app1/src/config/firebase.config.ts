@@ -1,11 +1,12 @@
 import type {EmulatorConfig} from '@df/types';
 
 /**
- * Firebase Teaching App 2 - Stage 2: Hybrid development
- * Local data stores with production cloud functions
+ * Firebase Teaching App 1 - Emulator configuration
+ * Uses cloud authentication (no auth emulator per STANDARDS_STYLES.md)
+ * Local emulators for Firestore, Storage, and Functions
  */
 export const EMULATOR_CONFIG: EmulatorConfig = {
-  auth: true,
+  auth: false, // ✅ STANDARDS COMPLIANT: Auth emulator disabled
   firestore: true,
   storage: true,
   functions: true,

@@ -123,11 +123,11 @@ export class DfFirebaseTeachingApp extends LitElement {
     return html`
       <header>
         <span class="status" data-state=${this.emulatorStatus}>${statusLabel}</span>
-        <h1>Firebase Emulator Workspace</h1>
+        <h1>Firebase Teaching Workspace</h1>
         <p>
-          This host application boots against the Firebase Emulator Suite so the classroom can
-          prototype features with zero cloud dependencies. Run the emulators locally, wire the app to
-          <code>localhost</code>, and export seed data as you teach.
+          This application demonstrates Firebase integration patterns with cloud authentication
+          and local emulators for Firestore, Storage, and Functions. Sign in with Google using
+          your real account, then interact with emulated data services for safe development.
         </p>
       </header>
 
@@ -137,7 +137,8 @@ export class DfFirebaseTeachingApp extends LitElement {
           <li><code>pnpm install</code> (workspace-wide)</li>
           <li><code>pnpm --filter @df/df-firebase-teaching-app1 emulators:start</code></li>
           <li><code>pnpm --filter @df/df-firebase-teaching-app1 dev</code></li>
-          <li>Connect SDK instances using the <code>useEmulators</code> helpers</li>
+          <li>Sign in with Google (uses production auth)</li>
+          <li>Interact with Firestore, Storage, and Functions (use emulators)</li>
         </ul>
       </section>
 
