@@ -17,11 +17,11 @@ Offline-friendly host application for teaching Firebase development patterns wit
 
 3. Start the emulators against the shared demo project. This command keeps the suite running and persists data across restarts:
    ```sh
-   pnpm --filter @df/df-firebase-teaching-app1 emulators:start
+   pnpm --filter @df/df-firebase-teaching-app emulators:start
    ```
 4. Launch the web app in a second terminal:
    ```sh
-   pnpm --filter @df/df-firebase-teaching-app1 dev
+   pnpm --filter @df/df-firebase-teaching-app dev
    ```
 5. Open `http://127.0.0.1:4176` in your browser. The banner in the landing page confirms whether the Emulator UI is reachable (port `4000`).
 
@@ -189,12 +189,12 @@ This script tests logging in with all 10 users and displays their authentication
 
 - Export current emulator state:
   ```sh
-  pnpm --filter @df/df-firebase-teaching-app1 emulators:export
+  pnpm --filter @df/df-firebase-teaching-app emulators:export
   ```
   
 - Import a saved snapshot and start emulators:
   ```sh
-  pnpm --filter @df/df-firebase-teaching-app1 emulators:import
+  pnpm --filter @df/df-firebase-teaching-app emulators:import
   ```
   
 - Clear all persisted data:
@@ -264,10 +264,10 @@ The Firebase teaching app now includes complete authentication patterns demonstr
 
 ```bash
 # Terminal 1: Start emulators
-pnpm --filter @df/df-firebase-teaching-app1 emulators:start
+pnpm --filter @df/df-firebase-teaching-app emulators:start
 
 # Terminal 2: Start dev server
-pnpm --filter @df/df-firebase-teaching-app1 dev
+pnpm --filter @df/df-firebase-teaching-app dev
 ```
 
 Then:
@@ -319,8 +319,8 @@ The Firestore demo showcases end-to-end CRUD flows powered by the shared todos s
 
 ### Quick Firestore Tour
 
-1. Start the emulators: `pnpm --filter @df/df-firebase-teaching-app1 emulators:start`
-2. Launch the dev server: `pnpm --filter @df/df-firebase-teaching-app1 dev`
+1. Start the emulators: `pnpm --filter @df/df-firebase-teaching-app emulators:start`
+2. Launch the dev server: `pnpm --filter @df/df-firebase-teaching-app dev`
 3. Visit the "Firestore CRUD Pattern" section
 4. Toggle real-time updates, adjust filters, and add/edit/delete todos
 5. Switch page size to explore pagination
@@ -349,8 +349,8 @@ The Storage demo demonstrates Firebase Storage patterns with real file upload an
 
 ### Quick Storage Tour
 
-1. Start the emulators: `pnpm --filter @df/df-firebase-teaching-app1 emulators:start`
-2. Launch the dev server: `pnpm --filter @df/df-firebase-teaching-app1 dev`
+1. Start the emulators: `pnpm --filter @df/df-firebase-teaching-app emulators:start`
+2. Launch the dev server: `pnpm --filter @df/df-firebase-teaching-app dev`
 3. Visit the "Storage Pattern" section
 4. Drag-and-drop an image file or click to browse
 5. Watch the upload progress bar
@@ -600,10 +600,10 @@ This approach ensures the teaching app remains maintainable while providing exce
 
 ## Development Tasks
 
-- `pnpm --filter @df/df-firebase-teaching-app1 build` – Type-check and emit static assets.
-- `pnpm --filter @df/df-firebase-teaching-app1 preview` – Serve the production build on port `4176`.
-- `pnpm --filter @df/df-firebase-teaching-app1 test` – Run the Playwright smoke test (ensures the shell renders).
-- `pnpm --filter @df/df-firebase-teaching-app1 test:rules` – Run automated security rules tests.
+- `pnpm --filter @df/df-firebase-teaching-app build` – Type-check and emit static assets.
+- `pnpm --filter @df/df-firebase-teaching-app preview` – Serve the production build on port `4176`.
+- `pnpm --filter @df/df-firebase-teaching-app test` – Run the Playwright smoke test (ensures the shell renders).
+- `pnpm --filter @df/df-firebase-teaching-app test:rules` – Run automated security rules tests.
 
 ## Security Rules Testing (Ticket 8: ✅ Complete)
 
@@ -616,10 +616,10 @@ The Firebase teaching app includes production-ready security rules with comprehe
 
 ```bash
 # Terminal 1: Ensure emulators are running
-pnpm --filter @df/df-firebase-teaching-app1 emulators:start
+pnpm --filter @df/df-firebase-teaching-app emulators:start
 
 # Terminal 2: Run automated rules tests
-pnpm --filter @df/df-firebase-teaching-app1 test:rules
+pnpm --filter @df/df-firebase-teaching-app test:rules
 ```
 
 Expected output:
@@ -748,7 +748,7 @@ Rules are automatically loaded when emulators start. No deployment needed.
 
 **To production Firebase:**
 ```bash
-pnpm --filter @df/df-firebase-teaching-app1 deploy:rules
+pnpm --filter @df/df-firebase-teaching-app deploy:rules
 ```
 
 This deploys both `firestore.rules` and `storage.rules` to your Firebase project.
@@ -809,9 +809,9 @@ The current testing architecture provides excellent coverage and reliability for
 
 ## Development Tasks
 
-- `pnpm --filter @df/df-firebase-teaching-app1 build` – Type-check and emit static assets.
-- `pnpm --filter @df/df-firebase-teaching-app1 preview` – Serve the production build on port `4176`.
-- `pnpm --filter @df/df-firebase-teaching-app1 test` – Run the Playwright smoke test (ensures the shell renders).
+- `pnpm --filter @df/df-firebase-teaching-app build` – Type-check and emit static assets.
+- `pnpm --filter @df/df-firebase-teaching-app preview` – Serve the production build on port `4176`.
+- `pnpm --filter @df/df-firebase-teaching-app test` – Run the Playwright smoke test (ensures the shell renders).
 
 ---
 
@@ -848,7 +848,7 @@ This section demonstrates how to deploy the Firebase Teaching App to production 
 Create `.env.production` file (copy from `.env.production.example`):
 
 ```bash
-cd apps/df-firebase-teaching-app1
+cd apps/df-firebase-teaching-app
 cp .env.production.example .env.production
 ```
 
@@ -874,7 +874,7 @@ VITE_FIREBASE_EMULATOR_UI=http://127.0.0.1:5400
 
 ```bash
 # From the app directory
-cd apps/df-firebase-teaching-app1
+cd apps/df-firebase-teaching-app
 
 # Initialize (select your project when prompted)
 firebase use --add
@@ -887,25 +887,25 @@ firebase use --add
 
 ```bash
 # Ensure security rules pass all tests
-pnpm --filter @df/df-firebase-teaching-app1 test:rules
+pnpm --filter @df/df-firebase-teaching-app test:rules
 
 # Verify production build works
-pnpm --filter @df/df-firebase-teaching-app1 build:prod
+pnpm --filter @df/df-firebase-teaching-app build:prod
 
 # Preview production build locally
-pnpm --filter @df/df-firebase-teaching-app1 preview:prod
+pnpm --filter @df/df-firebase-teaching-app preview:prod
 ```
 
 **Step 6: Deploy to Production**
 
 ```bash
 # Full deployment (rules + functions + hosting)
-pnpm --filter @df/df-firebase-teaching-app1 deploy:prod
+pnpm --filter @df/df-firebase-teaching-app deploy:prod
 
 # Or deploy components individually:
-pnpm --filter @df/df-firebase-teaching-app1 deploy:rules      # Security rules only
-pnpm --filter @df/df-firebase-teaching-app1 deploy:functions  # Cloud Functions only
-pnpm --filter @df/df-firebase-teaching-app1 deploy:hosting    # Hosting only
+pnpm --filter @df/df-firebase-teaching-app deploy:rules      # Security rules only
+pnpm --filter @df/df-firebase-teaching-app deploy:functions  # Cloud Functions only
+pnpm --filter @df/df-firebase-teaching-app deploy:hosting    # Hosting only
 ```
 
 **Step 7: Verify Deployment**
@@ -1150,7 +1150,7 @@ jobs:
           pnpm --filter @df/ui-lit run build
       
       - name: Create .env.production from secrets
-        working-directory: apps/df-firebase-teaching-app1
+        working-directory: apps/df-firebase-teaching-app
         run: |
           cat > .env.production << EOF
           VITE_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
@@ -1164,10 +1164,10 @@ jobs:
           EOF
       
       - name: Run security rules tests
-        run: pnpm --filter @df/df-firebase-teaching-app1 test:rules
+        run: pnpm --filter @df/df-firebase-teaching-app test:rules
       
       - name: Build production app
-        run: pnpm --filter @df/df-firebase-teaching-app1 build:prod
+        run: pnpm --filter @df/df-firebase-teaching-app build:prod
       
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -1228,7 +1228,7 @@ Copy the bundle to your static site in two commands:
 # From root of monorepo
 
 # builds bundle
-pnpm --filter @df/df-firebase-teaching-app1 build:bundle
+pnpm --filter @df/df-firebase-teaching-app build:bundle
 
 # deploys bundle
 ./scripts/copy-app-bundle.sh df-firebase-teaching-app /path/to/your/site/target-dir
@@ -1247,7 +1247,7 @@ Deploy the app to non-Firebase hosting platforms (11ty, Netlify, Vercel, traditi
 
 ```bash
 # Create standalone bundle
-pnpm --filter @df/df-firebase-teaching-app1 build:bundle
+pnpm --filter @df/df-firebase-teaching-app build:bundle
 
 # Output: dist/ directory contains:
 # - index.html
@@ -1263,14 +1263,14 @@ pnpm --filter @df/df-firebase-teaching-app1 build:bundle
 **Step 1: Build the bundle**
 
 ```bash
-pnpm --filter @df/df-firebase-teaching-app1 build:bundle
+pnpm --filter @df/df-firebase-teaching-app build:bundle
 ```
 
 **Step 2: Copy bundle to 11ty site**
 
 ```bash
 # Copy dist/ to your 11ty public directory
-cp -r apps/df-firebase-teaching-app1/dist/* path/to/11ty-site/public/firebase-app/
+cp -r apps/df-firebase-teaching-app/dist/* path/to/11ty-site/public/firebase-app/
 ```
 
 **Step 3: Create 11ty page**
@@ -1318,8 +1318,8 @@ Create `netlify.toml` in app directory:
 
 ```toml
 [build]
-  command = "pnpm install && pnpm --filter @df/df-firebase-teaching-app1 build:bundle"
-  publish = "apps/df-firebase-teaching-app1/dist"
+  command = "pnpm install && pnpm --filter @df/df-firebase-teaching-app build:bundle"
+  publish = "apps/df-firebase-teaching-app/dist"
 
 [[redirects]]
   from = "/*"
@@ -1342,7 +1342,7 @@ Create `netlify.toml` in app directory:
 pnpm add -g vercel
 
 # Build and deploy
-cd apps/df-firebase-teaching-app1
+cd apps/df-firebase-teaching-app
 pnpm build:bundle
 vercel --prod
 ```
@@ -1353,8 +1353,8 @@ Create `vercel.json` in app directory:
 
 ```json
 {
-  "buildCommand": "pnpm install && pnpm --filter @df/df-firebase-teaching-app1 build:bundle",
-  "outputDirectory": "apps/df-firebase-teaching-app1/dist",
+  "buildCommand": "pnpm install && pnpm --filter @df/df-firebase-teaching-app build:bundle",
+  "outputDirectory": "apps/df-firebase-teaching-app/dist",
   "framework": null
 }
 ```
@@ -1430,8 +1430,8 @@ Header set X-XSS-Protection "1; mode=block"
 **Cloudflare Pages:**
 
 1. Connect GitHub repository to Cloudflare Pages
-2. Build command: `pnpm install && pnpm --filter @df/df-firebase-teaching-app1 build:bundle`
-3. Build output directory: `apps/df-firebase-teaching-app1/dist`
+2. Build command: `pnpm install && pnpm --filter @df/df-firebase-teaching-app build:bundle`
+3. Build output directory: `apps/df-firebase-teaching-app/dist`
 4. Add environment variables in Cloudflare dashboard
 
 **AWS CloudFront + S3:**

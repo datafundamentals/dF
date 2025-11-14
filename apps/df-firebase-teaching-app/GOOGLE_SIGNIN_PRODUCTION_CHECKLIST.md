@@ -46,7 +46,7 @@ Pre-authorized domains (no action needed):
 
 ```bash
 # From monorepo root
-cd apps/df-firebase-teaching-app1
+cd apps/df-firebase-teaching-app
 
 # Deploy everything (includes Google Sign-In)
 pnpm deploy:prod

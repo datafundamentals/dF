@@ -184,7 +184,7 @@ They exist because you were trying to **modify apps in-place** instead of having
 
 Keep only what's actually different:
 
-1. **`df-firebase-teaching-app1`** - Stage 1: Full Emulator
+1. **`df-firebase-teaching-app`** - Stage 1: Full Emulator
 2. **`df-firebase-teaching-app2`** - Stage 2: Hybrid (delete app3, app4 - identical)
 3. **`df-firebase-teaching-app5`** - Stage 4: Full Production
 
@@ -194,7 +194,7 @@ Keep only what's actually different:
 
 Complete the intended progression:
 
-1. **`df-firebase-teaching-app1`** - Stage 1: All emulators
+1. **`df-firebase-teaching-app`** - Stage 1: All emulators
 2. **`df-firebase-teaching-app2`** - Stage 2: Prod auth, local data/functions
 3. **`df-firebase-teaching-app4`** - Stage 3: Prod auth/functions, local data (FIX CONFIG)
 4. **`df-firebase-teaching-app5`** - Stage 4: Full production

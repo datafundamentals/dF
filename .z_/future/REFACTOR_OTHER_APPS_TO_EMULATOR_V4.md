@@ -2,7 +2,7 @@ guides/FIREBASE_ENVIRONMENT_SWITCHING.md
 
 apps/df-activity-log
 apps/df-chat-app
-apps/df-firebase-teaching-app1 at least try this one first else do another
+apps/df-firebase-teaching-app at least try this one first else do another
 
 
 basic idea:

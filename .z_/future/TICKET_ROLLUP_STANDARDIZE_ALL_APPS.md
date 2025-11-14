@@ -40,7 +40,7 @@ This ticket should likely be split into:
 
 ### High Priority (Teaching Apps)
 1. `df-firebase-teaching-app0` - Core Firebase patterns
-2. `df-firebase-teaching-app1` - Auth patterns
+2. `df-firebase-teaching-app` - Auth patterns
 3. `df-firebase-teaching-app2` - Firestore patterns
 4. `df-firebase-teaching-app3` - Storage patterns
 5. `df-firebase-teaching-app4` - Functions patterns
@@ -60,7 +60,7 @@ This ticket should likely be split into:
 Copy from `df-activity-log`:
 
 ```bash
-cp apps/df-activity-log/rollup.config.js apps/df-firebase-teaching-app1/rollup.config.js
+cp apps/df-activity-log/rollup.config.js apps/df-firebase-teaching-app/rollup.config.js
 ```
 
 Update `input` and `output.file`:
@@ -69,7 +69,7 @@ Update `input` and `output.file`:
 export default {
   input: 'dist/main.js',
   output: {
-    file: 'dist/df-firebase-teaching-app1.bundled.js', // ← Change this
+    file: 'dist/df-firebase-teaching-app.bundled.js', // ← Change this
     format: 'esm',
   },
   // ... rest same as canonical
@@ -174,7 +174,7 @@ Execute in this order to minimize merge conflicts and learn from each iteration:
 
 ### Phase 1: Low-Risk Apps (Week 1)
 - `df-firebase-teaching-app0` (minimal complexity)
-- `df-firebase-teaching-app1` (auth patterns - already working in df-activity-log)
+- `df-firebase-teaching-app` (auth patterns - already working in df-activity-log)
 
 **Goal:** Identify common migration issues early
 

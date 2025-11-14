@@ -34,7 +34,7 @@ import {initializeTokenExchange} from './auth-token-exchange.js';
  *
  * ARCHITECTURE:
  * - Google auth uses same Firebase config as rest of app (from .env files)
- * - Teaching app uses apps/df-firebase-teaching-app1/.env.* (emulator or production)
+ * - Teaching app uses apps/df-firebase-teaching-app/.env.* (emulator or production)
  * - Token exchange bridges auth systems via Cloud Function when needed
  * - Unified configuration approach - no duplication
  *

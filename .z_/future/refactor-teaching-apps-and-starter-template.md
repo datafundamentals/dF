@@ -89,7 +89,7 @@ pnpm install
 pnpm build
 
 # Test one teaching app starts
-pnpm --filter df-firebase-teaching-app1 dev
+pnpm --filter df-firebase-teaching-app dev
 ```
 
 ### 3. Clean Git State
@@ -359,7 +359,7 @@ html`<df-emulator-mode-banner></df-emulator-mode-banner>`;
 **Estimated time:** 1-2 hours  
 **Goal:** Prove mode switching works in real app
 
-**App to update:** `df-firebase-teaching-app1` (keep others as control)
+**App to update:** `df-firebase-teaching-app` (keep others as control)
 
 **Changes:**
 1. Update firebase.config.ts to use `getCurrentModeConfig()`
@@ -370,18 +370,18 @@ html`<df-emulator-mode-banner></df-emulator-mode-banner>`;
 **Test procedure:**
 ```bash
 # Test full mode
-echo "VITE_EMULATOR_MODE=full" > apps/df-firebase-teaching-app1/.env.local
-pnpm --filter df-firebase-teaching-app1 dev
+echo "VITE_EMULATOR_MODE=full" > apps/df-firebase-teaching-app/.env.local
+pnpm --filter df-firebase-teaching-app dev
 # Verify: green banner, all emulators
 
 # Test hybrid mode
-echo "VITE_EMULATOR_MODE=hybrid" > apps/df-firebase-teaching-app1/.env.local
-pnpm --filter df-firebase-teaching-app1 dev
+echo "VITE_EMULATOR_MODE=hybrid" > apps/df-firebase-teaching-app/.env.local
+pnpm --filter df-firebase-teaching-app dev
 # Verify: yellow banner, no auth emulator
 
 # Test production mode
-echo "VITE_EMULATOR_MODE=production" > apps/df-firebase-teaching-app1/.env.local
-pnpm --filter df-firebase-teaching-app1 dev
+echo "VITE_EMULATOR_MODE=production" > apps/df-firebase-teaching-app/.env.local
+pnpm --filter df-firebase-teaching-app dev
 # Verify: red banner, no emulators
 ```
 
@@ -393,7 +393,7 @@ pnpm --filter df-firebase-teaching-app1 dev
 - [ ] No emulator connection errors in console
 - [ ] Mode switching is bidirectional (can go back)
 
-**Deliverable:** Updated `df-firebase-teaching-app1` with mode switching
+**Deliverable:** Updated `df-firebase-teaching-app` with mode switching
 
 **Commit message:** `feat(teaching-app1): add mode switching capability`
 
@@ -647,7 +647,7 @@ pnpm validate:clone apps/df-my-new-app
 **Estimated time:** 30 minutes  
 **Goal:** Teaching app matches production pattern
 
-**Changes to df-firebase-teaching-app1:**
+**Changes to df-firebase-teaching-app:**
 1. Copy rollup.config.js from df-activity-log
 2. Update output filename
 3. Add `build:rollup` script to package.json
@@ -656,8 +656,8 @@ pnpm validate:clone apps/df-my-new-app
 
 **Test:**
 ```bash
-pnpm --filter df-firebase-teaching-app1 build:rollup
-ls apps/df-firebase-teaching-app1/dist/bundle/  # Should see bundle
+pnpm --filter df-firebase-teaching-app build:rollup
+ls apps/df-firebase-teaching-app/dist/bundle/  # Should see bundle
 ```
 
 **Exit criteria:**
@@ -678,7 +678,7 @@ ls apps/df-firebase-teaching-app1/dist/bundle/  # Should see bundle
 
 **Files to create:**
 ```
-apps/df-firebase-teaching-app1/src/demos/
+apps/df-firebase-teaching-app/src/demos/
 └── 04-mode-switching-demo.ts  ← NEW
 ```
 
@@ -713,7 +713,7 @@ apps/df-firebase-teaching-app1/src/demos/
 **Goal:** ONE teaching app with all features
 
 **Actions:**
-1. Rename `df-firebase-teaching-app1` → `df-firebase-teaching-app` (singular)
+1. Rename `df-firebase-teaching-app` → `df-firebase-teaching-app` (singular)
 2. Move `teaching-app2-5` to `.z_/archived-teaching-apps/`
 3. Update all documentation references
 4. Update workspace configuration
@@ -722,7 +722,7 @@ apps/df-firebase-teaching-app1/src/demos/
 **Commands:**
 ```bash
 # Rename main teaching app
-mv apps/df-firebase-teaching-app1 apps/df-firebase-teaching-app
+mv apps/df-firebase-teaching-app apps/df-firebase-teaching-app
 
 # Archive others
 mkdir -p .z_/archived-teaching-apps
@@ -1542,7 +1542,7 @@ cp -r apps/df-starter-template apps/df-my-new-app
 
 #### 3.1 Keep ONE Teaching App
 - ✅ Keep: `df-firebase-teaching-app` (singular, no number)
-- 🗑️ Archive: `df-firebase-teaching-app1` through `df-firebase-teaching-app5`
+- 🗑️ Archive: `df-firebase-teaching-app` through `df-firebase-teaching-app5`
 
 #### 3.2 Add Interactive Mode Switching Demo
 

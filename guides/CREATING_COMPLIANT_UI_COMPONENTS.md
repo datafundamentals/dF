@@ -51,7 +51,7 @@ Some MD3 patterns (e.g., segmented buttons) are spec-only. In those cases:
 ## 5. Testing Requirements
 - Add/extend Storybook stories under `apps/df-storybook`
 - Unit test logic-heavy components with Vitest (see `packages/ui-lit/vitest.config.ts`)
-- Integration tests live in `apps/df-firebase-teaching-app1/tests`
+- Integration tests live in `apps/df-firebase-teaching-app/tests`
 
 ## 6. Automated Validation
 1. `pnpm scan:compliance` – static scanner + ESLint rule

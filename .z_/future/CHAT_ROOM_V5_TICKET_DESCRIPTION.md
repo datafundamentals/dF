@@ -12,7 +12,7 @@ This ticket is different in that
   
 ## Step 1 - Clone App1 as a Temporary Testing Agent
 
-apps/df-firebase-teaching-app1 is cloned to apps/df-chat-tmp-test-app
+apps/df-firebase-teaching-app is cloned to apps/df-chat-tmp-test-app
 
 All relevant pnpm, turbo, and package.json adjustments are made, to assure that the new clone is usable and worthy of being worked within.
 

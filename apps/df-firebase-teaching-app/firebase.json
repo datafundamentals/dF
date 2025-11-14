@@ -4,7 +4,7 @@
     "runtime": "nodejs20",
     "predeploy": [
       "pnpm --filter @df/types run build",
-      "pnpm --filter @df/df-firebase-teaching-app1-functions run build"
+      "pnpm --filter @df/df-firebase-teaching-app-functions run build"
     ]
   },
   "firestore": {

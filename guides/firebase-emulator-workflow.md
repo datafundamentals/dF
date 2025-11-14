@@ -13,7 +13,7 @@ Canonical instructions for running the Firebase Emulator Suite across DF teachin
 From the repo root run the app-specific emulator command, for example:
 
 ```sh
-pnpm --filter @df/df-firebase-teaching-app1 emulators:start
+pnpm --filter @df/df-firebase-teaching-app emulators:start
 ```
 
 Each teaching app ships with its own `firebase.json`. The command above will:

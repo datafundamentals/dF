@@ -14,7 +14,7 @@ const TEST_PORTS = [
   4173, // df-npm-info-app
   4174, // df-teaching-app
   4175, // df-lit-starter
-  4176, // df-firebase-teaching-app1
+  4176, // df-firebase-teaching-app
   4177, // df-chat-tmp-test-app
   4180, // df-activity-log
   4181, // df-chat-app

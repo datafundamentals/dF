@@ -34,14 +34,8 @@ export default [
   // MD3 enforcement for UI components
   {
     files: [
-      'packages/ui-lit/src/**/*.ts',
-      'apps/df-firebase-teaching-app1/src/**/*.ts',
-      'apps/df-chat-tmp-test-app/src/**/*.ts',
+      'apps/df-firebase-teaching-app/src/**/*.ts',
       'apps/df-firebase-teaching-app2/src/**/*.ts',
-      'apps/df-app-starter-template/src/**/*.ts',
-      'apps/df-firebase-teaching-app4/src/**/*.ts',
-      'apps/df-firebase-teaching-app5/src/**/*.ts',
-    ],
     ignores: [
       '**/*.spec.ts',
       '**/*.test.ts',

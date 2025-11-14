@@ -40,10 +40,10 @@ in isolation.
 TODO: this section is AFU probably
 
 
-- `apps/df-firebase-teaching-app1/src/df-firestore-demo.ts` initialises the shared store, connects to
+- `apps/df-firebase-teaching-app/src/df-firestore-demo.ts` initialises the shared store, connects to
   the emulator (when `VITE_USE_EMULATOR=true`), enables offline persistence, and renders the
   Firestore list.
-- `apps/df-firebase-teaching-app1/index.html` registers the demo alongside the emulator workspace and
+- `apps/df-firebase-teaching-app/index.html` registers the demo alongside the emulator workspace and
   authentication demo.
 
 ## Offline Persistence & Emulator Wiring
@@ -88,7 +88,7 @@ Firestore `Timestamp` values to match production usage.
 
 ## Integration Tests
 
-`apps/df-firebase-teaching-app1/tests/integration/firestore.spec.ts` covers:
+`apps/df-firebase-teaching-app/tests/integration/firestore.spec.ts` covers:
 
 1. Creating a todo via the UI
 2. Updating and completing the todo
@@ -97,5 +97,5 @@ Firestore `Timestamp` values to match production usage.
 5. Priority filter
 6. Deleting the created todo
 
-Run the suite with `pnpm --filter @df/df-firebase-teaching-app1 test` once emulators are running.
+Run the suite with `pnpm --filter @df/df-firebase-teaching-app test` once emulators are running.
 

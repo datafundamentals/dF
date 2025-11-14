@@ -1,5 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 echo "🔍 Running MD3 compliance scan on staged files..."
 pnpm scan:compliance:staged

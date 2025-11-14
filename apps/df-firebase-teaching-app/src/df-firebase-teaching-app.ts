@@ -135,8 +135,8 @@ export class DfFirebaseTeachingApp extends LitElement {
         <h2 id="emulator-setup">Quick setup</h2>
         <ul>
           <li><code>pnpm install</code> (workspace-wide)</li>
-          <li><code>pnpm --filter @df/df-firebase-teaching-app1 emulators:start</code></li>
-          <li><code>pnpm --filter @df/df-firebase-teaching-app1 dev</code></li>
+          <li><code>pnpm --filter @df/df-firebase-teaching-app emulators:start</code></li>
+          <li><code>pnpm --filter @df/df-firebase-teaching-app dev</code></li>
           <li>Sign in with Google (uses production auth)</li>
           <li>Interact with Firestore, Storage, and Functions (use emulators)</li>
         </ul>
@@ -173,11 +173,11 @@ export class DfFirebaseTeachingApp extends LitElement {
         completed: false,
       },
       {
-        label: 'Run `pnpm --filter @df/df-firebase-teaching-app1 emulators:start`',
+        label: 'Run `pnpm --filter @df/df-firebase-teaching-app emulators:start`',
         completed: this.emulatorStatus === 'connected',
       },
       {
-        label: 'Run `pnpm --filter @df/df-firebase-teaching-app1 dev`',
+        label: 'Run `pnpm --filter @df/df-firebase-teaching-app dev`',
         completed: false,
       },
     ];

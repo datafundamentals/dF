@@ -26,7 +26,7 @@ pnpm --filter @df/<app-name> build:bundle
 
 **Example:**
 ```bash
-pnpm --filter @df/df-firebase-teaching-app1 build:bundle
+pnpm --filter @df/df-firebase-teaching-app build:bundle
 ./scripts/copy-app-bundle.sh df-firebase-teaching-app ../my-11ty-site/public/firebase-app
 ```
 

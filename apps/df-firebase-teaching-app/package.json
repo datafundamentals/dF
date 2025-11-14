@@ -1,5 +1,5 @@
 {
-  "name": "@df/df-firebase-teaching-app1",
+  "name": "@df/df-firebase-teaching-app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "start:test": "pnpm build && vite dev --host 127.0.0.1 --port 4176 --strictPort --mode test --logLevel error",
     "pretest": "pnpm build",
     "test": "pnpm test:integration",
-    "test:integration": "playwright test --config ../../playwright.config.ts --project=df-firebase-teaching-app1",
+    "test:integration": "playwright test --config ../../playwright.config.ts --project=df-firebase-teaching-app",
     "test:rules": "tsx ./tests/security-rules/run-all-tests.ts",
     "test:seed-data": "pnpm --filter @df/firebase-emulator test:seed-data",
     "emulators:start": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project demo-firebase-teaching-app --import ../../packages/firebase-emulator/emulator-data --export-on-exit ../../packages/firebase-emulator/emulator-data",

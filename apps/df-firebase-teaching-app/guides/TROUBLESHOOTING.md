@@ -70,7 +70,7 @@ Error: Firebase project ID is undefined
 
 1. Create `.env.local` file in your app directory:
 ```bash
-# apps/df-firebase-teaching-app1/.env.local
+# apps/df-firebase-teaching-app/.env.local
 VITE_USE_EMULATOR=true
 VITE_FIREBASE_API_KEY=demo-api-key
 VITE_FIREBASE_AUTH_DOMAIN=demo-project.firebaseapp.com
@@ -111,11 +111,11 @@ FirebaseError: auth/emulator-config-failed
 **Solution:**
 ```bash
 # Start emulators from the app directory
-cd apps/df-firebase-teaching-app1
+cd apps/df-firebase-teaching-app
 pnpm emulators:start
 
 # Or use the monorepo command
-pnpm --filter @df/df-firebase-teaching-app1 emulators:start
+pnpm --filter @df/df-firebase-teaching-app emulators:start
 ```
 
 **Verify emulators are running:**
@@ -225,7 +225,7 @@ const testUsers = [
 
 **Create seed users:**
 ```bash
-cd apps/df-firebase-teaching-app1
+cd apps/df-firebase-teaching-app
 pnpm seed:all
 ```
 
@@ -687,7 +687,7 @@ pnpm emulators:start
 **2. Check function exists:**
 ```bash
 # In functions directory
-cd apps/df-firebase-teaching-app1/functions
+cd apps/df-firebase-teaching-app/functions
 ls -la src/
 
 # Ensure function is exported in index.ts
@@ -696,11 +696,11 @@ cat src/index.ts
 
 **3. Rebuild functions:**
 ```bash
-cd apps/df-firebase-teaching-app1/functions
+cd apps/df-firebase-teaching-app/functions
 pnpm build
 
 # Restart emulators
-pnpm --filter @df/df-firebase-teaching-app1 emulators:start
+pnpm --filter @df/df-firebase-teaching-app emulators:start
 ```
 
 **Why this works:** Functions must be built before emulator can run them.
@@ -984,7 +984,7 @@ setLogLevel('debug');
 
 ```bash
 # Start emulators
-pnpm --filter @df/df-firebase-teaching-app1 emulators:start
+pnpm --filter @df/df-firebase-teaching-app emulators:start
 
 # Seed emulator data
 pnpm --filter @df/firebase-emulator seed:all

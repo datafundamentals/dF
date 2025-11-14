@@ -120,7 +120,7 @@ let unsubscribeAuthListener: Unsubscribe | null = null;
  * Token stored for external integrations to consume.
  *
  * **Note:** app1 exception - Uses Auth Emulator for email/password development.
- * See `apps/df-firebase-teaching-app1` for details.
+ * See `apps/df-firebase-teaching-app` for details.
  *
  * @internal
  */

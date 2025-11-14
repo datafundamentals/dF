@@ -119,7 +119,7 @@ packages/firebase-emulator/
 
 2. **Start Emulators:**
    ```bash
-   pnpm --filter @df/df-firebase-teaching-app1 emulators:start
+   pnpm --filter @df/df-firebase-teaching-app emulators:start
    ```
 
 3. **Run Seed Script:**
