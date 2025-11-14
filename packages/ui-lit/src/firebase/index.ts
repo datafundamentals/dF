@@ -7,5 +7,6 @@ export {DfFirestoreItem} from './df-firestore-item.js';
 export {DfFirestoreForm} from './df-firestore-form.js';
 export {DfFirestoreDelete} from './df-firestore-delete.js';
 export {DfFirestoreList} from './df-firestore-list.js';
+export {DfFirestoreDemo} from './df-firestore-demo.js';
 export {DfFileList} from './df-file-list.js';
 export {DfFileDelete} from './df-file-delete.js';

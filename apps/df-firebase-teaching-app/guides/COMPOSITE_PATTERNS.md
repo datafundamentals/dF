@@ -643,7 +643,7 @@ export async function compositeOperation(): Promise<void> {
 
 **Auth + Firestore Composite:**
 - `packages/state/src/stores/todos.store.ts` - User-owned todos pattern
-- `apps/df-firebase-teaching-app/src/df-firestore-demo.ts` - UI integration
+- `packages/ui-lit/src/firebase/df-firestore-demo.ts` - UI integration
 
 **Storage + Firestore Composite:**
 - `packages/state/src/stores/storage.store.ts` - File upload patterns

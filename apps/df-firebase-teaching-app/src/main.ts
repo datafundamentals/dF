@@ -12,7 +12,7 @@ import './df-firebase-teaching-app.js';
 initializeFirebaseForApp();
 
 // Always include the Firestore demo so integration tests can exercise CRUD flows
-void import('./df-firestore-demo.js');
+void import('@df/ui-lit/firebase/df-firestore-demo.js');
 
 // Only load storage and functions demos in dev/production mode, not during tests
 if (import.meta.env.MODE !== 'test') {

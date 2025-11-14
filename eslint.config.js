@@ -36,6 +36,7 @@ export default [
     files: [
       'apps/df-firebase-teaching-app/src/**/*.ts',
       'apps/df-firebase-teaching-app2/src/**/*.ts',
+    ],
     ignores: [
       '**/*.spec.ts',
       '**/*.test.ts',
