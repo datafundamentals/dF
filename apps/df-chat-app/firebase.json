@@ -4,10 +4,6 @@
     "indexes": "firestore.indexes.json"
   },
   "emulators": {
-    "auth": {
-      "host": "127.0.0.1",
-      "port": 9155
-    },
     "firestore": {
       "host": "127.0.0.1",
       "port": 8280
@@ -19,10 +15,6 @@
     "functions": {
       "host": "127.0.0.1",
       "port": 5501
-    },
-    "hosting": {
-      "host": "127.0.0.1",
-      "port": 5500
     },
     "ui": {
       "enabled": true,
