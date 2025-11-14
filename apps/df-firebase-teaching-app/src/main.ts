@@ -17,5 +17,5 @@ void import('@df/ui-lit/firebase/df-firestore-demo.js');
 // Only load storage and functions demos in dev/production mode, not during tests
 if (import.meta.env.MODE !== 'test') {
   void import('./df-storage-demo.js');
-  void import('./df-functions-demo.js');
+  void import('@df/ui-lit/firebase/df-functions-demo.js');
 }

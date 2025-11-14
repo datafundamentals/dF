@@ -238,10 +238,13 @@ export async function callTodosExport(format: 'csv' | 'json' = 'csv'): Promise<s
 
   try {
     // Construct the HTTP function URL
-    // In emulator: http://127.0.0.1:5501/demo-firebase-teaching-app/us-central1/todosExportAPI
+    // In emulator: http://127.0.0.1:5501/<project-id>/us-central1/todosExportAPI
     // In production: https://us-central1-<project-id>.cloudfunctions.net/todosExportAPI
-    // Note: For now, we default to emulator. In production, this should read from env.
-    const baseUrl = 'http://127.0.0.1:5501/demo-firebase-teaching-app/us-central1';
+    const app = getInitializedFirebaseApp();
+    const projectId = app.options.projectId || 'peg-2035';
+    const baseUrl = shouldUseEmulatorForService('functions')
+      ? `http://127.0.0.1:5501/${projectId}/us-central1`
+      : `https://us-central1-${projectId}.cloudfunctions.net`;
 
     const url = `${baseUrl}/todosExportAPI?format=${format}`;
     const response = await fetch(url);

@@ -10,3 +10,4 @@ export {DfFirestoreList} from './df-firestore-list.js';
 export {DfFirestoreDemo} from './df-firestore-demo.js';
 export {DfFileList} from './df-file-list.js';
 export {DfFileDelete} from './df-file-delete.js';
+export {DfFunctionsDemo} from './df-functions-demo.js';

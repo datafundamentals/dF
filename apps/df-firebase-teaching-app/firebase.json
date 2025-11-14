@@ -1,10 +1,10 @@
 {
   "functions": {
-    "source": "functions",
+    "source": "../../services/functions",
     "runtime": "nodejs20",
     "predeploy": [
       "pnpm --filter @df/types run build",
-      "pnpm --filter @df/df-firebase-teaching-app-functions run build"
+      "pnpm --filter @df/functions-shared run build"
     ]
   },
   "firestore": {

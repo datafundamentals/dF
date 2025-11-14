@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "peg-2035",
+    "prod": "peg-2035",
+    "production": "peg-2035"
+  }
+}

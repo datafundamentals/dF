@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "source": ".",
+    "runtime": "nodejs20",
+    "predeploy": [
+      "pnpm --filter @df/types run build",
+      "pnpm --filter @df/functions-shared run build"
+    ]
+  },
+  "emulators": {
+    "functions": {
+      "host": "127.0.0.1",
+      "port": 5501
+    }
+  }
+}
