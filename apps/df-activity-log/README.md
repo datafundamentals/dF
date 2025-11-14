@@ -1,14 +1,20 @@
 # DF Activity Log
 
-Single-page Lit app that demonstrates Firebase Authentication + Firestore writes against the local emulator suite. Users record pushup counts, which are stored in a nested collection under `activity/{uid}/pushups`.
+Single-page Lit app that demonstrates Firebase Authentication with Firestore writes that can target either the local emulator suite or live cloud services. Users record pushup counts, which are stored in a nested collection under `activity/{uid}/pushups`.
 
 ## Stack
 - Lit 3 + `@lit-labs/signals`
 - Shared Firebase helpers/state from `@df/state`
 - Material Design 3 components provided via `@df/ui-lit`
-- Firebase Emulator Suite only (no production writes)
+- Firebase Emulator Suite for Firestore/Storage/Functions + production Auth
 
 ## Quick Start
+0. Copy `.env.development.example` to `.env.development`, fill in your real Firebase credentials, and keep `VITE_USE_EMULATOR=true` (this is what turns on the yellow banner).
+   ```sh
+   cp .env.development.example .env.development
+   # then edit .env.development with real project values
+   ```
+   > If this file is missing, Vite boots in cloud mode, the banner turns red, and Google Sign-In fails with `VITE_FIREBASE_API_KEY` errors.
 1. Install repo dependencies if needed: `pnpm install`
 2. Start the Firebase Emulator Suite (this app ships its own launcher so you don't have to remember the other teaching apps):
    ```sh
@@ -19,14 +25,20 @@ Single-page Lit app that demonstrates Firebase Authentication + Firestore writes
    ```sh
    pnpm --filter @df/df-activity-log dev
    ```
-4. Open `http://127.0.0.1:4180` and authenticate with the built-in widgets. Entries appear in `activity/<uid>/pushups` inside the Emulator UI (`http://127.0.0.1:5400`).
+4. Open `http://127.0.0.1:4180` and authenticate with the built-in widgets. A yellow banner confirms emulator mode. Entries appear in `activity/<uid>/pushups` inside the Emulator UI (`http://127.0.0.1:5400`).
 
 > **Need the canonical seed data?** The emulator persists writes to `apps/df-activity-log/emulator-data/`, so once you create accounts/entries they stick around. If you prefer the shared classroom dataset, copy `packages/firebase-emulator/emulator-data/` into this app’s folder (or rerun `pnpm --filter @df/firebase-emulator seed`) before starting the suite.
 
 ## Environment Files
-- `.env.emulator` (committed) targets the `demo-firebase-teaching-app` placeholder project and sets `VITE_USE_EMULATOR=true`
-- `.env.development` symlinks to `.env.emulator` for Vite
-- `.env.production.example` documents the vars required for a real Firebase project (future work)
+- `.env.development` (ignored) contains real Firebase credentials **with** `VITE_USE_EMULATOR=true`
+- `.env.production` (ignored) contains the same credentials **with** `VITE_USE_EMULATOR=false`
+- `.env.development.example` / `.env.production.example` document the required variables
+
+Both `.env` files must reference the real Firebase project that owns authentication. The emulator toggle only affects Firestore/Storage/Functions. Run `pnpm dev` for emulator-backed development (yellow banner) or temporarily override the flag for cloud testing:
+
+```sh
+VITE_USE_EMULATOR=false pnpm --filter @df/df-activity-log dev
+```
 
 ## Firestore Layout
 ```
@@ -54,7 +66,7 @@ Integration specs live under `tests/integration/` (placeholder for now). When au
 ## File Map
 ```
 src/
-  config/firebase.config.ts   # Emulator-only config consumed by main.ts
+  config/firebase.config.ts   # Runtime env detector shared by Firebase helpers
   df-activity-log-app.ts      # Lit component w/ auth, form, and history UI
   main.ts                     # Imports Material + initializes Firebase
 firestore.rules               # Per-user access control

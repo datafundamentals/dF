@@ -1,25 +1,16 @@
-import type {EmulatorConfig, FirebaseConfig} from '@df/types';
+import type {EnvironmentConfig} from '@df/firebase';
+import type {EmulatorConfig} from '@df/types';
+import {getEmulatorConfigForRuntime} from '@df/firebase';
+
+const environmentConfig = getEmulatorConfigForRuntime();
 
 /**
- * Production Firebase configuration for df-activity-log
- * Hardcoded config avoids need for .env in bundled deployments
- * These are public keys and safe to commit
+ * Resolved Firebase environment configuration for df-activity-log.
+ * Automatically switches between emulator + cloud modes based on VITE_USE_EMULATOR.
  */
-export const FIREBASE_CONFIG: FirebaseConfig = {
-  apiKey: 'AIzaSyCGaJKzrUv_TgD97QLt-ydGPBbpCyCnrEw',
-  authDomain: 'peg-2035.firebaseapp.com',
-  projectId: 'peg-2035',
-  storageBucket: 'peg-2035.appspot.com',
-  messagingSenderId: '1039825199205',
-  appId: '1:1039825199205:web:44d7dfd0f6f970c0ee668c',
-};
+export const ENVIRONMENT_CONFIG: EnvironmentConfig = environmentConfig;
 
 /**
- * Emulator configuration - all disabled for production deployment
+ * Backwards-compatible alias for consumers that still expect EMULATOR_CONFIG.
  */
-export const EMULATOR_CONFIG: EmulatorConfig = {
-  auth: false,
-  firestore: false,
-  storage: false,
-  functions: false,
-};
+export const EMULATOR_CONFIG: EmulatorConfig = environmentConfig;

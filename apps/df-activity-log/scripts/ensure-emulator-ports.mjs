@@ -1,6 +1,6 @@
 import {execSync} from 'node:child_process';
 
-const PORTS = [9155, 8280, 9390, 5501, 5500, 5400, 4400, 4401, 4500];
+const PORTS = [8280, 9390, 5501, 5400, 4400, 4401, 4500];
 
 const killed = [];
 
