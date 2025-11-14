@@ -11,7 +11,7 @@ Use this checklist when migrating an app to the v4 pattern:
 - [ ] **src/config/firebase.config.ts**: Set `auth: false` in `EMULATOR_CONFIG`
 - [ ] **src/main.ts**: Use `initializeFirebaseForApp()` without arguments
 - [ ] **index.html**: Add `<df-environment-banner>` and `<df-auth-wrapper headless>`
-- [ ] **.env files**: Create `.env.development` and `.env.production` with REAL credentials
+- [ ] **.env files**: Copy `.env.development.example` / `.env.production.example`, fill in REAL credentials, set `VITE_USE_EMULATOR=true` (dev) and `false` (prod)
 - [ ] **Cleanup**: Delete `.env.emulator`, `.env.local`, and any `df-auth-demo.ts` files
 - [ ] **Test**: Run `firebase emulators:start` - verify NO auth emulator starts
 - [ ] **Test**: Run `pnpm dev` - yellow banner appears, Google Sign-In works
@@ -40,6 +40,8 @@ Use this checklist when migrating an app to the v4 pattern:
 - `.env.production`: `VITE_USE_EMULATOR=false` (all services use production Firebase)
 
 This avoids credential duplication and follows Vite conventions.
+
+> Every app in this repo ships `.env.development.example` / `.env.production.example`. **Copy them before running any commands**—`pnpm dev` will fail or start in cloud mode if `.env.development` is missing.
 
 ### Required Steps to Disable Auth Emulator
 
@@ -179,6 +181,8 @@ pnpm --filter @df/your-app dev
 - Google Sign-In works with real accounts (uses real credentials)
 - Firestore, Storage, Functions use local emulators (because `VITE_USE_EMULATOR=true`)
 
+> ⚠️ If `.env.development` is missing or still contains placeholder credentials, Vite silently falls back to cloud mode. You'll see a red banner and runtime errors such as `VITE_FIREBASE_API_KEY is not defined`. Fix the file, restart `pnpm dev`, and confirm the banner returns to yellow.
+
 ### Testing with Cloud Services (No Emulators)
 
 ```bash
@@ -186,12 +190,7 @@ pnpm --filter @df/your-app dev
 VITE_USE_EMULATOR=false pnpm dev
 ```
 
-Or edit `.env.local`:
-```env
-VITE_USE_EMULATOR=false
-```
-
-Then restart the dev server. The red banner will appear, and the app uses live Firebase services.
+Alternatively, flip `VITE_USE_EMULATOR` inside `.env.development`, restart `pnpm dev`, and remember to restore it to `true` afterwards. The red banner indicates you're talking to live Firebase services.
 
 ### Production Deployment
 
@@ -210,18 +209,25 @@ The production build **omits** `VITE_USE_EMULATOR`, so the app defaults to cloud
 
 ### Environment Files
 
-- **`.env.emulator`** (loaded by Vite dev server by default)
+- **`.env.development`** (loaded by `pnpm dev`)
   ```env
   VITE_USE_EMULATOR=true
-  VITE_FIREBASE_API_KEY=demo-api-key-for-emulator-development
-  # ... other placeholder credentials
+  VITE_FIREBASE_API_KEY=AIzaSy...      # Real Firebase credentials
+  VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+  VITE_FIREBASE_PROJECT_ID=your-project-id
+  VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+  VITE_FIREBASE_MESSAGING_SENDER_ID=1234567890
+  VITE_FIREBASE_APP_ID=1:1234567890:web:abc123
+  VITE_FIREBASE_EMULATOR_UI=http://127.0.0.1:5400
   ```
 
-- **`.env.production`** (used for `pnpm build`)
+- **`.env.production`** (used by `pnpm build` / deploys)
   ```env
   VITE_USE_EMULATOR=false
-  VITE_FIREBASE_API_KEY=AIzaSy...  # Real Firebase credentials
-  # ... other production credentials
+  # Same real credentials as .env.development
+  VITE_FIREBASE_API_KEY=AIzaSy...
+  VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+  # ... etc
   ```
 
 ### Configuration Helper
@@ -271,9 +277,9 @@ The old system used `VITE_FIREBASE_ENV` with named environments (`fb-emulator` v
 
 ### If You're on the Old System
 
-1. **Update `.env.emulator`**: Ensure it includes `VITE_USE_EMULATOR=true`
-2. **Update `.env.production`**: Ensure it includes `VITE_USE_EMULATOR=false`
-3. **Remove `.env.local` overrides**: Delete any `VITE_FIREBASE_ENV=...` lines
+1. **Create/Update `.env.development`**: Ensure it includes `VITE_USE_EMULATOR=true` and real Firebase credentials
+2. **Create/Update `.env.production`**: Ensure it includes `VITE_USE_EMULATOR=false` (same credentials as development)
+3. **Remove `.env.local` overrides**: Delete any `VITE_FIREBASE_ENV=...` lines and stop committing `.env.local`
 4. **Update `main.ts`**: Change from explicit config passing to auto-detection:
    ```ts
    // Old
@@ -291,7 +297,7 @@ The legacy `getFirebaseEnvironmentConfig()` function still works but is deprecat
 
 ## Verification Checklist
 
-- [ ] Run `pnpm dev` (with default `.env.emulator`): Yellow banner appears, emulators work
+- [ ] Run `pnpm dev` (with `.env.development`): Yellow banner appears, emulators work
 - [ ] Run `VITE_USE_EMULATOR=false pnpm dev`: Red banner appears, uses live Firebase
 - [ ] Run `pnpm build`: Build succeeds, banner is hidden in production bundle
 - [ ] After `firebase deploy`: Banner does not appear on deployed app, uses cloud Firebase
@@ -336,6 +342,11 @@ The legacy `getFirebaseEnvironmentConfig()` function still works but is deprecat
 - **Solution**: Ensure `.env.development` exists with `VITE_USE_EMULATOR=true` and `"dev": "vite"` in package.json
 - **Verify**: Check browser console for `import.meta.env.VITE_USE_EMULATOR` value
 
+**Q: Dev server throws `VITE_FIREBASE_API_KEY is not defined` (or similar) on startup**
+- **Cause**: `.env.development` wasn't created or still contains placeholder values, so Vite never injects the Firebase vars
+- **Solution**: Copy `.env.development.example` to `.env.development`, paste the real Firebase credentials, set `VITE_USE_EMULATOR=true`, and restart `pnpm dev`
+- **Verify**: The yellow banner should return and `import.meta.env.VITE_FIREBASE_API_KEY` should print a real key in the browser console
+
 **Q: I get `auth/api-key-not-valid` error when trying to sign in**
 - **Root cause**: `.env.development` doesn't exist or has demo/placeholder credentials
 - **Solution**: Ensure `.env.development` exists with REAL Firebase credentials (not "demo-api-key...")
@@ -349,12 +360,12 @@ The legacy `getFirebaseEnvironmentConfig()` function still works but is deprecat
 
 **Q: The banner doesn't appear or shows wrong environment**
 - Restart the dev server: `pnpm dev`
-- Check that `.env.emulator` has `VITE_USE_EMULATOR=true`
+- Check that `.env.development` has `VITE_USE_EMULATOR=true`
 - Verify that `.env.production` has `VITE_USE_EMULATOR=false`
 
 **Q: I want to test cloud Firebase locally**
 - Run: `VITE_USE_EMULATOR=false pnpm dev`
-- Or temporarily edit `.env.local` and restart the server
+- Or temporarily set `VITE_USE_EMULATOR=false` inside `.env.development` and restart the server (remember to revert to `true` afterwards)
 
 **Q: The banner appears in production**
 - This should not happen. Verify that:

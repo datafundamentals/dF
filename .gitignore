@@ -27,6 +27,7 @@ apps/df-firebase-teaching-app0/functions/lib/
 !**/.env.example
 !**/.env.emulator
 !**/.env.production.example
+!apps/df-activity-log/.env.development.example
 packages/state/src/stores/google-auth-config.ts
 # .env.development is a symlink to .env.emulator (excluded but kept for Vite)
 .env
@@ -34,6 +35,7 @@ packages/state/src/stores/google-auth-config.ts
 !.env.example
 !.env.emulator
 !.env.production.example
+!apps/df-activity-log/.env.development.example
 
 # Logs
 **/*.log
