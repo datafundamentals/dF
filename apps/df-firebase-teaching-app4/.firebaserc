@@ -1,8 +1,0 @@
-{
-  "projects": {
-    "prod": "peg-2035",
-    "production": "peg-2035"
-  },
-  "targets": {},
-  "etags": {}
-}

@@ -15,13 +15,9 @@ const TEST_PORTS = [
   4174, // df-teaching-app
   4175, // df-lit-starter
   4176, // df-firebase-teaching-app
-  4177, // df-chat-tmp-test-app
   4180, // df-activity-log
   4181, // df-chat-app
-  4182, // df-firebase-teaching-app2
   4183, // df-firebase-teaching-app3
-  4184, // df-firebase-teaching-app4
-  4185, // df-firebase-teaching-app5
   4186, // df-auth-trigd-func-tool
 ];
 
