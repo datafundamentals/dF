@@ -78,10 +78,7 @@ export const enforceMD3Rule = {
       const start = node.range[0] + index;
       const loc = sourceCode.getLocFromIndex(start);
       const beforeText = sourceCode.text.slice(Math.max(0, start - 200), start);
-      if (
-        /eslint-disable-next-line\s+@df\/md3\/enforce-md3/.test(beforeText) ||
-        /md3-gap/.test(beforeText)
-      ) {
+      if (/md3-gap/.test(beforeText)) {
         return;
       }
 

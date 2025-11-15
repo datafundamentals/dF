@@ -14,6 +14,13 @@ export default [
 
   // TypeScript configuration
   ...tseslint.configs.recommended,
+
+  // Load custom MD3 plugin globally so disable directives can resolve the rule
+  {
+    plugins: {
+      '@df/md3': md3Plugin,
+    },
+  },
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
@@ -36,6 +43,7 @@ export default [
     files: [
       'apps/df-firebase-teaching-app/src/**/*.ts',
       'apps/df-firebase-teaching-app2/src/**/*.ts',
+      'packages/ui-lit/src/**/*.ts',
     ],
     ignores: [
       '**/*.spec.ts',
@@ -44,9 +52,6 @@ export default [
       '**/*.testing-guide.ts',
       '**/*.md.ts',
     ],
-    plugins: {
-      '@df/md3': md3Plugin,
-    },
     rules: {
       '@df/md3/enforce-md3': 'error',
     },

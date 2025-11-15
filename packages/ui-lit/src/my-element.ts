@@ -31,14 +31,16 @@ export class MyElement extends LitElement {
   }
 
   override render() {
-    // eslint-disable-next-line @df/md3/enforce-md3 -- Legacy teaching component preserved for backward compatibility
-    return html`
+    /* eslint-disable @df/md3/enforce-md3 -- Legacy teaching component preserved for backward compatibility */
+    const legacyTemplate = html`
       <h1>${this.sayHello(this.name)}!</h1>
       <button @click=${this.onClick} part="button">
         Click Count: ${this.count}
       </button>
       <slot></slot>
     `;
+    /* eslint-enable @df/md3/enforce-md3 */
+    return legacyTemplate;
   }
 
   private onClick() {
