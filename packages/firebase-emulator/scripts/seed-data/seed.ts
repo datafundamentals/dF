@@ -64,8 +64,10 @@ const firebaseConfig = {
 };
 
 // Emulator configuration
+// Note: These match the ports in apps/df-firebase-teaching-app/firebase.json
+// For df-auth-trigd-func-tool, the auth port is 9156
 const EMULATOR_CONFIG = {
-  auth: {host: '127.0.0.1', port: 9155},
+  auth: {host: '127.0.0.1', port: process.env.AUTH_EMULATOR_PORT ? parseInt(process.env.AUTH_EMULATOR_PORT) : 9155},
   firestore: {host: '127.0.0.1', port: 8280},
   storage: {host: '127.0.0.1', port: 9390},
 };
@@ -698,8 +700,16 @@ async function seedStorage(
 // --- Main Script ---
 
 async function main(): Promise<void> {
-  console.log('🌱 Firebase Emulator Seed Script');
-  console.log('================================\n');
+  const skipAuth = process.env.SKIP_AUTH_SEEDING === 'true';
+  const authOnly = process.env.AUTH_ONLY_SEEDING === 'true';
+
+  if (authOnly) {
+    console.log('🌱 Firebase Emulator Auth-Only Seed Script');
+    console.log('==========================================\n');
+  } else {
+    console.log('🌱 Firebase Emulator Seed Script');
+    console.log('================================\n');
+  }
 
   // Safety check: Ensure we're using emulators
   if (!isUsingEmulators()) {
@@ -731,15 +741,33 @@ async function main(): Promise<void> {
 
   // Run seeding operations
   try {
-    const users = await seedAuthUsers(auth);
-    const adminUser = findAdminUser(users);
-    await assignAdminClaim(adminUser);
+    let users: SeededAuthUser[] = [];
 
-    if (adminUser) {
-      try {
-        await signInWithEmailAndPassword(auth, adminUser.email, adminUser.password);
-      } catch (error) {
-        console.error(`  ✗ Failed to sign in admin user ${adminUser.email} for Firestore seeding:`, error);
+    // Seed auth users (unless explicitly skipped)
+    if (!skipAuth) {
+      users = await seedAuthUsers(auth);
+      const adminUser = findAdminUser(users);
+      await assignAdminClaim(adminUser);
+    }
+
+    // If auth-only mode, exit after seeding auth
+    if (authOnly) {
+      console.log('\n✅ Auth seeding completed successfully!');
+      console.log('\nNext steps:');
+      console.log('  - View data in Emulator UI: http://127.0.0.1:5400');
+      console.log('  - Export data: pnpm emulators:export\n');
+      process.exit(0);
+    }
+
+    // Seed Firestore collections
+    if (users.length > 0) {
+      const adminUser = findAdminUser(users);
+      if (adminUser) {
+        try {
+          await signInWithEmailAndPassword(auth, adminUser.email, adminUser.password);
+        } catch (error) {
+          console.error(`  ✗ Failed to sign in admin user ${adminUser.email} for Firestore seeding:`, error);
+        }
       }
     }
 
@@ -758,7 +786,7 @@ async function main(): Promise<void> {
     console.log('  - View data in Emulator UI: http://127.0.0.1:5400');
     console.log('  - Export data: pnpm emulators:export');
     console.log('  - Reset data: pnpm seed:reset\n');
-    
+
     // Exit cleanly to avoid Firebase SDK hanging
     process.exit(0);
   } catch (error) {

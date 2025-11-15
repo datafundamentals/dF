@@ -6,6 +6,8 @@
   "scripts": {
     "seed": "tsx ./scripts/seed-data/seed.ts",
     "seed:reset": "pnpm emulators:clear && pnpm seed",
+    "seed:auth-only": "AUTH_ONLY_SEEDING=true AUTH_EMULATOR_PORT=${AUTH_EMULATOR_PORT:-9155} tsx ./scripts/seed-data/seed.ts",
+    "seed:auth-only:reset": "pnpm emulators:clear && pnpm seed:auth-only",
     "emulators:clear": "node ./scripts/clear-emulator-data.mjs",
     "ensure-ports": "node ./scripts/ensure-emulator-ports.mjs",
     "test:auth": "tsx ./scripts/test-auth.ts",

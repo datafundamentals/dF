@@ -31,14 +31,14 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     /**
      * Check if user has admin custom claim
      */
     function isAdmin() {
       return isAuthenticated() && request.auth.token.admin == true;
     }
-    
+
     /**
      * Check if user is the document owner (when userId field exists)
      */
@@ -79,16 +79,16 @@ service cloud.firestore {
     // =============================================================================
     
     match /todos/{todoId} {
-      
+
       /**
        * Validate todo document structure and field types
        */
       function isValidTodo() {
-        let required = ['title', 'description', 'completed', 'priority', 'tags', 
+        let required = ['title', 'description', 'completed', 'priority', 'tags',
                        'createdAt', 'updatedAt', 'titleLower'];
         let allowed = ['title', 'description', 'completed', 'priority', 'tags',
                       'createdAt', 'updatedAt', 'dueDate', 'titleLower', 'userId'];
-        
+
         return hasRequiredFields(required)
             && hasOnlyAllowedFields(allowed)
             && isValidType('title', 'string')
@@ -107,25 +107,25 @@ service cloud.firestore {
             && request.resource.data.titleLower == request.resource.data.title.lower()
             && request.resource.data.tags.size() <= 10;
       }
-      
+
       /**
        * Allow reads for authenticated users
        * Future: Add ownership filter with userId field
        */
       allow read: if isAuthenticated();
-      
+
       /**
        * Allow creates for authenticated users if document is valid
        * Future: Enforce request.auth.uid == resource.data.userId
        */
       allow create: if isAuthenticated() && isValidTodo();
-      
+
       /**
        * Allow updates for authenticated users if document remains valid
        * Future: Add ownership check with isOwner(resource.data.userId)
        */
       allow update: if isAuthenticated() && isValidTodo();
-      
+
       /**
        * Allow deletes for authenticated users
        * Future: Add ownership check with isOwner(resource.data.userId)
@@ -139,26 +139,27 @@ service cloud.firestore {
     
     /**
      * Reference data collections are read-only for authenticated users
-     * Admins can write for seeding and maintenance
+     * Authenticated users can write during development (for seeding via the df-seed-data component)
+     * Future: Restrict to isAdmin() when role system is implemented
      */
     match /flowers/{flowerId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
-    
+
     match /continents/{continentId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
-    
+
     match /chemicalElements/{elementId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
-    
+
     match /musicalInstruments/{instrumentId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
     
     // =============================================================================

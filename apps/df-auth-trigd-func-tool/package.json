@@ -19,6 +19,8 @@
     "test:integration": "playwright test --config ../../playwright.config.ts --project=df-auth-trigd-func-tool",
     "emulators:start": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project demo-auth-function-tool --import ../../packages/firebase-emulator/emulator-data --export-on-exit ../../packages/firebase-emulator/emulator-data --only auth,firestore,functions",
     "emulators:clear": "pnpm --filter @df/firebase-emulator emulators:clear",
+    "seed": "AUTH_EMULATOR_PORT=9156 pnpm --filter @df/firebase-emulator seed:auth-only",
+    "seed:reset": "AUTH_EMULATOR_PORT=9156 pnpm --filter @df/firebase-emulator seed:auth-only:reset",
     "deploy:functions": "firebase deploy --only functions",
     "deploy:hosting": "pnpm build:prod && firebase deploy --only hosting"
   },

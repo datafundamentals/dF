@@ -23,8 +23,6 @@
     "emulators:export": "firebase emulators:export --project peg-2035 ../../packages/firebase-emulator/emulator-data",
     "emulators:import": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project peg-2035 --import ../../packages/firebase-emulator/emulator-data --only auth,firestore,storage,functions,hosting",
     "emulators:clear": "pnpm --filter @df/firebase-emulator emulators:clear",
-    "seed": "pnpm --filter @df/firebase-emulator seed",
-    "seed:reset": "pnpm --filter @df/firebase-emulator seed:reset",
     "test:auth": "pnpm --filter @df/firebase-emulator test:auth",
     "deploy:rules": "firebase deploy --only firestore:rules,storage",
     "deploy:functions": "firebase deploy --only functions",

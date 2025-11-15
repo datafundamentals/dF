@@ -31,6 +31,8 @@
     "./df-auth-wrapper.js": "./dist/df-auth-wrapper.js",
     "./df-environment-banner": "./dist/df-environment-banner.js",
     "./df-environment-banner.js": "./dist/df-environment-banner.js",
+    "./df-seed-data": "./dist/df-seed-data.js",
+    "./df-seed-data.js": "./dist/df-seed-data.js",
     "./firebase": "./dist/firebase/index.js",
     "./firebase/index.js": "./dist/firebase/index.js",
     "./firebase/df-firestore-demo": "./dist/firebase/df-firestore-demo.js",
