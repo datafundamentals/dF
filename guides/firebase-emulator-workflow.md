@@ -1,3 +1,7 @@
+This document is temporarily deprecated until it can be repaired.
+
+Because auth emulator is only available in a very unique and special app `apps/df-auth-trigd-func-tool` much of this document is void should not be used until it can be completely checked and refactored.
+
 # Firebase Emulator Workflow
 
 Canonical instructions for running the Firebase Emulator Suite across DF teaching apps.

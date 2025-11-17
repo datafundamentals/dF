@@ -1,6 +1,6 @@
 export type Permission = string;
 
-export type Role = 'admin' | 'player' | 'meet' | 'viewer';
+export type Role = 'admin' | 'player' | 'coderFomo' | 'viewer';
 
 export interface UserProfileDocument {
   userId: string;
