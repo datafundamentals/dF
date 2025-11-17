@@ -9,3 +9,4 @@ export * from './firebase-todos.types.js';
 export * from './firebase-chat.types.js';
 export * from './firebase-storage.types.js';
 export * from './firebase-activity.types.js';
+export * from './firebase-rbac.types.js';
