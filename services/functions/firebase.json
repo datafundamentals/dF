@@ -3,7 +3,6 @@
     "source": ".",
     "runtime": "nodejs20",
     "predeploy": [
-      "pnpm --filter @df/types run build",
       "pnpm --filter @df/functions-shared run build"
     ]
   },

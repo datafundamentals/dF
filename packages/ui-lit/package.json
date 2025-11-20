@@ -38,10 +38,15 @@
     "./firebase/df-firestore-demo": "./dist/firebase/df-firestore-demo.js",
     "./firebase/df-firestore-demo.js": "./dist/firebase/df-firestore-demo.js",
     "./firebase/df-functions-demo": "./dist/firebase/df-functions-demo.js",
-    "./firebase/df-functions-demo.js": "./dist/firebase/df-functions-demo.js"
+    "./firebase/df-functions-demo.js": "./dist/firebase/df-functions-demo.js",
+    "./user-admin-list": "./dist/user-admin-list.js",
+    "./user-admin-list.js": "./dist/user-admin-list.js",
+    "./role-picker": "./dist/role-picker.js",
+    "./role-picker.js": "./dist/role-picker.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
     "build:rollup": "pnpm build && rollup -c",
     "lint": "eslint src",
     "test": "vitest run",

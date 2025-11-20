@@ -1,16 +1,14 @@
 /**
  * Cloud Functions Entry Point
  *
- * This file exports all Cloud Functions for the df-firebase-teaching-app.
+ * NOTE: This directory (apps/df-firebase-teaching-app/functions/) is LEGACY.
  *
- * Architecture Pattern: APP-SPECIFIC FUNCTIONS
- * ============================================
- * These functions live in apps/df-firebase-teaching-app/functions/ because they are
- * specific to the teaching app's functionality.
+ * Architecture Pattern: All Cloud Functions go in services/functions/
+ * ==================================================================
+ * Per guides/FUNCTIONS_PLACEMENT.md, functions are servers and ALL belong in services/.
+ * This directory is kept for backward compatibility but should not be used for new work.
  *
- * For SHARED functions used by multiple apps (e.g., shared auth/roles system),
- * see services/firebase-functions-shared/ and reference:
- * - guides/FUNCTIONS_PLACEMENT.md
+ * See: guides/FUNCTIONS_PLACEMENT.md
  *
  * Function Organization:
  * - callable/     - Functions called directly from client apps (httpsCallable)
@@ -81,20 +79,6 @@ export { cleanupExpiredTodos, manualCleanupExpiredTodos, // Callable version for
  *    - No user initiation
  *    - Batch processing
  *    - Best for: Maintenance, reports, cleanups
- *
- * ## App-Specific vs Shared Functions:
- *
- * **Use app-specific functions** (this directory) when:
- * - Function is specific to one app's features
- * - Business logic is tightly coupled to app
- * - Only this app needs the functionality
- * - Example: Todo-specific operations (this app)
- *
- * **Use shared functions** (services/firebase-functions-shared/) when:
- * - Multiple apps need the same functionality
- * - Centralized auth/roles management
- * - Cross-app data synchronization
- * - Example: Setting custom claims for 6+ apps
  *
  * ## See Also:
  * - guides/FUNCTIONS_PLACEMENT.md - Complete architecture guide

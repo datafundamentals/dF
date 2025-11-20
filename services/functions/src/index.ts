@@ -3,14 +3,10 @@
  *
  * This file exports all Cloud Functions for the df-firebase-teaching-app.
  *
- * Architecture Pattern: APP-SPECIFIC FUNCTIONS
- * ============================================
- * These functions live in apps/df-firebase-teaching-app/functions/ because they are
- * specific to the teaching app's functionality.
- *
- * For SHARED functions used by multiple apps (e.g., shared auth/roles system),
- * see services/firebase-functions-shared/ and reference:
- * - guides/FUNCTIONS_PLACEMENT.md
+ * Architecture Pattern: Cloud Functions
+ * ====================================
+ * All Cloud Functions go in services/functions/ - this is the only acceptable location.
+ * For complete architecture rules, see guides/FUNCTIONS_PLACEMENT.md
  *
  * Function Organization:
  * - callable/     - Functions called directly from client apps (httpsCallable)
@@ -31,7 +27,10 @@ initializeApp();
  * These functions are called from the client using httpsCallable().
  * They provide type-safe, authenticated RPC-style communication.
  */
+export {helloWorld} from './callable/helloWorld.js';
 export {createTodoAdvanced} from './callable/createTodoAdvanced.js';
+export {getUserList} from './callable/getUserList.js';
+export {updateUserRole} from './callable/updateUserRole.js';
 
 /**
  * HTTP Functions
@@ -94,20 +93,6 @@ export {
  *    - No user initiation
  *    - Batch processing
  *    - Best for: Maintenance, reports, cleanups
- *
- * ## App-Specific vs Shared Functions:
- *
- * **Use app-specific functions** (this directory) when:
- * - Function is specific to one app's features
- * - Business logic is tightly coupled to app
- * - Only this app needs the functionality
- * - Example: Todo-specific operations (this app)
- *
- * **Use shared functions** (services/firebase-functions-shared/) when:
- * - Multiple apps need the same functionality
- * - Centralized auth/roles management
- * - Cross-app data synchronization
- * - Example: Setting custom claims for 6+ apps
  *
  * ## See Also:
  * - guides/FUNCTIONS_PLACEMENT.md - Complete architecture guide

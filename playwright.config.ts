@@ -38,6 +38,12 @@ const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
     reuseExistingServer: true,
     timeout: 120_000,
   },
+  'df-user-admin-app': {
+    command: 'pnpm --filter @df/df-user-admin-app run start:test',
+    url: 'http://127.0.0.1:4184',
+    reuseExistingServer: true,
+    timeout: 120_000,
+  },
   'df-auth-trigd-func-tool': {
     command: 'pnpm --filter @df/df-auth-trigd-func-tool run start:test',
     url: 'http://127.0.0.1:4186',
@@ -142,6 +148,14 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:4183',
+      },
+    },
+    {
+      name: 'df-user-admin-app',
+      testDir: 'apps/df-user-admin-app/tests/integration',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4184',
       },
     },
     {

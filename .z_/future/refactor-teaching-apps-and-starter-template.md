@@ -40,7 +40,7 @@ See `.z_/future/teaching-apps-investigation.md` for partial analysis, some analy
 
 #### 1. Service Naming
 - ✅ `services/fb-functions/` (shorter, better for IDE)
-- ❌ NOT `services/firebase-functions-shared/` (too verbose)
+- ❌ NOT `services/functions/` (too verbose)
 
 #### 2. Teaching Apps Consolidation
 - ✅ **ONE teaching app** with interactive mode switching tutorial

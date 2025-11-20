@@ -1,5 +1,5 @@
 {
-  "name": "@df/df-app-starter-template",
+  "name": "@df/df-user-admin-app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,10 +14,10 @@
     "preview": "vite preview --host 127.0.0.1 --port 4183",
     "preview:prod": "vite preview --mode production --host 127.0.0.1 --port 4183",
     "serve": "vite",
-    "start:test": "pnpm build && vite dev --host 127.0.0.1 --port 4183 --strictPort --mode test --logLevel error",
+    "start:test": "pnpm build && vite dev --host 127.0.0.1 --port 4184 --strictPort --mode test --logLevel error",
     "pretest": "pnpm build",
     "test": "pnpm test:integration",
-    "test:integration": "playwright test --config ../../playwright.config.ts --project=df-app-starter-template",
+    "test:integration": "playwright test --config ../../playwright.config.ts --project=df-user-admin-app",
     "test:rules": "tsx ./tests/security-rules/run-all-tests.ts",
     "test:seed-data": "pnpm --filter @df/firebase-emulator test:seed-data",
     "emulators:start": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project demo-firebase-teaching-app --only firestore,storage,functions --import ../../packages/firebase-emulator/emulator-data --export-on-exit ../../packages/firebase-emulator/emulator-data",
@@ -28,7 +28,7 @@
     "seed:reset": "pnpm --filter @df/firebase-emulator seed:reset",
     "deploy:rules": "firebase deploy --only firestore:rules,storage",
     "deploy:functions": "firebase deploy --only functions",
-    "deploy:prod": "pnpm test:rules && pnpm build:prod && firebase deploy --only firestore:rules,storage"
+    "deploy:prod": "pnpm test:rules && pnpm build:prod && firebase deploy --only firestore:rules,storage,functions"
   },
   "dependencies": {
     "@df/firebase": "workspace:*",

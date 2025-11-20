@@ -16,8 +16,8 @@ Document:
 Example observation: "If the starter used pattern `apps/df-[feature]-app` consistently, we could automate import path updates during cloning."
 
 ## Reference Files (MANDATORY READING)
+- `guides/FUNCTIONS_PLACEMENT.md` - **CRITICAL**: Where backend functions belong (app-specific vs shared)
 - `guides/ROLE_BASED_ACCESS_CONTROL_GUIDE.md` - RBAC implementation patterns
-- `guides/FUNCTIONS_PLACEMENT.md` - Where to place new backend functions
 - `guides/WC_SHARED_DEFAULTS.md` - Component architecture patterns
 - `guides/FIREBASE_PATTERNS.md` - Firebase state management
 - `.z_/historical/1115_INITIAL_SECURITY_WORKS_TICKET.md` - Recently merged RBAC work
@@ -55,10 +55,30 @@ Update role definitions to include:
 
 **Implication for Testing**: See Testing Requirements section for adjusted approach.
 
+## Backend Functions Placement Decision
+
+**All Cloud Functions go in `services/functions/`**
+
+**Justification**: Functions are servers. Per `guides/FUNCTIONS_PLACEMENT.md`, ALL server code goes in `services/`. Never in `apps/`. The user-admin-app (browser code) will call these functions via the Cloud Functions API.
+
+**Reference**: See `guides/FUNCTIONS_PLACEMENT.md` - Pattern 1 (Regular Cloud Functions)
+
+---
+
 ## Backend Services
 
+**Location Pattern**: Per `guides/FUNCTIONS_PLACEMENT.md` Pattern 1 (Regular Cloud Functions):
+- Place in: `services/functions/src/callable/`
+- These are Cloud Functions that the user-admin-app (browser code) calls via the API
+- Deploy with: `cd services/functions && firebase deploy --only functions`
+- Use **ESM only**: `"type": "module"` in package.json, `"module": "NodeNext"` in tsconfig.json
+
+**Permission Checking**: Per `guides/ROLE_BASED_ACCESS_CONTROL_GUIDE.md`:
+- ✅ Always check for PERMISSION from custom claims, never check for ROLE
+- Verify caller has the required permission in `request.auth.token.permissions`
+- Permissions are set during auth user creation (in services/auth-functions/)
+
 ### Function: `getUserList`
-**Location**: Consult `guides/FUNCTIONS_PLACEMENT.md` for proper placement
 
 **Purpose**: Return paginated, searchable list of users
 
@@ -92,7 +112,6 @@ Update role definitions to include:
 **Sorting**: Always return most recent users first (by `createdAt` desc)
 
 ### Function: `updateUserRole`
-**Location**: Consult `guides/FUNCTIONS_PLACEMENT.md` for proper placement
 
 **Purpose**: Update a user's role and recompute permissions
 

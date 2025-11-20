@@ -175,7 +175,7 @@ firebase functions:log
 - Only needed by this teaching app
 - Tightly coupled to teaching app's data model
 
-**Use shared functions** (`services/firebase-functions-shared/`) when:
+**Use shared functions** (`services/functions/`) when:
 - Multiple apps need same functionality
 - Centralized auth/roles management
 - Cross-app data synchronization

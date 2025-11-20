@@ -8,11 +8,8 @@
  * - Returns typed response
  * - Includes comprehensive error handling
  *
- * This is an APP-SPECIFIC function that lives in apps/df-firebase-teaching-app/functions/
- * because it's specific to the teaching app's todo functionality.
- *
- * For SHARED functions used by multiple apps, see services/firebase-functions-shared/
- * and reference guides/FUNCTIONS_PLACEMENT.md
+ * This function lives in services/functions/ because all Cloud Functions go in services/.
+ * See guides/FUNCTIONS_PLACEMENT.md for complete architecture rules.
  */
 
 import * as functions from 'firebase-functions/v2';
