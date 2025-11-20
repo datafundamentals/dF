@@ -1,7 +1,7 @@
 /**
- * Callable Function: updateUserRole
+ * Callable Function: setUserRoles
  *
- * Updates a user's role and recomputes permissions.
+ * Sets a user's roles array and recomputes permissions as the union of all role permissions.
  * Security: Caller must have 'user:changeRole' permission.
  * Additional: Prevents self-modification (user cannot change their own role).
  *
@@ -19,25 +19,163 @@ import {getFirestore, Timestamp} from 'firebase-admin/firestore';
 import {getAuth} from 'firebase-admin/auth';
 import type {Role, UserProfileDocument} from '../types';
 
-interface UpdateUserRoleRequest {
+interface SetUserRolesRequest {
   targetUserId: string;
-  newRole: Role;
+  roles: Role[];
 }
 
-interface UpdateUserRoleResponse {
+interface SetUserRolesResponse {
   success: boolean;
   userId: string;
-  newRole: Role;
+  roles: Role[];
+  permissions: string[];
   updatedAt: string;
 }
 
-export const updateUserRole = functions.https.onCall<
-  UpdateUserRoleRequest,
-  Promise<UpdateUserRoleResponse>
+/**
+ * Compute permissions as union of all role permissions.
+ */
+function getPermissionsForRoles(roles: Role[]): string[] {
+  const rolePermissions: {[K in Role]: string[]} = {
+    admin: ['user-admin-app:view', 'user:list', 'user:changeRole'],
+    player: [],
+    coderFomo: [],
+    viewer: [],
+  };
+
+  const permissionSet = new Set<string>();
+  roles.forEach((role) => {
+    rolePermissions[role].forEach((permission) => permissionSet.add(permission));
+  });
+  return Array.from(permissionSet).sort();
+}
+
+export const setUserRoles = functions.https.onCall<
+  SetUserRolesRequest,
+  Promise<SetUserRolesResponse>
 >(
   {
     region: 'us-central1',
     cors: true, // Allow all origins - Cloud Run will handle CORS
+  },
+  async (request) => {
+    // 1. Verify authentication
+    if (!request.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Must be signed in');
+    }
+
+    // 2. Verify caller has 'user:changeRole' permission
+    const claims = request.auth.token;
+    if (!claims.permissions?.includes('user:changeRole')) {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'Insufficient permissions to change user roles'
+      );
+    }
+
+    const {targetUserId, roles: rolesInput} = request.data;
+    const callerId = request.auth.uid;
+
+    // 3. Validate roles array is not empty
+    if (!Array.isArray(rolesInput) || rolesInput.length === 0) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Roles must be a non-empty array'
+      );
+    }
+
+    // 4. Validate all roles are valid
+    const validRoles: Role[] = ['admin', 'player', 'coderFomo', 'viewer'];
+    const roles = rolesInput as Role[];
+    for (const role of roles) {
+      if (!validRoles.includes(role)) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          `Invalid role: ${role}. Must be one of: ${validRoles.join(', ')}`
+        );
+      }
+    }
+
+    // 5. Prevent self-modification
+    if (targetUserId === callerId) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'Cannot modify your own roles'
+      );
+    }
+
+    try {
+      const firestore = getFirestore();
+      const auth = getAuth();
+
+      // 6. Verify target user exists
+      try {
+        await auth.getUser(targetUserId);
+      } catch {
+        throw new functions.https.HttpsError('not-found', 'User not found');
+      }
+
+      // 7. Update Firestore userProfiles document
+      const userProfileRef = firestore.collection('userProfiles').doc(targetUserId);
+      const updatedAt = new Date().toISOString();
+
+      // Compute union of permissions from all roles
+      const permissions = getPermissionsForRoles(roles);
+
+      await userProfileRef.update({
+        roles,
+        permissions,
+        updatedAt,
+      });
+
+      // 8. Update Firebase Auth custom claims
+      await auth.setCustomUserClaims(targetUserId, {
+        roles,
+        permissions,
+      });
+
+      // 9. Log the change for audit
+      functions.logger.info('User roles updated', {
+        targetUserId,
+        roles,
+        caller: callerId,
+        timestamp: updatedAt,
+      });
+
+      return {
+        success: true,
+        userId: targetUserId,
+        roles,
+        permissions,
+        updatedAt,
+      };
+    } catch (error) {
+      // Re-throw HttpsError as-is
+      if (error instanceof functions.https.HttpsError) {
+        throw error;
+      }
+
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      functions.logger.error('Failed to update user roles', {
+        targetUserId,
+        roles: rolesInput,
+        caller: callerId,
+        error: errorMessage,
+      });
+
+      throw new functions.https.HttpsError('internal', 'Failed to update user roles');
+    }
+  }
+);
+
+// Legacy function for backward compatibility - kept for now
+export const updateUserRole = functions.https.onCall<
+  {targetUserId: string; newRole: Role},
+  Promise<{success: boolean; userId: string; roles: Role[]; updatedAt: string}>
+>(
+  {
+    region: 'us-central1',
+    cors: true,
   },
   async (request) => {
     // 1. Verify authentication
@@ -72,7 +210,7 @@ export const updateUserRole = functions.https.onCall<
     if (targetUserId === callerId) {
       throw new functions.https.HttpsError(
         'failed-precondition',
-        'Cannot modify your own role'
+        'Cannot modify your own roles'
       );
     }
 
@@ -87,34 +225,24 @@ export const updateUserRole = functions.https.onCall<
         throw new functions.https.HttpsError('not-found', 'User not found');
       }
 
-      // 6. Update Firestore userProfiles document
+      // 6. Update Firestore and Auth with single role wrapped in array
       const userProfileRef = firestore.collection('userProfiles').doc(targetUserId);
       const updatedAt = new Date().toISOString();
-
-      // Get the permissions for the new role
-      const rolePermissions: {[K in Role]: string[]} = {
-        admin: ['user-admin-app:view', 'user:list', 'user:changeRole'],
-        player: [],
-        coderFomo: [],
-        viewer: [],
-      };
-
-      const newPermissions = rolePermissions[newRole];
+      const roles = [newRole];
+      const permissions = getPermissionsForRoles(roles);
 
       await userProfileRef.update({
-        role: newRole,
-        permissions: newPermissions,
+        roles,
+        permissions,
         updatedAt,
       });
 
-      // 7. Update Firebase Auth custom claims
       await auth.setCustomUserClaims(targetUserId, {
-        role: newRole,
-        permissions: newPermissions,
+        roles,
+        permissions,
       });
 
-      // 8. Log the change for audit
-      functions.logger.info('User role updated', {
+      functions.logger.info('User role updated (legacy)', {
         targetUserId,
         newRole,
         caller: callerId,
@@ -124,7 +252,7 @@ export const updateUserRole = functions.https.onCall<
       return {
         success: true,
         userId: targetUserId,
-        newRole,
+        roles,
         updatedAt,
       };
     } catch (error) {

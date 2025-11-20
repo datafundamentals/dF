@@ -8,14 +8,14 @@ export type Role = 'admin' | 'player' | 'coderFomo' | 'viewer';
 
 export interface UserProfileDocument {
   userId: string;
-  role: Role;
+  roles: Role[];
   permissions: Permission[];
   createdAt: string;
   updatedAt?: string;
 }
 
 export interface UserRoleClaims {
-  role: Role;
+  roles: Role[];
   permissions?: Permission[];
 }
 

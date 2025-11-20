@@ -30,7 +30,7 @@ initializeApp();
 export {helloWorld} from './callable/helloWorld.js';
 export {createTodoAdvanced} from './callable/createTodoAdvanced.js';
 export {getUserList} from './callable/getUserList.js';
-export {updateUserRole} from './callable/updateUserRole.js';
+export {updateUserRole, setUserRoles} from './callable/updateUserRole.js';
 
 /**
  * HTTP Functions

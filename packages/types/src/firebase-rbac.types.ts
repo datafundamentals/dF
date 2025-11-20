@@ -35,14 +35,14 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 
 export interface UserProfileDocument {
   userId: string;
-  role: Role;
+  roles: Role[];
   permissions: Permission[];
   createdAt: string;
   updatedAt?: string;
 }
 
 export interface UserRoleClaims {
-  role: Role;
+  roles: Role[];
   permissions?: Permission[];
 }
 
@@ -54,6 +54,6 @@ export interface UserAdminListItem {
   uid: string;
   email: string;
   displayName?: string;
-  role: Role;
+  roles: Role[];
   createdAt: string;
 }

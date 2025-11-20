@@ -55,7 +55,7 @@ describe('user-admin.store', () => {
       {
         uid: 'user-1',
         email: 'user1@example.com',
-        role: 'admin',
+        roles: ['admin'],
         createdAt: '2024-01-01T00:00:00.000Z',
         displayName: 'User One',
       },
@@ -93,7 +93,7 @@ describe('user-admin.store', () => {
       {
         uid: 'user-2',
         email: 'user2@example.com',
-        role: 'player',
+        roles: ['player'],
         createdAt: '2024-02-01T00:00:00.000Z',
       },
     ];

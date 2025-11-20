@@ -9,14 +9,14 @@ type Role = 'admin' | 'player' | 'coderFomo' | 'viewer';
 
 interface UserProfileDocument {
   userId: string;
-  role: Role;
+  roles: Role[];
   permissions: Permission[];
   createdAt: string;
   updatedAt?: string;
 }
 
 interface UserRoleClaims {
-  role: Role;
+  roles: Role[];
   permissions?: Permission[];
 }
 
@@ -36,20 +36,25 @@ const USER_PROFILE_COLLECTION = 'userProfiles';
 const DEFAULT_ROLE: Role = 'viewer';
 
 /**
- * Compute permissions based on role.
+ * Compute permissions as union of all role permissions.
  * This ensures consistent permission mapping across the app.
  */
-function getPermissionsForRole(role: Role): string[] {
-  return ROLE_PERMISSIONS[role];
+function getPermissionsForRoles(roles: Role[]): string[] {
+  const permissionSet = new Set<string>();
+  roles.forEach((role) => {
+    ROLE_PERMISSIONS[role].forEach((permission) => permissionSet.add(permission));
+  });
+  return Array.from(permissionSet).sort();
 }
 
 export const authUserCreated = functions.auth.user().onCreate(async (user) => {
   const uid = user.uid;
   const timestamp = new Date().toISOString();
-  const permissions = getPermissionsForRole(DEFAULT_ROLE);
+  const roles = [DEFAULT_ROLE];
+  const permissions = getPermissionsForRoles(roles);
   const profileDoc: UserProfileDocument = {
     userId: uid,
-    role: DEFAULT_ROLE,
+    roles,
     permissions,
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -58,11 +63,11 @@ export const authUserCreated = functions.auth.user().onCreate(async (user) => {
   try {
     await firestore.collection(USER_PROFILE_COLLECTION).doc(uid).set(profileDoc);
     const claims: UserRoleClaims = {
-      role: DEFAULT_ROLE,
+      roles,
       permissions,
     };
     await auth.setCustomUserClaims(uid, claims);
-    functions.logger.info('RBAC profile initialized', {uid, role: DEFAULT_ROLE, permissions});
+    functions.logger.info('RBAC profile initialized', {uid, roles, permissions});
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : error;
     functions.logger.error('Failed to initialize RBAC profile', {uid, error: errorMessage});

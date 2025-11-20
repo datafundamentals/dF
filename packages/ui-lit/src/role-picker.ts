@@ -1,22 +1,22 @@
 /**
  * Component: df-role-picker
  *
- * Dialog/modal for selecting a user role.
- * Displays available roles and handles confirmation.
+ * Dialog/modal for selecting multiple user roles.
+ * Displays available roles as checkboxes and handles confirmation.
  *
  * Usage:
  * ```html
  * <df-role-picker
  *   .userEmail=${email}
- *   .currentRole=${role}
+ *   .currentRoles=${['admin', 'moderator']}
  *   .open=${isOpen}
- *   @role-selected=${handleRoleSelected}
+ *   @roles-selected=${handleRolesSelected}
  *   @cancel=${handleCancel}
  * ></df-role-picker>
  * ```
  *
  * Events:
- * - role-selected: Fired when user confirms role change (detail: { newRole })
+ * - roles-selected: Fired when user confirms role changes (detail: { selectedRoles })
  * - cancel: Fired when user cancels the dialog
  */
 
@@ -108,7 +108,7 @@ export class DfRolePicker extends LitElement {
       background-color: #f3f4f6;
     }
 
-    .role-option md-radio {
+    .role-option md-checkbox {
       margin-top: 0.25rem;
       cursor: pointer;
     }
@@ -148,10 +148,10 @@ export class DfRolePicker extends LitElement {
   userEmail = '';
 
   @property()
-  currentRole: Role = 'viewer';
+  declare currentRoles: Role[];
 
   @property()
-  selectedRole: Role = 'viewer';
+  declare selectedRoles: Role[];
 
   private readonly roleDescriptions: Record<Role, string> = {
     admin: 'Full access to all features and user management',
@@ -162,12 +162,13 @@ export class DfRolePicker extends LitElement {
 
   constructor() {
     super();
-    this.selectedRole = this.currentRole;
+    this.currentRoles = [];
+    this.selectedRoles = [];
   }
 
   override updated(changedProperties: Map<string, unknown>): void {
-    if (changedProperties.has('currentRole')) {
-      this.selectedRole = this.currentRole;
+    if (changedProperties.has('currentRoles')) {
+      this.selectedRoles = [...this.currentRoles];
     }
   }
 
@@ -176,9 +177,9 @@ export class DfRolePicker extends LitElement {
       <div class="overlay" @click=${this.handleOverlayClick}>
         <div class="dialog" @click=${(e: MouseEvent) => e.stopPropagation()}>
           <div class="dialog-header">
-            <h2 class="dialog-title">Change this guy's User Role</h2>
+            <h2 class="dialog-title">Manage User Roles</h2>
             <p class="dialog-description">
-              Select a new role for:
+              Select one or more roles for:
               <span class="user-email">${this.userEmail}</span>
             </p>
           </div>
@@ -192,10 +193,10 @@ export class DfRolePicker extends LitElement {
               Cancel
             </md-outlined-button>
             <md-filled-button
-              ?disabled=${this.selectedRole === this.currentRole}
+              ?disabled=${this.rolesUnchanged()}
               @click=${() => this.confirm()}
             >
-              Update Role
+              Update Roles
             </md-filled-button>
           </div>
         </div>
@@ -207,17 +208,15 @@ export class DfRolePicker extends LitElement {
     const roles: Role[] = ['admin', 'player', 'coderFomo', 'viewer'];
     return roles.map(
       (role) => html`
-        <div class="role-option" ?selected=${this.selectedRole === role} @click=${() => {
-          this.selectedRole = role;
+        <div class="role-option" ?selected=${this.selectedRoles.includes(role)} @click=${() => {
+          this.toggleRole(role);
         }}>
-          <md-radio
-            name="role"
-            .value=${role}
-            .checked=${this.selectedRole === role}
+          <md-checkbox
+            .checked=${this.selectedRoles.includes(role)}
             @change=${() => {
-              this.selectedRole = role;
+              this.toggleRole(role);
             }}
-          ></md-radio>
+          ></md-checkbox>
           <div class="role-info">
             <span class="role-name">${this.formatRole(role)}</span>
             <div class="role-description">
@@ -229,10 +228,27 @@ export class DfRolePicker extends LitElement {
     );
   }
 
+  private toggleRole(role: Role): void {
+    const index = this.selectedRoles.indexOf(role);
+    if (index === -1) {
+      this.selectedRoles = [...this.selectedRoles, role];
+    } else {
+      this.selectedRoles = this.selectedRoles.filter((_, i) => i !== index);
+    }
+  }
+
+  private rolesUnchanged(): boolean {
+    if (this.selectedRoles.length !== this.currentRoles.length) {
+      return false;
+    }
+    const selectedSet = new Set(this.selectedRoles);
+    return this.currentRoles.every((role) => selectedSet.has(role));
+  }
+
   private confirm(): void {
     this.dispatchEvent(
-      new CustomEvent('role-selected', {
-        detail: {newRole: this.selectedRole},
+      new CustomEvent('roles-selected', {
+        detail: {selectedRoles: this.selectedRoles},
         bubbles: true,
         composed: true,
       })
@@ -252,7 +268,7 @@ export class DfRolePicker extends LitElement {
 
   private close(): void {
     this.open = false;
-    this.selectedRole = this.currentRole;
+    this.selectedRoles = [...this.currentRoles];
   }
 
   private handleOverlayClick(): void {

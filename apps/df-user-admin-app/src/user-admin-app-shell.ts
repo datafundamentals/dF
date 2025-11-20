@@ -5,12 +5,12 @@ import {
   firebaseAuthState,
   userAdminState,
   loadUsers,
-  updateUserRole,
+  setUserRoles,
   clearUserAdminError,
 } from '@df/state';
 import type {Role, UserAdminListItem} from '@df/types';
 
-type SelectedUser = Pick<UserAdminListItem, 'uid' | 'email' | 'role'>;
+type SelectedUser = Pick<UserAdminListItem, 'uid' | 'email' | 'roles'>;
 
 @customElement('user-admin-app-shell')
 export class UserAdminAppShell extends SignalWatcher(LitElement) {
@@ -98,24 +98,26 @@ export class UserAdminAppShell extends SignalWatcher(LitElement) {
     }
   }
 
-  private handleUserSelected(event: CustomEvent<{uid: string; email: string; currentRole: Role}>): void {
+  private handleUserSelected(event: CustomEvent<{uid: string; email: string; currentRoles: Role[]}>): void {
     this.selectedUser = {
       uid: event.detail.uid,
       email: event.detail.email,
-      role: event.detail.currentRole,
+      roles: event.detail.currentRoles,
     };
     this.isRolePickerOpen = true;
   }
 
-  private async handleRoleSelected(event: CustomEvent<{newRole: Role}>): Promise<void> {
+  private async handleRolesSelected(event: CustomEvent<{selectedRoles: Role[]}>): Promise<void> {
     if (!this.selectedUser) return;
 
     try {
-      await updateUserRole(this.selectedUser.uid, event.detail.newRole);
+      if (event.detail.selectedRoles.length > 0) {
+        await setUserRoles(this.selectedUser.uid, event.detail.selectedRoles);
+      }
       this.isRolePickerOpen = false;
       this.selectedUser = null;
     } catch (error) {
-      console.error('Failed to update user role:', error);
+      console.error('Failed to update user roles:', error);
     }
   }
 
@@ -160,8 +162,8 @@ export class UserAdminAppShell extends SignalWatcher(LitElement) {
         <df-role-picker
           ?open=${this.isRolePickerOpen}
           .userEmail=${this.selectedUser?.email || ''}
-          .currentRole=${this.selectedUser?.role || 'viewer'}
-          @role-selected=${(e: CustomEvent) => this.handleRoleSelected(e)}
+          .currentRoles=${this.selectedUser?.roles || []}
+          @roles-selected=${(e: CustomEvent) => this.handleRolesSelected(e)}
           @cancel=${() => this.handleCancel()}
         ></df-role-picker>
       </div>

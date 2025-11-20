@@ -14,7 +14,7 @@
  * ```
  *
  * Events:
- * - user-selected: Fired when user clicks on a user item (detail: { uid, email, currentRole })
+ * - user-selected: Fired when user clicks on a user item (detail: { uid, email, currentRoles })
  */
 
 import {css, html, LitElement} from 'lit';
@@ -92,12 +92,19 @@ export class DfUserAdminList extends LitElement {
       margin-top: 0.25rem;
     }
 
+    .roles-container {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-left: auto;
+      align-items: center;
+    }
+
     .role-badge {
       padding: 0.375rem 0.75rem;
       border-radius: 9999px;
       font-size: 0.875rem;
       font-weight: 500;
-      margin-left: 1rem;
       white-space: nowrap;
     }
 
@@ -187,8 +194,14 @@ export class DfUserAdminList extends LitElement {
                             Created ${this.formatDate(user.createdAt)}
                           </div>
                         </div>
-                        <div class="role-badge ${this.getRoleBadgeClass(user.role)}">
-                          ${this.formatRole(user.role)}
+                        <div class="roles-container">
+                          ${user.roles.map(
+                            (role) => html`
+                              <div class="role-badge ${this.getRoleBadgeClass(role)}">
+                                ${this.formatRole(role)}
+                              </div>
+                            `
+                          )}
                         </div>
                       </div>
                     `
@@ -216,7 +229,7 @@ export class DfUserAdminList extends LitElement {
         detail: {
           uid: user.uid,
           email: user.email,
-          currentRole: user.role,
+          currentRoles: user.roles,
         },
         bubbles: true,
         composed: true,

@@ -33,6 +33,19 @@ interface UpdateUserRolePayload {
   newRole: Role;
 }
 
+interface SetUserRolesResponse {
+  success: boolean;
+  userId: string;
+  roles: Role[];
+  permissions: string[];
+  updatedAt: string;
+}
+
+interface SetUserRolesPayload {
+  targetUserId: string;
+  roles: Role[];
+}
+
 /** Internal signal tracking the user list. */
 const usersSignal = signal<UserAdminListItem[]>([]);
 /** Internal signal tracking loading status for any user admin request. */
@@ -104,6 +117,7 @@ export async function loadUsers(searchQuery: string = ''): Promise<void> {
 
 /**
  * Updates a user's role via the Cloud Function and reloads the list on success.
+ * Legacy function - prefer setUserRoles for multiple role support.
  */
 export async function updateUserRole(targetUserId: string, newRole: Role): Promise<void> {
   loadingSignal.set(true);
@@ -120,6 +134,31 @@ export async function updateUserRole(targetUserId: string, newRole: Role): Promi
     const message = error instanceof Error ? error.message : 'Failed to update user role';
     errorSignal.set(message);
     console.error('[user-admin.store] Failed to update user role:', error);
+    throw error;
+  } finally {
+    loadingSignal.set(false);
+  }
+}
+
+/**
+ * Sets multiple roles for a user via the Cloud Function and reloads the list on success.
+ * Supports many-to-many RBAC with automatic permission union calculation.
+ */
+export async function setUserRoles(targetUserId: string, roles: Role[]): Promise<void> {
+  loadingSignal.set(true);
+  errorSignal.set('');
+
+  try {
+    const fn = callable<SetUserRolesPayload, SetUserRolesResponse>(
+      ensureFunctionsInstance(),
+      'setUserRoles'
+    );
+    await fn({targetUserId, roles});
+    await loadUsers();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update user roles';
+    errorSignal.set(message);
+    console.error('[user-admin.store] Failed to update user roles:', error);
     throw error;
   } finally {
     loadingSignal.set(false);

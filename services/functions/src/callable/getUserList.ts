@@ -28,7 +28,7 @@ interface UserListItem {
   uid: string;
   email: string;
   displayName?: string;
-  role: Role;
+  roles: Role[];
   createdAt: string;
 }
 
@@ -84,7 +84,7 @@ export const getUserList = functions.https.onCall<
             uid: user.uid,
             email: user.email || '',
             displayName: user.displayName,
-            role: profile?.role || 'viewer',
+            roles: profile?.roles || ['viewer'],
             createdAt: profile?.createdAt || new Date(user.metadata.creationTime).toISOString(),
           };
         })
