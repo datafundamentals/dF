@@ -1,4 +1,10 @@
-import {defineConfig, devices} from 'playwright/test';
+import {defineConfig, devices, type PlaywrightTestConfig} from 'playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 type WebServerConfig = {
   command: string;
@@ -7,62 +13,64 @@ type WebServerConfig = {
   timeout: number;
 };
 
-const PROJECT_WEB_SERVERS: Record<string, WebServerConfig> = {
-  'df-npm-info-app': {
-    command: 'pnpm --filter @df/df-npm-info-app run start:test',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-  'df-teaching-app': {
-    command: 'pnpm --filter @df/df-teaching-app run start:test',
-    url: 'http://127.0.0.1:4174',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-  'df-lit-starter': {
-    command: 'pnpm --filter @df/df-lit-starter run start:test',
-    url: 'http://127.0.0.1:4175',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-  'df-firebase-teaching-app': {
-    command: 'pnpm --filter @df/df-firebase-teaching-app run start:test',
-    url: 'http://127.0.0.1:4176',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-  'df-app-starter-template': {
-    command: 'pnpm --filter @df/df-app-starter-template run start:test',
-    url: 'http://127.0.0.1:4183',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-  'df-user-admin-app': {
-    command: 'pnpm --filter @df/df-user-admin-app run start:test',
-    url: 'http://127.0.0.1:4184',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-  'df-auth-trigd-func-tool': {
-    command: 'pnpm --filter @df/df-auth-trigd-func-tool run start:test',
-    url: 'http://127.0.0.1:4186',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-  'df-activity-log': {
-    command: 'pnpm --filter @df/df-activity-log run start:test',
-    url: 'http://127.0.0.1:4180',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-  'df-chat-app': {
-    command: 'pnpm --filter @df/df-chat-app run start:test',
-    url: 'http://127.0.0.1:4181',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
-};
+function discoverApps() {
+  const appsDir = path.join(__dirname, 'apps');
+  const webServers: Record<string, WebServerConfig> = {};
+  const projects: NonNullable<PlaywrightTestConfig['projects']> = [];
+
+  if (!fs.existsSync(appsDir)) return {webServers, projects};
+
+  const apps = fs.readdirSync(appsDir).filter((dir) => {
+    return fs.statSync(path.join(appsDir, dir)).isDirectory();
+  });
+
+  for (const app of apps) {
+    const pkgPath = path.join(appsDir, app, 'package.json');
+    const viteConfigPath = path.join(appsDir, app, 'vite.config.ts');
+
+    if (fs.existsSync(pkgPath) && fs.existsSync(viteConfigPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+        if (pkg.scripts && pkg.scripts['start:test']) {
+          const viteConfig = fs.readFileSync(viteConfigPath, 'utf-8');
+          let portMatch = viteConfig.match(/port:\s*(\d+)/) || viteConfig.match(/const\s+PORT\s*=\s*(\d+)/);
+
+          if (!portMatch) {
+             // Fallback: Try to find port in package.json start:test script
+             const startScript = pkg.scripts['start:test'];
+             portMatch = startScript.match(/--port\s+(\d+)/);
+          }
+
+          if (portMatch) {
+            const port = portMatch[1];
+            const url = `http://127.0.0.1:${port}`;
+
+            webServers[app] = {
+              command: `pnpm --filter @df/${app} run start:test`,
+              url,
+              reuseExistingServer: true,
+              timeout: 120_000,
+            };
+
+            projects.push({
+              name: app,
+              testDir: `apps/${app}/tests/integration`,
+              use: {
+                ...devices['Desktop Chrome'],
+                baseURL: url,
+              },
+            });
+          }
+        }
+      } catch (e) {
+        console.warn(`Failed to parse config for app ${app}:`, e);
+      }
+    }
+  }
+  return {webServers, projects};
+}
+
+const {webServers: PROJECT_WEB_SERVERS, projects: DISCOVERED_PROJECTS} = discoverApps();
 
 function parseRequestedProjects(argv: string[]): string[] {
   const projects = new Set<string>();
@@ -109,79 +117,6 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
   },
-  projects: [
-    {
-      name: 'df-npm-info-app',
-      testDir: 'apps/df-npm-info-app/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4173',
-      },
-    },
-    {
-      name: 'df-teaching-app',
-      testDir: 'apps/df-teaching-app/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4174',
-      },
-    },
-    {
-      name: 'df-lit-starter',
-      testDir: 'apps/df-lit-starter/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4175',
-      },
-    },
-    {
-      name: 'df-firebase-teaching-app',
-      testDir: 'apps/df-firebase-teaching-app/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4176',
-      },
-    },
-    {
-      name: 'df-app-starter-template',
-      testDir: 'apps/df-app-starter-template/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4183',
-      },
-    },
-    {
-      name: 'df-user-admin-app',
-      testDir: 'apps/df-user-admin-app/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4184',
-      },
-    },
-    {
-      name: 'df-auth-trigd-func-tool',
-      testDir: 'apps/df-auth-trigd-func-tool/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4186',
-      },
-    },
-    {
-      name: 'df-activity-log',
-      testDir: 'apps/df-activity-log/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4180',
-      },
-    },
-    {
-      name: 'df-chat-app',
-      testDir: 'apps/df-chat-app/tests/integration',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4181',
-      },
-    },
-  ],
+  projects: DISCOVERED_PROJECTS,
   webServer: selectedWebServers.length ? selectedWebServers : undefined,
 });

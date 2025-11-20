@@ -3,16 +3,17 @@ import {resolve} from 'node:path';
 
 const distEntry = './dist/main.js';
 const sourceEntry = '/src/main.ts';
+const PORT = 4183;
 
 export default defineConfig({
   publicDir: resolve(__dirname, '../../public'),
   server: {
     host: '127.0.0.1',
-    port: 4183,
+    port: PORT,
   },
   preview: {
     host: '127.0.0.1',
-    port: 4183,
+    port: PORT,
   },
   /**
    * Environment file loading configuration

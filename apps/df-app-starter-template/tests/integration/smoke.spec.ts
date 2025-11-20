@@ -8,6 +8,6 @@ test('shows emulator workspace landing page', async ({page}) => {
   expect(authWrapper).not.toBeNull();
 
   // Verify the app container exists in the DOM
-  const container = await page.locator('rename-me-app-container');
+  const container = await page.locator('app-container');
   await expect(container).toBeAttached({timeout: 5000});
 });

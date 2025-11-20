@@ -2,7 +2,7 @@ import {initializeFirebaseForApp} from '@df/state';
 import '@df/ui-lit/remove-replace-me';
 import '@df/ui-lit/df-auth-wrapper';
 import '@df/ui-lit/df-environment-banner';
-import './rename-me-app-container.js';
+import './app-container.js';
 
 // Initialize Firebase with automatic emulator detection
 // Reads VITE_USE_EMULATOR from environment:

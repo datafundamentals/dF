@@ -1,8 +1,8 @@
 import {css, html, LitElement} from 'lit';
 import {customElement} from 'lit/decorators.js';
 
-@customElement('rename-me-app-container')
-export class RenameMeAppContainer extends LitElement {
+@customElement('app-container')
+export class AppContainer extends LitElement {
   static override styles = css`
     :host {
       display: block;
@@ -25,6 +25,6 @@ export class RenameMeAppContainer extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'rename-me-app-container': RenameMeAppContainer;
+    'app-container': AppContainer;
   }
 }

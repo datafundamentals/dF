@@ -178,6 +178,9 @@ function findViolationsInLine(line, patterns) {
 
 function scanFile(filePath) {
   const absolutePath = resolve(PROJECT_ROOT, filePath);
+  if (!existsSync(absolutePath)) {
+    return [];
+  }
   const content = readFileSync(absolutePath, 'utf8');
   const lines = content.split(/\r?\n/);
 
