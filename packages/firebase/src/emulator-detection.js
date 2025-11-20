@@ -19,7 +19,7 @@ export function shouldUseEmulators(config, override) {
     if (typeof config.enabled === 'boolean') {
         return config.enabled;
     }
-    return Boolean(config.auth || config.firestore || config.storage || config.functions || config.hosting);
+    return Boolean(config.auth || config.firestore || config.storage || config.functions);
 }
 /**
  * Connects available Firebase services to their emulator counterparts. Safe to

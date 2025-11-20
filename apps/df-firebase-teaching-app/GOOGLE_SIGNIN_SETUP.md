@@ -44,8 +44,9 @@ That's it! The component is production-ready and works automatically when:
 
 Firebase automatically authorizes:
 - ✅ `localhost` (for local development)
-- ✅ `*.web.app` (your Firebase Hosting domain)
-- ✅ `*.firebaseapp.com` (your Firebase Hosting domain)
+
+Add your production domains:
+- `your-domain.com` (or whatever static host you use)
 
 **If using a custom domain:**
 
@@ -61,8 +62,9 @@ Firebase automatically authorizes:
 # Build for production
 pnpm --filter @df/df-firebase-teaching-app build:prod
 
-# Deploy to Firebase Hosting
-pnpm --filter @df/df-firebase-teaching-app deploy:hosting
+# Deploy backend and publish bundle to your static host (Firebase Hosting is not used)
+pnpm --filter @df/df-firebase-teaching-app deploy:prod
+# Copy dist/ to Netlify/Vercel/11ty/etc.
 ```
 
 **Google Sign-In now works!** No code changes required.
@@ -159,7 +161,7 @@ The teaching app automatically hides the Google Sign-In button when running in e
 
 **Google Sign-In works automatically!**
 
-When you deploy to Firebase Hosting (or any authorized domain), the button appears and works with real Google OAuth:
+When you deploy to your production domain, the button appears and works with real Google OAuth:
 
 1. User clicks "Sign in with Google"
 2. Popup window opens with Google account picker
@@ -347,7 +349,7 @@ Redirect-based sign-in doesn't use popups, so no COOP issues.
 ### ✅ DO:
 - Enable Google Sign-In only in production Firebase projects you control
 - Add only domains you own to authorized domains list
-- Use HTTPS for custom domains (Firebase Hosting enforces this automatically)
+- Use HTTPS for custom domains
 - Implement proper security rules in Firestore/Storage based on `request.auth.uid`
 - Log authentication errors for debugging
 

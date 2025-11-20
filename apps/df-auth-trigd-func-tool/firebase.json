@@ -6,6 +6,13 @@
       "pnpm --filter @df/auth-functions run build"
     ]
   },
+  "functions": {
+    "source": "../../services/functions/",
+    "runtime": "nodejs20",
+    "predeploy": [
+      "pnpm --filter @df/functions-shared run build"
+    ]
+  },
   "emulators": {
     "auth": {
       "host": "127.0.0.1",

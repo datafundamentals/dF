@@ -75,6 +75,8 @@ The app reads Firebase config from:
 cd apps/df-user-admin-app
 pnpm emulators:start
 
+# Port map lives in packages/firebase/firebase.json; keep this app’s firebase.json aligned to avoid emulator drift.
+
 # Terminal 2: Run the app
 VITE_USE_EMULATOR=true pnpm dev
 ```
@@ -91,7 +93,7 @@ Then sign in with any email (emulator allows any credentials).
 2. **Deploy this app**:
    ```bash
    pnpm --filter @df/df-user-admin-app run build
-   firebase deploy --only hosting --project your-project-id
+   # Deploy the built dist/ directory to your preferred static host (Firebase Hosting is not used)
    ```
 
 ### Promoting First User to Admin

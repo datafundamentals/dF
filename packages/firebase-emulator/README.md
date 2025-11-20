@@ -20,7 +20,7 @@ Run these commands from the repo root:
 ### Utility Commands
 
 - `pnpm --filter @df/firebase-emulator emulators:clear` – remove the generated `emulator-data/` snapshot (useful before running exports).
-- `pnpm --filter @df/firebase-emulator ensure-ports` – free the standard emulator ports (9155, 8280, 9390, 5501, 5500, 5400, 4400, 4401, 4500).
+- `pnpm --filter @df/firebase-emulator ensure-ports` – free the standard emulator ports (9155, 8280, 9390, 5501, 5400, 4400, 4401, 4500).
 - `pnpm --filter @df/firebase-emulator test:auth` – smoke-test seeded users against the Auth emulator.
 
 See `guides/firebase-emulator-workflow.md` for full setup instructions and troubleshooting tips.

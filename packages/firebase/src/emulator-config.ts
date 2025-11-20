@@ -11,22 +11,20 @@
  * in firebase.json for proper emulator connectivity.
  * 
  * Standard DF monorepo ports (avoid common dev server conflicts):
- * - Auth: 9099 (standard Firebase port)
- * - Firestore: 8888 (custom, avoids 8000/8080)
- * - Storage: 9199 (standard Firebase port)
- * - Functions: 5001 (standard Firebase port)
- * - Hosting: 5500 (standard Firebase port)
+ * - Auth: 9155 (standard Firebase port)
+ * - Firestore: 8280 (custom, avoids 8000/8080)
+ * - Storage: 9390 (standard Firebase port)
+ * - Functions: 5501 (customised to avoid conflicts)
  * - UI: 5400 (custom, avoids 4000 range used by Vite)
  */
 
 import type { EmulatorPorts } from '@df/types/firebase.types';
 
 export const DF_EMULATOR_PORTS: EmulatorPorts = {
-  "auth": 9099,
-  "firestore": 8888,
-  "storage": 9199,
-  "functions": 5001,
-  "hosting": 5500,
+  "auth": 9155,
+  "firestore": 8280,
+  "storage": 9390,
+  "functions": 5501,
   "ui": 5400
 } as const;
 

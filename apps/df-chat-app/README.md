@@ -15,6 +15,7 @@ This workspace hosts the production-ready `<df-chat-widget>` so it can run again
    pnpm --filter @df/df-chat-app emulators:start
    ```
    > This wraps `firebase emulators:start` with the same port map (+ disk-backed imports/exports) used elsewhere in the repo, but because the script lives inside this workspace it won’t break when other emulator workflows are refactored.
+   > Ports are defined centrally in `packages/firebase/firebase.json`; keep this app’s `firebase.json` in sync with that file to avoid drift.
 3. In another terminal, run the chat app dev server:
    ```sh
    pnpm --filter @df/df-chat-app dev
@@ -57,7 +58,7 @@ src/
   df-chat-app.ts              # Minimal host that renders <df-chat-widget>
   main.ts                     # Imports Material + initializes Firebase
 firestore.rules               # Per-user access control
-firebase.json                 # Emulator + hosting configuration
+firebase.json                 # Emulator configuration
 README.md                     # This file
 ```
 

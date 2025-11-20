@@ -47,7 +47,7 @@ export function shouldUseEmulators(config?: EmulatorHostConfig_Deprecated | null
     return config.enabled;
   }
 
-  return Boolean(config.auth || config.firestore || config.storage || config.functions || config.hosting);
+  return Boolean(config.auth || config.firestore || config.storage || config.functions);
 }
 
 /**

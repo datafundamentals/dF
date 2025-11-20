@@ -33,10 +33,11 @@ Offline-friendly host application for teaching Firebase development patterns wit
 | Firestore      | 8280 |
 | Storage        | 9390 |
 | Functions      | 5501 |
-| Hosting        | 5500 |
 | Emulator UI    | 5400 |
 
 Avoid running other Firebase workspaces on the same ports. If you already have emulators running, shut them down or update one project's ports before continuing.
+
+> Port map for all apps lives in `packages/firebase/firebase.json`; keep this app’s `firebase.json` aligned to avoid emulator drift.
 
 ## Environment Configuration
 
@@ -817,7 +818,7 @@ The current testing architecture provides excellent coverage and reliability for
 
 ## Production Deployment
 
-This section demonstrates how to deploy the Firebase Teaching App to production Firebase Hosting, completing the emulator-first development lifecycle. **Note:** Production deployment is OPTIONAL for teaching purposes - the app works 100% offline with emulators.
+This section demonstrates how to deploy backend resources (rules + functions) and publish the Firebase Teaching App bundle to a static host (Firebase Hosting is not used). **Note:** Production deployment is OPTIONAL for teaching purposes - the app works 100% offline with emulators.
 
 ### Prerequisites
 
@@ -839,9 +840,8 @@ This section demonstrates how to deploy the Firebase Teaching App to production 
 
 1. In Firebase Console, click "Add app" → Web (</> icon)
 2. Enter app nickname (e.g., "Teaching App Web")
-3. Check "Also set up Firebase Hosting"
-4. Click "Register app"
-5. **Copy the Firebase configuration values** - you'll need these for `.env.production`
+3. Click "Register app"
+4. **Copy the Firebase configuration values** - you'll need these for `.env.production`
 
 **Step 3: Configure Production Environment**
 
@@ -899,23 +899,21 @@ pnpm --filter @df/df-firebase-teaching-app preview:prod
 **Step 6: Deploy to Production**
 
 ```bash
-# Full deployment (rules + functions + hosting)
+# Deploy Firestore rules, Storage rules, and Cloud Functions
 pnpm --filter @df/df-firebase-teaching-app deploy:prod
 
 # Or deploy components individually:
 pnpm --filter @df/df-firebase-teaching-app deploy:rules      # Security rules only
 pnpm --filter @df/df-firebase-teaching-app deploy:functions  # Cloud Functions only
-pnpm --filter @df/df-firebase-teaching-app deploy:hosting    # Hosting only
 ```
 
 **Step 7: Verify Deployment**
 
-1. Check Firebase Console for deployment URL (Hosting section)
-2. Open your deployed app: `https://YOUR-PROJECT.web.app`
-3. Test authentication (sign-up, sign-in, sign-out)
-4. Test Firestore operations (create, read, update, delete todos)
-5. Test Storage operations (upload, download files)
-6. Check Firebase Console for any errors
+1. Confirm your static host has been updated with the latest bundle (if applicable).
+2. Test authentication (sign-up, sign-in, sign-out).
+3. Test Firestore operations (create, read, update, delete todos).
+4. Test Storage operations (upload, download files).
+5. Check Firebase Console for any errors.
 
 ### Deployment Scripts Reference
 
@@ -925,9 +923,7 @@ pnpm --filter @df/df-firebase-teaching-app deploy:hosting    # Hosting only
 | `preview:prod` | Preview production build locally | Testing production build before deploy |
 | `deploy:rules` | Deploy Firestore & Storage rules | Security rules changed |
 | `deploy:functions` | Deploy Cloud Functions | Functions code changed |
-| `deploy:hosting` | Build and deploy app to Hosting | App code changed |
-| `deploy:prod` | Deploy everything (runs tests first) | Full production deployment |
-| `deploy:prod:quick` | Deploy hosting without tests | Quick iteration (use sparingly) |
+| `deploy:prod` | Deploy rules + functions (runs tests first) | Backend deployment |
 
 ### Production Environment Differences
 
@@ -1016,7 +1012,7 @@ For automated deployments on every push to `main` branch, see the **CI/CD Setup*
 
 ### Alternative Hosting: Bundled Deployment
 
-If you need to deploy to non-Firebase hosting (Netlify, Vercel, traditional servers), see the **Alternative Hosting** section below.
+For production delivery, deploy the bundle to your static host (Netlify, Vercel, traditional servers). See the **Alternative Hosting** section below.
 
 ### Security Considerations
 
@@ -1030,7 +1026,7 @@ If you need to deploy to non-Firebase hosting (Netlify, Vercel, traditional serv
 - [ ] Test with production Firebase project before going live
 
 **Production Security Best Practices:**
-- ✅ HTTPS only (automatic with Firebase Hosting)
+- ✅ Serve over HTTPS on your chosen static host
 - ✅ Strict security rules (test before deploying)
 - ✅ Environment variables for secrets (never hardcode)
 - ✅ Firebase App Check enabled (prevents unauthorized access)
@@ -1122,7 +1118,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Firebase Hosting
+    name: Deploy Firebase backend
     runs-on: ubuntu-latest
     
     steps:
@@ -1169,13 +1165,10 @@ jobs:
       - name: Build production app
         run: pnpm --filter @df/df-firebase-teaching-app build:prod
       
-      - name: Deploy to Firebase
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'
+      - name: Deploy rules + functions
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: pnpm --filter @df/df-firebase-teaching-app deploy:prod
 ```
 
 **Step 2: Configure GitHub Secrets**
@@ -1192,28 +1185,19 @@ Add the following secrets:
 | `FIREBASE_STORAGE_BUCKET` | Your storage bucket | Same as above |
 | `FIREBASE_MESSAGING_SENDER_ID` | Your sender ID | Same as above |
 | `FIREBASE_APP_ID` | Your app ID | Same as above |
-| `FIREBASE_SERVICE_ACCOUNT` | Service account JSON | Generate in Firebase Console → Project Settings → Service accounts |
 | `FIREBASE_TOKEN` | CI token | Run `firebase login:ci` locally |
 
-**Step 3: Generate Firebase Service Account**
-
-1. Firebase Console → Project Settings → Service accounts
-2. Click "Generate new private key"
-3. Download JSON file
-4. Copy entire JSON content to `FIREBASE_SERVICE_ACCOUNT` secret in GitHub
-
-**Step 4: Test the Workflow**
+**Step 3: Test the Workflow**
 
 1. Push to `main` branch (or manual trigger from Actions tab)
 2. Watch workflow run in GitHub Actions tab
 3. Verify deployment succeeds
-4. Check your Firebase Hosting URL
 
 ### CI/CD Best Practices
 
 - ✅ Run tests before deployment (`test:rules`, integration tests)
 - ✅ Use branch protection rules (require CI to pass before merge)
-- ✅ Deploy to staging environment first (use Firebase Hosting preview channels)
+- ✅ Deploy to staging environments first (match your hosting provider's workflow)
 - ✅ Implement rollback procedures (see PRODUCTION_READINESS.md)
 - ✅ Monitor deployment status (Firebase Console + GitHub Actions)
 - ✅ Set up deployment notifications (Slack, Discord, email)
@@ -1533,6 +1517,6 @@ For detailed remediation plan, see: **`.z_/future/TESTING_DEBT.md`**
 ## Troubleshooting
 
 - **Emulators not detected**: The landing page raises a warning if the Emulator UI on `http://127.0.0.1:4000` cannot be reached. Start the suite or update `VITE_FIREBASE_EMULATOR_UI` in your `.env` file.
-- **Port already in use**: Another process may still be listening on one of the custom ports (`9155`, `8280`, `9390`, `5501`, `5500`, `5400`). Use `lsof -nP -i :<port>` to identify and stop it, or update the port numbers in `firebase.json` and the README tables.
+- **Port already in use**: Another process may still be listening on one of the custom ports (`9155`, `8280`, `9390`, `5501`, `5400`). Use `lsof -nP -i :<port>` to identify and stop it, or update the port numbers in `firebase.json` and the README tables.
 - **Stale seed data**: Run `pnpm --filter @df/firebase-emulator emulators:clear` to reset the `emulator-data/` directory, then restart the suite.
 - **CLI login prompts**: The CLI only needs login when you interact with remote Firebase projects. For emulator-only work you can skip the login step.

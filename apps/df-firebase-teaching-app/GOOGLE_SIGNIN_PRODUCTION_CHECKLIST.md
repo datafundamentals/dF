@@ -23,22 +23,16 @@ Quick reference for deploying Google Sign-In to your production Firebase project
 
 ✅ **That's it for basic setup!** Firebase handles all OAuth configuration automatically.
 
-### Step 2: Add Authorized Domains (if using custom domain)
-
-**Skip this if deploying to Firebase Hosting** - your `.web.app` and `.firebaseapp.com` domains are pre-authorized.
-
-**For custom domains:**
+### Step 2: Add Authorized Domains
 
 1. Still in **Authentication** → **Settings** tab
 2. Scroll to **Authorized domains** section
 3. Click **Add domain**
-4. Enter your custom domain (e.g., `myapp.com`)
+4. Enter your production domain (e.g., `myapp.com`)
 5. Click **Add**
 
-Pre-authorized domains (no action needed):
+Default authorized domain:
 - `localhost` (local development)
-- `*.web.app` (Firebase Hosting)
-- `*.firebaseapp.com` (Firebase Hosting)
 
 ## Deployment Commands
 
@@ -55,7 +49,7 @@ pnpm deploy:prod
 This runs:
 1. Security rules tests (must pass)
 2. Production build with `.env.production`
-3. Deployment to Firebase Hosting
+3. Deployment to your static host
 
 ### Step-by-Step Deploy
 
@@ -71,17 +65,16 @@ pnpm preview:prod
 # 3. Deploy security rules
 pnpm deploy:rules
 
-# 4. Deploy hosting
-pnpm deploy:hosting
+# 4. Deploy backend + bundle to your static host (Firebase Hosting is not used)
+pnpm deploy:prod
+# Copy dist/ to your hosting provider (Netlify/Vercel/11ty/etc.)
 ```
 
 ## Post-Deployment Verification
 
 ### 1. Visit Your Deployed App
 
-Open your Firebase Hosting URL:
-- `https://YOUR-PROJECT.web.app`
-- OR `https://YOUR-PROJECT.firebaseapp.com`
+Open the URL where you published the static bundle.
 
 ### 2. Test Google Sign-In
 
@@ -160,7 +153,7 @@ See [MANUAL_TESTING_KNOWN_ISSUES.md](./MANUAL_TESTING_KNOWN_ISSUES.md) - this is
 ### ✅ Completed by Default
 
 Firebase handles these automatically:
-- HTTPS enforcement (all Firebase Hosting URLs use HTTPS)
+- HTTPS enforcement (serve the app over HTTPS on your host)
 - OAuth token management (client ID, secret)
 - Secure redirects (only to authorized domains)
 - Token refresh (Firebase SDK handles this)

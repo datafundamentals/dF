@@ -31,7 +31,6 @@ const ports = {
   firestore: emulators.firestore?.port,
   storage: emulators.storage?.port,
   functions: emulators.functions?.port,
-  hosting: emulators.hosting?.port,
   ui: emulators.ui?.port,
 };
 
@@ -59,8 +58,7 @@ const output = `/**
  * - Auth: ${ports.auth} (standard Firebase port)
  * - Firestore: ${ports.firestore} (custom, avoids 8000/8080)
  * - Storage: ${ports.storage} (standard Firebase port)
- * - Functions: ${ports.functions} (standard Firebase port)
- * - Hosting: ${ports.hosting} (standard Firebase port)
+ * - Functions: ${ports.functions} (customised to avoid conflicts)
  * - UI: ${ports.ui} (custom, avoids 4000 range used by Vite)
  */
 

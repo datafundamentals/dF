@@ -21,6 +21,7 @@ Single-page Lit app that demonstrates Firebase Authentication with Firestore wri
    pnpm --filter @df/df-activity-log emulators:start
    ```
    > This wraps `firebase emulators:start` with the same port map (+ disk-backed imports/exports) used elsewhere in the repo, but because the script lives inside this workspace it won’t break when other emulator workflows are refactored.
+   > Ports are defined centrally in `packages/firebase/firebase.json`; keep this app’s `firebase.json` in sync with that file to avoid drift.
 3. In another terminal, run the activity log dev server:
    ```sh
    pnpm --filter @df/df-activity-log dev
@@ -70,7 +71,7 @@ src/
   df-activity-log-app.ts      # Lit component w/ auth, form, and history UI
   main.ts                     # Imports Material + initializes Firebase
 firestore.rules               # Per-user access control
-firebase.json                 # Emulator + hosting configuration
+firebase.json                 # Emulator configuration
 README.md                     # This file
 ```
 

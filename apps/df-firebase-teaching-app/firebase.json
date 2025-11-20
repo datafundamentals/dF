@@ -1,4 +1,5 @@
 {
+  "_comment": "Emulator ports must mirror packages/firebase/firebase.json (single source of truth). Update shared file + rebuild @df/firebase if ports change.",
   "functions": {
     "source": "../../services/functions",
     "runtime": "nodejs20",
@@ -32,24 +33,5 @@
       "host": "127.0.0.1",
       "port": 5400
     }
-  },
-  "hosting": {
-    "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "headers": [
-      {
-        "source": "**",
-        "headers": [
-          {
-            "key": "Cross-Origin-Opener-Policy",
-            "value": "unsafe-none"
-          }
-        ]
-      }
-    ]
   }
 }

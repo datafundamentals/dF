@@ -1,7 +1,16 @@
 {
+  "_comment": "Emulator ports must mirror packages/firebase/firebase.json (single source of truth). Update shared file + rebuild @df/firebase if ports change.",
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "source": "../../services/functions",
+    "runtime": "nodejs20",
+    "predeploy": [
+      "pnpm --filter @df/types run build",
+      "pnpm --filter @df/functions-shared run build"
+    ]
   },
   "emulators": {
     "firestore": {
@@ -21,13 +30,5 @@
       "host": "127.0.0.1",
       "port": 5400
     }
-  },
-  "hosting": {
-    "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ]
   }
 }

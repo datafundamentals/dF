@@ -1,25 +1,21 @@
 {
-  "_comment": "This file is owned by @df/firebase package and serves as the single source of truth for emulator configuration across all teaching apps. TypeScript constants are auto-generated from this file via scripts/generate-emulator-config.ts. See packages/firebase/src/emulator-config.ts for the generated output.",
+  "_comment": "This file is owned by @df/firebase package and serves as the single source of truth for emulator configuration across all teaching apps. TypeScript constants are auto-generated from this file via scripts/generate-emulator-config.ts. See packages/firebase/src/emulator-config.ts for the generated output. Hosting is intentionally omitted; Vite handles local serving.",
   "emulators": {
     "auth": {
       "host": "127.0.0.1",
-      "port": 9099
+      "port": 9155
     },
     "firestore": {
       "host": "127.0.0.1",
-      "port": 8888
+      "port": 8280
     },
     "storage": {
       "host": "127.0.0.1",
-      "port": 9199
+      "port": 9390
     },
     "functions": {
       "host": "127.0.0.1",
-      "port": 5001
-    },
-    "hosting": {
-      "host": "127.0.0.1",
-      "port": 5500
+      "port": 5501
     },
     "ui": {
       "enabled": true,

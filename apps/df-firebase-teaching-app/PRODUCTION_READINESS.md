@@ -54,7 +54,7 @@ Use this checklist to ensure your Firebase Teaching App is ready for production 
 ### 8. Security
 - [ ] Firebase App Check configured (recommended)
 - [ ] Custom domain configured (optional)
-- [ ] HTTPS enforced (automatic with Firebase Hosting)
+- [ ] HTTPS enforced on your hosting provider
 - [ ] CORS policies reviewed for functions
 - [ ] Authentication providers configured correctly
 
@@ -75,7 +75,7 @@ Use this checklist to ensure your Firebase Teaching App is ready for production 
 
 After deployment, verify the following:
 
-- [ ] Application accessible at Firebase Hosting URL
+- [ ] Application accessible at your production URL
 - [ ] Authentication works (sign-up, sign-in, sign-out)
 - [ ] Firestore operations work (create, read, update, delete)
 - [ ] Storage operations work (upload, download, delete)
@@ -93,7 +93,7 @@ After deployment, verify the following:
 - ✅ Production Firebase quotas and limits apply
 - ✅ Real billing (if on Blaze plan)
 - ✅ Data persists permanently (not emulator exports)
-- ✅ HTTPS enforced automatically
+- ✅ Use HTTPS on your hosting provider
 
 ### What Stays the Same:
 - ✅ Application code (identical to emulator development)
@@ -111,10 +111,8 @@ After deployment, verify the following:
 
 If issues are discovered post-deployment:
 
-1. **Immediate Rollback (Hosting)**
-   ```bash
-   firebase hosting:clone SOURCE_SITE_ID:SOURCE_VERSION_ID TARGET_SITE_ID
-   ```
+1. **Immediate Rollback (Static Host)**
+   - Revert to the previous bundle on your hosting provider (Firebase Hosting is not used).
 
 2. **Rules Rollback**
    - Go to Firebase Console > Firestore/Storage > Rules > Rules History

@@ -43,7 +43,6 @@ export interface EmulatorHostConfig_Deprecated {
     /** Region the Functions emulator listens on (defaults to `us-central1`). */
     region?: string;
   };
-  hosting?: EmulatorHostConfig;
   ui?: {
     /** Base URL for the Emulator UI, used for health checks and links. */
     url: string;
@@ -82,7 +81,6 @@ export interface EmulatorPorts {
   firestore: number;
   storage: number;
   functions: number;
-  hosting: number;
   ui: number;
 }
 
