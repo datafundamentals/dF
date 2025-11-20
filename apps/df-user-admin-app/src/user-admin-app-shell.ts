@@ -1,17 +1,16 @@
 import {css, html, LitElement} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
-import {getInitializedFirebaseApp, shouldUseEmulatorForService, firebaseAuthState} from '@df/state';
-import {getFirebaseFunctions, connectFunctionsToEmulator, callable} from '@df/firebase/functions';
 import {SignalWatcher} from '@lit-labs/signals';
-import type {Role} from '@df/types';
+import {
+  firebaseAuthState,
+  userAdminState,
+  loadUsers,
+  updateUserRole,
+  clearUserAdminError,
+} from '@df/state';
+import type {Role, UserAdminListItem} from '@df/types';
 
-interface UserItem {
-  uid: string;
-  email: string;
-  displayName?: string;
-  role: Role;
-  createdAt: string;
-}
+type SelectedUser = Pick<UserAdminListItem, 'uid' | 'email' | 'role'>;
 
 @customElement('user-admin-app-shell')
 export class UserAdminAppShell extends SignalWatcher(LitElement) {
@@ -72,23 +71,14 @@ export class UserAdminAppShell extends SignalWatcher(LitElement) {
     }
   `;
 
-  @state() private declare users: UserItem[];
-
-  @state() private declare loading: boolean;
-
-  @state() private declare error: string;
-
-  @state() private declare selectedUser: {uid: string; email: string; role: Role} | null;
+  @state() private declare selectedUser: SelectedUser | null;
 
   @state() private declare isRolePickerOpen: boolean;
 
-  private usersLoaded = false;
+  private hasRequestedUsers = false;
 
   constructor() {
     super();
-    this.users = [];
-    this.loading = true;
-    this.error = '';
     this.selectedUser = null;
     this.isRolePickerOpen = false;
   }
@@ -96,47 +86,15 @@ export class UserAdminAppShell extends SignalWatcher(LitElement) {
   protected override updated(changedProperties: Map<string | number | symbol, unknown>): void {
     super.updated(changedProperties);
 
-    // Check auth state after any update
-    // SignalWatcher will re-render when firebaseAuthState signal changes
-    // so this method will be called whenever auth state changes
     const {authState, authUser} = firebaseAuthState.get();
 
-    if (authState === 'authenticated' && authUser && !this.usersLoaded) {
-      this.usersLoaded = true;
-      this.loadUsers();
-    }
-  }
-
-  private async loadUsers(): Promise<void> {
-    try {
-      this.loading = true;
-      this.error = '';
-
-      // Initialize Firebase app and get Functions instance with emulator support
-      const app = getInitializedFirebaseApp();
-      const functions = getFirebaseFunctions(app, 'us-central1');
-
-      // Connect to emulator if configured
-      if (shouldUseEmulatorForService('functions')) {
-        connectFunctionsToEmulator(functions, {
-          host: '127.0.0.1',
-          port: 5001,
-        });
-      }
-
-      const getUserList = callable<{searchQuery?: string}, {users: UserItem[]; nextPageToken?: string}>(
-        functions,
-        'getUserList'
-      );
-
-      const result = await getUserList({searchQuery: ''});
-      this.users = result.data.users;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load users';
-      this.error = message;
-      console.error('Failed to load users:', error);
-    } finally {
-      this.loading = false;
+    if (authState === 'authenticated' && authUser && !this.hasRequestedUsers) {
+      this.hasRequestedUsers = true;
+      loadUsers().catch((error) => {
+        console.error('Failed to load users:', error);
+      });
+    } else if ((!authUser || authState !== 'authenticated') && this.hasRequestedUsers) {
+      this.hasRequestedUsers = false;
     }
   }
 
@@ -153,39 +111,11 @@ export class UserAdminAppShell extends SignalWatcher(LitElement) {
     if (!this.selectedUser) return;
 
     try {
-      this.loading = true;
-
-      // Initialize Firebase app and get Functions instance with emulator support
-      const app = getInitializedFirebaseApp();
-      let functions = getFirebaseFunctions(app, 'us-central1');
-
-      // Connect to emulator if configured
-      if (shouldUseEmulatorForService('functions')) {
-        connectFunctionsToEmulator(functions, {
-          host: '127.0.0.1',
-          port: 5001,
-        });
-      }
-
-      const updateUserRole = callable<{targetUserId: string; newRole: Role}, {success: boolean}>(
-        functions,
-        'updateUserRole'
-      );
-
-      await updateUserRole({
-        targetUserId: this.selectedUser.uid,
-        newRole: event.detail.newRole,
-      });
-
-      // Reload users to show updated role
-      await this.loadUsers();
+      await updateUserRole(this.selectedUser.uid, event.detail.newRole);
       this.isRolePickerOpen = false;
+      this.selectedUser = null;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update user role';
-      this.error = message;
       console.error('Failed to update user role:', error);
-    } finally {
-      this.loading = false;
     }
   }
 
@@ -195,9 +125,9 @@ export class UserAdminAppShell extends SignalWatcher(LitElement) {
   }
 
   override render() {
-    // Access the auth state signal to make SignalWatcher reactive
-    // This will cause the component to re-render whenever auth state changes
+    // Make component reactive to auth changes
     firebaseAuthState.get();
+    const {users, loading, error} = userAdminState.get();
 
     return html`
       <div class="container">
@@ -206,23 +136,23 @@ export class UserAdminAppShell extends SignalWatcher(LitElement) {
           <p class="subtitle">Manage user roles and permissions</p>
         </div>
 
-        ${this.error
+        ${error
           ? html`
               <div class="error">
-                <span>${this.error}</span>
-                <button class="error-close" @click=${() => (this.error = '')}>
+                <span>${error}</span>
+                <button class="error-close" @click=${() => clearUserAdminError()}>
                   ×
                 </button>
               </div>
             `
           : ''}
 
-        ${this.loading
+        ${loading
           ? html` <div class="loading">Loading users...</div> `
           : html`
               <df-user-admin-list
-                .users=${this.users}
-                .loading=${this.loading}
+                .users=${users}
+                .loading=${loading}
                 @user-selected=${(e: CustomEvent) => this.handleUserSelected(e)}
               ></df-user-admin-list>
             `}

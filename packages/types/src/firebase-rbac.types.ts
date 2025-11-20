@@ -45,3 +45,15 @@ export interface UserRoleClaims {
   role: Role;
   permissions?: Permission[];
 }
+
+/**
+ * User record exposed to administrative UIs.
+ * Represents a flattened snapshot of Firebase Auth info plus metadata.
+ */
+export interface UserAdminListItem {
+  uid: string;
+  email: string;
+  displayName?: string;
+  role: Role;
+  createdAt: string;
+}

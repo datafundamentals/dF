@@ -19,15 +19,9 @@
 
 import {css, html, LitElement} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import type {Role} from '@df/types';
+import type {Role, UserAdminListItem} from '@df/types';
 
-interface UserItem {
-  uid: string;
-  email: string;
-  displayName?: string;
-  role: Role;
-  createdAt: string;
-}
+type UserItem = UserAdminListItem;
 
 @customElement('df-user-admin-list')
 export class DfUserAdminList extends LitElement {

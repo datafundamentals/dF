@@ -12,5 +12,6 @@ export * from './stores/functions-demo.store.js';
 export * from './stores/firebase-init.js';
 export * from './stores/activity-log.store.js';
 export * from './stores/seed-data.store.js';
+export * from './stores/user-admin.store.js';
 export * from './init-firebase.js';
 export * from './utils/auth-guard.js';

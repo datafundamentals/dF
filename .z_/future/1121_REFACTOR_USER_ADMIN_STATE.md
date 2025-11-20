@@ -1,5 +1,9 @@
 # Ticket 1121: Refactor User Admin App to Use Signals-Based State Management
 
+Dear Codex. Please give me as many chances to check your work as you go, as you can tolerate. I am very fussy about the code that goes into my monorepo. Please don't make any git adds or commits, because that is how i check your work before adding it into my monorepo.
+
+This ticket is all about conforming to the standards in this monorepo, and not at all about new features or capabilities. If there is any ambiguity about anything described herein, please do not hesitate to ask me.
+
 **Status:** Planning
 **Related Tickets:** 1117 (df-user-admin-app), 1120 (Fix Multiple Roles)
 **Priority:** High
