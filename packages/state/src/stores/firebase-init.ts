@@ -130,7 +130,7 @@ export function getInitializedFirebaseApp(): FirebaseApp {
  * @example
  * ```typescript
  * if (shouldUseEmulatorForService('auth')) {
- *   connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+ *   connectAuthEmulator(auth, 'http://127.0.0.1:9155');
  * }
  * ```
  */

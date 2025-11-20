@@ -199,7 +199,7 @@ initializeFirebase(firebaseConfig);
 ```typescript
 // apps/df-firebase-teaching-app/src/config/firebase.config.ts
 export const emulatorConfig = {  // ❌ Hardcoded, not typed
-  auth: { host: 'localhost', port: 9099 },
+  auth: { host: '127.0.0.1', port: 9155 },
   firestore: { host: 'localhost', port: 8080 },
   // ...
 };
@@ -212,7 +212,7 @@ import type { EmulatorConfig } from '@df/types/firebase.types';  // ✅
 
 export const emulatorConfig: EmulatorConfig = {  // ✅ Typed
   enabled: import.meta.env.VITE_USE_EMULATOR === 'true',
-  auth: { host: 'localhost', port: 9099 },
+  auth: { host: '127.0.0.1', port: 9155 },
   firestore: { host: 'localhost', port: 8080 },
   storage: { host: 'localhost', port: 9199 },
   functions: { host: 'localhost', port: 5001, region: 'us-central1' },
