@@ -28,7 +28,7 @@ Single-page Lit app that demonstrates Firebase Authentication with Firestore wri
    ```
 4. Open `http://127.0.0.1:4180` and authenticate with the built-in widgets. A yellow banner confirms emulator mode. Entries appear in `activity/<uid>/pushups` inside the Emulator UI (`http://127.0.0.1:5400`).
 
-> **Need the canonical seed data?** The emulator persists writes to `apps/df-activity-log/emulator-data/`, so once you create accounts/entries they stick around. If you prefer the shared classroom dataset, copy `packages/firebase-emulator/emulator-data/` into this app’s folder (or rerun `pnpm --filter @df/firebase-emulator seed`) before starting the suite.
+> Emulator data is now shared at `packages/firebase-emulator/emulator-data/` (same as other apps) so seeds and writes persist across workspaces. Run `pnpm --filter @df/firebase-emulator seed` to refresh it.
 
 ## Environment Files
 - `.env.development` (ignored) contains real Firebase credentials **with** `VITE_USE_EMULATOR=true`

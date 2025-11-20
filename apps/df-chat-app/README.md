@@ -22,7 +22,7 @@ This workspace hosts the production-ready `<df-chat-widget>` so it can run again
    ```
 4. Open `http://127.0.0.1:4181`, sign in, and start sending messages. Chat transcripts persist to the `chatMessage` collection in the configured Firebase project.
 
-> **Need the canonical seed data?** If you switch the emulator flags back on, the launcher persists data to `apps/df-chat-app/emulator-data/`. Copy `packages/firebase-emulator/emulator-data/` into this folder (or rerun `pnpm --filter @df/firebase-emulator seed`) before starting the suite.
+> Emulator data is shared at `packages/firebase-emulator/emulator-data/` (same as other apps). Run `pnpm --filter @df/firebase-emulator seed` to refresh it.
 
 ## Environment Files
 - `.env.emulator` (committed) targets the `demo-firebase-teaching-app` placeholder project and sets `VITE_USE_EMULATOR=true`

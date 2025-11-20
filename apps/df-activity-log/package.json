@@ -17,8 +17,8 @@
     "pretest": "pnpm build",
     "test": "pnpm test:integration || true",
     "test:integration": "playwright test --config ../../playwright.config.ts --project=df-activity-log",
-  "emulators:start": "node ./scripts/ensure-emulator-ports.mjs && firebase emulators:start --project demo-firebase-teaching-app --import ./emulator-data --export-on-exit ./emulator-data --only firestore,storage,functions",
-    "emulators:clear": "node ./scripts/clear-emulator-data.mjs"
+  "emulators:start": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project demo-firebase-teaching-app --import ../../packages/firebase-emulator/emulator-data --export-on-exit ../../packages/firebase-emulator/emulator-data --only firestore,storage,functions",
+    "emulators:clear": "pnpm --filter @df/firebase-emulator emulators:clear"
   },
   "dependencies": {
     "@df/firebase": "workspace:*",
