@@ -8,9 +8,11 @@ import {
 import type {
   FirestoreCollectionState,
   FirestoreDocumentData,
+  ExerciseDraft,
+  ExerciseEntry,
   PushupDraft,
-  PushupEntry,
-  PushupSummaryState,
+  ActivitySummaryState,
+  ExerciseType,
 } from '@df/types';
 import {FirestoreCollectionStore} from './firestore-base.store.js';
 import {
@@ -25,7 +27,7 @@ const FIRESTORE_HOST = '127.0.0.1';
 const FIRESTORE_PORT = 8280;
 const PAGE_SIZE = 20;
 
-const defaultState: FirestoreCollectionState<PushupEntry> = {
+const defaultState: FirestoreCollectionState<ExerciseEntry> = {
   status: 'idle',
   documents: [],
   error: null,
@@ -38,26 +40,39 @@ const defaultState: FirestoreCollectionState<PushupEntry> = {
   queryDescription: 'Awaiting authentication',
 };
 
-const fallbackStateSignal = signal<FirestoreCollectionState<PushupEntry>>({...defaultState});
-const storeSignal = signal<FirestoreCollectionStore<PushupEntry> | null>(null);
+const fallbackStateSignal = signal<FirestoreCollectionState<ExerciseEntry>>({...defaultState});
+const storeSignal = signal<FirestoreCollectionStore<ExerciseEntry> | null>(null);
 const collectionRefSignal = signal<CollectionReference<DocumentData> | null>(null);
 const activeUserIdSignal = signal<string | null>(null);
 
-export const pushupCollectionState = computed<FirestoreCollectionState<PushupEntry>>(() => {
+export const pushupCollectionState = computed<FirestoreCollectionState<ExerciseEntry>>(() => {
   const store = storeSignal.get();
   return store ? store.state.get() : fallbackStateSignal.get();
 });
 
-export const pushupSummaryState = computed<PushupSummaryState>(() => {
+export const pushupSummaryState = computed<ActivitySummaryState>(() => {
   const documents = pushupCollectionState.get().documents;
-  const totalPushups = documents.reduce((sum, entry) => sum + entry.count, 0);
   const entryCount = documents.length;
   const lastEntryAt = entryCount > 0 ? documents[0].recordedAt ?? null : null;
 
+  const byType: Record<ExerciseType, {count: number; totalValue: number}> = {
+    pushups: {count: 0, totalValue: 0},
+    squats: {count: 0, totalValue: 0},
+    plank: {count: 0, totalValue: 0},
+    dumbbells: {count: 0, totalValue: 0},
+    hang: {count: 0, totalValue: 0},
+  };
+
+  documents.forEach((entry) => {
+    byType[entry.exerciseType].count += 1;
+    byType[entry.exerciseType].totalValue += entry.value;
+  });
+
   return {
-    totalPushups,
+    totalExercises: entryCount,
     entryCount,
     lastEntryAt,
+    byType,
   };
 });
 
@@ -90,9 +105,9 @@ export async function initializePushupStore(
   const collectionPath = buildCollectionPath(userId);
   const ref = collection(db, collectionPath);
 
-  const newStore = new FirestoreCollectionStore<PushupEntry>(ref, {
+  const newStore = new FirestoreCollectionStore<ExerciseEntry>(ref, {
     defaultConstraints: [orderBy('recordedAt', 'desc')],
-    defaultQueryDescription: 'Your pushup history (newest first)',
+    defaultQueryDescription: 'Your activity history (newest first)',
     pageSize: PAGE_SIZE,
     mapDocument: normalizeEntry,
   });
@@ -118,19 +133,31 @@ export function teardownPushupStore(): void {
 }
 
 export async function logPushupEntry(draft: PushupDraft): Promise<string> {
-  if (!Number.isFinite(draft.count)) {
-    throw new Error('Pushup count must be a valid number.');
+  // Convert legacy pushup format to new exercise format
+  const exerciseDraft: ExerciseDraft = {
+    exerciseType: 'pushups',
+    value: draft.count,
+    note: draft.note,
+    recordedAt: draft.recordedAt,
+  };
+  return logExerciseEntry(exerciseDraft);
+}
+
+export async function logExerciseEntry(draft: ExerciseDraft): Promise<string> {
+  if (!Number.isFinite(draft.value)) {
+    throw new Error('Exercise value must be a valid number.');
   }
 
-  const count = Math.max(0, Math.trunc(draft.count));
-  if (count <= 0) {
-    throw new Error('Pushup count must be greater than zero.');
+  const value = Math.max(0, Math.trunc(draft.value));
+  if (value <= 0) {
+    throw new Error('Exercise value must be greater than zero.');
   }
 
   const now = new Date();
   const recordedAt = draft.recordedAt ?? now;
-  const payload: FirestoreDocumentData<PushupEntry> = {
-    count,
+  const payload: FirestoreDocumentData<ExerciseEntry> = {
+    exerciseType: draft.exerciseType,
+    value,
     note: normalizeNote(draft.note),
     recordedAt,
     createdAt: now,
@@ -160,7 +187,7 @@ export function getActivePushupCollectionPath(): string | null {
   return ref?.path ?? null;
 }
 
-function normalizeEntry(entry: PushupEntry): PushupEntry {
+function normalizeEntry(entry: ExerciseEntry): ExerciseEntry {
   const recordedAt = entry.recordedAt instanceof Timestamp ? entry.recordedAt.toDate() : entry.recordedAt ?? null;
   const createdAt = entry.createdAt instanceof Timestamp ? entry.createdAt.toDate() : entry.createdAt ?? null;
   const updatedAt = entry.updatedAt instanceof Timestamp ? entry.updatedAt.toDate() : entry.updatedAt ?? null;
@@ -173,10 +200,10 @@ function normalizeEntry(entry: PushupEntry): PushupEntry {
   };
 }
 
-function ensureStore(): FirestoreCollectionStore<PushupEntry> {
+function ensureStore(): FirestoreCollectionStore<ExerciseEntry> {
   const store = storeSignal.get();
   if (!store) {
-    throw new Error('Pushup store has not been initialized. Call initializePushupStore() after authentication.');
+    throw new Error('Exercise store has not been initialized. Call initializePushupStore() after authentication.');
   }
   return store;
 }

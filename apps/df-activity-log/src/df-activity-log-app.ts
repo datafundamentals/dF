@@ -1,23 +1,22 @@
 import {css, html, LitElement, nothing} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import type {FirebaseUser} from '@df/types';
+import type {FirebaseUser, ExerciseType} from '@df/types';
+import {EXERCISE_TYPE_CONFIG} from '../../../packages/types/dist/index.js';
 import {
   firebaseAuthState,
   initializePushupStore,
   pushupCollectionState,
   pushupSummaryState,
-  logPushupEntry,
+  logExerciseEntry,
   deletePushupEntry,
   refreshPushupEntries,
-  getActivePushupCollectionPath,
   teardownPushupStore,
   getInitializedFirebaseApp,
   shouldUseEmulatorForService,
 } from '@df/state';
 
 import '@df/ui-lit/firebase';
-import '@df/ui-lit/df-google-signin';
 
 interface SubmitMessage {
   variant: 'success' | 'error';
@@ -57,6 +56,13 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
       color: #047857;
       font-weight: 600;
       font-size: 0.85rem;
+    }
+
+    .page-title {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #0f172a;
     }
 
     .hero-title {
@@ -211,7 +217,8 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
   @state() private initializedUserId: string | null = null;
   @state() private storeError: string | null = null;
-  @state() private formCount = '10';
+  @state() private selectedExerciseType: ExerciseType = 'pushups';
+  @state() private formValue = '10';
   @state() private formNote = '';
   @state() private isSubmitting = false;
   @state() private submitMessage: SubmitMessage | null = null;
@@ -239,8 +246,9 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
     return html`
       <section class="shell">
-        ${this.renderHero(isAuthenticated)}
-        ${this.renderAuthPanel(isAuthenticated)}
+        ${isAuthenticated
+          ? html`<h1 class="page-title">Fitness Log · ${authUser?.displayName || authUser?.email || 'User'}</h1>`
+          : nothing}
         ${this.storeError
           ? html`<div class="status error">
               ${this.storeError}
@@ -256,65 +264,6 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
     `;
   }
 
-  private renderHero(isAuthenticated: boolean) {
-    const emulatorUi = 'http://127.0.0.1:5400'; // Emulator UI URL (not used in production)
-    const usingEmulator = shouldUseEmulatorForService('firestore') || 
-                          shouldUseEmulatorForService('auth') ||
-                          shouldUseEmulatorForService('storage');
-    const environmentLabel = usingEmulator ? 'Local Firebase emulator' : 'Production Firebase';
-    const authStatus = isAuthenticated ? 'Signed in' : 'Guest mode';
-
-    return html`
-      <header>
-        <span class="badge">${environmentLabel} • ${authStatus}</span>
-        <h1 class="hero-title">Activity Log · Pushup Tracker</h1>
-        <p class="lead">
-          ${usingEmulator ? html`
-            Log your pushup reps against the Firebase emulator. Every entry is stored beneath
-            <code class="collection-path">activity/&lt;uid&gt;/pushups</code> so it stays scoped to your account.
-            Start the emulator suite (see <code>guides/firebase-emulator-workflow.md</code>) and keep an eye on the dashboard at
-            <a href=${emulatorUi} target="_blank" rel="noreferrer">${emulatorUi}</a> to inspect writes in real time.
-          ` : html`
-            Log your pushup reps to production Firebase. Every entry is stored beneath
-            <code class="collection-path">activity/&lt;uid&gt;/pushups</code> so it stays scoped to your account.
-          `}
-        </p>
-      </header>
-    `;
-  }
-
-  private renderAuthPanel(isAuthenticated: boolean) {
-    if (isAuthenticated) {
-      return html`
-        <div class="auth-panel">
-          <div class="card">
-            <h3>Signed in</h3>
-            <df-user-profile></df-user-profile>
-            <df-sign-out></df-sign-out>
-          </div>
-          <div class="card">
-            <h3>Need another account?</h3>
-            <p>Open an incognito window and authenticate again. Emulator auth persists to disk for teaching flows.</p>
-          </div>
-        </div>
-      `;
-    }
-
-    return html`
-      <div class="auth-panel">
-        <div class="card">
-          <h3>Sign in with email</h3>
-          <df-sign-in></df-sign-in>
-          <df-sign-up></df-sign-up>
-          <df-password-reset></df-password-reset>
-        </div>
-        <div class="card">
-          <h3>Or continue with Google</h3>
-          <df-google-signin></df-google-signin>
-        </div>
-      </div>
-    `;
-  }
 
   private renderSignedOutMessage() {
     return html`
@@ -331,7 +280,6 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
     const documents = pushups?.documents ?? [];
     const status = pushups?.status ?? 'idle';
-    const collectionPath = getActivePushupCollectionPath();
 
     return html`
       <section class="activity-grid">
@@ -339,11 +287,7 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
           <h3>Activity summary</h3>
           <div class="summary-metrics">
             <dl class="summary-tile">
-              <dt>Total pushups</dt>
-              <dd>${summary?.totalPushups ?? 0}</dd>
-            </dl>
-            <dl class="summary-tile">
-              <dt>Entries</dt>
+              <dt>Total entries</dt>
               <dd>${summary?.entryCount ?? 0}</dd>
             </dl>
             <dl class="summary-tile">
@@ -351,24 +295,35 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
               <dd>${summary?.lastEntryAt ? this.formatDate(summary.lastEntryAt) : '—'}</dd>
             </dl>
           </div>
-          ${collectionPath
-            ? html`<p class="collection-path">Collection: ${collectionPath}</p>`
-            : nothing}
         </div>
         <div class="card">
-          <h3>Log pushups</h3>
+          <h3>Log exercise</h3>
           ${this.submitMessage
             ? html`<div class="status ${this.submitMessage.variant}">${this.submitMessage.text}</div>`
             : nothing}
           <form @submit=${this.handleSubmit}>
+            <md-filled-select
+              label="Exercise type"
+              value=${this.selectedExerciseType}
+              @change=${this.handleExerciseTypeChange}
+              ?disabled=${this.isSubmitting}
+            >
+              ${Object.entries(EXERCISE_TYPE_CONFIG).map(
+                ([type, config]) => html`
+                  <md-select-option value=${type}>
+                    <div slot="headline">${config.label}</div>
+                  </md-select-option>
+                `
+              )}
+            </md-filled-select>
             <md-outlined-text-field
-              label="Pushups"
+              label="${EXERCISE_TYPE_CONFIG[this.selectedExerciseType].label} (${EXERCISE_TYPE_CONFIG[this.selectedExerciseType].unit})"
               type="number"
               required
               inputmode="numeric"
-              helper="Enter a whole number"
-              value=${this.formCount}
-              @input=${this.handleCountInput}
+              helper=${EXERCISE_TYPE_CONFIG[this.selectedExerciseType].description}
+              value=${this.formValue}
+              @input=${this.handleValueInput}
               ?disabled=${this.isSubmitting}
             ></md-outlined-text-field>
             <md-outlined-text-field
@@ -399,15 +354,16 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
           </div>
         </div>
         ${documents.length === 0
-          ? html`<div class="empty-state">No pushups logged yet. Submit your first entry above.</div>`
+          ? html`<div class="empty-state">No exercises logged yet. Submit your first entry above.</div>`
           : html`
               <div class="history-list">
                 ${documents.map(
                   (entry) => html`
                     <article class="history-item">
                       <div>
-                        <strong>${entry.count}</strong>
+                        <strong>${entry.value} ${EXERCISE_TYPE_CONFIG[entry.exerciseType].unit}</strong>
                         <div class="history-meta">
+                          <span>${EXERCISE_TYPE_CONFIG[entry.exerciseType].label}</span>
                           <span>${this.formatDate(entry.recordedAt)}</span>
                           ${entry.note ? html`<span>${entry.note}</span>` : nothing}
                         </div>
@@ -447,9 +403,17 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
     this.storeError = null;
   }
 
-  private handleCountInput(event: Event): void {
+  private handleExerciseTypeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    if (target?.value) {
+      this.selectedExerciseType = target.value as ExerciseType;
+      this.formValue = '10';
+    }
+  }
+
+  private handleValueInput(event: Event): void {
     const target = event.target as HTMLInputElement | null;
-    this.formCount = target?.value ?? '';
+    this.formValue = target?.value ?? '';
   }
 
   private handleNoteInput(event: Event): void {
@@ -467,16 +431,21 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
     this.submitMessage = null;
 
     try {
-      const parsed = Number(this.formCount);
-      await logPushupEntry({count: parsed, note: this.formNote});
-      this.formCount = '10';
+      const parsed = Number(this.formValue);
+      await logExerciseEntry({
+        exerciseType: this.selectedExerciseType,
+        value: parsed,
+        note: this.formNote,
+      });
+      this.formValue = '10';
       this.formNote = '';
-      this.submitMessage = {variant: 'success', text: 'Pushup entry saved to Firestore.'};
+      const exerciseLabel = EXERCISE_TYPE_CONFIG[this.selectedExerciseType].label;
+      this.submitMessage = {variant: 'success', text: `${exerciseLabel} entry saved to Firestore.`};
     } catch (error) {
-      console.error('[df-activity-log] Failed to log pushups', error);
+      console.error('[df-activity-log] Failed to log exercise', error);
       this.submitMessage = {
         variant: 'error',
-        text: (error as Error)?.message ?? 'Unable to save pushups. Check the console for details.',
+        text: (error as Error)?.message ?? 'Unable to save exercise. Check the console for details.',
       };
     } finally {
       this.isSubmitting = false;
