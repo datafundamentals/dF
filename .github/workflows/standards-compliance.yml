@@ -30,13 +30,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: MD3 compliance scanner
-        run: ./scripts/check-md3-compliance.sh
+        run: pnpm --filter @df/compliance-tools run check:md3
 
       - name: Standards documentation check
-        run: ./scripts/check-standards-docs.sh
+        run: pnpm --filter @df/compliance-tools run check:docs
 
       - name: Forbidden patterns check
-        run: ./scripts/check-forbidden-patterns.sh
+        run: pnpm --filter @df/compliance-tools run check:patterns
 
       - name: Run lint suite
         run: pnpm lint

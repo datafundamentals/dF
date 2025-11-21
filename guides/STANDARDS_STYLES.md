@@ -110,9 +110,10 @@ The repository follows a strict structure to separate runtime code from build/ma
 
 ### Tooling Guidelines
 
-- **Bash Scripts**: Simple shell scripts that run natively without `node_modules` may reside in `scripts/`.
-- **Node Tools**: Complex scripts or those requiring dependencies must reside in `tools/` as their own workspace (e.g., `tools/compliance`).
+- **All Tools in `tools/`**: All meta-code, build scripts, and maintenance utilities reside in `tools/`.
+- **Workspaces**: Each tool should be a proper pnpm workspace with its own `package.json` (e.g., `tools/compliance`, `tools/deploy-scripts`).
 - **Execution**: Run tools via `pnpm` scripts defined in the root `package.json` or using `pnpm --filter`.
+- **No `scripts/` Directory**: The root `scripts/` directory is deprecated and removed. All scripts must be migrated to `tools/`.
 
 ### Compliance Tools
 

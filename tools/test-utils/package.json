@@ -1,0 +1,11 @@
+{
+  "name": "@df/test-utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean-ports": "node src/clean-test-ports.mjs"
+  },
+  "dependencies": {
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@df/deploy-scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "copy-bundle": "node src/copy-app-bundle.mjs"
+  },
+  "dependencies": {
+  }
+}

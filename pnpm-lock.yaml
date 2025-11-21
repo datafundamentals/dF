@@ -739,6 +739,10 @@ importers:
 
   tools/compliance: {}
 
+  tools/deploy-scripts: {}
+
+  tools/test-utils: {}
+
 packages:
 
   '@11ty/dependency-tree@2.0.1':
