@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import {readFileSync, existsSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {resolve, dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-const PROJECT_ROOT = resolve(process.cwd());
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '../../../');
 
 const CHECKS = [
   {

@@ -2,4 +2,4 @@
 set -euo pipefail
 
 dirname="$(cd "$(dirname "$0")" && pwd)"
-node "$dirname/compliance/check-standards-docs.mjs"
+node "$dirname/../tools/compliance/src/check-standards-docs.mjs"

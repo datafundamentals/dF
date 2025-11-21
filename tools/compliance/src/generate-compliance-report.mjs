@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 import {execSync} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {resolve, dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-const PROJECT_ROOT = resolve(process.cwd());
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '../../../');
 const REPORT_PATH = resolve(PROJECT_ROOT, 'COMPLIANCE_REPORT.md');
 
 function runScanner() {
   try {
-    const output = execSync('node ./scripts/compliance/check-md3-compliance.mjs --json --quiet', {
+    const output = execSync('node tools/compliance/src/check-md3-compliance.mjs --json --quiet', {
       cwd: PROJECT_ROOT,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],

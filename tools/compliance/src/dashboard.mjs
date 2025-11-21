@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import {execSync} from 'node:child_process';
-import {resolve} from 'node:path';
+import {resolve, dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-const PROJECT_ROOT = resolve(process.cwd());
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '../../../');
 
 function runCommand(command, options = {}) {
   try {
@@ -17,7 +19,7 @@ function runCommand(command, options = {}) {
 }
 
 function getComplianceData() {
-  const result = runCommand('node ./scripts/compliance/check-md3-compliance.mjs --json --quiet');
+  const result = runCommand('node tools/compliance/src/check-md3-compliance.mjs --json --quiet');
   if (!result.output) {
     return {violations: []};
   }
@@ -38,12 +40,12 @@ function getFileList() {
 }
 
 function runDocCheck() {
-  const result = runCommand('./scripts/check-standards-docs.sh');
+  const result = runCommand('node tools/compliance/src/check-standards-docs.mjs');
   return result.success;
 }
 
 function runForbiddenCheck() {
-  const result = runCommand('./scripts/check-forbidden-patterns.sh');
+  const result = runCommand('node tools/compliance/src/check-forbidden-patterns.mjs');
   return result.success;
 }
 
@@ -67,8 +69,8 @@ function printDashboard({violations, totalComponents, docStatus, forbiddenStatus
     console.log('  ✅ All scanned components are MD3 compliant.');
   }
 
-  console.log('\nDocumentation Status: ' + (docStatus ? '✅ Up to date' : '❌ Missing required sections (run ./scripts/check-standards-docs.sh)'));
-  console.log('Forbidden Patterns: ' + (forbiddenStatus ? '✅ Clean' : '❌ Violations present (run ./scripts/check-forbidden-patterns.sh)'));
+  console.log('\nDocumentation Status: ' + (docStatus ? '✅ Up to date' : '❌ Missing required sections (run node tools/compliance/src/check-standards-docs.mjs)'));
+  console.log('Forbidden Patterns: ' + (forbiddenStatus ? '✅ Clean' : '❌ Violations present (run node tools/compliance/src/check-forbidden-patterns.mjs)'));
   console.log('\nNext Actions:');
   if (violatingFiles.length) {
     console.log('  1. Replace native elements in violating files with MD3 components.');

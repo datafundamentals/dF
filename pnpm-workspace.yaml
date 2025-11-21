@@ -3,6 +3,7 @@ packages:
   - "apps/*/functions"  # Cloud Functions workspaces
   - "packages/*"
   - "services/*"     # includes a package.json wrapper so pnpm/turbo can see it
+  - "tools/*"
 
 onlyBuiltDependencies:
   - esbuild

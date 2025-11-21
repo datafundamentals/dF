@@ -2,4 +2,4 @@
 set -euo pipefail
 
 dirname="$(cd "$(dirname "$0")" && pwd)"
-node "$dirname/compliance/check-forbidden-patterns.mjs"
+node "$dirname/../tools/compliance/src/check-forbidden-patterns.mjs"

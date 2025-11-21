@@ -17,12 +17,12 @@
     "test:clean-ports": "node ./scripts/clean-test-ports.mjs",
     "test:integration": "playwright test",
     "clean": "turbo run clean && pnpm -r exec rimraf node_modules dist .turbo",
-    "scan:compliance": "node ./scripts/compliance/check-md3-compliance.mjs",
-    "scan:compliance:staged": "node ./scripts/compliance/check-md3-compliance.mjs --staged",
+    "scan:compliance": "node tools/compliance/src/check-md3-compliance.mjs",
+    "scan:compliance:staged": "node tools/compliance/src/check-md3-compliance.mjs --staged",
     "prepare": "husky install",
-    "standards:dashboard": "node ./scripts/standards-dashboard.mjs",
-    "generate:compliance-report": "node ./scripts/compliance/generate-compliance-report.mjs",
-    "scan:compliance:interactive": "node ./scripts/compliance/check-md3-compliance.mjs --interactive"
+    "standards:dashboard": "node tools/compliance/src/dashboard.mjs",
+    "generate:compliance-report": "node tools/compliance/src/generate-compliance-report.mjs",
+    "scan:compliance:interactive": "node tools/compliance/src/check-md3-compliance.mjs --interactive"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

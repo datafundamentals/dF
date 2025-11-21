@@ -99,6 +99,29 @@ Events should follow the pattern: `df-[component-name]-[action-type]`
 - **Lifecycle helpers** – Components extend `SignalWatcher` and read signals in `render()`; avoid manual subscriptions.
 - **Upcoming Firebase work** – Additional guidance will ship with the dedicated Firebase ticket; until then do not introduce Firebase-specific contracts into new docs. (See `.z_/future` for planning notes.)
 
+## Monorepo Structure & Tooling
+
+The repository follows a strict structure to separate runtime code from build/maintenance tools.
+
+- **`apps/`**: Runnable applications and teaching harnesses.
+- **`packages/`**: Shared libraries (types, state, UI components) imported by apps.
+- **`services/`**: Backend services and API facades.
+- **`tools/`**: Meta-code, build scripts, and maintenance utilities that operate *on* the repository.
+
+### Tooling Guidelines
+
+- **Bash Scripts**: Simple shell scripts that run natively without `node_modules` may reside in `scripts/`.
+- **Node Tools**: Complex scripts or those requiring dependencies must reside in `tools/` as their own workspace (e.g., `tools/compliance`).
+- **Execution**: Run tools via `pnpm` scripts defined in the root `package.json` or using `pnpm --filter`.
+
+### Compliance Tools
+
+We maintain a suite of compliance tools to enforce standards (MD3 usage, documentation, forbidden patterns).
+
+- **Dashboard**: `pnpm standards:dashboard` - Overview of repo health.
+- **MD3 Check**: `pnpm scan:compliance` - Scans for forbidden native HTML elements.
+- **Docs Check**: `pnpm check:docs` (via `tools/compliance`) - Verifies required documentation snippets.
+
 ## Firebase & State Management
 
 ### Store Architecture

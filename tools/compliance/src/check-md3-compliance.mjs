@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import {execSync} from 'node:child_process';
 import {readFileSync, existsSync, writeFileSync} from 'node:fs';
-import {resolve, relative} from 'node:path';
+import {resolve, relative, dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import readline from 'node:readline/promises';
 import {stdin as input, stdout as output} from 'node:process';
 
-const PROJECT_ROOT = resolve(process.cwd());
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '../../../');
 const TARGET_DIRECTORIES = [
   'packages/ui-lit/src/',
   'apps/df-activity-log/src/',

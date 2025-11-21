@@ -1,0 +1,15 @@
+{
+  "name": "@df/compliance-tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dashboard": "node src/dashboard.mjs",
+    "check:patterns": "node src/check-forbidden-patterns.mjs",
+    "check:md3": "node src/check-md3-compliance.mjs",
+    "check:docs": "node src/check-standards-docs.mjs",
+    "report": "node src/generate-compliance-report.mjs"
+  },
+  "dependencies": {
+  }
+}
