@@ -4,6 +4,7 @@ packages:
   - "packages/*"
   - "services/*"     # includes a package.json wrapper so pnpm/turbo can see it
   - "tools/*"
+  - "extensions/*"
 
 onlyBuiltDependencies:
   - esbuild
