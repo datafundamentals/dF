@@ -20,14 +20,17 @@
         "command": "df.openMarkdownTools",
         "title": "Open DF Tools",
         "category": "DF",
-        "icon": "$(book)"
+        "icon": {
+          "light": "media/book-light.svg",
+          "dark": "media/book-dark.svg"
+        }
       }
     ],
     "menus": {
       "editor/title": [
         {
           "command": "df.openMarkdownTools",
-          "group": "navigation",
+          "group": "navigation@1",
           "when": "resourceLangId == markdown"
         }
       ],
@@ -47,7 +50,7 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
-    "lint": "eslint src --ext ts",
+    "lint": "eslint ./src",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
@@ -55,9 +58,9 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.6",
     "@types/node": "20.x",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0",
-    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "eslint": "^9.0.0",
     "glob": "^10.3.10",
     "mocha": "^10.2.0",
     "typescript": "^5.3.3",

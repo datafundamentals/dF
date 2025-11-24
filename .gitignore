@@ -12,11 +12,13 @@ node_modules/
 # Build outputs
 **/dist/
 **/out-tsc/
+**/out/
 **/build/
 **/lib/
 **/storybook-static/
 dist/
 out-tsc/
+out/
 build/
 lib/
 
@@ -64,6 +66,8 @@ lerna-debug.log*
 **/.idea/
 .vscode/
 .idea/
+**/.vscode-test/
+.vscode-test/
 
 # OS files
 .DS_Store
@@ -78,6 +82,7 @@ Thumbs.db
 apps/*/chromadata/
 apps/*/playwright-report/
 apps/*/test-results/
+test-results/
 shared/dist/
 
 # TypeScript

@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "df-markdown-tools" is now active!');
@@ -59,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
     // Listen for active editor changes
-    vscode.window.onDidChangeActiveTextEditor(editor => {
+    vscode.window.onDidChangeActiveTextEditor(_editor => {
         if (currentPanel && currentPanel.visible) {
             updateWebviewContext(currentPanel);
         }
