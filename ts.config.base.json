@@ -4,6 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
+    "skipLibCheck": true,
     "paths": {
       "@df/state/*": ["./packages/state/src/*"],
       "@df/state": ["./packages/state/src/index.ts"],
