@@ -1,3 +1,5 @@
+<img src="https://datafundamentals.com/static/datafundamentals.gif" alt="datafundamentals" />
+
 # df
 
 datafundamentals monorepo for:
