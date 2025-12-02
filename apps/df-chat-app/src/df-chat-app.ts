@@ -26,7 +26,7 @@ export class DfChatApp extends LitElement {
   override render() {
     return html`
       <div class="shell">
-        <df-chat-widget heading="df chat"></df-chat-widget>
+        <df-chat-widget heading="coder FOMO chat"></df-chat-widget>
       </div>
     `;
   }
