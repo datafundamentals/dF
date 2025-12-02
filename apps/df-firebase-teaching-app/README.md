@@ -1215,7 +1215,7 @@ Copy the bundle to your static site in two commands:
 pnpm --filter @df/df-firebase-teaching-app build:bundle
 
 # deploys bundle
-./scripts/copy-app-bundle.sh df-firebase-teaching-app /path/to/your/site/target-dir
+pnpm deploy:copy-bundle df-firebase-teaching-app /path/to/your/site/target-dir
 ```
 
 📚 **Integration guide:** [guides/BUNDLE_INTEGRATION.md](./guides/BUNDLE_INTEGRATION.md)

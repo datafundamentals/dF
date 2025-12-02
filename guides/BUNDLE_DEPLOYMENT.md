@@ -21,13 +21,18 @@ Build and copy any app bundle in two commands:
 ```bash
 # From monorepo root
 pnpm --filter @df/<app-name> build:bundle
-./scripts/copy-app-bundle.sh <app-name> /path/to/your/site/target-directory
+pnpm deploy:copy-bundle <app-name> /path/to/your/site/target-directory
 ```
 
-**Example:**
+**Example 1:**
 ```bash
 pnpm --filter @df/df-firebase-teaching-app build:bundle
-./scripts/copy-app-bundle.sh df-firebase-teaching-app ../my-11ty-site/public/firebase-app
+pnpm deploy:copy-bundle df-firebase-teaching-app ../my-11ty-site/public/firebase-app
+```
+**Example 2:**
+```bash
+pnpm --filter @df/df-chat-app build:bundle
+pnpm deploy:copy-bundle df-chat-app ../sites/appwriter.com/static/wc/bundle
 ```
 
 The script will:
@@ -210,7 +215,7 @@ Check the app's `guides/BUNDLE_INTEGRATION.md` for the full list of available we
 
 **Step 1: Copy bundle**
 ```bash
-./scripts/copy-app-bundle.sh df-firebase-teaching-app ../sites/my-11ty-site/static/wc
+pnpm deploy:copy-bundle df-firebase-teaching-app ../sites/my-11ty-site/static/wc
 ```
 
 **Step 2: Configure 11ty passthrough copy** (`.eleventy.js`):
