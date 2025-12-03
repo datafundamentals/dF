@@ -16,6 +16,11 @@ export default {
     replace({
       preventAssignment: true,
       'process.env.NODE_ENV': JSON.stringify('production'),
+      'import.meta.env.MODE': JSON.stringify('production'),
+      'import.meta.env.PROD': JSON.stringify(true),
+      'import.meta.env.DEV': JSON.stringify(false),
+      'import.meta.env.VITE_FIREBASE_EMULATOR_UI': JSON.stringify(undefined),
+      'import.meta.env.VITE_USE_EMULATOR': JSON.stringify('false'),
     }),
     terser({
       ecma: 2021,

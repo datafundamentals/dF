@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json --watch",
+    "build:rollup": "pnpm clean && pnpm build && rollup -c",
     "dev": "vite",
     "preview": "vite preview --host 127.0.0.1 --port 4174",
     "serve": "vite",

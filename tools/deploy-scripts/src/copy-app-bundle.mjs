@@ -60,7 +60,7 @@ if (!existsSync(appDir)) {
   process.exit(1);
 }
 
-// Validate app has package.json with build:bundle script
+// Validate app has package.json with build script
 const pkgJsonPath = join(appDir, 'package.json');
 if (!existsSync(pkgJsonPath)) {
   console.log(`❌ Error: ${pkgJsonPath} not found`);
@@ -68,27 +68,30 @@ if (!existsSync(pkgJsonPath)) {
 }
 
 const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
-if (!pkgJson.scripts || !pkgJson.scripts['build:bundle']) {
-  console.log(`❌ Error: App '${appName}' does not have a 'build:bundle' script`);
-  console.log('');
-  console.log(`Add to ${pkgJsonPath}:`);
-  console.log('  "scripts": {');
-  console.log('    "build:bundle": "vite build --mode production"');
-  console.log('  }');
+const hasRollup = pkgJson.scripts && pkgJson.scripts['build:rollup'];
+const hasBundle = pkgJson.scripts && pkgJson.scripts['build:bundle'];
+
+if (!hasRollup && !hasBundle) {
+  console.log(`❌ Error: App '${appName}' does not have a 'build:rollup' or 'build:bundle' script`);
   process.exit(1);
 }
 
+// Determine build strategy
+const buildScript = hasRollup ? 'build:rollup' : 'build:bundle';
+// Rollup builds to dist/bundle, Vite builds to dist
+const buildSourceDir = hasRollup ? join(appDir, 'dist/bundle') : join(appDir, 'dist');
+
 // Build fresh bundle
-console.log(`📦 Building fresh bundle for ${appName}...`);
-const buildSuccess = runCommand(`pnpm --filter "@df/${appName}" build:bundle`);
+console.log(`📦 Building fresh bundle for ${appName} using ${buildScript}...`);
+const buildSuccess = runCommand(`pnpm --filter "@df/${appName}" ${buildScript}`);
 if (!buildSuccess) {
   console.log('❌ Build failed.');
   process.exit(1);
 }
 
 // Validate source exists
-if (!existsSync(sourceDir)) {
-  console.log(`❌ Error: ${sourceDir} not found after build`);
+if (!existsSync(buildSourceDir)) {
+  console.log(`❌ Error: ${buildSourceDir} not found after build`);
   console.log('Build may have failed. Check output above.');
   process.exit(1);
 }
@@ -99,32 +102,42 @@ if (!existsSync(targetPath)) {
 }
 
 // Copy files
-console.log(`📋 Copying to ${targetPath}...`);
-cpSync(sourceDir, targetPath, { recursive: true });
+console.log(`📋 Copying from ${buildSourceDir} to ${targetPath}...`);
+cpSync(buildSourceDir, targetPath, { recursive: true });
 
 // Copy example integration file if it exists and update the script hash
 const exampleFile = join(appDir, 'guides/example-integration.html');
 if (existsSync(exampleFile)) {
-  const targetExampleFile = join(targetPath, 'example-integration.html');
+  const targetExampleName = `example-${appName}-integration.html`;
+  const targetExampleFile = join(targetPath, targetExampleName);
   cpSync(exampleFile, targetExampleFile);
 
-  // Extract the actual script hash from the built index.html
-  const builtIndex = join(targetPath, 'index.html');
-  if (existsSync(builtIndex)) {
-    const indexContent = readFileSync(builtIndex, 'utf-8');
-    const match = indexContent.match(/assets\/index-[^"]*\.js/);
-    
-    if (match) {
-      const actualHash = match[0];
-      let exampleContent = readFileSync(targetExampleFile, 'utf-8');
-      exampleContent = exampleContent.replace(/assets\/index-[^"]*\.js/g, actualHash);
-      writeFileSync(targetExampleFile, exampleContent);
-      console.log(`📄 Copied example-integration.html (updated script hash to ${actualHash})`);
-    } else {
-      console.log('📄 Copied example-integration.html (warning: could not detect script hash)');
+  // Only try to update hash if we are using Vite (build:bundle)
+  if (!hasRollup) {
+    // Extract the actual script hash from the built index.html
+    const builtIndex = join(targetPath, 'index.html');
+    if (existsSync(builtIndex)) {
+      const indexContent = readFileSync(builtIndex, 'utf-8');
+      const match = indexContent.match(/assets\/index-[^"]*\.js/);
+      
+      if (match) {
+        const actualHash = match[0];
+        let exampleContent = readFileSync(targetExampleFile, 'utf-8');
+        exampleContent = exampleContent.replace(/assets\/index-[^"]*\.js/g, actualHash);
+        writeFileSync(targetExampleFile, exampleContent);
+        console.log(`📄 Copied ${targetExampleName} (updated script hash to ${actualHash})`);
+      } else {
+        console.log(`📄 Copied ${targetExampleName} (warning: could not detect script hash)`);
+      }
     }
   } else {
-    console.log('📄 Copied example-integration.html');
+     // For Rollup, update the script tag to point to the simple bundle name
+     let exampleContent = readFileSync(targetExampleFile, 'utf-8');
+     // Replace the old hashed path with the new simple path
+     // Matches ./assets/index-....js OR just assets/index-....js
+     exampleContent = exampleContent.replace(/(\.\/)?assets\/index-[^"]*\.js/g, `./${appName}.js`);
+     writeFileSync(targetExampleFile, exampleContent);
+     console.log(`📄 Copied ${targetExampleName} (updated script source to ./${appName}.js)`);
   }
 }
 
@@ -137,7 +150,7 @@ try {
   const files = readdirSync(targetPath);
   files.slice(0, 10).forEach(file => console.log(file));
   if (files.length > 10) console.log('...');
-} catch (e) {
+} catch {
   console.log('Error listing files');
 }
 console.log('');

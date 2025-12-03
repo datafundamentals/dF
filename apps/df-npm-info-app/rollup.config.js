@@ -5,11 +5,12 @@ import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 
 export default {
-  input: 'dist/main.js',
+  input: 'dist/df-npm-info-app.js',
   output: {
-    file: 'dist/bundle/df-activity-log.js',
+    file: 'dist/bundle/df-npm-info-app.js',
     format: 'esm',
     sourcemap: true,
+    inlineDynamicImports: true,
   },
   plugins: [
     resolve(),

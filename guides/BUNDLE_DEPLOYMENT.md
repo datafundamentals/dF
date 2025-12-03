@@ -16,55 +16,81 @@ FOR A WORKING MODEL TO COMPARE AGAINST SEE APPWRITER IN THE LOCALLY RUNNING VERS
 
 ## Quick Start
 
-Build and copy any app bundle in two commands:
+Build and copy any app bundle in a single command:
 
 ```bash
 # From monorepo root
-pnpm --filter @df/<app-name> build:bundle
 pnpm deploy:copy-bundle <app-name> /path/to/your/site/target-directory
 ```
 
 **Example 1:**
 ```bash
-pnpm --filter @df/df-firebase-teaching-app build:bundle
 pnpm deploy:copy-bundle df-firebase-teaching-app ../my-11ty-site/public/firebase-app
 ```
 **Example 2:**
 ```bash
-pnpm --filter @df/df-chat-app build:bundle
 pnpm deploy:copy-bundle df-chat-app ../sites/appwriter.com/static/wc/bundle
 ```
 
 The script will:
-1. Build a fresh production bundle
-2. Copy all assets to your target directory
-3. Include an example integration file (if available)
-4. Show next steps
+1. Automatically detect the best build method (`build:rollup` or `build:bundle`)
+2. Build a fresh production bundle
+3. Copy all assets to your target directory
+4. Include an example integration file (if available)
+5. Show next steps
 
 ## What's in a Bundle?
 
-After building, the `dist/` directory contains:
+If the app supports Rollup (like `df-firebase-teaching-app`), you get a clean single-file bundle:
+
+```
+dist/bundle/
+├── <app-name>.js       # Single JavaScript bundle (no hash)
+└── stats.html          # Bundle size analysis
+```
+
+If the app only supports Vite (legacy), you get hashed assets:
 
 ```
 dist/
-├── index.html          # Standalone HTML page (shows all components)
 ├── assets/
-│   ├── index-[hash].js # Main JavaScript bundle
-│   └── *.js            # Code-split chunks (lazy loaded)
-└── favicon files       # App icons
+│   └── index-[hash].js
+└── index.html
 ```
 
-**Key Points:**
+**Key Points (Rollup Bundle):**
+- ✅ **Single File:** No hashing, easy to include (`<script src="/path/to/app.js"></script>`)
 - ✅ **Self-contained:** All dependencies bundled (Lit, Material Web, etc.)
-- ✅ **Optimized:** Vite minification, tree-shaking, code-splitting
+- ✅ **Optimized:** Minified, tree-shaken
 - ✅ **Environment-baked:** Config from `.env.production` included at build time
-- ✅ **Static:** No server-side rendering required, works on any static host
 
 ## Integration Methods
 
 There are three ways to integrate a bundle into your site, each with different tradeoffs.
 
-### Method 1: iframe Embed (Recommended for Simplicity)
+### Method 1: Single File Include (Recommended)
+
+**Best for:** Cleanest integration, no complex build scripts needed.
+
+**How it works:**
+```html
+<!-- In your HTML template -->
+<div id="app-demo">
+  <df-firebase-teaching-app></df-firebase-teaching-app>
+</div>
+
+<script type="module" src="/firebase-app/bundle/df-firebase-teaching-app.js"></script>
+```
+
+**Pros:**
+- ✅ **Stable Filename:** No hashes to manage
+- ✅ **Simple:** Just one script tag
+- ✅ **Native Feel:** Components integrate seamlessly
+
+**Cons:**
+- ⚠️ **Caching:** You may need to manually bust cache if you update the app (e.g. `?v=2`)
+
+### Method 2: iframe Embed (Simplicity & Isolation)
 
 **Best for:** Quick integration, complete isolation, avoiding style conflicts
 
@@ -81,23 +107,7 @@ There are three ways to integrate a bundle into your site, each with different t
 </iframe>
 ```
 
-**11ty example (in a `.md` or `.njk` file):**
-```markdown
----
-title: Firebase Demo
-layout: base
----
-
-# Interactive Firebase Demo
-
-<iframe
-  src="/firebase-app/index.html"
-  width="100%"
-  height="1200px"
-  frameborder="0"
-  title="Firebase Teaching App">
-</iframe>
-```
+**Note:** This requires `build:bundle` (Vite build) instead of `build:rollup`.
 
 **Pros:**
 - ✅ Zero configuration - just copy bundle and add iframe
@@ -110,23 +120,16 @@ layout: base
 - ⚠️ "Feels" like an embed rather than native content
 - ⚠️ Separate scroll context
 
-### Method 2: Direct Script Include (Native Feel)
+### Method 3: Direct Script Include (Vite Hashed)
 
-**Best for:** Making the app feel like part of your site, full control over layout
+**Best for:** If you prefer Vite's code splitting and hashing (advanced).
 
 **How it works:**
 ```html
-<!-- In your HTML template -->
-<div id="app-demo">
-  <!-- Web components from the app - see app's BUNDLE_INTEGRATION.md for component list -->
-  <df-firebase-teaching-app></df-firebase-teaching-app>
-  <df-auth-demo></df-auth-demo>
-</div>
-
 <script type="module" src="/firebase-app/assets/index-[hash].js"></script>
 ```
 
-**Challenge:** The hash in the filename changes on every build.
+**Challenge:** The hash in the filename changes on every build. Requires shortcodes/scripts to resolve.
 
 **Solution for 11ty - Use a shortcode:**
 
@@ -182,7 +185,7 @@ layout: base
 - ⚠️ Potential style conflicts (bundle styles mix with site styles)
 - ⚠️ More complex to debug (shared console context)
 
-### Method 3: Component Picker (Selective Integration)
+### Method 4: Component Picker (Selective Integration)
 
 **Best for:** Including only specific components, custom layouts
 
@@ -196,7 +199,8 @@ Instead of including the entire app, pick individual components:
   <df-auth-demo></df-auth-demo>
 </div>
 
-{% appBundleScript "/firebase-app" %}
+<!-- Use Method 1 or 3 to include the script -->
+<script type="module" src="/firebase-app/bundle/df-firebase-teaching-app.js"></script>
 ```
 
 **Available components:**
@@ -226,9 +230,9 @@ module.exports = function(eleventyConfig) {
 ```
 
 **Step 3: Choose integration method:**
-- **Quick:** Use iframe embed (Method 1)
-- **Native:** Add shortcode and use direct script include (Method 2)
-- **Custom:** Pick specific components (Method 3)
+- **Recommended:** Single File Include (Method 1)
+- **Quick:** Use iframe embed (Method 2)
+- **Advanced:** Use direct script include with hashing (Method 3)
 
 **Step 4: Create page** (e.g., `src/firebase-demo.md`):
 ```markdown
@@ -258,16 +262,14 @@ npx @11ty/eleventy
 ```astro
 ---
 // src/pages/app-demo.astro
-const bundlePath = "/firebase-app";
-// For dynamic script src, read index.html and extract script path
+const bundlePath = "/firebase-app/bundle/df-firebase-teaching-app.js";
 ---
 
 <div id="app-demo">
   <df-firebase-teaching-app></df-firebase-teaching-app>
 </div>
 
-<!-- Astro handles script loading differently - consult Astro docs for best practices -->
-<script is:inline type="module" src={`${bundlePath}/assets/index-[hash].js`}></script>
+<script is:inline type="module" src={bundlePath}></script>
 ```
 
 ## Hugo Integration
@@ -275,7 +277,7 @@ const bundlePath = "/firebase-app";
 Create `layouts/shortcodes/app-bundle.html`:
 ```html
 {{ $bundlePath := .Get "path" }}
-<iframe src="{{ $bundlePath }}/index.html" width="100%" height="1200px"></iframe>
+<script type="module" src="{{ $bundlePath }}/bundle/df-firebase-teaching-app.js"></script>
 ```
 
 Use in content:
@@ -287,12 +289,17 @@ Use in content:
 
 If your static site generator doesn't support shortcodes or scripting:
 
-**Option 1: iframe (always works)**
+**Option 1: Single File (Recommended)**
+```html
+<script type="module" src="/firebase-app/bundle/df-firebase-teaching-app.js"></script>
+```
+
+**Option 2: iframe (always works)**
 ```html
 <iframe src="/firebase-app/index.html" width="100%" height="1200px"></iframe>
 ```
 
-**Option 2: Manual script update**
+**Option 3: Manual script update (Vite)**
 
 After each build, manually update your template with the new hash:
 ```html

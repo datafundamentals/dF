@@ -7,9 +7,10 @@ import replace from '@rollup/plugin-replace';
 export default {
   input: 'dist/main.js',
   output: {
-    file: 'dist/bundle/df-activity-log.js',
+    file: 'dist/bundle/df-firebase-teaching-app.js',
     format: 'esm',
     sourcemap: true,
+    inlineDynamicImports: true,
   },
   plugins: [
     resolve(),
