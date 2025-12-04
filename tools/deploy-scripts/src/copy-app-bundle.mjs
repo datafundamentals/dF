@@ -10,6 +10,37 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../../');
 const APPS_DIR = join(PROJECT_ROOT, 'apps');
 
+// Parse .env.deploy files (simple key=value parser)
+function parseEnvFile(filePath) {
+  const env = {};
+  if (!existsSync(filePath)) return env;
+
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    content.split('\n').forEach(line => {
+      const trimmed = line.trim();
+      // Skip empty lines and comments
+      if (!trimmed || trimmed.startsWith('#')) return;
+      const [key, ...valueParts] = trimmed.split('=');
+      if (key && valueParts.length > 0) {
+        env[key.trim()] = valueParts.join('=').trim();
+      }
+    });
+  } catch (err) {
+    // Silently ignore parse errors
+  }
+
+  return env;
+}
+
+// Merge env configs: global defaults + app-specific overrides
+function loadEnvConfig(appDir) {
+  const globalEnv = parseEnvFile(join(PROJECT_ROOT, '.env.deploy'));
+  const appEnv = parseEnvFile(join(appDir, '.env.deploy'));
+  // App-level values override global defaults
+  return { ...globalEnv, ...appEnv };
+}
+
 function runCommand(command, options = {}) {
   try {
     execSync(command, { stdio: 'inherit', cwd: PROJECT_ROOT, ...options });
@@ -26,14 +57,23 @@ function getAvailableApps() {
   });
 }
 
-function printUsage() {
-  console.log('❌ Error: Two parameters required');
+function printUsage(missing = '') {
+  if (missing) {
+    console.log(`❌ Error: ${missing}`);
+    console.log('');
+  }
+  console.log('Usage: pnpm deploy:copy-bundle <app-name> [target-path]');
   console.log('');
-  console.log('Usage: node copy-app-bundle.mjs <app-name> <target-path>');
+  console.log('Arguments:');
+  console.log('  <app-name>   Required. App folder name (e.g., df-firebase-teaching-app)');
+  console.log('  [target-path] Optional. Override DEFAULT_MPA_PATH from .env.deploy');
   console.log('');
   console.log('Examples:');
-  console.log('  node copy-app-bundle.mjs df-firebase-teaching-app ../my-11ty-site/public/firebase-app');
-  console.log('  node copy-app-bundle.mjs df-npm-info-app /Users/pete/sites/blog/static/demos/npm-info');
+  console.log('  pnpm deploy:copy-bundle df-app-starter-template');
+  console.log('    (uses DEFAULT_MPA_PATH from .env.deploy)');
+  console.log('');
+  console.log('  pnpm deploy:copy-bundle df-app-starter-template ../my-11ty-site/public/app');
+  console.log('    (uses explicit path, overrides .env.deploy)');
   console.log('');
   console.log('Available apps:');
   getAvailableApps().forEach(app => console.log(`  - ${app}`));
@@ -41,15 +81,33 @@ function printUsage() {
 }
 
 const args = process.argv.slice(2);
-if (args.length < 2) {
-  printUsage();
+if (args.length < 1) {
+  printUsage('At least one parameter required: <app-name>');
   process.exit(1);
 }
 
-const [appName, targetPathRaw] = args;
-const targetPath = resolve(process.cwd(), targetPathRaw); // Resolve target relative to where command is run
+const appName = args[0];
+const targetPathRaw = args[1]; // May be undefined
 const appDir = join(APPS_DIR, appName);
 const sourceDir = join(appDir, 'dist');
+
+// Load environment configuration (global + app-specific overrides)
+const envConfig = loadEnvConfig(appDir);
+
+// Determine target path: explicit arg > env config > error
+let targetBasePath;
+if (targetPathRaw) {
+  targetBasePath = resolve(process.cwd(), targetPathRaw);
+} else if (envConfig.DEFAULT_MPA_PATH) {
+  targetBasePath = resolve(PROJECT_ROOT, envConfig.DEFAULT_MPA_PATH);
+} else {
+  printUsage('Missing target path: provide as argument or set DEFAULT_MPA_PATH in .env.deploy');
+  process.exit(1);
+}
+
+// Each app gets its own subdirectory to avoid collisions in MPA
+const targetPath = join(targetBasePath, appName);
+console.log(`📍 Target app directory: ${targetPath}`);
 
 // Validate app exists
 if (!existsSync(appDir)) {
@@ -96,14 +154,91 @@ if (!existsSync(buildSourceDir)) {
   process.exit(1);
 }
 
+// Validate MPA bundle templates exist
+const bundleInnerPath = join(appDir, '_bundle/inner.html');
+const bundleOuterPath = join(appDir, '_bundle/outer.html');
+
+if (!existsSync(bundleInnerPath)) {
+  console.log(`❌ Error: Missing MPA template: ${bundleInnerPath}`);
+  console.log('');
+  console.log('MPA deployments require _bundle/inner.html and _bundle/outer.html templates.');
+  console.log('Copy these from an existing app (e.g., df-chat-app) or create them manually.');
+  console.log('');
+  console.log('See guides/STANDARDS_STYLES.md for MPA deployment patterns.');
+  process.exit(1);
+}
+
+if (!existsSync(bundleOuterPath)) {
+  console.log(`❌ Error: Missing MPA template: ${bundleOuterPath}`);
+  console.log('');
+  console.log('MPA deployments require _bundle/inner.html and _bundle/outer.html templates.');
+  console.log('Copy these from an existing app (e.g., df-chat-app) or create them manually.');
+  console.log('');
+  console.log('See guides/STANDARDS_STYLES.md for MPA deployment patterns.');
+  process.exit(1);
+}
+
 // Create target directory if needed
 if (!existsSync(targetPath)) {
   mkdirSync(targetPath, { recursive: true });
 }
 
-// Copy files
+// Copy bundle files (JS, maps, stats)
 console.log(`📋 Copying from ${buildSourceDir} to ${targetPath}...`);
 cpSync(buildSourceDir, targetPath, { recursive: true });
+
+// Copy and transform inner.html to app root
+console.log(`📋 Copying inner.html to ${targetPath}...`);
+let innerContent = readFileSync(bundleInnerPath, 'utf-8');
+// Remove HTML comments
+innerContent = innerContent.replace(/<!--[\s\S]*?-->/g, '');
+// Replace entire <script type="module"> tag with correct src
+// This is robust to placeholder text changes and whitespace variations
+const transformedInnerContent = innerContent.replace(
+  /<script[^>]*type="module"[^>]*>\s*<\/script>/,
+  `<script type="module" src="./${appName}.js"></script>`
+);
+writeFileSync(join(targetPath, 'inner.html'), transformedInnerContent);
+
+// Create move-me/{app-name}/ directory structure
+const moveMeDir = join(targetPath, 'move-me', appName);
+mkdirSync(moveMeDir, { recursive: true });
+
+// Read outer.html template and rewrite iframe src and height with config values
+console.log(`📋 Creating index.html in move-me/${appName}/...`);
+let outerContent = readFileSync(bundleOuterPath, 'utf-8');
+// Remove HTML comments
+outerContent = outerContent.replace(/<!--[\s\S]*?-->/g, '');
+
+// Get values from env config (app override takes precedence over global)
+const mpaPath = envConfig.DEFAULT_MPA_PATH || '';
+const iframeHeight = envConfig.BUNDLE_IFRAME_HEIGHT || '600px';
+
+// Extract web path from DEFAULT_MPA_PATH
+// DEFAULT_MPA_PATH is monorepo-relative (e.g., ../sites/btrg/static/wc)
+// We need the web-absolute path (e.g., /static/wc)
+// Extract everything from /static/ onwards
+const webPathMatch = mpaPath.match(/\/static\/.*/);
+const webPath = webPathMatch ? webPathMatch[0] : mpaPath;
+
+// Build the actual src path: web-absolute path + app name + inner.html
+const iframeSrc = `${webPath}/${appName}/inner.html`;
+
+// Replace template placeholders with actual values
+// These regexes are robust to changes in placeholder text and whitespace
+let indexContent = outerContent
+  // Replace iframe src attribute with actual deployment path
+  .replace(
+    /src="[^"]*"/,
+    `src="${iframeSrc}"`
+  )
+  // Replace iframe height attribute with actual configured height
+  .replace(
+    /height="[^"]*"/,
+    `height="${iframeHeight}"`
+  );
+
+writeFileSync(join(moveMeDir, 'index.html'), indexContent);
 
 // Copy example integration file if it exists and update the script hash
 const exampleFile = join(appDir, 'guides/example-integration.html');
@@ -143,13 +278,28 @@ if (existsSync(exampleFile)) {
 
 // Show what was copied
 console.log('');
-console.log('✅ Bundle copied successfully!');
+console.log('✅ Bundle deployment complete!');
 console.log('');
-console.log('Files in target:');
+console.log('Deployment structure created:');
+console.log(`  ${targetPath}/`);
+console.log(`    ├── inner.html                    (iframe inner - component + script)`);
+console.log(`    ├── ${appName}.js                 (main bundle)`);
+console.log(`    ├── ${appName}.js.map             (source map)`);
+console.log(`    ├── stats.html                    (bundle analysis)`);
+console.log(`    └── move-me/`);
+console.log(`        └── ${appName}/`);
+console.log(`            └── index.html            (ready to deploy - move this folder to production)`);
+console.log('');
+console.log('📋 Next steps:');
+console.log(`  1. Review: ${join(moveMeDir, 'index.html')}`);
+console.log(`  2. Copy: move-me/${appName}/ → your 11ty site structure`);
+console.log(`  3. The iframe src is absolute: /static/wc/${appName}/inner.html`);
+console.log('');
+console.log('All files in app directory:');
 try {
   const files = readdirSync(targetPath);
-  files.slice(0, 10).forEach(file => console.log(file));
-  if (files.length > 10) console.log('...');
+  files.slice(0, 15).forEach(file => console.log(`  - ${file}`));
+  if (files.length > 15) console.log(`  ... and ${files.length - 15} more`);
 } catch {
   console.log('Error listing files');
 }
