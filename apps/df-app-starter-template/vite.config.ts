@@ -6,6 +6,14 @@ const sourceEntry = '/src/main.ts';
 const PORT = 4183;
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: resolve(__dirname, 'index.html'),
+    },
+  },
+  optimizeDeps: {
+    entries: [resolve(__dirname, 'index.html')],
+  },
   publicDir: resolve(__dirname, '../../public'),
   server: {
     host: '127.0.0.1',

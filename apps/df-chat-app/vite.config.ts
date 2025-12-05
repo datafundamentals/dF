@@ -5,18 +5,18 @@ const distEntry = './dist/main.js';
 const sourceEntry = '/src/main.ts';
 
 export default defineConfig({
-  publicDir: resolve(__dirname, '../../public'),
   build: {
+    rollupOptions: {
+      input: resolve(__dirname, 'index.html'),
+      output: {
+        inlineDynamicImports: true,
+      },
+    },
     lib: {
       entry: resolve(__dirname, 'src/main.ts'),
       name: 'DfChatApp',
       fileName: 'df-chat-app.bundled',
       formats: ['es'],
-    },
-    rollupOptions: {
-      output: {
-        inlineDynamicImports: true,
-      },
     },
     outDir: 'dist',
     emptyOutDir: false,
@@ -36,6 +36,10 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    entries: [resolve(__dirname, 'index.html')],
+  },
+  publicDir: resolve(__dirname, '../../public'),
   server: {
     host: '127.0.0.1',
     port: 4181,
