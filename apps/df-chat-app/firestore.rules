@@ -1,6 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // --- Chat App Rules ---
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -49,6 +50,11 @@ service cloud.firestore {
       allow update: if false;
 
       allow delete: if false;
+    }
+
+    // --- Activity Log Rules ---
+    match /activity/{userId}/pushups/{pushupId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
