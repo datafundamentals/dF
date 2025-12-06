@@ -122,6 +122,10 @@ export class DfFirebaseTeachingApp extends LitElement {
 
     return html`
       <header>
+        <p>This app is only designed to be running in an emulator. 
+          If you are running against production firebase you are probably making a booboo. 
+          This is an early app, so it may actually be obsolete in many respects.
+        </p>
         <span class="status" data-state=${this.emulatorStatus}>${statusLabel}</span>
         <h1>Firebase Teaching Workspace</h1>
         <p>
