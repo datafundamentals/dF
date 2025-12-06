@@ -8,6 +8,7 @@
 import {LitElement, html, css, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
+import {styleMap} from 'lit/directives/style-map.js';
 import {
   firebaseAuthState,
   signInWithGoogle,
@@ -42,6 +43,7 @@ type EmailPwView = 'sign-in' | 'sign-up' | 'reset';
  * @property {boolean} headless - If true, hides the header with user info
  * @property {boolean} showHideUser - If true, shows raw user object JSON (debug mode)
  * @property {boolean} emailPw - If true, exposes developer-only email/password UI for emulator workflows
+ * @property {string} bkgrd - Optional background image URL for the login screen
  *
  * @example Headless mode
  * ```html
@@ -66,6 +68,7 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
   @property({type: Boolean}) declare headless: boolean;
   @property({type: Boolean}) declare showHideUser: boolean;
   @property({type: Boolean}) declare emailPw: boolean;
+  @property({type: String, attribute: 'bkgrd'}) declare bkgrd: string | null;
   @state() private declare emailPwView: EmailPwView;
   @state() private declare initError: string | null;
 
@@ -74,6 +77,7 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
     this.headless = false;
     this.showHideUser = false;
     this.emailPw = false;
+    this.bkgrd = null;
     this.emailPwView = 'sign-in';
     this.initError = null;
   }
@@ -105,6 +109,10 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
       align-items: center;
       min-height: 100vh;
       width: 100%;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-color: var(--md-sys-color-surface, #fff);
     }
 
     .login-button {
@@ -303,7 +311,7 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
   private _renderLoginScreen() {
     if (!this.emailPw) {
       return html`
-        <div class="full-screen">
+        <div class="full-screen" style=${styleMap(this._loginBackgroundStyles())}>
           <md-filled-button
             class="login-button"
             @click=${this._handleLoginClick}
@@ -315,7 +323,7 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
     }
 
     return html`
-      <div class="full-screen">
+      <div class="full-screen" style=${styleMap(this._loginBackgroundStyles())}>
         <div class="dev-login" aria-live="polite">
           <div class="dev-grid">
             <section class="dev-card google-panel">
@@ -487,6 +495,16 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
         composed: true,
       })
     );
+  }
+
+  private _loginBackgroundStyles(): Record<string, string> {
+    if (!this.bkgrd) {
+      return {};
+    }
+
+    return {
+      backgroundImage: `url(${this.bkgrd})`,
+    };
   }
 }
 

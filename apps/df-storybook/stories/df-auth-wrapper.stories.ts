@@ -1,11 +1,13 @@
 import type {Meta, StoryObj} from '@storybook/web-components';
 import {html} from 'lit';
+import {ifDefined} from 'lit/directives/if-defined.js';
 import '@df/ui-lit/df-auth-wrapper';
 
 interface DfAuthWrapperStoryArgs {
   headless?: boolean;
   showHideUser?: boolean;
   emailPw?: boolean;
+  bkgrd?: string;
   onUserChanged?: (event: CustomEvent) => void;
 }
 
@@ -34,6 +36,7 @@ Content inside the wrapper is only visible after successful authentication.
 - **Developer email/password panel** – Optional UI for Auth Emulator workflows
 - **Material Design 3** – Uses MD3 buttons for authentication UI
 - **Event-driven** – Dispatches custom events for auth state changes
+- **Optional background** – Supply a \`bkgrd\` image URL to cover the login view
 
 ## Storage
 
@@ -70,6 +73,11 @@ await initializeGoogleAuth(config);
 <df-auth-wrapper emailPw>
   <p>Use this when writing auth-triggered Cloud Functions locally.</p>
 </df-auth-wrapper>
+
+<!-- Background image on login view -->
+<df-auth-wrapper bkgrd="https://healthyaging.net/wp-content/uploads/2022/04/pushup-482.jpg">
+  <p>Protected content shows after login.</p>
+</df-auth-wrapper>
 \`\`\`
 
 ## Events
@@ -80,6 +88,7 @@ await initializeGoogleAuth(config);
 - \`headless\` (boolean): Hide header with user info/logout
 - \`showHideUser\` (boolean): Show raw user JSON for debugging
 - \`emailPw\` (boolean): Enable the developer-only email/password UI (Auth Emulator only)
+- \`bkgrd\` (string): Background image URL that covers the login screen
 
 ## Debug Mode
 Alt+Click the logout button to toggle display of raw user JSON.
@@ -109,6 +118,7 @@ Based on \`boltup-authentication\` component with modernizations:
     headless: false,
     showHideUser: false,
     emailPw: false,
+    bkgrd: undefined,
   },
   argTypes: {
     headless: {
@@ -132,6 +142,13 @@ Based on \`boltup-authentication\` component with modernizations:
         defaultValue: {summary: 'false'},
       },
     },
+    bkgrd: {
+      control: 'text',
+      description: 'Background image URL to cover the login state',
+      table: {
+        defaultValue: {summary: 'undefined'},
+      },
+    },
     onUserChanged: {action: 'df-auth-wrapper-user-changed'},
   },
   tags: ['autodocs'],
@@ -147,6 +164,7 @@ export const Default: Story = {
       ?headless=${args.headless}
       ?emailPw=${args.emailPw}
       ?showHideUser=${args.showHideUser}
+      bkgrd=${ifDefined(args.bkgrd)}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => {
         args.onUserChanged?.(event);
         console.log('User changed:', event.detail);
@@ -198,6 +216,7 @@ export const Headless: Story = {
       ?headless=${args.headless}
       ?emailPw=${args.emailPw}
       ?showHideUser=${args.showHideUser}
+      bkgrd=${ifDefined(args.bkgrd)}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => {
         args.onUserChanged?.(event);
         console.log('User changed:', event.detail);
@@ -249,6 +268,7 @@ export const WithDebugMode: Story = {
       ?headless=${args.headless}
       ?emailPw=${args.emailPw}
       ?showHideUser=${args.showHideUser}
+      bkgrd=${ifDefined(args.bkgrd)}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => {
         args.onUserChanged?.(event);
         console.log('User changed:', event.detail);
@@ -291,6 +311,7 @@ export const MinimalExample: Story = {
   render: (args) => html`
     <df-auth-wrapper
       ?emailPw=${args.emailPw}
+      bkgrd=${ifDefined(args.bkgrd)}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => args.onUserChanged?.(event)}
     >
       <div style="padding: 24px; text-align: center;">
@@ -308,11 +329,36 @@ export const MinimalExample: Story = {
   },
 };
 
+export const LoginBackground: Story = {
+  args: {
+    bkgrd: 'https://healthyaging.net/wp-content/uploads/2022/04/pushup-482.jpg',
+  },
+  render: (args) => html`
+    <df-auth-wrapper
+      bkgrd=${ifDefined(args.bkgrd)}
+      @df-auth-wrapper-user-changed=${(event: CustomEvent) => args.onUserChanged?.(event)}
+    >
+      <div style="padding: 24px; text-align: center; color: #0f172a;">
+        <h2 style="margin: 0 0 12px 0;">📸 Custom Background</h2>
+        <p style="margin: 0;">The login view fills the wrapper with your supplied image.</p>
+      </div>
+    </df-auth-wrapper>
+  `,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates the `bkgrd` property, which covers the login screen with a supplied image while leaving authenticated views unchanged.',
+      },
+    },
+  },
+};
+
 export const EventLogging: Story = {
   render: (args) => html`
     <df-auth-wrapper
       ?headless=${args.headless}
       ?emailPw=${args.emailPw}
+      bkgrd=${ifDefined(args.bkgrd)}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => {
         args.onUserChanged?.(event);
         const user = event.detail.newValue;
@@ -383,6 +429,7 @@ export const DeveloperEmailPassword: Story = {
     <df-auth-wrapper
       ?headless=${args.headless}
       ?emailPw=${args.emailPw}
+      bkgrd=${ifDefined(args.bkgrd)}
       @df-auth-wrapper-user-changed=${(event: CustomEvent) => args.onUserChanged?.(event)}
     >
       <div style="padding: 32px; max-width: 960px; margin: 0 auto;">
@@ -421,6 +468,7 @@ export const RealWorldLayout: Story = {
         ?headless=${args.headless}
         ?emailPw=${args.emailPw}
         ?showHideUser=${args.showHideUser}
+        bkgrd=${ifDefined(args.bkgrd)}
         @df-auth-wrapper-user-changed=${(event: CustomEvent) => args.onUserChanged?.(event)}
       >
         <!-- Simulated app content -->
