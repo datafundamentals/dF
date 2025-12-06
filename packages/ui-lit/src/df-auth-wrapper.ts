@@ -8,10 +8,18 @@
 import {LitElement, html, css, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {firebaseAuthState, signInWithGoogle, signOut} from '@df/state';
+import {
+  firebaseAuthState,
+  signInWithGoogle,
+  signOut,
+  initializeAuth,
+  getInitializedFirebaseApp,
+  initializeFirebaseForApp,
+} from '@df/state';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/text-button.js';
 import '@material/web/button/filled-tonal-button.js';
+import '@material/web/progress/circular-progress.js';
 import './firebase/df-sign-in.js';
 import './firebase/df-sign-up.js';
 import './firebase/df-password-reset.js';
@@ -59,6 +67,7 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
   @property({type: Boolean}) declare showHideUser: boolean;
   @property({type: Boolean}) declare emailPw: boolean;
   @state() private declare emailPwView: EmailPwView;
+  @state() private declare initError: string | null;
 
   constructor() {
     super();
@@ -66,6 +75,22 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
     this.showHideUser = false;
     this.emailPw = false;
     this.emailPwView = 'sign-in';
+    this.initError = null;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    try {
+      // Ensure emulator config is set (auto-detects from env)
+      initializeFirebaseForApp();
+      const app = getInitializedFirebaseApp();
+      initializeAuth(app);
+    } catch (e) {
+      // App might not be initialized yet if used outside of standard app flow
+      // This is expected in some 11ty contexts where init happens later
+      console.error('DfAuthWrapper: Firebase initialization failed', e);
+      this.initError = (e as Error).message;
+    }
   }
 
   static override styles = css`
@@ -241,6 +266,24 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
 
   override render() {
     const {authUser, authState} = firebaseAuthState.get();
+
+    if (this.initError) {
+      return html`
+        <div class="full-screen" style="color: var(--md-sys-color-error, red); padding: 20px; text-align: center;">
+          <p><strong>Authentication Error</strong></p>
+          <p>${this.initError}</p>
+          <p style="font-size: 0.8em">Check console for details.</p>
+        </div>
+      `;
+    }
+
+    if (authState === 'loading' || authState === 'idle') {
+      return html`
+        <div class="full-screen">
+          <md-circular-progress indeterminate></md-circular-progress>
+        </div>
+      `;
+    }
 
     if (authState !== 'authenticated' || !authUser) {
       return this._renderLoginScreen();
