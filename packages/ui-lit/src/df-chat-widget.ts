@@ -233,6 +233,7 @@ export class DfChatWidget extends SignalWatcher(LitElement) {
 
     const statusLabel = this.resolveStatusLabel(chatState.status, sendState.status, sendState.error);
 
+    // Messages are already in ascending order (oldest first)
     const messages = chatState.documents;
     const isEmpty = !messages.length && chatState.status !== 'loading';
 

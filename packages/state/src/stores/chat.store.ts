@@ -2,7 +2,6 @@ import {computed, signal} from '@lit-labs/signals';
 import type {FirebaseApp} from 'firebase/app';
 import {
   connectFirestoreToEmulator,
-  enableFirestoreOfflinePersistence,
   getFirestoreDb,
 } from '@df/firebase';
 import type {
@@ -70,7 +69,9 @@ export async function initializeChatStore(app: FirebaseApp, useEmulator: boolean
     });
   }
 
-  await enableFirestoreOfflinePersistence(db);
+  // Offline persistence disabled for chat - we want fresh data on every load
+  // and real-time updates are more important than offline viewing for chat
+  // await enableFirestoreOfflinePersistence(db);
 
   collectionRef = collection(db, COLLECTION_PATH);
 

@@ -1,7 +1,7 @@
 import type {FirestoreDocument} from './firebase-firestore.types.js';
 
 /** Supported exercise types in the activity log. */
-export type ExerciseType = 'pushups' | 'squats' | 'plank' | 'dumbbells' | 'hang';
+export type ExerciseType = 'pushups' | 'squats' | 'plank' | 'dumbbells' | 'bands' | 'hang';
 
 /** Unit of measurement for each exercise type. */
 export type ExerciseUnit = 'count' | 'seconds';
@@ -34,6 +34,11 @@ export const EXERCISE_TYPE_CONFIG: Record<ExerciseType, ExerciseTypeConfig> = {
     label: 'Dumbbells',
     unit: 'count',
     description: 'Count of reps completed',
+  },
+  bands: {
+    label: 'Bands',
+    unit: 'seconds',
+    description: 'Pull duration in seconds',
   },
   hang: {
     label: 'Hang',

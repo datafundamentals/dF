@@ -60,6 +60,7 @@ export const pushupSummaryState = computed<ActivitySummaryState>(() => {
     squats: {count: 0, totalValue: 0},
     plank: {count: 0, totalValue: 0},
     dumbbells: {count: 0, totalValue: 0},
+    bands: {count: 0, totalValue: 0},
     hang: {count: 0, totalValue: 0},
   };
 
