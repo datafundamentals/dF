@@ -1,19 +1,12 @@
 {
   "firestore": {
-    "rules": "../../firestore.rules"
+    "rules": "firestore.rules"
   },
   "functions": {
     "source": "../../services/auth-functions",
     "runtime": "nodejs20",
     "predeploy": [
       "pnpm --filter @df/auth-functions run build"
-    ]
-  },
-  "functions": {
-    "source": "../../services/functions/",
-    "runtime": "nodejs20",
-    "predeploy": [
-      "pnpm --filter @df/functions-shared run build"
     ]
   },
   "emulators": {

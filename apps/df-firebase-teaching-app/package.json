@@ -20,14 +20,14 @@
     "test:integration": "playwright test --config ../../playwright.config.ts --project=df-firebase-teaching-app",
     "test:rules": "tsx ./tests/security-rules/run-all-tests.ts",
     "test:seed-data": "pnpm --filter @df/firebase-emulator test:seed-data",
-    "emulators:start": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project peg-2035 --import ../../packages/firebase-emulator/emulator-data --export-on-exit ../../packages/firebase-emulator/emulator-data --only firestore,storage,functions",
-    "emulators:export": "firebase emulators:export --project peg-2035 ../../packages/firebase-emulator/emulator-data",
-    "emulators:import": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project peg-2035 --import ../../packages/firebase-emulator/emulator-data --only firestore,storage,functions",
-    "emulators:clear": "pnpm --filter @df/firebase-emulator emulators:clear",
+    "emulators:start": "echo '⚠️  Please run \"pnpm emulators:start\" from the repo root. See guides/firebase-emulator-workflow.md for details.' && exit 1",
+    "emulators:export": "echo '⚠️  Please run \"pnpm emulators:export\" from the repo root. See guides/firebase-emulator-workflow.md for details.' && exit 1",
+    "emulators:import": "echo '⚠️  Please run \"pnpm emulators:import\" from the repo root. See guides/firebase-emulator-workflow.md for details.' && exit 1",
+    "emulators:clear": "echo '⚠️  Please run \"pnpm emulators:clear\" from the repo root. See guides/firebase-emulator-workflow.md for details.' && exit 1",
     "test:auth": "pnpm --filter @df/firebase-emulator test:auth",
-    "deploy:rules": "firebase deploy --only firestore:rules,storage",
-    "deploy:functions": "firebase deploy --only functions",
-    "deploy:prod": "pnpm test:rules && pnpm build:prod && firebase deploy --only firestore:rules,storage,functions"
+    "deploy:rules": "cd ../.. && firebase deploy --only firestore:rules,storage",
+    "deploy:functions": "cd ../.. && firebase deploy --only functions",
+    "deploy:prod": "pnpm test:rules && pnpm build:prod && cd ../.. && firebase deploy --only firestore:rules,storage,functions"
   },
   "dependencies": {
     "@df/firebase": "workspace:*",

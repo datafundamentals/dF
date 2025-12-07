@@ -1,5 +1,26 @@
 {
   "projects": {
     "default": "peg-2035"
+  },
+  "targets": {
+    "peg-2035": {
+      "hosting": {
+        "df-activity-log": [
+          "df-activity-log"
+        ],
+        "df-chat-app": [
+          "df-chat-app"
+        ],
+        "df-firebase-teaching-app": [
+          "df-firebase-teaching-app"
+        ],
+        "df-user-admin-app": [
+          "df-user-admin-app"
+        ],
+        "df-app-starter-template": [
+          "df-app-starter-template"
+        ]
+      }
+    }
   }
 }

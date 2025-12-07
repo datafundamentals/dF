@@ -21,8 +21,7 @@
     "emulators:clear": "pnpm --filter @df/firebase-emulator emulators:clear",
     "seed": "AUTH_EMULATOR_PORT=9156 pnpm --filter @df/firebase-emulator seed:auth-only",
     "seed:reset": "AUTH_EMULATOR_PORT=9156 pnpm --filter @df/firebase-emulator seed:auth-only:reset",
-    "deploy:functions": "firebase deploy --only functions",
-    "deploy:hosting": "pnpm build:prod && firebase deploy --only hosting"
+    "deploy:functions": "firebase deploy --only functions"
   },
   "dependencies": {
     "@df/firebase": "workspace:*",

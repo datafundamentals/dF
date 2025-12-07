@@ -20,13 +20,13 @@
     "test:integration": "playwright test --config ../../playwright.config.ts --project=df-app-starter-template",
     "test:rules": "tsx ./tests/security-rules/run-all-tests.ts",
     "test:seed-data": "pnpm --filter @df/firebase-emulator test:seed-data",
-    "emulators:start": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project peg-2035 --only firestore,storage,functions --import ../../packages/firebase-emulator/emulator-data --export-on-exit ../../packages/firebase-emulator/emulator-data",
-    "emulators:clear": "pnpm --filter @df/firebase-emulator emulators:clear",
+    "emulators:start": "echo '⚠️  Please run \"pnpm emulators:start\" from the repo root. See guides/firebase-emulator-workflow.md for details.' && exit 1",
+    "emulators:clear": "echo '⚠️  Please run \"pnpm emulators:clear\" from the repo root. See guides/firebase-emulator-workflow.md for details.' && exit 1",
     "seed": "pnpm --filter @df/firebase-emulator seed",
     "seed:reset": "pnpm --filter @df/firebase-emulator seed:reset",
-    "deploy:rules": "firebase deploy --only firestore:rules,storage",
-    "deploy:functions": "firebase deploy --only functions",
-    "deploy:prod": "pnpm test:rules && pnpm build:prod && firebase deploy --only firestore:rules,storage"
+    "deploy:rules": "cd ../.. && firebase deploy --only firestore:rules,storage",
+    "deploy:functions": "cd ../.. && firebase deploy --only functions",
+    "deploy:prod": "pnpm test:rules && pnpm build:prod && cd ../.. && firebase deploy --only firestore:rules,storage"
   },
   "dependencies": {
     "@df/firebase": "workspace:*",

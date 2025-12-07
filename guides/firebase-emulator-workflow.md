@@ -1,10 +1,8 @@
-This document is temporarily deprecated until it can be repaired.
-
-Because auth emulator is only available in a very unique and special app `apps/df-auth-trigd-func-tool` much of this document is void should not be used until it can be completely checked and refactored.
-
 # Firebase Emulator Workflow
 
 Canonical instructions for running the Firebase Emulator Suite across DF teaching apps.
+
+> **Note:** This workflow applies to all apps **EXCEPT** `apps/df-auth-trigd-func-tool`, which maintains its own specialized emulator configuration for Auth testing.
 
 ## Prerequisites
 
@@ -14,17 +12,24 @@ Canonical instructions for running the Firebase Emulator Suite across DF teachin
 
 ## Start the Emulator Suite
 
-From the repo root run the app-specific emulator command, for example:
+**Run this command from the repo root:**
 
 ```sh
-pnpm --filter @df/df-firebase-teaching-app emulators:start
+pnpm emulators:start
 ```
 
-Each teaching app ships with its own `firebase.json`. The command above will:
+This command will:
 
 1. Free the common emulator ports (`pnpm --filter @df/firebase-emulator ensure-ports`)
-2. Start Firebase emulators using the shared snapshot at `packages/firebase-emulator/emulator-data`
+2. Start Firebase emulators (Firestore, Storage, Functions) using the shared snapshot at `packages/firebase-emulator/emulator-data`
 3. Export emulator state back to the same directory on exit
+
+### Why run from root?
+
+All teaching apps (except the auth tool) share the same Firebase project (`peg-2035`) and the same emulator configuration. Running a single instance from the root ensures:
+- Consistent state across all apps
+- No port conflicts
+- Simplified maintenance
 
 ## Seed Canonical Data
 
@@ -49,6 +54,16 @@ To clear the snapshot and restore the canonical data from scratch:
 ```sh
 pnpm --filter @df/firebase-emulator seed:reset
 ```
+
+## Troubleshooting
+
+If you see port conflicts:
+
+```sh
+pnpm emulators:clear
+```
+
+This will kill any lingering processes on the emulator ports.
 
 This performs:
 
