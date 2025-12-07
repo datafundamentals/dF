@@ -1,8 +1,10 @@
 <!doctype html>
 <meta charset="utf-8" />
 <!--If not a firebase app, remove <df-auth-wrapper>-->
-<df-auth-wrapper>
-    <df-firebase-teaching-app></df-firebase-teaching-app>
+<df-auth-wrapper headless>
+    <df-firestore-demo></df-firestore-demo>
+    <df-storage-demo></df-storage-demo>
+    <df-functions-demo></df-functions-demo>
 </df-auth-wrapper>
 <!--The next line is reconfigured by `pnpm deploy:copy-bundle`-->
 <script type="module" src="provided by `pnpm deploy:copy-bundle`"></script>

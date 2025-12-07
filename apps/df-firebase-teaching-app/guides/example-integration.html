@@ -58,14 +58,14 @@
     </div>
 
     <!--
-      Recommended default: Show all five components
+      Recommended default: Show the teaching demos behind the auth wrapper
       See BUNDLE_INTEGRATION.md for selective component usage
     -->
-    <df-firebase-teaching-app></df-firebase-teaching-app>
-    <df-auth-demo></df-auth-demo>
-    <df-firestore-demo></df-firestore-demo>
-    <df-storage-demo></df-storage-demo>
-    <df-functions-demo></df-functions-demo>
+    <df-auth-wrapper headless>
+      <df-firestore-demo></df-firestore-demo>
+      <df-storage-demo></df-storage-demo>
+      <df-functions-demo></df-functions-demo>
+    </df-auth-wrapper>
   </div>
 
   <!--

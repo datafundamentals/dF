@@ -18,7 +18,6 @@ export class DfFirestoreDemo extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
-      width: min(1200px, 90vw);
       margin: 0 auto;
       box-sizing: border-box;
       border-radius: 24px;

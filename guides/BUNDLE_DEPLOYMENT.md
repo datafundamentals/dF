@@ -75,9 +75,11 @@ There are three ways to integrate a bundle into your site, each with different t
 **How it works:**
 ```html
 <!-- In your HTML template -->
-<div id="app-demo">
-  <df-firebase-teaching-app></df-firebase-teaching-app>
-</div>
+<df-auth-wrapper headless>
+  <df-firestore-demo></df-firestore-demo>
+  <df-storage-demo></df-storage-demo>
+  <df-functions-demo></df-functions-demo>
+</df-auth-wrapper>
 
 <script type="module" src="/firebase-app/bundle/df-firebase-teaching-app.js"></script>
 ```
@@ -167,8 +169,11 @@ layout: base
 # Interactive Firebase Demo
 
 <div id="app-demo">
-  <df-firebase-teaching-app></df-firebase-teaching-app>
-  <df-auth-demo></df-auth-demo>
+  <df-auth-wrapper headless>
+    <df-firestore-demo></df-firestore-demo>
+    <df-storage-demo></df-storage-demo>
+    <df-functions-demo></df-functions-demo>
+  </df-auth-wrapper>
 </div>
 
 {% appBundleScript "/firebase-app" %}
@@ -266,7 +271,11 @@ const bundlePath = "/firebase-app/bundle/df-firebase-teaching-app.js";
 ---
 
 <div id="app-demo">
-  <df-firebase-teaching-app></df-firebase-teaching-app>
+  <df-auth-wrapper headless>
+    <df-firestore-demo></df-firestore-demo>
+    <df-storage-demo></df-storage-demo>
+    <df-functions-demo></df-functions-demo>
+  </df-auth-wrapper>
 </div>
 
 <script is:inline type="module" src={bundlePath}></script>

@@ -121,7 +121,6 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
     }
 
     .full-width-div {
-      width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -165,7 +164,6 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
     }
 
     .dev-login {
-      width: min(1200px, 100%);
       padding: 32px;
       border-radius: 24px;
       border: 1px solid var(--md-sys-color-outline-variant, rgba(15, 23, 42, 0.12));

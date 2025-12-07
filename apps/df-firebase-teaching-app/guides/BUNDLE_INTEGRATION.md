@@ -12,10 +12,11 @@ This guide focuses only on the **app-specific components and requirements** for 
 
 ## Available Components
 
-The Firebase Teaching App exports these five main web components:
+The Firebase Teaching App bundle ships these web components:
 
 ```html
-<df-firebase-teaching-app></df-firebase-teaching-app>
+<df-environment-banner></df-environment-banner>
+<df-auth-wrapper></df-auth-wrapper> <!-- wrapper used around demos -->
 <df-auth-demo></df-auth-demo>
 <df-firestore-demo></df-firestore-demo>
 <df-storage-demo></df-storage-demo>
@@ -24,19 +25,21 @@ The Firebase Teaching App exports these five main web components:
 
 ## Common Component Combination Examples
 
-**All five components** (full Firebase ecosystem demo):
+**Default teaching layout** (matches the bundled embed):
 ```html
-<df-firebase-teaching-app></df-firebase-teaching-app>
-<df-auth-demo></df-auth-demo>
-<df-firestore-demo></df-firestore-demo>
-<df-storage-demo></df-storage-demo>
-<df-functions-demo></df-functions-demo>
+<df-auth-wrapper headless>
+  <df-firestore-demo></df-firestore-demo>
+  <df-storage-demo></df-storage-demo>
+  <df-functions-demo></df-functions-demo>
+</df-auth-wrapper>
 ```
 
 **Auth + Firestore only** (most common teaching scenario):
 ```html
-<df-auth-demo></df-auth-demo>
-<df-firestore-demo></df-firestore-demo>
+<df-auth-wrapper headless>
+  <df-auth-demo></df-auth-demo>
+  <df-firestore-demo></df-firestore-demo>
+</df-auth-wrapper>
 ```
 
 **Single component** (focused demonstration):

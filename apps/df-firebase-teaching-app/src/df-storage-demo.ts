@@ -26,7 +26,6 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
     :host {
       display: block;
       font-family: var(--df-font-family, system-ui, sans-serif);
-      width: min(1200px, 90vw);
       margin: 0 auto;
       background: white;
       border-radius: 16px;
