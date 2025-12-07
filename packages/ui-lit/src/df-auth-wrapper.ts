@@ -125,9 +125,8 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
       justify-content: space-between;
       align-items: center;
       min-height: 50px;
-      padding: 8px 16px;
-      border-bottom: 1px solid var(--md-sys-color-outline-variant, #ccc);
-      background: var(--md-sys-color-surface, #fff);
+      background: var(--md-sys-color-surface, #D3D3D3);
+      border-radius: 5px;
     }
 
     .full-width-div > div {
@@ -136,10 +135,11 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
     }
 
     .user-photo {
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       object-fit: cover;
+      padding: 2px;
     }
 
     .user-name {
@@ -434,7 +434,7 @@ export class DfAuthWrapper extends SignalWatcher(LitElement) {
             xmlns="http://www.w3.org/2000/svg"
             width="60"
             height="12"
-            viewBox="0 0 60 12"
+            viewBox="0 0 60 10"
           >
             <text
               x="3"
