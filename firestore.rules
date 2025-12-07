@@ -1,65 +1,75 @@
 rules_version = '2';
 
 /**
- * Firebase Firestore Security Rules
+ * Firebase Firestore Security Rules - Monorepo Consolidated
  *
- * This ruleset demonstrates production-ready security patterns for the teaching app.
- * It covers authentication checks, field validation, and extensible permission models.
+ * SINGLE SOURCE OF TRUTH for all Firestore security rules across the monorepo.
  *
- * Key Patterns:
- * - Authentication-first: All operations require valid auth
- * - Field validation: Explicit schemas prevent malformed data
- * - Read separation: Query rules vs document rules for flexibility
- * - Extensible ownership: Ready for userId-based permissions when needed
+ * This file is owned by packages/firebase and referenced by all app firebase.json files.
+ * When any app deploys, this complete ruleset is deployed to the Firebase project.
+ *
+ * Architecture:
+ * - All apps in this monorepo share the same Firebase project
+ * - Firebase projects have ONE ruleset that applies to all apps
+ * - Each app's firebase.json references this file: "rules": "../../packages/firebase/firestore.rules"
+ *
+ * Organization:
+ * - Helper functions (reusable across collections)
+ * - Collection-specific rules (grouped by app/feature)
+ * - Default deny-all rule at the end
+ *
+ * Deployment:
+ *   From any app directory: firebase deploy --only firestore:rules
+ *   This deploys the complete ruleset from this file
  *
  * Testing:
- *   pnpm test:rules  - Run automated security rules tests
+ *   pnpm test:rules  - Run automated security rules tests (from teaching app)
  *
- * @see tests/security-rules/ for comprehensive test coverage
+ * @see apps/df-firebase-teaching-app/tests/security-rules/ for test coverage
  */
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // =============================================================================
     // HELPER FUNCTIONS
     // =============================================================================
-    
+
     /**
      * Check if user is authenticated
      */
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     /**
      * Check if user has admin custom claim
      */
     function isAdmin() {
       return isAuthenticated() && request.auth.token.admin == true;
     }
-    
+
     /**
      * Check if user is the document owner (when userId field exists)
      */
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    
+
     /**
      * Validate that required fields exist in the document
      */
     function hasRequiredFields(fields) {
       return request.resource.data.keys().hasAll(fields);
     }
-    
+
     /**
      * Validate that no unexpected fields are present
      */
     function hasOnlyAllowedFields(allowedFields) {
       return request.resource.data.keys().hasOnly(allowedFields);
     }
-    
+
     /**
      * Check if a field's type matches expected type
      */
@@ -73,22 +83,22 @@ service cloud.firestore {
           || expectedType == 'map' && value is map
           || expectedType == 'null' && value == null;
     }
-    
+
     // =============================================================================
-    // TODOS COLLECTION
+    // TODOS COLLECTION (df-firebase-teaching-app, df-user-admin-app)
     // =============================================================================
-    
+
     match /todos/{todoId} {
-      
+
       /**
        * Validate todo document structure and field types
        */
       function isValidTodo() {
-        let required = ['title', 'description', 'completed', 'priority', 'tags', 
+        let required = ['title', 'description', 'completed', 'priority', 'tags',
                        'createdAt', 'updatedAt', 'titleLower'];
         let allowed = ['title', 'description', 'completed', 'priority', 'tags',
                       'createdAt', 'updatedAt', 'dueDate', 'titleLower', 'userId'];
-        
+
         return hasRequiredFields(required)
             && hasOnlyAllowedFields(allowed)
             && isValidType('title', 'string')
@@ -107,36 +117,49 @@ service cloud.firestore {
             && request.resource.data.titleLower == request.resource.data.title.lower()
             && request.resource.data.tags.size() <= 10;
       }
-      
+
       /**
        * Allow reads for authenticated users
        * Future: Add ownership filter with userId field
        */
       allow read: if isAuthenticated();
-      
+
       /**
        * Allow creates for authenticated users if document is valid
        * Future: Enforce request.auth.uid == resource.data.userId
        */
       allow create: if isAuthenticated() && isValidTodo();
-      
+
       /**
        * Allow updates for authenticated users if document remains valid
        * Future: Add ownership check with isOwner(resource.data.userId)
        */
       allow update: if isAuthenticated() && isValidTodo();
-      
+
       /**
        * Allow deletes for authenticated users
        * Future: Add ownership check with isOwner(resource.data.userId)
        */
       allow delete: if isAuthenticated();
     }
-    
+
     // =============================================================================
-    // READ-ONLY REFERENCE DATA COLLECTIONS
+    // USER PROFILES COLLECTION (df-firebase-teaching-app, df-user-admin-app)
     // =============================================================================
-    
+
+    /**
+     * User profile documents are automatically created by authUserCreated trigger.
+     * Users can read their own profile; admins can read all.
+     */
+    match /userProfiles/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if false; // Controlled exclusively by auth triggers
+    }
+
+    // =============================================================================
+    // READ-ONLY REFERENCE DATA COLLECTIONS (df-firebase-teaching-app)
+    // =============================================================================
+
     /**
      * Reference data collections are read-only for authenticated users
      * Admins can write for seeding and maintenance
@@ -145,26 +168,74 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
-    
+
     match /continents/{continentId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
-    
+
     match /chemicalElements/{elementId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
-    
+
     match /musicalInstruments/{instrumentId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
-    
+
+    // =============================================================================
+    // CHAT MESSAGES COLLECTION (df-chat-app)
+    // =============================================================================
+
+    match /chatMessage/{messageId} {
+      /**
+       * Validate chat message structure and field types
+       */
+      function isValidChatMessage() {
+        let required = ['text', 'userId', 'userDisplayName', 'userPhotoURL', 'createdAt'];
+        let allowed = ['text', 'userId', 'userDisplayName', 'userPhotoURL', 'createdAt'];
+
+        return hasRequiredFields(required)
+            && hasOnlyAllowedFields(allowed)
+            && request.resource.data.text is string
+            && request.resource.data.text.size() > 0
+            && request.resource.data.text.size() <= 1000
+            && request.resource.data.userId is string
+            && request.resource.data.userId.size() > 0
+            && request.resource.data.userDisplayName is string
+            && request.resource.data.userDisplayName.size() > 0
+            && (request.resource.data.userPhotoURL is string || request.resource.data.userPhotoURL == null)
+            && (request.resource.data.createdAt is timestamp || request.resource.data.createdAt == null);
+      }
+
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated()
+        && request.auth.uid == request.resource.data.userId
+        && isValidChatMessage();
+
+      allow update: if false;
+
+      allow delete: if false;
+    }
+
+    // =============================================================================
+    // ACTIVITY LOG COLLECTION (df-activity-log)
+    // =============================================================================
+
+    /**
+     * Activity tracking with user-scoped subcollections
+     * Users can only access their own activity data
+     */
+    match /activity/{userId}/pushups/{pushupId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // =============================================================================
     // DEFAULT DENY
     // =============================================================================
-    
+
     /**
      * Deny all other paths by default
      * Explicit rules required for all collections

@@ -302,6 +302,7 @@ When migrating Firebase code from `.z_/WIP/approach/`:
 
 ## Related Documentation
 
+- [Firestore Rules Management](/guides/firebase-teaching/FIRESTORE_RULES_MANAGEMENT.md) - How security rules are managed in the monorepo
 - [Shared Web Component Defaults](/guides/SHARED_WEB_COMPONENT_DEFAULTS.md)
 - [Firebase Teaching App Roadmap](/.z_/WIP/FIREBASE_TEACHING_APP_ROADMAP.md)
 - [Testing Architecture Patterns](/guides/TESTING_ARCHITECTURE_PATTERNS.md)

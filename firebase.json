@@ -1,0 +1,6 @@
+{
+  "_comment": "Root-level Firebase configuration for deploying shared Firestore security rules. All apps in this monorepo share the same Firebase project and ruleset. Deploy from root: firebase deploy --only firestore:rules",
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "_comment": "Emulator ports must mirror packages/firebase/firebase.json (single source of truth). Update shared file + rebuild @df/firebase if ports change.",
   "firestore": {
-    "rules": "firestore.rules",
+    "rules": "../../firestore.rules",
     "indexes": "firestore.indexes.json"
   },
   "storage": {
