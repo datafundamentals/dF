@@ -10,11 +10,5 @@ import '@df/ui-lit/df-environment-banner';
 // This must happen before any Firebase stores are accessed
 initializeFirebaseForApp();
 
-// Always include the Firestore demo so integration tests can exercise CRUD flows
-void import('@df/ui-lit/firebase/df-firestore-demo.js');
-
-// Only load storage and functions demos in dev/production mode, not during tests
-if (import.meta.env.MODE !== 'test') {
-  void import('./df-storage-demo.js');
-  void import('@df/ui-lit/firebase/df-functions-demo.js');
-}
+// Load the app container which hosts all demo components
+void import('./app-container.js');

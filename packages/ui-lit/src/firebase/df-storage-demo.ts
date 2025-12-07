@@ -217,7 +217,9 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
     this.uploadedUrl = e.detail.linkUrl;
 
     // Refresh file list by calling its public refresh method
-    const fileList = this.shadowRoot?.querySelector('#file-list') as any;
+    const fileList = this.shadowRoot?.querySelector('#file-list') as HTMLElement & {
+      refresh?: () => Promise<void>;
+    };
     if (fileList && typeof fileList.refresh === 'function') {
       await fileList.refresh();
     }
@@ -239,7 +241,9 @@ export class DfStorageDemo extends SignalWatcher(LitElement) {
       console.log('[df-storage-demo] File deleted:', file);
 
       // Refresh file list by calling its public refresh method
-      const fileList = this.shadowRoot?.querySelector('#file-list') as any;
+      const fileList = this.shadowRoot?.querySelector('#file-list') as HTMLElement & {
+        refresh?: () => Promise<void>;
+      };
       if (fileList && typeof fileList.refresh === 'function') {
         await fileList.refresh();
       }

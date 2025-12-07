@@ -39,6 +39,8 @@
     "./firebase/df-firestore-demo.js": "./dist/firebase/df-firestore-demo.js",
     "./firebase/df-functions-demo": "./dist/firebase/df-functions-demo.js",
     "./firebase/df-functions-demo.js": "./dist/firebase/df-functions-demo.js",
+    "./firebase/df-storage-demo": "./dist/firebase/df-storage-demo.js",
+    "./firebase/df-storage-demo.js": "./dist/firebase/df-storage-demo.js",
     "./user-admin-list": "./dist/user-admin-list.js",
     "./user-admin-list.js": "./dist/user-admin-list.js",
     "./role-picker": "./dist/role-picker.js",
