@@ -90,9 +90,13 @@ export class UserAdminAppShell extends SignalWatcher(LitElement) {
 
     if (authState === 'authenticated' && authUser && !this.hasRequestedUsers) {
       this.hasRequestedUsers = true;
-      loadUsers().catch((error) => {
-        console.error('Failed to load users:', error);
-      });
+      // Force token refresh to ensure we have the latest claims/token
+      // This fixes an issue where refreshing the page might use a stale token
+      authUser.getIdToken(true)
+        .then(() => loadUsers())
+        .catch((error) => {
+          console.error('Failed to load users:', error);
+        });
     } else if ((!authUser || authState !== 'authenticated') && this.hasRequestedUsers) {
       this.hasRequestedUsers = false;
     }
