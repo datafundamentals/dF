@@ -24,6 +24,9 @@ import {ENVIRONMENT_CONFIGS, getEmulatorConfigForRuntime} from '@df/firebase';
  */
 @customElement('df-environment-banner')
 export class DfEnvironmentBanner extends LitElement {
+  private originalBodyPaddingTop?: string;
+  private paddingApplied = false;
+
   /**
    * Optional override that forces the component into a specific Firebase
    * environment. Primarily useful for Storybook documentation.
@@ -57,11 +60,15 @@ export class DfEnvironmentBanner extends LitElement {
 
   static override styles = css`
     :host {
-      display: block;
-      position: sticky;
+      display: flex;
+      justify-content: center;
+      position: fixed;
       top: 0;
+      left: 0;
+      right: 0;
       z-index: 1000;
       font-family: var(--md-ref-typeface-plain, 'Roboto', 'Helvetica Neue', sans-serif);
+      pointer-events: none; /* allow underlying page interactions */
     }
 
     .banner {
@@ -69,11 +76,14 @@ export class DfEnvironmentBanner extends LitElement {
       align-items: center;
       gap: 1rem;
       padding: 0.85rem 1.2rem;
+      margin: 0 0.75rem;
+      box-sizing: border-box;
       border-left: 6px solid transparent;
       border-radius: 0 0 0.75rem 0.75rem;
       font-size: 0.95rem;
       line-height: 1.35;
       box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+      pointer-events: auto; /* keep banner text selectable */
     }
 
     .mode {
@@ -139,6 +149,33 @@ export class DfEnvironmentBanner extends LitElement {
         </div>
       </section>
     `;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    // Apply after first render so we can measure the banner height.
+    this.updateComplete.then(() => requestAnimationFrame(() => this.applyBodyOffset()));
+  }
+
+  override disconnectedCallback() {
+    if (this.paddingApplied) {
+      document.body.style.paddingTop = this.originalBodyPaddingTop ?? '';
+    }
+    super.disconnectedCallback();
+  }
+
+  private applyBodyOffset() {
+    const banner = this.shadowRoot?.querySelector<HTMLElement>('.banner');
+    if (!banner) return;
+
+    const desiredGap = Math.ceil(banner.getBoundingClientRect().height + 8); // breathing room under the banner
+    const currentPadding = parseFloat(getComputedStyle(document.body).paddingTop || '0');
+
+    if (currentPadding < desiredGap) {
+      this.originalBodyPaddingTop = document.body.style.paddingTop || '';
+      document.body.style.paddingTop = `${desiredGap}px`;
+      this.paddingApplied = true;
+    }
   }
 }
 
