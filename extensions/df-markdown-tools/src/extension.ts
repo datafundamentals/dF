@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 						enableScripts: true,
                         // Restrict the webview to only loading content from our extension's `media` directory.
                         localResourceRoots: [
-                            vscode.Uri.file(path.join(context.extensionPath, '..', 'df-markdown-tools-ui', 'dist'))
+                            vscode.Uri.file(path.join(context.extensionPath, 'media', 'ui'))
                         ]
 					}
 				);
@@ -135,19 +135,9 @@ function updateWebviewContext(panel: vscode.WebviewPanel) {
 
 function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-    // We assume the UI package is built into ../df-markdown-tools-ui/dist
-    const uiDistPath = vscode.Uri.joinPath(extensionUri, '..', 'df-markdown-tools-ui', 'dist');
+    // We assume the UI package is built into media/ui
+    const uiDistPath = vscode.Uri.joinPath(extensionUri, 'media', 'ui');
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(uiDistPath, 'assets', 'index.js'));
-    // Note: Vite might output different filenames, we might need to read the manifest or assume a fixed name.
-    // For this nominal test, we configured vite to output assets/[name].js, so it should be index.js if the entry is main.ts?
-    // Wait, vite outputs based on the input name. If input is index.html -> main.ts, it usually produces index.js or main.js.
-    // Let's assume we need to find the JS file or just point to the one we know.
-    // Actually, with the vite config I wrote: entryFileNames: `assets/[name].js`, and main.ts is the entry (via index.html), it might be `assets/index.js` or `assets/main.js`.
-    // Let's check the vite config again.
-    
-    // To be safe, let's just inject the script tag pointing to the built file.
-    // But we need to know the name.
-    // I'll update the vite config to be deterministic if possible, or just list the dir.
     
     return `<!DOCTYPE html>
 <html lang="en">

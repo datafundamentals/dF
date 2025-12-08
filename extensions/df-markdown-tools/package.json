@@ -3,6 +3,11 @@
   "displayName": "DF Markdown Tools",
   "description": "Markdown tools for DF Monorepo",
   "version": "0.0.1",
+  "publisher": "datafundamentals",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/datafundamentals/dF"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -47,6 +52,10 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "tsup src/extension.ts --format cjs --external vscode",
+    "build:ui": "pnpm --filter @df/df-markdown-tools-ui build",
+    "copy:ui": "rm -rf media/ui && mkdir -p media/ui && cp -r ../df-markdown-tools-ui/dist/* media/ui/",
+    "prepackage": "pnpm run build:ui && pnpm run copy:ui",
+    "pack": "vsce package",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
@@ -54,17 +63,18 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.6",
     "@types/node": "20.x",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^8.46.1",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^3.7.1",
     "eslint": "^9.0.0",
     "glob": "^10.3.10",
     "mocha": "^10.2.0",
-    "typescript": "^5.3.3",
     "tsup": "^8.0.1",
-    "@vscode/test-electron": "^2.3.8"
+    "typescript": "^5.3.3"
   }
 }
