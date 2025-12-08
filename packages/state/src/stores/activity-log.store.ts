@@ -11,8 +11,6 @@ import type {
   ExerciseDraft,
   ExerciseEntry,
   PushupDraft,
-  ActivitySummaryState,
-  ExerciseType,
 } from '@df/types';
 import {FirestoreCollectionStore} from './firestore-base.store.js';
 import {
@@ -48,33 +46,6 @@ const activeUserIdSignal = signal<string | null>(null);
 export const pushupCollectionState = computed<FirestoreCollectionState<ExerciseEntry>>(() => {
   const store = storeSignal.get();
   return store ? store.state.get() : fallbackStateSignal.get();
-});
-
-export const pushupSummaryState = computed<ActivitySummaryState>(() => {
-  const documents = pushupCollectionState.get().documents;
-  const entryCount = documents.length;
-  const lastEntryAt = entryCount > 0 ? documents[0].recordedAt ?? null : null;
-
-  const byType: Record<ExerciseType, {count: number; totalValue: number}> = {
-    pushups: {count: 0, totalValue: 0},
-    squats: {count: 0, totalValue: 0},
-    plank: {count: 0, totalValue: 0},
-    dumbbells: {count: 0, totalValue: 0},
-    bands: {count: 0, totalValue: 0},
-    hang: {count: 0, totalValue: 0},
-  };
-
-  documents.forEach((entry) => {
-    byType[entry.exerciseType].count += 1;
-    byType[entry.exerciseType].totalValue += entry.value;
-  });
-
-  return {
-    totalExercises: entryCount,
-    entryCount,
-    lastEntryAt,
-    byType,
-  };
 });
 
 export async function initializePushupStore(

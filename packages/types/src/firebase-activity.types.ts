@@ -82,14 +82,3 @@ export interface PushupDraft {
   note?: string | null;
   recordedAt?: Date | null;
 }
-
-/** Lightweight stats derived from the current set of exercise documents. */
-export interface ActivitySummaryState {
-  totalExercises: number;
-  entryCount: number;
-  lastEntryAt: Date | null;
-  byType: Record<ExerciseType, {count: number; totalValue: number}>;
-}
-
-/** Backward compatibility: Pushup summary state is now activity summary state. */
-export type PushupSummaryState = ActivitySummaryState;

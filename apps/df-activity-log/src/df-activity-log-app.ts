@@ -7,7 +7,6 @@ import {
   firebaseAuthState,
   initializePushupStore,
   pushupCollectionState,
-  pushupSummaryState,
   logExerciseEntry,
   deletePushupEntry,
   refreshPushupEntries,
@@ -242,7 +241,6 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
     }
 
     const pushups = this.initializedUserId ? pushupCollectionState.get() : null;
-    const summary = this.initializedUserId ? pushupSummaryState.get() : null;
 
     return html`
       <section class="shell">
@@ -259,7 +257,7 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
               </div>
             </div>`
           : nothing}
-        ${isAuthenticated ? this.renderActivityAreas(pushups, summary) : this.renderSignedOutMessage()}
+        ${isAuthenticated ? this.renderActivityAreas(pushups) : this.renderSignedOutMessage()}
       </section>
     `;
   }
@@ -273,7 +271,7 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
     `;
   }
 
-  private renderActivityAreas(pushups: ReturnType<typeof pushupCollectionState.get> | null, summary: ReturnType<typeof pushupSummaryState.get> | null) {
+  private renderActivityAreas(pushups: ReturnType<typeof pushupCollectionState.get> | null) {
     if (!this.initializedUserId) {
       return html`<div class="empty-state">Initialising Firestore connection…</div>`;
     }
@@ -283,19 +281,6 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
     return html`
       <section class="activity-grid">
-        <div class="card">
-          <h3>Activity summary</h3>
-          <div class="summary-metrics">
-            <dl class="summary-tile">
-              <dt>Total entries</dt>
-              <dd>${summary?.entryCount ?? 0}</dd>
-            </dl>
-            <dl class="summary-tile">
-              <dt>Last update</dt>
-              <dd>${summary?.lastEntryAt ? this.formatDate(summary.lastEntryAt) : '—'}</dd>
-            </dl>
-          </div>
-        </div>
         <div class="card">
           <h3>Log exercise</h3>
           ${this.submitMessage
