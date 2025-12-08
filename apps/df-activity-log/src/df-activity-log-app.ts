@@ -117,28 +117,32 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
       width: fit-content;
     }
 
-    .history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
       margin-top: 1rem;
+      font-size: 0.95rem;
     }
 
-    .history-item {
-      border-radius: 20px;
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      padding: 1rem 1.25rem;
-      background: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
+    .history-table th {
+      text-align: left;
+      padding: 0.4rem 1rem;
+      color: var(--md-sys-color-on-surface-variant, #475569);
+      font-weight: 500;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant, rgba(148, 163, 184, 0.2));
     }
 
-    .history-item strong {
-      font-size: 1.35rem;
-      color: #0f172a;
+    .history-table td {
+      border-bottom: 1px solid var(--md-sys-color-outline-variant, rgba(148, 163, 184, 0.1));
+      color: var(--md-sys-color-on-surface, #0f172a);
+    }
+
+    .history-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .history-table .actions-cell {
+      text-align: right;
     }
 
     .history-meta {
@@ -341,26 +345,26 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
         ${documents.length === 0
           ? html`<div class="empty-state">No exercises logged yet. Submit your first entry above.</div>`
           : html`
-              <div class="history-list">
-                ${documents.map(
-                  (entry) => html`
-                    <article class="history-item">
-                      <div>
-                        <strong>${entry.value} ${EXERCISE_TYPE_CONFIG[entry.exerciseType].unit}</strong>
-                        <div class="history-meta">
-                          <span>${EXERCISE_TYPE_CONFIG[entry.exerciseType].label}</span>
-                          <span>${this.formatDate(entry.recordedAt)}</span>
-                          ${entry.note ? html`<span>${entry.note}</span>` : nothing}
-                        </div>
-                      </div>
-                      <div class="history-actions">
-                        <md-text-button @click=${() => this.handleDelete(entry.id)}>
-                          Delete
-                        </md-text-button>
-                      </div>
-                    </article>
-                  `
-                )}
+              <div style="overflow-x: auto;">
+                <table class="history-table">
+                  <tbody>
+                    ${documents.map(
+                      (entry) => html`
+                        <tr>
+                          <td>${EXERCISE_TYPE_CONFIG[entry.exerciseType].label}</td>
+                          <td><strong>${entry.value}</strong> ${EXERCISE_TYPE_CONFIG[entry.exerciseType].unit}</td>
+                          <td>${this.formatDate(entry.recordedAt)}</td>
+                          <td>${entry.note || '-'}</td>
+                          <td class="actions-cell">
+                            <md-text-button @click=${() => this.handleDelete(entry.id)}>
+                              Delete
+                            </md-text-button>
+                          </td>
+                        </tr>
+                      `
+                    )}
+                  </tbody>
+                </table>
               </div>
             `}
       </section>
