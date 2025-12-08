@@ -1,0 +1,80 @@
+{
+  "name": "df-yaml-tools",
+  "displayName": "DF YAML Tools",
+  "description": "YAML tools for DF Monorepo",
+  "version": "0.0.1",
+  "publisher": "datafundamentals",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/datafundamentals/dF"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:yaml",
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "df.openYamlTools",
+        "title": "Open DF yaml Tools",
+        "category": "DF",
+        "icon": {
+          "light": "media/tree-light.svg",
+          "dark": "media/tree-dark.svg"
+        }
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "df.openYamlTools",
+          "group": "navigation@1",
+          "when": "resourceLangId == yaml"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "df.openYamlTools",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "tsup src/extension.ts --format cjs --external vscode",
+    "build:ui": "pnpm --filter @df/df-yaml-tools-ui build",
+    "copy:ui": "rm -rf media/ui && mkdir -p media/ui && cp -r ../df-yaml-tools-ui/dist/* media/ui/",
+    "prepackage": "pnpm run build:ui && pnpm run copy:ui",
+    "pack": "vsce package",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "lint": "eslint ./src",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^9.0.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}

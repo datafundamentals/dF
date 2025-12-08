@@ -1,0 +1,20 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Vertical trunk -->
+  <path d="M4 2.5V13.5" stroke="#1F1F1F" stroke-width="1.1" stroke-linecap="round"/>
+
+  <!-- Top branch with node -->
+  <path d="M4 4H7" stroke="#1F1F1F" stroke-width="1.1" stroke-linecap="round"/>
+  <circle cx="7.5" cy="4" r="1" fill="#1F1F1F"/>
+
+  <!-- Second branch with sub-branches -->
+  <path d="M4 6.5H6" stroke="#1F1F1F" stroke-width="1.1" stroke-linecap="round"/>
+  <path d="M6 6.5V9" stroke="#1F1F1F" stroke-width="1.1" stroke-linecap="round"/>
+  <path d="M6 7.5H9" stroke="#1F1F1F" stroke-width="1.1" stroke-linecap="round"/>
+  <circle cx="9.5" cy="7.5" r="1" fill="#1F1F1F"/>
+  <path d="M6 9H8.5" stroke="#1F1F1F" stroke-width="1.1" stroke-linecap="round"/>
+  <circle cx="9" cy="9" r="1" fill="#1F1F1F"/>
+
+  <!-- Bottom branch with node -->
+  <path d="M4 11.5H7.5" stroke="#1F1F1F" stroke-width="1.1" stroke-linecap="round"/>
+  <circle cx="8" cy="11.5" r="1" fill="#1F1F1F"/>
+</svg>
