@@ -17,8 +17,14 @@
       "mocha"
     ]
   },
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
-    ".vscode-test"
+    ".vscode-test",
+    "tsup.config.ts",
+    "tsup.config.js",
+    "tsup.config.js.map"
   ]
 }

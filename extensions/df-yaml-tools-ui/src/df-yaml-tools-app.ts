@@ -5,11 +5,19 @@ import { markdownTokensState, updateTokenCount } from '@df/state';
 import type { MarkdownTokensState } from '@df/types';
 import '@material/web/button/filled-button.js';
 
+declare const acquireVsCodeApi: undefined | (() => { postMessage: (message: unknown) => void });
+
 @customElement('df-yaml-tools-app')
 export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   @property({ type: String }) declare fileName: string;
   @state() private currentContent = '';
   @state() private isDirty = false;
+  @state() private taggingStatus: 'idle' | 'working' | 'success' | 'error' = 'idle';
+  @state() private taggingMessage = '';
+  @state() private tagInput = '';
+  @state() private archiveChecked = true;
+
+  private vscode = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : undefined;
 
   constructor() {
     super();
@@ -22,6 +30,14 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
         this.fileName = message.data.fileName;
         this.currentContent = message.data.content;
         this.isDirty = message.data.isDirty ?? false;
+        // reset tagging status on new content to reduce stale state
+        this.taggingStatus = 'idle';
+        this.taggingMessage = '';
+      }
+
+      if (message.command === 'taggingResult') {
+        this.taggingStatus = message.status;
+        this.taggingMessage = message.message;
       }
     });
   }
@@ -81,6 +97,26 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     md-filled-button {
       flex: 1;
     }
+    .tag-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .tag-input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid var(--vscode-input-border, rgba(255, 255, 255, 0.1));
+      background: var(--vscode-input-background, #1e1e1e);
+      color: var(--vscode-foreground);
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
   `;
 
   private async _handleCountTokens() {
@@ -88,11 +124,43 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     await updateTokenCount(this.currentContent);
   }
 
+  private _handleAddTags() {
+    if (!this.vscode) {
+      this.taggingStatus = 'error';
+      this.taggingMessage = 'VS Code API unavailable';
+      return;
+    }
+
+    const trimmedTag = this.tagInput.trim();
+    if (!this.archiveChecked && !trimmedTag) {
+      this.taggingStatus = 'error';
+      this.taggingMessage = 'Enter a tag or enable archive';
+      return;
+    }
+
+    this.taggingStatus = 'working';
+    this.taggingMessage = 'Adding tag(s)...';
+    this.vscode.postMessage({
+      command: 'addTags',
+      tag: trimmedTag,
+      includeArchive: this.archiveChecked
+    });
+  }
+
+  private _onTagInput(event: Event) {
+    this.tagInput = (event.target as HTMLInputElement).value ?? '';
+  }
+
+  private _onArchiveToggle(event: Event) {
+    this.archiveChecked = (event.target as HTMLInputElement).checked;
+  }
+
   override render() {
     const state = markdownTokensState.get() as MarkdownTokensState;
     const isError = state.status === 'error';
     const isLoading = state.status === 'counting';
     const isButtonDisabled = isLoading || this.isDirty;
+    const isTagButtonDisabled = this.isDirty || this.taggingStatus === 'working';
 
     return html`
       <div class="container">
@@ -122,6 +190,30 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
               ?disabled=${isButtonDisabled}>
               ${isLoading ? '⏳ Counting...' : this.isDirty ? '💾 Save first' : 'Count Tokens'}
             </md-filled-button>
+
+            <md-filled-button
+              @click=${this._handleAddTags}
+              ?disabled=${isTagButtonDisabled}>
+              ${this.taggingStatus === 'working' ? '⏳ Tagging...' : this.isDirty ? '💾 Save first' : 'Add Tag(s)'}
+            </md-filled-button>
+          </div>
+
+          <div class="tag-form">
+            <input
+              class="tag-input"
+              type="text"
+              placeholder="Enter a tag (optional)"
+              .value=${this.tagInput}
+              @input=${this._onTagInput}
+            />
+            <label class="checkbox-row">
+              <input
+                type="checkbox"
+                .checked=${this.archiveChecked}
+                @change=${this._onArchiveToggle}
+              />
+              Include "archive"
+            </label>
           </div>
 
           ${this.isDirty ? html`
@@ -131,6 +223,12 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
           ` : state.status !== 'idle' ? html`
             <p class="status ${isError ? 'error' : ''}">
               ${isLoading ? '⏳ Counting...' : isError ? `❌ ${state.errorMessage}` : '✓ Complete'}
+            </p>
+          ` : ''}
+
+          ${this.taggingStatus !== 'idle' ? html`
+            <p class="status ${this.taggingStatus === 'error' ? 'error' : ''}">
+              ${this.taggingStatus === 'working' ? '⏳ Tagging...' : this.taggingMessage || 'Tagging complete'}
             </p>
           ` : ''}
         </div>

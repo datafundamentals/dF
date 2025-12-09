@@ -2,7 +2,7 @@
   "name": "df-yaml-tools",
   "displayName": "DF YAML Tools",
   "description": "YAML tools for DF Monorepo",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "publisher": "datafundamentals",
   "repository": {
     "type": "git",
@@ -19,6 +19,9 @@
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
+  "dependencies": {
+    "yaml": "^2.6.1"
+  },
   "contributes": {
     "commands": [
       {
@@ -48,14 +51,15 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run package",
+    "vscode:prepublish": "pnpm run build:ui && pnpm run copy:ui && pnpm run package",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "tsup src/extension.ts --format cjs --external vscode",
+    "package": "tsup --config tsup.config.ts",
     "build:ui": "pnpm --filter @df/df-yaml-tools-ui build",
     "copy:ui": "rm -rf media/ui && mkdir -p media/ui && cp -r ../df-yaml-tools-ui/dist/* media/ui/",
     "prepackage": "pnpm run build:ui && pnpm run copy:ui",
-    "pack": "vsce package",
+    "prepack": "pnpm run build:ui && pnpm run copy:ui && pnpm run package",
+    "pack": "vsce package --no-dependencies",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
