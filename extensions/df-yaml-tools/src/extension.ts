@@ -262,9 +262,14 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: { tag: stri
         return;
     }
 
-    const hasArchive = tagsSeq.items.some((item: Scalar | YAMLMap | YAMLSeq | null | undefined) => item?.toString() === 'archive');
+    const archiveIndex = tagsSeq.items.findIndex((item: Scalar | YAMLMap | YAMLSeq | null | undefined) => item?.toString() === 'archive');
+    const hasArchive = archiveIndex >= 0;
+
     if (opts.includeArchive && !hasArchive) {
         tagsSeq.items.unshift(new YAML.Scalar('archive'));
+    } else if (!opts.includeArchive && hasArchive) {
+        // Remove archive tag when checkbox is unchecked
+        tagsSeq.items.splice(archiveIndex, 1);
     }
 
     if (normalizedTag) {

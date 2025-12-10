@@ -3,7 +3,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { SignalWatcher } from '@lit-labs/signals';
 import { markdownTokensState, updateTokenCount } from '@df/state';
 import type { MarkdownTokensState } from '@df/types';
-import '@material/web/button/filled-button.js';
 
 declare const acquireVsCodeApi: undefined | (() => { postMessage: (message: unknown) => void });
 
@@ -33,52 +32,95 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
         // reset tagging status on new content to reduce stale state
         this.taggingStatus = 'idle';
         this.taggingMessage = '';
+        // Sync checkbox state with actual file content
+        this._syncArchiveCheckboxFromContent(message.data.content);
       }
 
       if (message.command === 'taggingResult') {
         this.taggingStatus = message.status;
         this.taggingMessage = message.message;
+        // Clear tag input on successful tagging
+        if (message.status === 'success') {
+          this.tagInput = '';
+        }
       }
     });
   }
 
   static styles = css`
     :host {
-      display: block;
+      display: flex;
+      min-height: 100vh;
       padding: 16px;
       font-family: var(--vscode-font-family, sans-serif);
       color: var(--vscode-foreground);
+      box-sizing: border-box;
     }
     .container {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: calc(100vh - 32px);
     }
-    h2 {
+    .file-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+    .file-name {
       margin: 0;
-      font-size: 1.2rem;
+    }
+    .saved-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--vscode-testing-iconPassed, #73c991);
+    }
+    .footer {
+      margin-top: auto;
+      padding-top: 12px;
+      padding-bottom: 8px;
+      border-top: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.1));
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+    .footer button {
+      background: none;
+      border: none;
+      color: var(--vscode-textLink-foreground, #3794ff);
+      cursor: pointer;
+      padding: 0;
+      font-size: inherit;
+      text-decoration: underline;
+    }
+    .footer button:hover {
+      color: var(--vscode-textLink-activeForeground, #4daafc);
+    }
+    .footer button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+    .footer .token-result {
+      color: var(--vscode-symbolIcon-numberForeground, #b5cea8);
     }
     .file-info {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
       padding: 12px;
       background-color: var(--vscode-editor-background);
       border-radius: 4px;
-    }
-    .file-name {
-      margin: 0;
-      opacity: 0.8;
-      font-size: 0.9rem;
-    }
-    .token-count {
-      margin: 0;
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: var(--vscode-foreground);
-    }
-    .token-count strong {
-      color: var(--vscode-symbolIcon-numberForeground, #b5cea8);
+      flex-shrink: 0;
+      margin-top: 40vh;
     }
     .status {
       margin: 0;
@@ -89,35 +131,44 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       color: var(--vscode-errorForeground, #f48771);
       opacity: 1;
     }
-    .button-container {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    md-filled-button {
-      flex: 1;
-    }
     .tag-form {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 16px;
+      gap: 6px;
     }
-    .tag-input {
+    md-outlined-text-field {
       width: 100%;
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid var(--vscode-input-border, rgba(255, 255, 255, 0.1));
-      background: var(--vscode-input-background, #1e1e1e);
-      color: var(--vscode-foreground);
+      --md-outlined-text-field-container-shape: 4px;
+      --md-outlined-text-field-top-space: 8px;
+      --md-outlined-text-field-bottom-space: 8px;
+      --md-outlined-text-field-leading-space: 12px;
+      --md-outlined-text-field-trailing-space: 12px;
+      --md-outlined-text-field-outline-color: var(--vscode-input-border, rgba(255, 255, 255, 0.1));
+      --md-outlined-text-field-focus-outline-color: var(--vscode-focusBorder, #007acc);
+      --md-outlined-text-field-input-text-color: var(--vscode-input-foreground, var(--vscode-foreground));
+      --md-outlined-text-field-label-text-color: var(--vscode-input-foreground, var(--vscode-foreground));
+      --md-sys-color-on-surface: var(--vscode-input-foreground, var(--vscode-foreground));
+      --md-sys-color-on-surface-variant: var(--vscode-input-foreground, var(--vscode-foreground));
     }
     .checkbox-row {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+    md-checkbox {
+      --md-checkbox-container-size: 16px;
+      --md-checkbox-selected-container-color: var(--vscode-checkbox-background, #007acc);
+      --md-checkbox-outline-color: var(--vscode-checkbox-border, rgba(255, 255, 255, 0.3));
     }
   `;
+
+  private _syncArchiveCheckboxFromContent(content: string) {
+    // Simple string-based check for "archive" in AI-tagging section
+    // Look for AI-tagging: followed by - archive
+    const hasArchiveTag = /AI-tagging:\s*\n\s*-\s*archive\b/.test(content);
+    this.archiveChecked = hasArchiveTag;
+  }
 
   private async _handleCountTokens() {
     // Count the tokens in the content we already have
@@ -148,11 +199,21 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   }
 
   private _onTagInput(event: Event) {
-    this.tagInput = (event.target as HTMLInputElement).value ?? '';
+    const target = event.target as HTMLInputElement;
+    this.tagInput = target.value ?? '';
+  }
+
+  private _onTagKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this._handleAddTags();
+    }
   }
 
   private _onArchiveToggle(event: Event) {
-    this.archiveChecked = (event.target as HTMLInputElement).checked;
+    const target = event.target as HTMLInputElement;
+    this.archiveChecked = target.checked;
+    // Trigger tagging on checkbox change
+    this._handleAddTags();
   }
 
   override render() {
@@ -160,76 +221,57 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     const isError = state.status === 'error';
     const isLoading = state.status === 'counting';
     const isButtonDisabled = isLoading || this.isDirty;
-    const isTagButtonDisabled = this.isDirty || this.taggingStatus === 'working';
 
     return html`
       <div class="container">
-        <h2>YAML Tools</h2>
-
         <div class="file-info">
-          <p class="file-name">File: <strong>${this.fileName}</strong></p>
-
-          <!-- Debug: Show isDirty state visibly -->
-          <p style="font-size: 0.75rem; opacity: 0.5; margin: 0;">
-            ${this.isDirty ? '🔴 File has unsaved changes' : '🟢 File is saved'}
-          </p>
-
-          ${state.tokenCount > 0 ? html`
-            <p class="token-count">
-              Token Count: <strong>${state.tokenCount}</strong>
-            </p>
-          ` : html`
-            <p class="token-count" style="opacity: 0.5;">
-              Click to count tokens
-            </p>
-          `}
-
-          <div class="button-container">
-            <md-filled-button
-              @click=${this._handleCountTokens}
-              ?disabled=${isButtonDisabled}>
-              ${isLoading ? '⏳ Counting...' : this.isDirty ? '💾 Save first' : 'Count Tokens'}
-            </md-filled-button>
-
-            <md-filled-button
-              @click=${this._handleAddTags}
-              ?disabled=${isTagButtonDisabled}>
-              ${this.taggingStatus === 'working' ? '⏳ Tagging...' : this.isDirty ? '💾 Save first' : 'Add Tag(s)'}
-            </md-filled-button>
-          </div>
-
           <div class="tag-form">
-            <input
-              class="tag-input"
-              type="text"
-              placeholder="Enter a tag (optional)"
+            <md-outlined-text-field
+              label="Tag (optional)"
               .value=${this.tagInput}
               @input=${this._onTagInput}
-            />
+              @keydown=${this._onTagKeydown}
+              ?disabled=${this.isDirty}>
+            </md-outlined-text-field>
             <label class="checkbox-row">
-              <input
-                type="checkbox"
+              <md-checkbox
                 .checked=${this.archiveChecked}
                 @change=${this._onArchiveToggle}
-              />
-              Include "archive"
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span>archive</span>
             </label>
           </div>
 
           ${this.isDirty ? html`
             <p class="status" style="opacity: 0.7; color: var(--vscode-editorWarning-foreground, #dcdcaa);">
-              ℹ️ Save your changes before counting tokens
+              ℹ️ Save your changes first
             </p>
-          ` : state.status !== 'idle' ? html`
-            <p class="status ${isError ? 'error' : ''}">
-              ${isLoading ? '⏳ Counting...' : isError ? `❌ ${state.errorMessage}` : '✓ Complete'}
+          ` : isError ? html`
+            <p class="status error">
+              ❌ ${state.errorMessage}
             </p>
           ` : ''}
 
-          ${this.taggingStatus !== 'idle' ? html`
-            <p class="status ${this.taggingStatus === 'error' ? 'error' : ''}">
-              ${this.taggingStatus === 'working' ? '⏳ Tagging...' : this.taggingMessage || 'Tagging complete'}
+          ${this.taggingStatus === 'error' ? html`
+            <p class="status error">
+              ❌ ${this.taggingMessage}
             </p>
+          ` : ''}
+        </div>
+
+        <div class="footer">
+          <span class="file-name">${this.fileName}</span>
+          ${!this.isDirty ? html`
+            <span class="saved-indicator">● saved</span>
+          ` : ''}
+          <button
+            @click=${this._handleCountTokens}
+            ?disabled=${isButtonDisabled}>
+            ${isLoading ? 'counting...' : 'count tokens'}
+          </button>
+          ${state.tokenCount > 0 ? html`
+            <span class="token-result">${state.tokenCount}</span>
           ` : ''}
         </div>
       </div>
