@@ -32,7 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
                         // Restrict the webview to only loading content from our extension's `media` directory.
                         localResourceRoots: [
                             vscode.Uri.file(path.join(context.extensionPath, 'media', 'ui'))
-                        ]
+                        ],
+                        // Don't retain context when hidden - forces fresh load each time
+                        retainContextWhenHidden: false
 					}
 				);
 
@@ -46,11 +48,12 @@ export function activate(context: vscode.ExtensionContext) {
 				);
 
                 // Set the webview's initial html content
+                const cacheToken = Date.now().toString();
+                outputChannel.appendLine(`Creating webview with cache token: ${cacheToken}`);
 				currentPanel.webview.html = getWebviewContent(
                     currentPanel.webview,
                     context.extensionUri,
-                    // Bust webview cache between runs so UI updates show up
-                    (context.extension.packageJSON?.version as string | undefined) ?? Date.now().toString()
+                    cacheToken
                 );
 
                 // Handle messages from the webview
@@ -79,6 +82,13 @@ export function activate(context: vscode.ExtensionContext) {
                                         tag: (message.tag ?? '').toString(),
                                         includeArchive: Boolean(message.includeArchive)
                                     });
+                                } else {
+                                    vscode.window.showErrorMessage('YAML Tools panel is not available.');
+                                }
+                                return;
+                            case 'deleteFile':
+                                if (currentPanel) {
+                                    await deleteActiveFile(currentPanel);
                                 } else {
                                     vscode.window.showErrorMessage('YAML Tools panel is not available.');
                                 }
@@ -322,20 +332,108 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ve
     // We assume the UI package is built into media/ui
     const uiDistPath = vscode.Uri.joinPath(extensionUri, 'media', 'ui');
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(uiDistPath, 'assets', 'index.js'));
-    
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src ${webview.cspSource}; font-src ${webview.cspSource};">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>DF YAML Tools</title>
 </head>
 <body>
+    <!-- Cache bust: ${versionToken} -->
     <df-yaml-tools-app></df-yaml-tools-app>
     <script type="module" src="${scriptUri.toString()}?v=${versionToken}"></script>
 </body>
 </html>`;
+}
+
+async function deleteActiveFile(panel: vscode.WebviewPanel) {
+    const editor = vscode.window.activeTextEditor ?? lastActiveEditor;
+
+    if (!editor) {
+        vscode.window.showErrorMessage('No active editor found to delete.');
+        return;
+    }
+
+    const filePath = editor.document.uri.fsPath;
+    const fileName = path.basename(filePath);
+
+    // Show confirmation dialog (VSCode standard)
+    const answer = await vscode.window.showWarningMessage(
+        `Are you sure you want to delete "${fileName}"?`,
+        { modal: true },
+        'Delete'
+    );
+
+    if (answer !== 'Delete') {
+        outputChannel.appendLine('Delete cancelled by user');
+        return;
+    }
+
+    try {
+        outputChannel.appendLine('Starting delete workflow for: ' + fileName);
+
+        // First, add "deleted" tag to the YAML
+        outputChannel.appendLine('Adding deleted tag...');
+        await addTagsToActiveFile(panel, { tag: 'deleted', includeArchive: false });
+
+        // Save the file with the deleted tag
+        await editor.document.save();
+
+        const fileDir = path.dirname(filePath);
+        const deletedDir = path.join(fileDir, 'deleted');
+
+        // Create deleted directory if it doesn't exist
+        try {
+            await vscode.workspace.fs.createDirectory(vscode.Uri.file(deletedDir));
+            outputChannel.appendLine(`Created deleted directory: ${deletedDir}`);
+        } catch (err) {
+            // Directory might already exist, that's ok
+            outputChannel.appendLine(`Deleted directory exists or created: ${deletedDir}`);
+        }
+
+        const targetPath = path.join(deletedDir, fileName);
+        const sourceUri = vscode.Uri.file(filePath);
+        const targetUri = vscode.Uri.file(targetPath);
+
+        // Close all editor tabs for the file being deleted
+        const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
+        const fileTabs = tabs.filter(tab => {
+            if (tab.input instanceof vscode.TabInputText) {
+                return tab.input.uri.fsPath === filePath;
+            }
+            return false;
+        });
+
+        outputChannel.appendLine(`Found ${fileTabs.length} tabs for file: ${fileName}`);
+
+        for (const tab of fileTabs) {
+            await vscode.window.tabGroups.close(tab);
+            outputChannel.appendLine(`Closed tab for: ${fileName}`);
+        }
+
+        // Clear the lastActiveEditor reference since we just closed it
+        lastActiveEditor = undefined;
+
+        // Move the file
+        await vscode.workspace.fs.rename(sourceUri, targetUri, { overwrite: true });
+        outputChannel.appendLine(`Moved file to: ${targetPath}`);
+
+        // Close the webview panel
+        panel.dispose();
+        outputChannel.appendLine('Closed YAML Tools panel');
+
+        vscode.window.showInformationMessage(`File moved to deleted folder: ${fileName}`);
+    } catch (error) {
+        const errorMsg = `Failed to delete file: ${String(error)}`;
+        outputChannel.appendLine(errorMsg);
+        vscode.window.showErrorMessage(errorMsg);
+    }
 }
 
 export function deactivate() {}

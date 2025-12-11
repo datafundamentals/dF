@@ -51,7 +51,8 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run build:ui && pnpm run copy:ui && pnpm run package",
+    "build": "pnpm run build:ui && pnpm run copy:ui && pnpm run package",
+    "vscode:prepublish": "pnpm run build",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "tsup --config tsup.config.ts",

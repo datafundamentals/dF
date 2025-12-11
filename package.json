@@ -7,7 +7,8 @@
     "apps/*",
     "apps/*/functions",
     "packages/*",
-    "services/*"
+    "services/*",
+    "extensions/*"
   ],
   "scripts": {
     "dev": "turbo run dev --parallel",

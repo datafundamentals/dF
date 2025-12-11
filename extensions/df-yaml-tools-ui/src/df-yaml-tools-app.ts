@@ -160,6 +160,8 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       --md-checkbox-container-size: 16px;
       --md-checkbox-selected-container-color: var(--vscode-checkbox-background, #007acc);
       --md-checkbox-outline-color: var(--vscode-checkbox-border, rgba(255, 255, 255, 0.3));
+      --md-checkbox-state-layer-size: 18px;
+      flex-shrink: 0;
     }
   `;
 
@@ -209,6 +211,26 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     }
   }
 
+  private _onDeleteToggle(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const target = event.target as HTMLInputElement;
+    // Always uncheck immediately (acts like a button)
+    target.checked = false;
+
+    if (!this.vscode) {
+      this.taggingStatus = 'error';
+      this.taggingMessage = 'VS Code API unavailable';
+      return;
+    }
+
+    // Trigger delete workflow
+    this.vscode.postMessage({
+      command: 'deleteFile'
+    });
+  }
+
   private _onArchiveToggle(event: Event) {
     const target = event.target as HTMLInputElement;
     this.archiveChecked = target.checked;
@@ -233,14 +255,22 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
               @keydown=${this._onTagKeydown}
               ?disabled=${this.isDirty}>
             </md-outlined-text-field>
-            <label class="checkbox-row">
+            <div class="checkbox-row">
+              <md-checkbox
+                .checked=${false}
+                @change=${this._onDeleteToggle}
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span @click=${this._onDeleteToggle}>delete</span>
+            </div>
+            <div class="checkbox-row">
               <md-checkbox
                 .checked=${this.archiveChecked}
                 @change=${this._onArchiveToggle}
                 ?disabled=${this.isDirty}>
               </md-checkbox>
-              <span>archive</span>
-            </label>
+              <span @click=${this._onArchiveToggle}>archive</span>
+            </div>
           </div>
 
           ${this.isDirty ? html`
