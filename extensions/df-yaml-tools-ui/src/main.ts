@@ -5,4 +5,5 @@ import '@material/web/button/filled-button.js';
 import '@material/web/textfield/outlined-text-field.js';
 import '@material/web/checkbox/checkbox.js';
 
+import '@df/ui-lit/df-yaml-nav';
 import './df-yaml-tools-app';

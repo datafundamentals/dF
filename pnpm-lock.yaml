@@ -702,6 +702,9 @@ importers:
         specifier: ^2.6.1
         version: 2.8.1
     devDependencies:
+      '@df/df-yaml-tools-ui':
+        specifier: workspace:*
+        version: link:../df-yaml-tools-ui
       '@types/glob':
         specifier: ^8.1.0
         version: 8.1.0

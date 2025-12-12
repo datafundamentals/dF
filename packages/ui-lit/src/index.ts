@@ -12,6 +12,7 @@ import './material-design-init.js';
 export * from './remove-replace-me.js';
 export * from './my-element.js';
 export * from './df-segmented-button.js';
+export * from './df-yaml-nav.js';
 export * from './df-upload-link.js';
 export * from './df-practice-widget.js';
 export * from './df-npm-info-widget.js';

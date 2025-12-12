@@ -13,6 +13,8 @@
     "./my-element.js": "./dist/my-element.js",
     "./segmented-button": "./dist/segmented-button.js",
     "./segmented-button.js": "./dist/segmented-button.js",
+    "./df-yaml-nav": "./dist/df-yaml-nav.js",
+    "./df-yaml-nav.js": "./dist/df-yaml-nav.js",
     "./df-upload-link": "./dist/df-upload-link.js",
     "./df-upload-link.js": "./dist/df-upload-link.js",
     "./df-upload-link-store": "./dist/df-upload-link-store.js",

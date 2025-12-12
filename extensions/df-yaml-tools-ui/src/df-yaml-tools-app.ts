@@ -15,36 +15,48 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   @state() private taggingMessage = '';
   @state() private tagInput = '';
   @state() private archiveChecked = true;
+  @state() private yamlFiles: string[] = [];
 
   private vscode = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : undefined;
+  private _messageHandler = this._handleMessage.bind(this);
 
   constructor() {
     super();
     this.fileName = '...';
+  }
 
-    // Listen for messages from VS Code
-    window.addEventListener('message', event => {
-      const message = event.data;
-      if (message.command === 'updateContent') {
-        this.fileName = message.data.fileName;
-        this.currentContent = message.data.content;
-        this.isDirty = message.data.isDirty ?? false;
-        // reset tagging status on new content to reduce stale state
-        this.taggingStatus = 'idle';
-        this.taggingMessage = '';
-        // Sync checkbox state with actual file content
-        this._syncArchiveCheckboxFromContent(message.data.content);
-      }
+  override connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('message', this._messageHandler);
+  }
 
-      if (message.command === 'taggingResult') {
-        this.taggingStatus = message.status;
-        this.taggingMessage = message.message;
-        // Clear tag input on successful tagging
-        if (message.status === 'success') {
-          this.tagInput = '';
-        }
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('message', this._messageHandler);
+  }
+
+  private _handleMessage(event: MessageEvent) {
+    const message = event.data;
+    if (message.command === 'updateContent') {
+      this.fileName = message.data.fileName;
+      this.currentContent = message.data.content;
+      this.isDirty = message.data.isDirty ?? false;
+      this.yamlFiles = message.data.yamlFiles ?? [];
+      // reset tagging status on new content to reduce stale state
+      this.taggingStatus = 'idle';
+      this.taggingMessage = '';
+      // Sync checkbox state with actual file content
+      this._syncArchiveCheckboxFromContent(message.data.content);
+    }
+
+    if (message.command === 'taggingResult') {
+      this.taggingStatus = message.status;
+      this.taggingMessage = message.message;
+      // Clear tag input on successful tagging
+      if (message.status === 'success') {
+        this.tagInput = '';
       }
-    });
+    }
   }
 
   static styles = css`
@@ -122,6 +134,9 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       flex-shrink: 0;
       margin-top: 40vh;
     }
+    df-yaml-nav {
+      margin-bottom: 6px;
+    }
     .status {
       margin: 0;
       opacity: 0.6;
@@ -185,11 +200,6 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     }
 
     const trimmedTag = this.tagInput.trim();
-    if (!this.archiveChecked && !trimmedTag) {
-      this.taggingStatus = 'error';
-      this.taggingMessage = 'Enter a tag or enable archive';
-      return;
-    }
 
     this.taggingStatus = 'working';
     this.taggingMessage = 'Adding tag(s)...';
@@ -238,6 +248,16 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     this._handleAddTags();
   }
 
+  private _handleNavigate(event: CustomEvent) {
+    if (!this.vscode) {
+      return;
+    }
+    this.vscode.postMessage({
+      command: 'navigateToFile',
+      fileName: event.detail.fileName
+    });
+  }
+
   override render() {
     const state = markdownTokensState.get() as MarkdownTokensState;
     const isError = state.status === 'error';
@@ -247,6 +267,11 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     return html`
       <div class="container">
         <div class="file-info">
+          <df-yaml-nav
+            .currentFile=${this.fileName}
+            .yamlFiles=${this.yamlFiles}
+            @navigate=${this._handleNavigate}>
+          </df-yaml-nav>
           <div class="tag-form">
             <md-outlined-text-field
               label="Tag (optional)"

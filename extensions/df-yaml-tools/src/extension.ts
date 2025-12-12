@@ -1,14 +1,41 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 import YAML, { isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Pair } from 'yaml';
+
+// Constants
+const YAML_KEYS = {
+	AI_TAGGING: 'AI-tagging',
+	ARCHIVE_TAG: 'archive',
+	DELETED_DIR: 'deleted'
+} as const;
 
 // Create output channel for debugging
 const outputChannel = vscode.window.createOutputChannel('DF YAML Tools');
 let lastActiveEditor: vscode.TextEditor | undefined = undefined;
 
+async function getYamlFilesInDirectory(filePath: string): Promise<string[]> {
+    const dir = path.dirname(filePath);
+    const files = await fs.promises.readdir(dir);
+
+    // Filter for YAML files, excluding subdirectories
+    const yamlFiles: string[] = [];
+    for (const file of files) {
+        const fullPath = path.join(dir, file);
+        const stat = await fs.promises.stat(fullPath);
+
+        // Only include files (not directories) with .yaml or .yml extension
+        if (stat.isFile() && (file.endsWith('.yaml') || file.endsWith('.yml'))) {
+            yamlFiles.push(file);
+        }
+    }
+
+    // Sort alphabetically
+    return yamlFiles.sort();
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	outputChannel.appendLine('=== DF YAML Tools Extension Activated ===');
-	console.log('Congratulations, your extension "df-yaml-tools" is now active!');
     vscode.window.showInformationMessage('DF YAML Tools Extension Activated!');
 
 	let currentPanel: vscode.WebviewPanel | undefined = undefined;
@@ -93,6 +120,11 @@ export function activate(context: vscode.ExtensionContext) {
                                     vscode.window.showErrorMessage('YAML Tools panel is not available.');
                                 }
                                 return;
+                            case 'navigateToFile':
+                                if (currentPanel && message.fileName) {
+                                    await navigateToFile(currentPanel, message.fileName);
+                                }
+                                return;
                         }
                     },
                     undefined,
@@ -149,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 }
 
-function updateWebviewContext(panel: vscode.WebviewPanel) {
+async function updateWebviewContext(panel: vscode.WebviewPanel) {
     const editor = vscode.window.activeTextEditor;
 
     // Only send if we have an active editor
@@ -163,11 +195,14 @@ function updateWebviewContext(panel: vscode.WebviewPanel) {
     const content = editor.document.getText();
     const isDirty = editor.document.isDirty;
 
-    outputChannel.appendLine(`Sending to webview: fileName="${fileName}", isDirty=${isDirty}, contentLength=${content.length}`);
+    // Get list of YAML files in the same directory
+    const yamlFiles = await getYamlFilesInDirectory(editor.document.fileName);
+
+    outputChannel.appendLine(`Sending to webview: fileName="${fileName}", isDirty=${isDirty}, contentLength=${content.length}, yamlFiles=${yamlFiles.length}`);
 
     panel.webview.postMessage({
         command: 'updateContent',
-        data: { fileName, content, isDirty }
+        data: { fileName, content, isDirty, yamlFiles }
     });
 }
 
@@ -239,7 +274,7 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: { tag: stri
 
     const aiIndex = sequenceItems.findIndex((item: YAMLMap | YAMLSeq | Scalar | null | undefined) => {
         if (!item || !isMap(item)) return false;
-        return item.items.some((child: Pair) => child.key?.toString() === 'AI-tagging');
+        return item.items.some((child: Pair) => child.key?.toString() === YAML_KEYS.AI_TAGGING);
     });
 
     let aiMap: YAMLMap;
@@ -247,10 +282,10 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: { tag: stri
 
     if (aiIndex >= 0) {
         aiMap = sequenceItems[aiIndex] as YAMLMap;
-        const existingTags = aiMap.get('AI-tagging', true) as unknown;
+        const existingTags = aiMap.get(YAML_KEYS.AI_TAGGING, true) as unknown;
         if (!existingTags || !isSeq(existingTags)) {
             tagsSeq = new YAMLSeq();
-            aiMap.set('AI-tagging', tagsSeq);
+            aiMap.set(YAML_KEYS.AI_TAGGING, tagsSeq);
         } else {
             tagsSeq = existingTags as YAMLSeq<Scalar | YAMLMap | YAMLSeq>;
         }
@@ -260,32 +295,33 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: { tag: stri
         }
     } else {
         tagsSeq = new YAMLSeq();
-        tagsSeq.items.push(new YAML.Scalar('archive'));
+        tagsSeq.items.push(new YAML.Scalar(YAML_KEYS.ARCHIVE_TAG));
         aiMap = new YAMLMap();
-        aiMap.add(new YAML.Pair('AI-tagging', tagsSeq));
+        aiMap.add(new YAML.Pair(YAML_KEYS.AI_TAGGING, tagsSeq));
         sequenceItems.unshift(aiMap);
     }
 
-    const normalizedTag = opts.tag.trim();
-    if (!opts.includeArchive && !normalizedTag) {
-        panel.webview.postMessage({ command: 'taggingResult', status: 'error', message: 'Enter a tag or enable archive' });
-        return;
-    }
+    // Parse comma-delimited tags (e.g., "frog, cat whiskers" -> ["frog", "cat whiskers"])
+    const tagInput = opts.tag.trim();
+    const parsedTags = tagInput
+        ? tagInput.split(',').map(t => t.trim()).filter(t => t.length > 0)
+        : [];
 
-    const archiveIndex = tagsSeq.items.findIndex((item: Scalar | YAMLMap | YAMLSeq | null | undefined) => item?.toString() === 'archive');
+    const archiveIndex = tagsSeq.items.findIndex((item: Scalar | YAMLMap | YAMLSeq | null | undefined) => item?.toString() === YAML_KEYS.ARCHIVE_TAG);
     const hasArchive = archiveIndex >= 0;
 
     if (opts.includeArchive && !hasArchive) {
-        tagsSeq.items.unshift(new YAML.Scalar('archive'));
+        tagsSeq.items.unshift(new YAML.Scalar(YAML_KEYS.ARCHIVE_TAG));
     } else if (!opts.includeArchive && hasArchive) {
         // Remove archive tag when checkbox is unchecked
         tagsSeq.items.splice(archiveIndex, 1);
     }
 
-    if (normalizedTag) {
-        const alreadyHasTag = tagsSeq.items.some(item => item?.toString() === normalizedTag);
+    // Add each parsed tag if it doesn't already exist
+    for (const tag of parsedTags) {
+        const alreadyHasTag = tagsSeq.items.some(item => item?.toString() === tag);
         if (!alreadyHasTag) {
-            tagsSeq.items.push(new YAML.Scalar(normalizedTag));
+            tagsSeq.items.push(new YAML.Scalar(tag));
         }
     }
 
@@ -317,9 +353,12 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: { tag: stri
         return;
     }
 
+    // Save the document after applying the edit
+    await editor.document.save();
+
     const summaryParts = [];
-    if (opts.includeArchive) summaryParts.push('archive');
-    if (normalizedTag) summaryParts.push(normalizedTag);
+    if (opts.includeArchive) summaryParts.push(YAML_KEYS.ARCHIVE_TAG);
+    summaryParts.push(...parsedTags);
     const summary = summaryParts.length ? summaryParts.join(', ') : 'tagging';
 
     outputChannel.appendLine(`Tags added/ensured at top of YAML list: ${summary}`);
@@ -380,19 +419,19 @@ async function deleteActiveFile(panel: vscode.WebviewPanel) {
 
         // First, add "deleted" tag to the YAML
         outputChannel.appendLine('Adding deleted tag...');
-        await addTagsToActiveFile(panel, { tag: 'deleted', includeArchive: false });
+        await addTagsToActiveFile(panel, { tag: YAML_KEYS.DELETED_DIR, includeArchive: false });
 
         // Save the file with the deleted tag
         await editor.document.save();
 
         const fileDir = path.dirname(filePath);
-        const deletedDir = path.join(fileDir, 'deleted');
+        const deletedDir = path.join(fileDir, YAML_KEYS.DELETED_DIR);
 
         // Create deleted directory if it doesn't exist
         try {
             await vscode.workspace.fs.createDirectory(vscode.Uri.file(deletedDir));
             outputChannel.appendLine(`Created deleted directory: ${deletedDir}`);
-        } catch (err) {
+        } catch {
             // Directory might already exist, that's ok
             outputChannel.appendLine(`Deleted directory exists or created: ${deletedDir}`);
         }
@@ -431,6 +470,35 @@ async function deleteActiveFile(panel: vscode.WebviewPanel) {
         vscode.window.showInformationMessage(`File moved to deleted folder: ${fileName}`);
     } catch (error) {
         const errorMsg = `Failed to delete file: ${String(error)}`;
+        outputChannel.appendLine(errorMsg);
+        vscode.window.showErrorMessage(errorMsg);
+    }
+}
+
+async function navigateToFile(panel: vscode.WebviewPanel, fileName: string) {
+    const editor = vscode.window.activeTextEditor ?? lastActiveEditor;
+
+    if (!editor) {
+        outputChannel.appendLine('No active editor for navigation');
+        return;
+    }
+
+    // Get the directory of the current file
+    const currentDir = path.dirname(editor.document.fileName);
+    const targetPath = path.join(currentDir, fileName);
+
+    try {
+        // Open the target file in preview mode (like single-click in file explorer)
+        // This allows navigating through files without filling up pinned tabs
+        const document = await vscode.workspace.openTextDocument(targetPath);
+        await vscode.window.showTextDocument(document, { preview: true, viewColumn: vscode.ViewColumn.One });
+
+        outputChannel.appendLine(`Navigated to: ${fileName}`);
+
+        // Update the webview with the new file's content
+        await updateWebviewContext(panel);
+    } catch (error) {
+        const errorMsg = `Failed to navigate to file: ${String(error)}`;
         outputChannel.appendLine(errorMsg);
         vscode.window.showErrorMessage(errorMsg);
     }
