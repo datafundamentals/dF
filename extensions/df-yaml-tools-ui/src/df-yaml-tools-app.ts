@@ -325,29 +325,6 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
             @navigate=${this._handleNavigate}>
           </df-yaml-nav>
           <div class="tag-form">
-            <md-outlined-text-field
-              label="Tag (optional)"
-              .value=${this.tagInput}
-              @input=${this._onTagInput}
-              @keydown=${this._onTagKeydown}
-              ?disabled=${this.isDirty}>
-            </md-outlined-text-field>
-            <div class="checkbox-row">
-              <md-checkbox
-                .checked=${false}
-                @change=${this._onDeleteToggle}
-                ?disabled=${this.isDirty}>
-              </md-checkbox>
-              <span @click=${this._onDeleteToggle}>delete</span>
-            </div>
-            <div class="checkbox-row">
-              <md-checkbox
-                .checked=${this.archiveChecked}
-                @change=${this._onArchiveToggle}
-                ?disabled=${this.isDirty}>
-              </md-checkbox>
-              <span @click=${this._onArchiveToggle}>archive</span>
-            </div>
             <div class="checkbox-row">
               <md-checkbox
                 .checked=${this.betterologyChecked}
@@ -388,6 +365,29 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
               </md-checkbox>
               <span @click=${this._onNbtrgToggle}>nbtrg</span>
             </div>
+            <div class="checkbox-row">
+              <md-checkbox
+                .checked=${this.archiveChecked}
+                @change=${this._onArchiveToggle}
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span @click=${this._onArchiveToggle}>archive</span>
+            </div>
+            <div class="checkbox-row">
+              <md-checkbox
+                .checked=${false}
+                @change=${this._onDeleteToggle}
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span @click=${this._onDeleteToggle}>delete</span>
+            </div>
+            <md-outlined-text-field
+              label="Tag (optional)"
+              .value=${this.tagInput}
+              @input=${this._onTagInput}
+              @keydown=${this._onTagKeydown}
+              ?disabled=${this.isDirty}>
+            </md-outlined-text-field>
           </div>
 
           ${this.isDirty ? html`
