@@ -7,6 +7,11 @@ import YAML, { isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Pair } from 'yaml';
 const YAML_KEYS = {
 	AI_TAGGING: 'AI-tagging',
 	ARCHIVE_TAG: 'archive',
+	BETTEROLOGY_TAG: 'betterology',
+	MARKETING_TAG: 'marketing',
+	CONTENT_TAG: 'content',
+	DEV_TAG: 'dev',
+	NBTRG_TAG: 'nbtrg',
 	DELETED_DIR: 'deleted'
 } as const;
 
@@ -107,7 +112,12 @@ export function activate(context: vscode.ExtensionContext) {
                                 if (currentPanel) {
                                     await addTagsToActiveFile(currentPanel, {
                                         tag: (message.tag ?? '').toString(),
-                                        includeArchive: Boolean(message.includeArchive)
+                                        includeArchive: Boolean(message.includeArchive),
+                                        includeBetterology: Boolean(message.includeBetterology),
+                                        includeMarketing: Boolean(message.includeMarketing),
+                                        includeContent: Boolean(message.includeContent),
+                                        includeDev: Boolean(message.includeDev),
+                                        includeNbtrg: Boolean(message.includeNbtrg)
                                     });
                                 } else {
                                     vscode.window.showErrorMessage('YAML Tools panel is not available.');
@@ -207,10 +217,26 @@ async function updateWebviewContext(panel: vscode.WebviewPanel) {
 }
 
 async function addArchiveTagToActiveFile(panel: vscode.WebviewPanel) {
-    await addTagsToActiveFile(panel, { tag: '', includeArchive: true });
+    await addTagsToActiveFile(panel, {
+        tag: '',
+        includeArchive: true,
+        includeBetterology: false,
+        includeMarketing: false,
+        includeContent: false,
+        includeDev: false,
+        includeNbtrg: false
+    });
 }
 
-async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: { tag: string; includeArchive: boolean }) {
+async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: {
+    tag: string;
+    includeArchive: boolean;
+    includeBetterology: boolean;
+    includeMarketing: boolean;
+    includeContent: boolean;
+    includeDev: boolean;
+    includeNbtrg: boolean;
+}) {
     const editor = vscode.window.activeTextEditor ?? lastActiveEditor;
 
     if (!editor) {
@@ -307,15 +333,26 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: { tag: stri
         ? tagInput.split(',').map(t => t.trim()).filter(t => t.length > 0)
         : [];
 
-    const archiveIndex = tagsSeq.items.findIndex((item: Scalar | YAMLMap | YAMLSeq | null | undefined) => item?.toString() === YAML_KEYS.ARCHIVE_TAG);
-    const hasArchive = archiveIndex >= 0;
+    // Helper function to handle tag add/remove
+    const handleTag = (tagKey: string, include: boolean) => {
+        const tagIndex = tagsSeq.items.findIndex((item: Scalar | YAMLMap | YAMLSeq | null | undefined) => item?.toString() === tagKey);
+        const hasTag = tagIndex >= 0;
 
-    if (opts.includeArchive && !hasArchive) {
-        tagsSeq.items.unshift(new YAML.Scalar(YAML_KEYS.ARCHIVE_TAG));
-    } else if (!opts.includeArchive && hasArchive) {
-        // Remove archive tag when checkbox is unchecked
-        tagsSeq.items.splice(archiveIndex, 1);
-    }
+        if (include && !hasTag) {
+            tagsSeq.items.unshift(new YAML.Scalar(tagKey));
+        } else if (!include && hasTag) {
+            // Remove tag when checkbox is unchecked
+            tagsSeq.items.splice(tagIndex, 1);
+        }
+    };
+
+    // Handle all checkbox tags
+    handleTag(YAML_KEYS.ARCHIVE_TAG, opts.includeArchive);
+    handleTag(YAML_KEYS.BETTEROLOGY_TAG, opts.includeBetterology);
+    handleTag(YAML_KEYS.MARKETING_TAG, opts.includeMarketing);
+    handleTag(YAML_KEYS.CONTENT_TAG, opts.includeContent);
+    handleTag(YAML_KEYS.DEV_TAG, opts.includeDev);
+    handleTag(YAML_KEYS.NBTRG_TAG, opts.includeNbtrg);
 
     // Add each parsed tag if it doesn't already exist
     for (const tag of parsedTags) {
@@ -358,6 +395,11 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: { tag: stri
 
     const summaryParts = [];
     if (opts.includeArchive) summaryParts.push(YAML_KEYS.ARCHIVE_TAG);
+    if (opts.includeBetterology) summaryParts.push(YAML_KEYS.BETTEROLOGY_TAG);
+    if (opts.includeMarketing) summaryParts.push(YAML_KEYS.MARKETING_TAG);
+    if (opts.includeContent) summaryParts.push(YAML_KEYS.CONTENT_TAG);
+    if (opts.includeDev) summaryParts.push(YAML_KEYS.DEV_TAG);
+    if (opts.includeNbtrg) summaryParts.push(YAML_KEYS.NBTRG_TAG);
     summaryParts.push(...parsedTags);
     const summary = summaryParts.length ? summaryParts.join(', ') : 'tagging';
 
@@ -419,7 +461,15 @@ async function deleteActiveFile(panel: vscode.WebviewPanel) {
 
         // First, add "deleted" tag to the YAML
         outputChannel.appendLine('Adding deleted tag...');
-        await addTagsToActiveFile(panel, { tag: YAML_KEYS.DELETED_DIR, includeArchive: false });
+        await addTagsToActiveFile(panel, {
+            tag: YAML_KEYS.DELETED_DIR,
+            includeArchive: false,
+            includeBetterology: false,
+            includeMarketing: false,
+            includeContent: false,
+            includeDev: false,
+            includeNbtrg: false
+        });
 
         // Save the file with the deleted tag
         await editor.document.save();

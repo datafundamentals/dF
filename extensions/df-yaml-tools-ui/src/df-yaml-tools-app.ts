@@ -15,6 +15,11 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   @state() private taggingMessage = '';
   @state() private tagInput = '';
   @state() private archiveChecked = true;
+  @state() private betterologyChecked = false;
+  @state() private marketingChecked = false;
+  @state() private contentChecked = false;
+  @state() private devChecked = false;
+  @state() private nbtrgChecked = false;
   @state() private yamlFiles: string[] = [];
 
   private vscode = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : undefined;
@@ -46,7 +51,7 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       this.taggingStatus = 'idle';
       this.taggingMessage = '';
       // Sync checkbox state with actual file content
-      this._syncArchiveCheckboxFromContent(message.data.content);
+      this._syncCheckboxesFromContent(message.data.content);
     }
 
     if (message.command === 'taggingResult') {
@@ -180,11 +185,18 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     }
   `;
 
-  private _syncArchiveCheckboxFromContent(content: string) {
-    // Simple string-based check for "archive" in AI-tagging section
-    // Look for AI-tagging: followed by - archive
-    const hasArchiveTag = /AI-tagging:\s*\n\s*-\s*archive\b/.test(content);
-    this.archiveChecked = hasArchiveTag;
+  private _syncCheckboxesFromContent(content: string) {
+    // Check for tags in AI-tagging section
+    // Match "- tagname" anywhere after "AI-tagging:"
+    const aiTaggingMatch = /AI-tagging:([\s\S]*?)(?=\n[^\s-]|\n\n|$)/.exec(content);
+    const aiTaggingSection = aiTaggingMatch ? aiTaggingMatch[1] : '';
+
+    this.archiveChecked = /^\s*-\s*archive\b/m.test(aiTaggingSection);
+    this.betterologyChecked = /^\s*-\s*betterology\b/m.test(aiTaggingSection);
+    this.marketingChecked = /^\s*-\s*marketing\b/m.test(aiTaggingSection);
+    this.contentChecked = /^\s*-\s*content\b/m.test(aiTaggingSection);
+    this.devChecked = /^\s*-\s*dev\b/m.test(aiTaggingSection);
+    this.nbtrgChecked = /^\s*-\s*nbtrg\b/m.test(aiTaggingSection);
   }
 
   private async _handleCountTokens() {
@@ -206,7 +218,12 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     this.vscode.postMessage({
       command: 'addTags',
       tag: trimmedTag,
-      includeArchive: this.archiveChecked
+      includeArchive: this.archiveChecked,
+      includeBetterology: this.betterologyChecked,
+      includeMarketing: this.marketingChecked,
+      includeContent: this.contentChecked,
+      includeDev: this.devChecked,
+      includeNbtrg: this.nbtrgChecked
     });
   }
 
@@ -244,6 +261,41 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   private _onArchiveToggle(event: Event) {
     const target = event.target as HTMLInputElement;
     this.archiveChecked = target.checked;
+    // Trigger tagging on checkbox change
+    this._handleAddTags();
+  }
+
+  private _onBetterologyToggle(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.betterologyChecked = target.checked;
+    // Trigger tagging on checkbox change
+    this._handleAddTags();
+  }
+
+  private _onMarketingToggle(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.marketingChecked = target.checked;
+    // Trigger tagging on checkbox change
+    this._handleAddTags();
+  }
+
+  private _onContentToggle(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.contentChecked = target.checked;
+    // Trigger tagging on checkbox change
+    this._handleAddTags();
+  }
+
+  private _onDevToggle(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.devChecked = target.checked;
+    // Trigger tagging on checkbox change
+    this._handleAddTags();
+  }
+
+  private _onNbtrgToggle(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.nbtrgChecked = target.checked;
     // Trigger tagging on checkbox change
     this._handleAddTags();
   }
@@ -295,6 +347,46 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
                 ?disabled=${this.isDirty}>
               </md-checkbox>
               <span @click=${this._onArchiveToggle}>archive</span>
+            </div>
+            <div class="checkbox-row">
+              <md-checkbox
+                .checked=${this.betterologyChecked}
+                @change=${this._onBetterologyToggle}
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span @click=${this._onBetterologyToggle}>betterology</span>
+            </div>
+            <div class="checkbox-row">
+              <md-checkbox
+                .checked=${this.marketingChecked}
+                @change=${this._onMarketingToggle}
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span @click=${this._onMarketingToggle}>marketing</span>
+            </div>
+            <div class="checkbox-row">
+              <md-checkbox
+                .checked=${this.contentChecked}
+                @change=${this._onContentToggle}
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span @click=${this._onContentToggle}>content</span>
+            </div>
+            <div class="checkbox-row">
+              <md-checkbox
+                .checked=${this.devChecked}
+                @change=${this._onDevToggle}
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span @click=${this._onDevToggle}>dev</span>
+            </div>
+            <div class="checkbox-row">
+              <md-checkbox
+                .checked=${this.nbtrgChecked}
+                @change=${this._onNbtrgToggle}
+                ?disabled=${this.isDirty}>
+              </md-checkbox>
+              <span @click=${this._onNbtrgToggle}>nbtrg</span>
             </div>
           </div>
 
