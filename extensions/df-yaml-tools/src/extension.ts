@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import YAML, { isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Pair, isPair } from 'yaml';
+import YAML, { isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Pair } from 'yaml';
+import { EnvUtils } from './utils/EnvUtils';
+import { YoutubeService } from './services/YoutubeService';
+import { YamlService } from './services/YamlService';
+import { callGemini } from '@df/state';
 
 // Constants
 const YAML_KEYS = {
@@ -46,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('df.openYamlTools', () => {
+vscode.commands.registerCommand('df.openYamlTools', () => {
 			outputChannel.appendLine('>>> Command: df.openYamlTools triggered');
 			const columnToShowIn = vscode.ViewColumn.Beside;
 
@@ -56,22 +60,22 @@ export function activate(context: vscode.ExtensionContext) {
 			} else {
 				outputChannel.appendLine('Creating new webview panel');
 				currentPanel = vscode.window.createWebviewPanel(
-					'dfYamlTools',
-					'DF YAML Tools',
-					columnToShowIn,
-					{
-						enableScripts: true,
+'dfYamlTools',
+'DF YAML Tools',
+columnToShowIn,
+{
+enableScripts: true,
                         // Restrict the webview to only loading content from our extension's `media` directory.
                         localResourceRoots: [
                             vscode.Uri.file(path.join(context.extensionPath, 'media', 'ui'))
                         ],
                         // Don't retain context when hidden - forces fresh load each time
                         retainContextWhenHidden: false
-					}
-				);
+}
+);
 
 				currentPanel.onDidDispose(
-					() => {
+() => {
 						outputChannel.appendLine('Panel disposed, clearing reference');
 						currentPanel = undefined;
 					},
@@ -82,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
                 // Set the webview's initial html content
                 const cacheToken = Date.now().toString();
                 outputChannel.appendLine(`Creating webview with cache token: ${cacheToken}`);
-				currentPanel.webview.html = getWebviewContent(
+currentPanel.webview.html = getWebviewContent(
                     currentPanel.webview,
                     context.extensionUri,
                     cacheToken
@@ -94,7 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
                         outputChannel.appendLine(`Received message from webview: ${message.command}`);
                         switch (message.command) {
                             case 'alert':
-                                vscode.window.showInformationMessage(message.text);
+                                vscode.window.showErrorMessage(message.text);
                                 return;
                             case 'requestContent':
                                 if (currentPanel) {
@@ -145,82 +149,86 @@ export function activate(context: vscode.ExtensionContext) {
                     undefined,
                     context.subscriptions
                 );
-			}
+                
+                // Initial update
+                updateWebviewContext(currentPanel);
+}
+})
+);
 
-            // Update content based on active editor
-            outputChannel.appendLine('Sending initial content to webview');
+    // Track active editor changes
+    vscode.window.onDidChangeActiveTextEditor(editor => {
+        if (editor) {
+            lastActiveEditor = editor;
+            if (currentPanel && currentPanel.visible) {
+                updateWebviewContext(currentPanel);
+            }
+        }
+    });
+
+    // Track document changes (for isDirty state and content updates)
+    vscode.workspace.onDidChangeTextDocument(event => {
+        if (currentPanel && currentPanel.visible && lastActiveEditor && event.document === lastActiveEditor.document) {
             updateWebviewContext(currentPanel);
-		})
-	);
+        }
+    });
 
-    // Listen for active editor changes (registered globally, outside command)
-    context.subscriptions.push(
-        vscode.window.onDidChangeActiveTextEditor(_editor => {
-            outputChannel.appendLine(`Active editor changed: ${_editor?.document.fileName || 'none'}`);
-            if (_editor) {
-                lastActiveEditor = _editor;
-            }
-            if (currentPanel && currentPanel.visible) {
-                outputChannel.appendLine('Panel visible, updating context');
-                updateWebviewContext(currentPanel);
-            }
-        })
-    );
+    // Initial update if panel is restored
+    if (vscode.window.activeTextEditor) {
+        lastActiveEditor = vscode.window.activeTextEditor;
+    }
+}
 
-    // Listen for document changes (registered globally, outside command)
-    // This fires whenever text is edited, file becomes dirty
-    context.subscriptions.push(
-        vscode.workspace.onDidChangeTextDocument(_event => {
-            // Skip output channel and other non-file documents to avoid infinite loops
-            if (_event.document.uri.scheme !== 'file') {
-                return;
-            }
-
-            outputChannel.appendLine(`Document changed: ${_event.document.fileName}, isDirty=${_event.document.isDirty}`);
-            if (currentPanel && currentPanel.visible) {
-                outputChannel.appendLine('Panel visible, updating context');
-                updateWebviewContext(currentPanel);
-            }
-        })
-    );
-
-    // Listen for file save events (explicitly handle save to update isDirty)
-    context.subscriptions.push(
-        vscode.workspace.onDidSaveTextDocument(_document => {
-            outputChannel.appendLine(`Document saved: ${_document.fileName}`);
-            if (currentPanel && currentPanel.visible) {
-                outputChannel.appendLine('Panel visible, updating context');
-                updateWebviewContext(currentPanel);
-            }
-        })
-    );
+function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, _cacheToken: string) {
+    // The UI is built into media/ui/assets/index.js
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'ui', 'assets', 'index.js'));
+    
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DF YAML Tools</title>
+</head>
+<body>
+    <df-yaml-tools-app></df-yaml-tools-app>
+    <script type="module" src="${scriptUri}"></script>
+</body>
+</html>`;
 }
 
 async function updateWebviewContext(panel: vscode.WebviewPanel) {
     const editor = vscode.window.activeTextEditor ?? lastActiveEditor;
-
-    // Only send if we have an active editor
     if (!editor) {
-        outputChannel.appendLine('No active editor, skipping update');
+        // Send empty state or error
         return;
     }
 
-    if (vscode.window.activeTextEditor) {
-        lastActiveEditor = vscode.window.activeTextEditor;
-    }
     const fileName = path.basename(editor.document.fileName);
-    const content = editor.document.getText();
-    const isDirty = editor.document.isDirty;
+    
+    // Check if it's a YAML file
+    if (!fileName.endsWith('.yaml') && !fileName.endsWith('.yml')) {
+        return;
+    }
 
-    // Get list of YAML files in the same directory
-    const yamlFiles = await getYamlFilesInDirectory(editor.document.fileName);
-
-    outputChannel.appendLine(`Sending to webview: fileName="${fileName}", isDirty=${isDirty}, contentLength=${content.length}, yamlFiles=${yamlFiles.length}`);
-
-    panel.webview.postMessage({
-        command: 'updateContent',
-        data: { fileName, content, isDirty, yamlFiles }
-    });
+    try {
+        const content = editor.document.getText();
+        const isDirty = editor.document.isDirty;
+        const yamlFiles = await getYamlFilesInDirectory(editor.document.fileName);
+        
+        panel.webview.postMessage({ 
+            command: 'updateContent', 
+            data: {
+                fileName,
+                content,
+                isDirty,
+                yamlFiles
+            }
+        });
+    } catch (error) {
+        const errorMsg = `Failed to update context: ${String(error)}`;
+        outputChannel.appendLine(errorMsg);
+    }
 }
 
 async function addArchiveTagToActiveFile(panel: vscode.WebviewPanel) {
@@ -334,7 +342,7 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: {
         sequenceItems.unshift(aiMap);
     }
 
-    // Parse comma-delimited tags (e.g., "frog, cat whiskers" -> ["frog", "cat whiskers"])
+    // Parse comma-delimited tags
     const tagInput = opts.tag.trim();
     const parsedTags = tagInput
         ? tagInput.split(',').map(t => t.trim()).filter(t => t.length > 0)
@@ -413,31 +421,6 @@ async function addTagsToActiveFile(panel: vscode.WebviewPanel, opts: {
     outputChannel.appendLine(`Tags added/ensured at top of YAML list: ${summary}`);
     panel.webview.postMessage({ command: 'taggingResult', status: 'success', message: `Added ${summary}` });
     updateWebviewContext(panel);
-}
-
-function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, versionToken: string) {
-    // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-    // We assume the UI package is built into media/ui
-    const uiDistPath = vscode.Uri.joinPath(extensionUri, 'media', 'ui');
-    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(uiDistPath, 'assets', 'index.js'));
-
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src ${webview.cspSource}; font-src ${webview.cspSource};">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>DF YAML Tools</title>
-</head>
-<body>
-    <!-- Cache bust: ${versionToken} -->
-    <df-yaml-tools-app></df-yaml-tools-app>
-    <script type="module" src="${scriptUri.toString()}?v=${versionToken}"></script>
-</body>
-</html>`;
 }
 
 async function deleteActiveFile(panel: vscode.WebviewPanel) {
@@ -562,135 +545,92 @@ async function navigateToFile(panel: vscode.WebviewPanel, fileName: string) {
 }
 
 async function extractYoutubeVitals(panel: vscode.WebviewPanel) {
+    outputChannel.appendLine('extractYoutubeVitals command received');
     const editor = vscode.window.activeTextEditor ?? lastActiveEditor;
     if (!editor) {
         vscode.window.showErrorMessage('No active editor found.');
+        panel.webview.postMessage({ command: 'alert', text: 'No active editor found.' });
         return;
     }
 
     const rawText = editor.document.getText();
     const doc = YAML.parseDocument(rawText);
     
-    const targetNodes: { node: Scalar, path: readonly any[] }[] = [];
-    const fallbackNodes: { node: Scalar, path: readonly any[] }[] = [];
-    
-    YAML.visit(doc, {
-        Scalar(_key, node, path) {
-            if (typeof node.value === 'string') {
-                if (/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/.test(node.value)) {
-                    
-                    // Check if already processed
-                    let isProcessed = false;
-                    const parent = path[path.length - 1];
-                    if (parent && isPair(parent) && parent.key && (parent.key as Scalar).value === 'url') {
-                        const grandparent = path[path.length - 2];
-                        if (grandparent && isMap(grandparent)) {
-                            if (grandparent.has('ai_vitals')) {
-                                isProcessed = true;
-                            }
-                        }
-                    }
-
-                    if (!isProcessed) {
-                        targetNodes.push({ node, path: [...path] });
-                    } else {
-                        fallbackNodes.push({ node, path: [...path] });
-                    }
-                }
-            }
-        }
-    });
+    // Use YamlService to find links
+    outputChannel.appendLine('Searching for YouTube links...');
+    const { targetNodes, fallbackNodes } = YamlService.findYoutubeLinks(doc);
+    outputChannel.appendLine(`Found ${targetNodes.length} target nodes and ${fallbackNodes.length} fallback nodes.`);
 
     // If we have unprocessed nodes, process ALL of them.
     // If we have NO unprocessed nodes, process the first fallback node (re-run).
     const nodesToProcess = targetNodes.length > 0 ? targetNodes : (fallbackNodes.length > 0 ? [fallbackNodes[0]] : []);
 
     if (nodesToProcess.length === 0) {
+        outputChannel.appendLine('No YouTube links found to process.');
         vscode.window.showErrorMessage('No YouTube link found.');
+        panel.webview.postMessage({ command: 'alert', text: 'No YouTube link found.' });
         return;
     }
 
-    let apiKey = process.env.GEMINI_API_KEY;
+    // Get API Keys using EnvUtils
+    outputChannel.appendLine('Checking API keys...');
+    let geminiApiKey = EnvUtils.getGeminiApiKey(outputChannel);
+    const youtubeApiKey = EnvUtils.getYoutubeApiKey(outputChannel);
 
-    // Try loading from .env.keys in workspace root
-    if (!apiKey && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-        try {
-            const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            const envKeysPath = path.join(workspaceRoot, '.env.keys');
-            if (fs.existsSync(envKeysPath)) {
-                const envContent = fs.readFileSync(envKeysPath, 'utf8');
-                // Simple parsing for GEMINI_API_KEY=value
-                const match = envContent.match(/^GEMINI_API_KEY=(.*)$/m);
-                if (match) {
-                    apiKey = match[1].trim();
-                    // Remove quotes if present
-                    if ((apiKey.startsWith('"') && apiKey.endsWith('"')) || (apiKey.startsWith("'") && apiKey.endsWith("'"))) {
-                        apiKey = apiKey.slice(1, -1);
-                    }
-                    outputChannel.appendLine('Loaded GEMINI_API_KEY from .env.keys');
-                }
-            }
-        } catch (e) {
-            outputChannel.appendLine(`Error reading .env.keys: ${e}`);
+    if (!geminiApiKey) {
+        outputChannel.appendLine('GEMINI_API_KEY missing. Prompting user...');
+        geminiApiKey = await vscode.window.showInputBox({
+            prompt: 'Enter your Gemini API Key',
+            password: true,
+            ignoreFocusOut: true
+        });
+
+        if (!geminiApiKey) {
+            outputChannel.appendLine('User cancelled API key input.');
+            vscode.window.showErrorMessage('GEMINI_API_KEY is required.');
+            panel.webview.postMessage({ command: 'alert', text: 'GEMINI_API_KEY is required.' });
+            return;
         }
     }
 
-    if (!apiKey) {
-        vscode.window.showErrorMessage('GEMINI_API_KEY not found in environment or .env.keys');
-        return;
+    if (!youtubeApiKey) {
+        outputChannel.appendLine('YOUTUBE_API_KEY missing. Will attempt fallback scraping.');
     }
 
     try {
+        outputChannel.appendLine(`Processing ${nodesToProcess.length} video(s)...`);
         panel.webview.postMessage({ command: 'alert', text: `Extracting vitals for ${nodesToProcess.length} video(s)...` });
         
         // Process in parallel
         await Promise.all(nodesToProcess.map(async (selected) => {
             const youtubeUrl = selected.node.value as string;
-            const vitals = await callGeminiForYoutube(apiKey!, youtubeUrl);
-
-            const vitalsMap = new YAMLMap();
-            vitalsMap.add(new Pair('title', vitals.title || 'Unknown'));
-            vitalsMap.add(new Pair('summary', vitals.summary || ''));
             
-            if (vitals.keyPoints && Array.isArray(vitals.keyPoints)) {
-                const seq = new YAMLSeq();
-                vitals.keyPoints.forEach((p: string) => seq.add(new Scalar(p)));
-                vitalsMap.add(new Pair('keyPoints', seq));
+            // 1. Get Video Details from YouTube API or Scraping
+            let videoContext = `YouTube Video URL: ${youtubeUrl}`;
+            try {
+                const details = await YoutubeService.getVideoDetails(youtubeUrl, youtubeApiKey);
+                videoContext += `\n\nVideo Title: ${details.title}\n\nVideo Description: ${details.description}\n\nChannel: ${details.channelTitle}\n\nPublished: ${details.publishedAt}\n\nDuration: ${details.duration}`;
+                outputChannel.appendLine(`Fetched details for: ${details.title}`);
+            } catch (e) {
+                outputChannel.appendLine(`Failed to fetch YouTube details: ${e}`);
+                // Fallback to just URL if API fails
             }
 
-            if (vitals.speakers && Array.isArray(vitals.speakers)) {
-                const seq = new YAMLSeq();
-                vitals.speakers.forEach((p: string) => seq.add(new Scalar(p)));
-                vitalsMap.add(new Pair('speakers', seq));
-            }
+            // 2. Call Gemini
+            const prompt = `Analyze the following YouTube video information and extract the title, summary, key points, and speakers.
+    
+${videoContext}
 
-            const { node, path } = selected;
-            const parent = path[path.length - 1];
+Return as JSON with keys: title, summary, keyPoints (array of strings), speakers (array of strings).`;
 
-            // Case 1: Already processed (updating existing)
-            if (parent && isPair(parent) && parent.key && (parent.key as Scalar).value === 'url') {
-                const grandparent = path[path.length - 2];
-                if (grandparent && isMap(grandparent)) {
-                    grandparent.set('ai_vitals', vitalsMap);
-                }
-            } 
-            // Case 2: Raw string (converting to map)
-            else {
-                const newMap = new YAMLMap();
-                newMap.add(new Pair('url', node.value));
-                newMap.add(new Pair('ai_vitals', vitalsMap));
+            const vitals = await callGemini({
+                apiKey: geminiApiKey,
+                prompt: prompt,
+                logger: (msg) => outputChannel.appendLine(msg)
+            });
 
-                if (isSeq(parent)) {
-                    const index = parent.items.indexOf(node);
-                    if (index !== -1) {
-                        parent.items[index] = newMap;
-                    }
-                } else if (isPair(parent)) {
-                    parent.value = newMap;
-                } else if (isMap(parent)) {
-                    // This is tricky if we don't know the key, but usually we are in a sequence or a value of a pair
-                }
-            }
+            // 3. Update YAML
+            YamlService.updateVitals(doc, selected.node, selected.path, vitals);
         }));
 
         const updatedText = doc.toString();
@@ -704,95 +644,13 @@ async function extractYoutubeVitals(panel: vscode.WebviewPanel) {
         await editor.document.save();
         
         panel.webview.postMessage({ command: 'alert', text: 'Vitals extracted!' });
-        updateWebviewContext(panel);
+        // Context update will happen automatically via onDidChangeTextDocument
 
     } catch (e) {
         vscode.window.showErrorMessage('Error: ' + e);
         outputChannel.appendLine('Error extracting vitals: ' + e);
+        panel.webview.postMessage({ command: 'alert', text: 'Error: ' + e });
     }
-}
-
-async function callGeminiForYoutube(apiKey: string, url: string): Promise<any> {
-    // 1. Fetch the YouTube page content to get real metadata
-    // Gemini API cannot "watch" videos from a URL directly, so we must provide context.
-    let videoContext = `YouTube Video URL: ${url}`;
-    try {
-        const pageResponse = await fetch(url);
-        if (pageResponse.ok) {
-            const html = await pageResponse.text();
-            
-            // Simple regex to extract title and description
-            const titleMatch = html.match(/<title>(.*?)<\/title>/);
-            const descMatch = html.match(/<meta name="description" content="(.*?)">/);
-            
-            const title = titleMatch ? titleMatch[1].replace(' - YouTube', '') : '';
-            const description = descMatch ? descMatch[1] : '';
-            
-            if (title || description) {
-                videoContext += `\n\nVideo Title: ${title}\n\nVideo Description: ${description}`;
-                outputChannel.appendLine(`Fetched metadata for: ${title}`);
-            }
-        }
-    } catch (e) {
-        outputChannel.appendLine(`Failed to fetch YouTube page metadata: ${e}`);
-        // Fallback to just the URL if fetch fails
-    }
-
-    const prompt = `Analyze the following YouTube video information and extract the title, summary, key points, and speakers.
-    
-${videoContext}
-
-Return as JSON with keys: title, summary, keyPoints (array of strings), speakers (array of strings).`;
-    
-    // Try the newest experimental model first, then fallbacks
-    const models = ['gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-1.5-pro'];
-    
-    let lastError;
-
-    for (const model of models) {
-        try {
-            outputChannel.appendLine(`Calling Gemini model: ${model}`);
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                const errorMsg = `${response.status} ${response.statusText}: ${errorText}`;
-                
-                // If 404, it means model not found, so try next one.
-                if (response.status === 404) {
-                    lastError = new Error(`Model ${model} not found: ${errorMsg}`);
-                    continue;
-                }
-                throw new Error(errorMsg);
-            }
-
-            const data = await response.json() as any;
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!text) throw new Error('No response text from Gemini');
-            
-            const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                return JSON.parse(jsonMatch[1] || jsonMatch[0]);
-            }
-            return { title: 'Extracted', summary: text, keyPoints: [] };
-
-        } catch (e) {
-            lastError = e;
-            // If it's a 404-like error, continue to next model
-            if (e instanceof Error && (e.message.includes('404') || e.message.includes('not found'))) {
-                continue;
-            }
-            throw e;
-        }
-    }
-    
-    throw lastError || new Error('Failed to find a working Gemini model');
 }
 
 export function deactivate() {}

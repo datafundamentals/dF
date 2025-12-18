@@ -7,7 +7,7 @@ export default defineConfig({
 	dts: false,
 	target: 'node18',
 	external: ['vscode'],
-	noExternal: ['yaml'],
+	noExternal: ['yaml', '@df/state'],
 	minify: false,
 	sourcemap: true
 });

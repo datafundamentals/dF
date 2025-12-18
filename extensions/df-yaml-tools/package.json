@@ -2,7 +2,7 @@
   "name": "df-yaml-tools",
   "displayName": "DF YAML Tools",
   "description": "YAML tools for DF Monorepo",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "publisher": "datafundamentals",
   "repository": {
     "type": "git",
@@ -20,7 +20,8 @@
   ],
   "main": "./dist/extension.js",
   "dependencies": {
-    "yaml": "^2.6.1"
+    "yaml": "^2.6.1",
+    "@df/state": "workspace:*"
   },
   "contributes": {
     "commands": [

@@ -16,3 +16,4 @@ export * from './stores/seed-data.store.js';
 export * from './stores/user-admin.store.js';
 export * from './init-firebase.js';
 export * from './utils/auth-guard.js';
+export * from './services/gemini.service.js';
