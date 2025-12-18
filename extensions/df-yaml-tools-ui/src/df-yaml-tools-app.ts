@@ -3,6 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { SignalWatcher } from '@lit-labs/signals';
 import { markdownTokensState, updateTokenCount } from '@df/state';
 import type { MarkdownTokensState } from '@df/types';
+import '@material/web/progress/circular-progress.js';
 
 declare const acquireVsCodeApi: undefined | (() => { postMessage: (message: unknown) => void });
 
@@ -21,6 +22,8 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   @state() private devChecked = false;
   @state() private nbtrgChecked = false;
   @state() private yamlFiles: string[] = [];
+  @state() private hasYoutubeLink = false;
+  @state() private extractingVitals = false;
 
   private vscode = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : undefined;
   private _messageHandler = this._handleMessage.bind(this);
@@ -52,6 +55,9 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       this.taggingMessage = '';
       // Sync checkbox state with actual file content
       this._syncCheckboxesFromContent(message.data.content);
+      // Check for YouTube links
+      this.hasYoutubeLink = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/.test(message.data.content);
+      this.extractingVitals = false;
     }
 
     if (message.command === 'taggingResult') {
@@ -61,6 +67,11 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       if (message.status === 'success') {
         this.tagInput = '';
       }
+    }
+
+    if (message.command === 'alert') {
+      // If we get an alert (like "Vitals extracted!"), stop the spinner
+      this.extractingVitals = false;
     }
   }
 
@@ -310,6 +321,14 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     });
   }
 
+  private _handleExtractYoutubeVitals() {
+    if (!this.vscode) return;
+    this.extractingVitals = true;
+    this.vscode.postMessage({
+      command: 'extractYoutubeVitals'
+    });
+  }
+
   override render() {
     const state = markdownTokensState.get() as MarkdownTokensState;
     const isError = state.status === 'error';
@@ -411,6 +430,16 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
           <span class="file-name">${this.fileName}</span>
           ${!this.isDirty ? html`
             <span class="saved-indicator">● saved</span>
+          ` : ''}
+          ${this.hasYoutubeLink ? html`
+            <button
+              @click=${this._handleExtractYoutubeVitals}
+              ?disabled=${this.isDirty || this.extractingVitals}
+              style="display: flex; align-items: center; gap: 8px;">
+              ${this.extractingVitals 
+                ? html`<md-circular-progress indeterminate style="--md-circular-progress-size: 16px;"></md-circular-progress> extracting...` 
+                : 'extract vitals'}
+            </button>
           ` : ''}
           <button
             @click=${this._handleCountTokens}
