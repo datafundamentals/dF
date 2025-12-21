@@ -6,6 +6,7 @@ import type { MarkdownTokensState } from '@df/types';
 import '@material/web/progress/circular-progress.js';
 
 declare const acquireVsCodeApi: undefined | (() => { postMessage: (message: unknown) => void });
+declare const __BUILD_DATE__: string;
 
 @customElement('df-yaml-tools-app')
 export class DfYamlToolsApp extends SignalWatcher(LitElement) {
@@ -36,6 +37,10 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     window.addEventListener('message', this._messageHandler);
+    console.log(
+      `%c df-yaml-tools-ui built: ${new Date(__BUILD_DATE__).toLocaleString()}`,
+      'color: #00ff00; font-weight: bold;'
+    );
   }
 
   override disconnectedCallback() {

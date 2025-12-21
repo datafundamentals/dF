@@ -5,7 +5,7 @@ import YAML, { isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Pair } from 'yaml';
 import { EnvUtils } from './utils/EnvUtils';
 import { YoutubeService } from './services/YoutubeService';
 import { YamlService } from './services/YamlService';
-import { callGemini } from '@df/state';
+import { callGemini } from './services/gemini.service';
 
 // Constants
 const YAML_KEYS = {
@@ -45,7 +45,8 @@ async function getYamlFilesInDirectory(filePath: string): Promise<string[]> {
 
 export function activate(context: vscode.ExtensionContext) {
 	outputChannel.appendLine('=== DF YAML Tools Extension Activated ===');
-    vscode.window.showInformationMessage('DF YAML Tools Extension Activated!');
+	outputChannel.appendLine(`Runtime timestamp: ${new Date().toLocaleTimeString()}`);
+	vscode.window.showInformationMessage('DF YAML Tools Extension Activated!');
 
 	let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
@@ -179,7 +180,7 @@ currentPanel.webview.html = getWebviewContent(
     }
 }
 
-function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, _cacheToken: string) {
+function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, cacheToken: string) {
     // The UI is built into media/ui/assets/index.js
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'ui', 'assets', 'index.js'));
     
@@ -192,7 +193,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, _c
 </head>
 <body>
     <df-yaml-tools-app></df-yaml-tools-app>
-    <script type="module" src="${scriptUri}"></script>
+    <script type="module" src="${scriptUri}?v=${cacheToken}"></script>
 </body>
 </html>`;
 }

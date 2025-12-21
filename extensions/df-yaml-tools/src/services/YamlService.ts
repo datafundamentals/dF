@@ -1,6 +1,6 @@
 import * as YAML from 'yaml';
 import { isMap, isPair, isSeq, Scalar, YAMLMap, Pair, YAMLSeq } from 'yaml';
-import { GeminiResponse } from '@df/state';
+import { GeminiResponse } from './gemini.service';
 
 export interface YoutubeNode {
     node: Scalar;
