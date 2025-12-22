@@ -156,6 +156,13 @@ currentPanel.webview.html = getWebviewContent(
                                     await handleSearchElastic(currentPanel, message.query, Boolean(message.fuzzy));
                                 }
                                 return;
+                            case 'openDocument':
+                                if (message.id && message.path) {
+                                    await openVirtualDocument(message.id, message.path, message.index);
+                                } else {
+                                    vscode.window.showErrorMessage('Missing document id or path.');
+                                }
+                                return;
                         }
                     },
                     undefined,
@@ -180,6 +187,11 @@ currentPanel.webview.html = getWebviewContent(
 
     // Track document changes (for isDirty state and content updates)
     vscode.workspace.onDidChangeTextDocument(event => {
+        // Ignore output channel changes to prevent infinite loops
+        if (event.document.uri.scheme === 'output') {
+            return;
+        }
+        
         if (currentPanel && currentPanel.visible && lastActiveEditor && event.document === lastActiveEditor.document) {
             updateWebviewContext(currentPanel);
         }
@@ -188,6 +200,26 @@ currentPanel.webview.html = getWebviewContent(
     // Initial update if panel is restored
     if (vscode.window.activeTextEditor) {
         lastActiveEditor = vscode.window.activeTextEditor;
+    }
+}
+
+async function openVirtualDocument(id: string, docPath: string, indexOverride?: string) {
+    const index = indexOverride || process.env.ELASTIC_INDEX || 'daily-batch';
+    const safeIndex = encodeURIComponent(index);
+    const safePath = docPath
+        .split('/')
+        .map(segment => encodeURIComponent(segment))
+        .join('/');
+    const safeId = encodeURIComponent(id);
+    const uri = vscode.Uri.parse(`elasticsearch://${safeIndex}/${safePath}?id=${safeId}`);
+
+    try {
+        await vscode.window.showTextDocument(uri, { preview: true, viewColumn: vscode.ViewColumn.One });
+        outputChannel.appendLine(`Opened virtual document: ${uri.toString()}`);
+    } catch (error) {
+        const errorMsg = `Failed to open virtual document: ${String(error)}`;
+        outputChannel.appendLine(errorMsg);
+        vscode.window.showErrorMessage(errorMsg);
     }
 }
 

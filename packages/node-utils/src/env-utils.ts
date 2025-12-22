@@ -14,7 +14,11 @@ export interface Logger {
  * Shared across all dF extensions and Node.js tools
  */
 export class EnvUtils {
+    private static cache: { [key: string]: string } = {};
+
     static getGeminiApiKey(logger?: Logger): string | undefined {
+        if (this.cache['GEMINI_API_KEY']) return this.cache['GEMINI_API_KEY'];
+
         let apiKey = process.env.GEMINI_API_KEY;
 
         // Helper to parse key from file
@@ -64,13 +68,22 @@ export class EnvUtils {
                 logger?.appendLine(`Error reading workspace .env.keys: ${e}`);
             }
         }
+        
+        if (apiKey) {
+            this.cache['GEMINI_API_KEY'] = apiKey;
+        }
         return apiKey;
     }
 
     static getYoutubeApiKey(logger?: Logger): string | undefined {
+        if (this.cache['YOUTUBE_API_KEY']) return this.cache['YOUTUBE_API_KEY'];
+
         // 1. Try environment variable
         let apiKey = process.env.YOUTUBE_API_KEY;
-        if (apiKey) return apiKey;
+        if (apiKey) {
+            this.cache['YOUTUBE_API_KEY'] = apiKey;
+            return apiKey;
+        }
 
         // Helper to parse key from file
         const parseKey = (filePath: string, keyName: string): string | undefined => {
@@ -98,6 +111,7 @@ export class EnvUtils {
         apiKey = parseKey(homeEnvPath, 'YOUTUBE_API_KEY');
         if (apiKey) {
             logger?.appendLine('Loaded YOUTUBE_API_KEY from ~/.env.keys');
+            this.cache['YOUTUBE_API_KEY'] = apiKey;
             return apiKey;
         }
 
@@ -110,6 +124,7 @@ export class EnvUtils {
                 const match = envContent.match(/YOUTUBE_API_KEY=(.*)/);
                 if (match) {
                     apiKey = match[1].trim();
+                    this.cache['YOUTUBE_API_KEY'] = apiKey;
                     return apiKey;
                 }
             }
@@ -121,9 +136,14 @@ export class EnvUtils {
     }
 
     static getElasticApiKey(logger?: Logger): string | undefined {
+        if (this.cache['ELASTIC_API_KEY']) return this.cache['ELASTIC_API_KEY'];
+
         // 1. Try environment variable
         let apiKey = process.env.ELASTIC_API_KEY;
-        if (apiKey) return apiKey;
+        if (apiKey) {
+            this.cache['ELASTIC_API_KEY'] = apiKey;
+            return apiKey;
+        }
 
         // Helper to parse key from file
         const parseKey = (filePath: string, keyName: string): string | undefined => {
@@ -151,6 +171,7 @@ export class EnvUtils {
         apiKey = parseKey(homeEnvPath, 'ELASTIC_API_KEY');
         if (apiKey) {
             logger?.appendLine('Loaded ELASTIC_API_KEY from ~/.env.keys');
+            this.cache['ELASTIC_API_KEY'] = apiKey;
             return apiKey;
         }
 
@@ -161,6 +182,7 @@ export class EnvUtils {
             apiKey = parseKey(envKeysPath, 'ELASTIC_API_KEY');
             if (apiKey) {
                 logger?.appendLine('Loaded ELASTIC_API_KEY from workspace .env.keys');
+                this.cache['ELASTIC_API_KEY'] = apiKey;
                 return apiKey;
             }
         } catch (e) {

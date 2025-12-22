@@ -396,7 +396,7 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
 
     // Send message to extension to open the virtual document
     this.vscode.postMessage({
-      command: 'openVirtualDocument',
+      command: 'openDocument',
       id: result.id,
       path: result.source.path
     });
