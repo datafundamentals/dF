@@ -31,6 +31,72 @@ export interface IndexResult {
     error?: string;
 }
 
+export interface SearchResult {
+    success: boolean;
+    hits?: any[];
+    error?: string;
+}
+
+/**
+ * Search for documents in Elasticsearch
+ *
+ * @param query - The search query
+ * @param apiKey - Elasticsearch API key
+ * @param options - Optional endpoint and index configuration
+ * @returns Promise<SearchResult>
+ */
+export async function searchDocuments(
+    query: string,
+    apiKey: string,
+    fuzzy: boolean = false,
+    options: ElasticIndexOptions = {}
+): Promise<SearchResult> {
+    const endpoint = options.endpoint || process.env.ELASTIC_ENDPOINT || 'http://localhost:9200';
+    const index = options.index || process.env.ELASTIC_INDEX || 'daily-batch';
+
+    try {
+        const url = `${endpoint}/${index}/_search`;
+        const searchBody = {
+            query: {
+                multi_match: {
+                    query: query,
+                    fields: ['content', 'filename', 'path'],
+                    fuzziness: fuzzy ? 'AUTO' : '0'
+                }
+            }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `ApiKey ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(searchBody),
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            return {
+                success: false,
+                error: `Elasticsearch search failed (${response.status}): ${errorBody}`
+            };
+        }
+
+        const data = await response.json();
+        return {
+            success: true,
+            hits: data.hits.hits
+        };
+
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error occurred'
+        };
+    }
+}
+
 /**
  * Verify that a document exists in Elasticsearch
  *

@@ -3,11 +3,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 import YAML, { isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Pair } from 'yaml';
 import { EnvUtils } from '@df/node-utils';
-import { archiveFileToDeleted } from '@df/extensions-shared';
+import { archiveFileToDeleted, indexDocument, verifyDocument, searchDocuments } from '@df/extensions-shared';
 import { YoutubeService } from './services/YoutubeService';
 import { YamlService } from './services/YamlService';
 import { callGemini } from './services/gemini.service';
-import { indexDocument, verifyDocument } from './services/elastic.service';
 
 // Constants
 const YAML_KEYS = {
@@ -152,6 +151,11 @@ currentPanel.webview.html = getWebviewContent(
                                     await handleMigrateActiveFile(currentPanel);
                                 }
                                 return;
+                            case 'searchElastic':
+                                if (currentPanel && message.query) {
+                                    await handleSearchElastic(currentPanel, message.query, Boolean(message.fuzzy));
+                                }
+                                return;
                         }
                     },
                     undefined,
@@ -206,9 +210,22 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ca
 }
 
 async function updateWebviewContext(panel: vscode.WebviewPanel) {
+    const apiKey = EnvUtils.getElasticApiKey(outputChannel);
+    outputChannel.appendLine(`[DEBUG] updateWebviewContext: apiKey found? ${!!apiKey}`);
+
     const editor = vscode.window.activeTextEditor ?? lastActiveEditor;
     if (!editor) {
-        // Send empty state or error
+        // Send just API key and empty state
+        panel.webview.postMessage({ 
+            command: 'updateContent', 
+            data: {
+                fileName: 'No active file',
+                content: '',
+                isDirty: false,
+                yamlFiles: [],
+                apiKey
+            }
+        });
         return;
     }
 
@@ -216,6 +233,17 @@ async function updateWebviewContext(panel: vscode.WebviewPanel) {
     
     // Check if it's a YAML file
     if (!fileName.endsWith('.yaml') && !fileName.endsWith('.yml')) {
+        // Send API key even if not YAML
+        panel.webview.postMessage({ 
+            command: 'updateContent', 
+            data: {
+                fileName: fileName + ' (not YAML)',
+                content: '',
+                isDirty: false,
+                yamlFiles: [],
+                apiKey
+            }
+        });
         return;
     }
 
@@ -230,7 +258,8 @@ async function updateWebviewContext(panel: vscode.WebviewPanel) {
                 fileName,
                 content,
                 isDirty,
-                yamlFiles
+                yamlFiles,
+                apiKey
             }
         });
     } catch (error) {
@@ -549,6 +578,50 @@ async function navigateToFile(panel: vscode.WebviewPanel, fileName: string) {
         const errorMsg = `Failed to navigate to file: ${String(error)}`;
         outputChannel.appendLine(errorMsg);
         vscode.window.showErrorMessage(errorMsg);
+    }
+}
+
+async function handleSearchElastic(panel: vscode.WebviewPanel, query: string, fuzzy: boolean = false) {
+    outputChannel.appendLine(`Searching Elasticsearch for: ${query} (fuzzy: ${fuzzy})`);
+    
+    const apiKey = EnvUtils.getElasticApiKey(outputChannel);
+    if (!apiKey) {
+        const errorMsg = 'ELASTIC_API_KEY not found';
+        outputChannel.appendLine(errorMsg);
+        panel.webview.postMessage({
+            command: 'searchResult',
+            status: 'error',
+            message: errorMsg
+        });
+        return;
+    }
+
+    try {
+        const result = await searchDocuments(query, apiKey, fuzzy);
+        
+        if (result.success) {
+            outputChannel.appendLine(`Search successful. Found ${result.hits?.length || 0} hits.`);
+            panel.webview.postMessage({
+                command: 'searchResult',
+                status: 'success',
+                results: result.hits
+            });
+        } else {
+            outputChannel.appendLine(`Search failed: ${result.error}`);
+            panel.webview.postMessage({
+                command: 'searchResult',
+                status: 'error',
+                message: result.error
+            });
+        }
+    } catch (error) {
+        const errorMsg = `Search exception: ${String(error)}`;
+        outputChannel.appendLine(errorMsg);
+        panel.webview.postMessage({
+            command: 'searchResult',
+            status: 'error',
+            message: errorMsg
+        });
     }
 }
 

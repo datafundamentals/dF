@@ -14,7 +14,16 @@ export interface ElasticDocument {
 /**
  * Status for Elasticsearch operations
  */
-export type ElasticStatus = 'idle' | 'indexing' | 'success' | 'error';
+export type ElasticStatus = 'idle' | 'indexing' | 'searching' | 'success' | 'error';
+
+/**
+ * Search result from Elasticsearch
+ */
+export interface ElasticSearchResult {
+  id: string;
+  score: number;
+  source: ElasticDocument;
+}
 
 /**
  * State for Elasticsearch store
@@ -23,6 +32,8 @@ export interface ElasticState {
   status: ElasticStatus;
   lastIndexedPath: string | null;
   errorMessage: string | null;
+  searchResults: ElasticSearchResult[];
+  searchQuery: string;
 }
 
 /**

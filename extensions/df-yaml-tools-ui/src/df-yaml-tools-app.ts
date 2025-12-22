@@ -1,9 +1,10 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { SignalWatcher } from '@lit-labs/signals';
-import { markdownTokensState, updateTokenCount } from '@df/state';
-import type { MarkdownTokensState } from '@df/types';
+import { markdownTokensState, updateTokenCount, updateSearchState } from '@df/state';
+import type { MarkdownTokensState, ElasticSearchResult } from '@df/types';
 import '@material/web/progress/circular-progress.js';
+import './df-search-widget.js';
 
 declare const acquireVsCodeApi: undefined | (() => { postMessage: (message: unknown) => void });
 declare const __BUILD_DATE__: string;
@@ -28,6 +29,7 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   @state() private migrating = false;
   @state() private migrationStatus: 'idle' | 'success' | 'error' = 'idle';
   @state() private migrationMessage = '';
+  @state() private apiKey = '';
 
   private vscode = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : undefined;
   private _messageHandler = this._handleMessage.bind(this);
@@ -58,6 +60,7 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       this.currentContent = message.data.content;
       this.isDirty = message.data.isDirty ?? false;
       this.yamlFiles = message.data.yamlFiles ?? [];
+      this.apiKey = message.data.apiKey ?? '';
       // reset tagging status on new content to reduce stale state
       this.taggingStatus = 'idle';
       this.taggingMessage = '';
@@ -90,6 +93,20 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       this.migrating = false;
       this.migrationStatus = message.status;
       this.migrationMessage = message.message;
+    }
+
+    if (message.command === 'searchResult') {
+      if (message.status === 'success') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const hits = message.results.map((hit: any) => ({
+          id: hit._id,
+          score: hit._score,
+          source: hit._source
+        })) as ElasticSearchResult[];
+        updateSearchState('success', hits, null);
+      } else {
+        updateSearchState('error', [], message.message);
+      }
     }
   }
 
@@ -361,6 +378,30 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     });
   }
 
+  private _handleSearch(event: CustomEvent) {
+    if (!this.vscode) return;
+    // Update state to searching immediately
+    updateSearchState('searching', [], null);
+    this.vscode.postMessage({
+      command: 'searchElastic',
+      query: event.detail.query,
+      fuzzy: event.detail.fuzzy
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _handleSearchResultSelect(event: CustomEvent) {
+    const result = event.detail.result;
+    if (!this.vscode) return;
+
+    // Send message to extension to open the virtual document
+    this.vscode.postMessage({
+      command: 'openVirtualDocument',
+      id: result.id,
+      path: result.source.path
+    });
+  }
+
   override render() {
     const state = markdownTokensState.get() as MarkdownTokensState;
     const isError = state.status === 'error';
@@ -457,6 +498,12 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
             </p>
           ` : ''}
         </div>
+
+        <df-search-widget 
+          .apiKey=${this.apiKey}
+          @df-search=${this._handleSearch}
+          @df-search-result-select=${this._handleSearchResultSelect}>
+        </df-search-widget>
 
         <div class="footer">
           <span class="file-name">${this.fileName}</span>

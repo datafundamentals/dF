@@ -1,10 +1,12 @@
 import {computed, signal} from '@lit-labs/signals';
-import type {ElasticDocument, ElasticState, ElasticStatus, ElasticConfig} from '@df/types';
+import type {ElasticDocument, ElasticState, ElasticStatus, ElasticConfig, ElasticSearchResult} from '@df/types';
 
 // Internal signals for tracking state
 const statusSignal = signal<ElasticStatus>('idle');
 const lastIndexedPathSignal = signal<string | null>(null);
 const errorSignal = signal<string | null>(null);
+const searchQuerySignal = signal<string>('');
+const searchResultsSignal = signal<ElasticSearchResult[]>([]);
 
 /**
  * Computed state that combines all elastic signals
@@ -13,6 +15,8 @@ export const elasticState = computed<ElasticState>(() => ({
   status: statusSignal.get(),
   lastIndexedPath: lastIndexedPathSignal.get(),
   errorMessage: errorSignal.get(),
+  searchQuery: searchQuerySignal.get(),
+  searchResults: searchResultsSignal.get(),
 }));
 
 /**
@@ -133,10 +137,105 @@ export async function indexDocument(
 }
 
 /**
+ * Update search state manually (used when search is performed externally, e.g. by VS Code extension host)
+ */
+export function updateSearchState(
+  status: ElasticStatus,
+  results: ElasticSearchResult[] = [],
+  error: string | null = null
+): void {
+  statusSignal.set(status);
+  searchResultsSignal.set(results);
+  errorSignal.set(error);
+}
+
+/**
+ * Set the search query
+ */
+export function setSearchQuery(query: string): void {
+  searchQuerySignal.set(query);
+}
+
+/**
+ * Search for documents in Elasticsearch
+ *
+ * @param query - The search query string
+ * @param config - Optional Elasticsearch configuration
+ */
+export async function performSearch(
+  query: string,
+  config?: Partial<ElasticConfig>
+): Promise<void> {
+  const finalConfig: ElasticConfig = {
+    ...DEFAULT_CONFIG,
+    ...config,
+  };
+
+  // Validate required config
+  if (!finalConfig.apiKey) {
+    const error = 'Elasticsearch API key is required';
+    statusSignal.set('error');
+    errorSignal.set(error);
+    throw new Error(error);
+  }
+
+  searchQuerySignal.set(query);
+  statusSignal.set('searching');
+  errorSignal.set(null);
+  searchResultsSignal.set([]);
+
+  try {
+    const url = `${finalConfig.endpoint}/${finalConfig.index}/_search`;
+    const searchBody = {
+      query: {
+        multi_match: {
+          query: query,
+          fields: ['content', 'filename', 'path'],
+          fuzziness: 'AUTO'
+        }
+      }
+    };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `ApiKey ${finalConfig.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(searchBody),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Elasticsearch search failed (${response.status}): ${errorBody}`);
+    }
+
+    const data = await response.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hits = data.hits.hits.map((hit: any) => ({
+      id: hit._id,
+      score: hit._score,
+      source: hit._source as ElasticDocument
+    }));
+
+    searchResultsSignal.set(hits);
+    statusSignal.set('success');
+
+  } catch (error) {
+    statusSignal.set('error');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    errorSignal.set(errorMessage);
+    throw error;
+  }
+}
+
+/**
  * Reset the elastic store state to initial values
  */
 export function resetElasticState(): void {
   statusSignal.set('idle');
   lastIndexedPathSignal.set(null);
   errorSignal.set(null);
+  searchQuerySignal.set('');
+  searchResultsSignal.set([]);
 }
