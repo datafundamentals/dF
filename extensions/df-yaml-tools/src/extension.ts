@@ -2,10 +2,12 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import YAML, { isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Pair } from 'yaml';
-import { EnvUtils } from './utils/EnvUtils';
+import { EnvUtils } from '@df/node-utils';
+import { archiveFileToDeleted } from '@df/extensions-shared';
 import { YoutubeService } from './services/YoutubeService';
 import { YamlService } from './services/YamlService';
 import { callGemini } from './services/gemini.service';
+import { indexDocument, verifyDocument } from './services/elastic.service';
 
 // Constants
 const YAML_KEYS = {
@@ -143,6 +145,11 @@ currentPanel.webview.html = getWebviewContent(
                             case 'extractYoutubeVitals':
                                 if (currentPanel) {
                                     await extractYoutubeVitals(currentPanel);
+                                }
+                                return;
+                            case 'migrateActiveFile':
+                                if (currentPanel) {
+                                    await handleMigrateActiveFile(currentPanel);
                                 }
                                 return;
                         }
@@ -542,6 +549,84 @@ async function navigateToFile(panel: vscode.WebviewPanel, fileName: string) {
         const errorMsg = `Failed to navigate to file: ${String(error)}`;
         outputChannel.appendLine(errorMsg);
         vscode.window.showErrorMessage(errorMsg);
+    }
+}
+
+async function handleMigrateActiveFile(panel: vscode.WebviewPanel) {
+    outputChannel.appendLine('migrateActiveFile command received');
+    const editor = vscode.window.activeTextEditor ?? lastActiveEditor;
+
+    if (!editor) {
+        vscode.window.showErrorMessage('No active editor found to migrate.');
+        panel.webview.postMessage({
+            command: 'migrateResult',
+            status: 'error',
+            message: 'No active editor found'
+        });
+        return;
+    }
+
+    const filePath = editor.document.fileName;
+    const content = editor.document.getText();
+    const fileName = path.basename(filePath);
+
+    outputChannel.appendLine(`Starting migration for: ${filePath}`);
+
+    // Get API key from .env.keys
+    const apiKey = EnvUtils.getElasticApiKey(outputChannel);
+    if (!apiKey) {
+        const errorMsg = 'ELASTIC_API_KEY not found in ~/.env.keys or environment variables';
+        outputChannel.appendLine(errorMsg);
+        vscode.window.showErrorMessage(errorMsg);
+        panel.webview.postMessage({
+            command: 'migrateResult',
+            status: 'error',
+            message: errorMsg
+        });
+        return;
+    }
+
+    try {
+        // Step 1: Index the document to Elasticsearch
+        const indexResult = await indexDocument(filePath, content, apiKey);
+
+        if (!indexResult.success) {
+            throw new Error(indexResult.error || 'Failed to index document');
+        }
+
+        outputChannel.appendLine(`Successfully indexed with doc ID: ${indexResult.docId}`);
+
+        // Step 2: Verify the document exists in Elasticsearch
+        outputChannel.appendLine(`Verifying document ${indexResult.docId}...`);
+        const verified = await verifyDocument(indexResult.docId, apiKey);
+
+        if (!verified) {
+            throw new Error('Document indexed but verification failed');
+        }
+
+        outputChannel.appendLine('Document verified in Elasticsearch');
+
+        // Step 3: Archive the local file to ./deleted/
+        outputChannel.appendLine(`Archiving local file: ${fileName}`);
+        await archiveFileToDeleted(filePath, YAML_KEYS.DELETED_DIR, outputChannel);
+
+        // Step 4: Success!
+        vscode.window.showInformationMessage(`Successfully migrated and archived: ${fileName}`);
+        panel.webview.postMessage({
+            command: 'migrateResult',
+            status: 'success',
+            message: `Successfully migrated and archived: ${fileName}`
+        });
+
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+        outputChannel.appendLine(`Migration failed: ${errorMsg}`);
+        vscode.window.showErrorMessage(`Migration failed: ${errorMsg}`);
+        panel.webview.postMessage({
+            command: 'migrateResult',
+            status: 'error',
+            message: errorMsg
+        });
     }
 }
 

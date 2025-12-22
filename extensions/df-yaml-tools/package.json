@@ -20,6 +20,8 @@
   ],
   "main": "./dist/extension.js",
   "dependencies": {
+    "@df/extensions-shared": "workspace:*",
+    "@df/node-utils": "workspace:*",
     "yaml": "^2.6.1"
   },
   "contributes": {

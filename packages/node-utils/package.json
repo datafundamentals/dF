@@ -1,0 +1,19 @@
+{
+  "name": "@df/node-utils",
+  "version": "0.0.0",
+  "description": "Node.js utilities for dF extensions and tools",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["node", "utilities", "env", "config"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@df/extensions-shared",
+  "version": "0.0.0",
+  "description": "Shared utilities for dF VS Code extensions",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["vscode", "extensions", "utilities"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

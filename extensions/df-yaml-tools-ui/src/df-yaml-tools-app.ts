@@ -25,6 +25,9 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   @state() private yamlFiles: string[] = [];
   @state() private hasYoutubeLink = false;
   @state() private extractingVitals = false;
+  @state() private migrating = false;
+  @state() private migrationStatus: 'idle' | 'success' | 'error' = 'idle';
+  @state() private migrationMessage = '';
 
   private vscode = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : undefined;
   private _messageHandler = this._handleMessage.bind(this);
@@ -58,6 +61,10 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       // reset tagging status on new content to reduce stale state
       this.taggingStatus = 'idle';
       this.taggingMessage = '';
+      // reset migration status on new content
+      this.migrating = false;
+      this.migrationStatus = 'idle';
+      this.migrationMessage = '';
       // Sync checkbox state with actual file content
       this._syncCheckboxesFromContent(message.data.content);
       // Check for YouTube links
@@ -77,6 +84,12 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     if (message.command === 'alert') {
       // If we get an alert (like "Vitals extracted!"), stop the spinner
       this.extractingVitals = false;
+    }
+
+    if (message.command === 'migrateResult') {
+      this.migrating = false;
+      this.migrationStatus = message.status;
+      this.migrationMessage = message.message;
     }
   }
 
@@ -334,6 +347,20 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     });
   }
 
+  private _handleMigrateActiveFile() {
+    if (!this.vscode) {
+      this.migrationStatus = 'error';
+      this.migrationMessage = 'VS Code API unavailable';
+      return;
+    }
+    this.migrating = true;
+    this.migrationStatus = 'idle';
+    this.migrationMessage = '';
+    this.vscode.postMessage({
+      command: 'migrateActiveFile'
+    });
+  }
+
   override render() {
     const state = markdownTokensState.get() as MarkdownTokensState;
     const isError = state.status === 'error';
@@ -441,10 +468,23 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
               @click=${this._handleExtractYoutubeVitals}
               ?disabled=${this.isDirty || this.extractingVitals}
               style="display: flex; align-items: center; gap: 8px;">
-              ${this.extractingVitals 
-                ? html`<md-circular-progress indeterminate style="--md-circular-progress-size: 16px;"></md-circular-progress> extracting...` 
+              ${this.extractingVitals
+                ? html`<md-circular-progress indeterminate style="--md-circular-progress-size: 16px;"></md-circular-progress> extracting...`
                 : 'extract vitals'}
             </button>
+          ` : ''}
+          <button
+            @click=${this._handleMigrateActiveFile}
+            ?disabled=${this.isDirty || this.migrating}
+            style="display: flex; align-items: center; gap: 8px;">
+            ${this.migrating
+              ? html`<md-circular-progress indeterminate style="--md-circular-progress-size: 16px;"></md-circular-progress> migrating...`
+              : 'migrate'}
+          </button>
+          ${this.migrationStatus === 'success' ? html`
+            <span style="color: var(--vscode-testing-iconPassed, #73c991);">✓</span>
+          ` : this.migrationStatus === 'error' ? html`
+            <span style="color: var(--vscode-errorForeground, #f48771);" title="${this.migrationMessage}">✗</span>
           ` : ''}
           <button
             @click=${this._handleCountTokens}

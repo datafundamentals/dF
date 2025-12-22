@@ -19,6 +19,28 @@ DEFAULT_BATCH_SIZE = 200
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent.parent / "daily" / "batch"
 
 
+def read_api_key_from_env_keys() -> Optional[str]:
+    """Read ELASTIC_API_KEY from ~/.env.keys file (matching extension behavior)."""
+    env_keys_path = Path.home() / ".env.keys"
+    if not env_keys_path.exists():
+        return None
+
+    try:
+        content = env_keys_path.read_text(encoding="utf-8")
+        for line in content.splitlines():
+            line = line.strip()
+            if line.startswith("ELASTIC_API_KEY="):
+                key = line.split("=", 1)[1].strip()
+                # Remove quotes if present
+                if (key.startswith('"') and key.endswith('"')) or (key.startswith("'") and key.endswith("'")):
+                    key = key[1:-1]
+                return key
+    except Exception:
+        pass
+
+    return None
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Bulk load local documents into Elasticsearch using the _bulk API.",
@@ -28,10 +50,14 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_ENDPOINT,
         help=f"Elasticsearch endpoint (default: {DEFAULT_ENDPOINT})",
     )
+
+    # Try to get API key from: 1) env var, 2) ~/.env.keys
+    default_api_key = os.environ.get(DEFAULT_API_KEY_ENV) or read_api_key_from_env_keys()
+
     parser.add_argument(
         "--api-key",
-        default=os.environ.get(DEFAULT_API_KEY_ENV),
-        help=f"API key or set {DEFAULT_API_KEY_ENV}",
+        default=default_api_key,
+        help=f"API key, set {DEFAULT_API_KEY_ENV} env var, or add to ~/.env.keys",
     )
     parser.add_argument(
         "--index",

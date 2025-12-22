@@ -11,6 +11,7 @@ export * from './firebase-chat.types.js';
 export * from './firebase-storage.types.js';
 export * from './firebase-activity.types.js';
 export * from './firebase-rbac.types.js';
+export * from './elastic.types.js';
 
 // Re-export commonly used activity log items for convenience
 export {EXERCISE_TYPE_CONFIG} from './firebase-activity.types.js';
