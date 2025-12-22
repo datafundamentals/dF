@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import YAML, { isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Pair } from 'yaml';
 import { EnvUtils } from '@df/node-utils';
-import { archiveFileToDeleted, indexDocument, verifyDocument, searchDocuments } from '@df/extensions-shared';
+import { archiveFileToDeleted, indexDocument, verifyDocument, searchDocuments, getDocument, updateDocument } from '@df/extensions-shared';
 import { YoutubeService } from './services/YoutubeService';
 import { YamlService } from './services/YamlService';
 import { callGemini } from './services/gemini.service';
@@ -23,6 +23,144 @@ const YAML_KEYS = {
 // Create output channel for debugging
 const outputChannel = vscode.window.createOutputChannel('DF YAML Tools');
 let lastActiveEditor: vscode.TextEditor | undefined = undefined;
+
+/**
+ * Filesystem Provider for Elasticsearch documents
+ * Enables reading/editing files stored in Elasticsearch via elasticsearch:// URI scheme
+ */
+class ElasticsearchFileSystemProvider implements vscode.FileSystemProvider {
+	private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+	readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
+
+	/**
+	 * Parse URI to extract index and document ID
+	 * URI format: elasticsearch://{index}/{path}?id={docId}
+	 */
+	private parseUri(uri: vscode.Uri): { index: string; docId: string } | null {
+		try {
+			const index = uri.authority;
+			const searchParams = new URLSearchParams(uri.query);
+			const docId = searchParams.get('id');
+
+			if (!index || !docId) {
+				outputChannel.appendLine(`Invalid URI format: ${uri.toString()}`);
+				return null;
+			}
+
+			return { index, docId };
+		} catch (error) {
+			outputChannel.appendLine(`Error parsing URI: ${String(error)}`);
+			return null;
+		}
+	}
+
+	watch(uri: vscode.Uri): vscode.Disposable {
+		// No-op: we don't watch for external changes
+		return new vscode.Disposable(() => {});
+	}
+
+	stat(uri: vscode.Uri): vscode.FileStat {
+		// Return a basic file stat
+		return {
+			type: vscode.FileType.File,
+			ctime: Date.now(),
+			mtime: Date.now(),
+			size: 0
+		};
+	}
+
+	readDirectory(uri: vscode.Uri): [string, vscode.FileType][] {
+		// Not needed for our use case
+		return [];
+	}
+
+	createDirectory(uri: vscode.Uri): void {
+		// Not needed for our use case
+		throw vscode.FileSystemError.NoPermissions('Cannot create directories in Elasticsearch');
+	}
+
+	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
+		outputChannel.appendLine(`Reading file: ${uri.toString()}`);
+
+		const parsed = this.parseUri(uri);
+		if (!parsed) {
+			throw vscode.FileSystemError.FileNotFound('Invalid URI format');
+		}
+
+		const { index, docId } = parsed;
+
+		// Get API key
+		const apiKey = EnvUtils.getElasticApiKey(outputChannel);
+		if (!apiKey) {
+			throw vscode.FileSystemError.Unavailable('ELASTIC_API_KEY not found');
+		}
+
+		try {
+			// Fetch document from Elasticsearch
+			const result = await getDocument(docId, apiKey, { index });
+
+			if (!result.success || !result.content) {
+				const error = result.error || 'Unknown error';
+				outputChannel.appendLine(`Failed to fetch document: ${error}`);
+				throw vscode.FileSystemError.FileNotFound(error);
+			}
+
+			outputChannel.appendLine(`Successfully read file (${result.content.length} bytes)`);
+			return Buffer.from(result.content, 'utf8');
+
+		} catch (error) {
+			const errorMsg = String(error);
+			outputChannel.appendLine(`Exception reading file: ${errorMsg}`);
+			throw vscode.FileSystemError.Unavailable(errorMsg);
+		}
+	}
+
+	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
+		outputChannel.appendLine(`Writing file: ${uri.toString()}`);
+
+		const parsed = this.parseUri(uri);
+		if (!parsed) {
+			throw vscode.FileSystemError.FileNotFound('Invalid URI format');
+		}
+
+		const { index, docId } = parsed;
+
+		// Get API key
+		const apiKey = EnvUtils.getElasticApiKey(outputChannel);
+		if (!apiKey) {
+			throw vscode.FileSystemError.Unavailable('ELASTIC_API_KEY not found');
+		}
+
+		try {
+			const contentString = Buffer.from(content).toString('utf8');
+			const result = await updateDocument(docId, contentString, apiKey, { index });
+
+			if (!result.success) {
+				const error = result.error || 'Unknown error';
+				outputChannel.appendLine(`Failed to write file: ${error}`);
+				throw vscode.FileSystemError.Unavailable(error);
+			}
+
+			outputChannel.appendLine('Successfully wrote file to Elasticsearch');
+
+			// Notify that the file has changed
+			this._emitter.fire([{ type: vscode.FileChangeType.Changed, uri }]);
+
+		} catch (error) {
+			const errorMsg = String(error);
+			outputChannel.appendLine(`Exception writing file: ${errorMsg}`);
+			throw vscode.FileSystemError.Unavailable(errorMsg);
+		}
+	}
+
+	delete(uri: vscode.Uri): void {
+		throw vscode.FileSystemError.NoPermissions('Cannot delete Elasticsearch documents from this interface');
+	}
+
+	rename(oldUri: vscode.Uri, newUri: vscode.Uri): void {
+		throw vscode.FileSystemError.NoPermissions('Cannot rename Elasticsearch documents');
+	}
+}
 
 async function getYamlFilesInDirectory(filePath: string): Promise<string[]> {
     const dir = path.dirname(filePath);
@@ -50,6 +188,16 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.showInformationMessage('DF YAML Tools Extension Activated!');
 
 	let currentPanel: vscode.WebviewPanel | undefined = undefined;
+
+	// Register Elasticsearch filesystem provider
+	const elasticsearchProvider = new ElasticsearchFileSystemProvider();
+	context.subscriptions.push(
+		vscode.workspace.registerFileSystemProvider('elasticsearch', elasticsearchProvider, {
+			isCaseSensitive: true,
+			isReadonly: false
+		})
+	);
+	outputChannel.appendLine('Registered elasticsearch:// filesystem provider (read/write enabled)');
 
 	context.subscriptions.push(
 vscode.commands.registerCommand('df.openYamlTools', () => {
@@ -715,7 +863,21 @@ async function handleMigrateActiveFile(panel: vscode.WebviewPanel) {
         outputChannel.appendLine(`Archiving local file: ${fileName}`);
         await archiveFileToDeleted(filePath, YAML_KEYS.DELETED_DIR, outputChannel);
 
-        // Step 4: Success!
+        // Step 4: Reopen as virtual document from Elasticsearch
+        outputChannel.appendLine('Reopening file as virtual document from Elasticsearch...');
+        const index = process.env.ELASTIC_INDEX || 'daily-batch';
+        await openVirtualDocument(indexResult.docId, filePath, index);
+
+        // Step 5: Update webview to show the new virtual document
+        // Give VS Code a moment to open the document
+        setTimeout(() => {
+            if (panel && !panel.visible) {
+                panel.reveal(vscode.ViewColumn.Beside);
+            }
+            updateWebviewContext(panel);
+        }, 500);
+
+        // Step 6: Success!
         vscode.window.showInformationMessage(`Successfully migrated and archived: ${fileName}`);
         panel.webview.postMessage({
             command: 'migrateResult',

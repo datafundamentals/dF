@@ -212,3 +212,126 @@ export async function indexDocument(
         };
     }
 }
+
+/**
+ * Result of getting a document
+ */
+export interface GetDocumentResult {
+    success: boolean;
+    content?: string;
+    document?: ElasticDocument;
+    error?: string;
+}
+
+/**
+ * Result of updating a document
+ */
+export interface UpdateDocumentResult {
+    success: boolean;
+    error?: string;
+}
+
+/**
+ * Get a document from Elasticsearch by ID
+ *
+ * @param docId - The document ID
+ * @param apiKey - Elasticsearch API key
+ * @param options - Optional endpoint and index configuration
+ * @returns Promise<GetDocumentResult>
+ */
+export async function getDocument(
+    docId: string,
+    apiKey: string,
+    options: ElasticIndexOptions = {}
+): Promise<GetDocumentResult> {
+    const endpoint = options.endpoint || process.env.ELASTIC_ENDPOINT || 'http://localhost:9200';
+    const index = options.index || process.env.ELASTIC_INDEX || 'daily-batch';
+
+    try {
+        const url = `${endpoint}/${index}/_doc/${docId}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `ApiKey ${apiKey}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            return {
+                success: false,
+                error: `Failed to get document (${response.status}): ${errorBody}`
+            };
+        }
+
+        const result = await response.json();
+        const doc = result._source as ElasticDocument;
+
+        return {
+            success: true,
+            content: doc.content,
+            document: doc
+        };
+
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error occurred'
+        };
+    }
+}
+
+/**
+ * Update a document's content in Elasticsearch
+ *
+ * @param docId - The document ID
+ * @param content - The new content
+ * @param apiKey - Elasticsearch API key
+ * @param options - Optional endpoint and index configuration
+ * @returns Promise<UpdateDocumentResult>
+ */
+export async function updateDocument(
+    docId: string,
+    content: string,
+    apiKey: string,
+    options: ElasticIndexOptions = {}
+): Promise<UpdateDocumentResult> {
+    const endpoint = options.endpoint || process.env.ELASTIC_ENDPOINT || 'http://localhost:9200';
+    const index = options.index || process.env.ELASTIC_INDEX || 'daily-batch';
+
+    try {
+        const url = `${endpoint}/${index}/_update/${docId}`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `ApiKey ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                doc: {
+                    content: content,
+                    size: content.length,
+                    modified: new Date().toISOString()
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            return {
+                success: false,
+                error: `Failed to update document (${response.status}): ${errorBody}`
+            };
+        }
+
+        return {
+            success: true
+        };
+
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error occurred'
+        };
+    }
+}
