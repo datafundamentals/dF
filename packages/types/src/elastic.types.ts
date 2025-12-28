@@ -34,6 +34,8 @@ export interface ElasticState {
   errorMessage: string | null;
   searchResults: ElasticSearchResult[];
   searchQuery: string;
+  isMigrating: boolean;
+  isSearching: boolean;
 }
 
 /**

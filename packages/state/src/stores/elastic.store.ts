@@ -17,6 +17,8 @@ export const elasticState = computed<ElasticState>(() => ({
   errorMessage: errorSignal.get(),
   searchQuery: searchQuerySignal.get(),
   searchResults: searchResultsSignal.get(),
+  isMigrating: statusSignal.get() === 'indexing',
+  isSearching: statusSignal.get() === 'searching',
 }));
 
 /**
@@ -146,6 +148,14 @@ export function updateSearchState(
 ): void {
   statusSignal.set(status);
   searchResultsSignal.set(results);
+  errorSignal.set(error);
+}
+
+/**
+ * Update migration status manually
+ */
+export function setMigrationStatus(status: ElasticStatus, error: string | null = null): void {
+  statusSignal.set(status);
   errorSignal.set(error);
 }
 

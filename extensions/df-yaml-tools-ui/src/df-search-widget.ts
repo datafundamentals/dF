@@ -82,12 +82,12 @@ export class DfSearchWidget extends SignalWatcher(LitElement) {
         </div>
         <md-filled-button
           @click=${this.handleSearch}
-          ?disabled=${state.status === 'searching' || !this.query}>
+          ?disabled=${state.isSearching || !this.query}>
           Search
         </md-filled-button>
       </div>
 
-      ${state.status === 'searching'
+      ${state.isSearching
         ? html`<md-circular-progress indeterminate></md-circular-progress>`
         : ''}
 

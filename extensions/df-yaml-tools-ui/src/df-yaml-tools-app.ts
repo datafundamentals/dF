@@ -1,9 +1,10 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { SignalWatcher } from '@lit-labs/signals';
-import { markdownTokensState, updateTokenCount, updateSearchState } from '@df/state';
-import type { MarkdownTokensState, ElasticSearchResult } from '@df/types';
+import { markdownTokensState, updateTokenCount, updateSearchState, elasticState, setMigrationStatus } from '@df/state';
+import type { MarkdownTokensState, ElasticSearchResult, ElasticState } from '@df/types';
 import '@material/web/progress/circular-progress.js';
+import '@material/web/button/filled-button.js';
 import './df-search-widget.js';
 
 declare const acquireVsCodeApi: undefined | (() => { postMessage: (message: unknown) => void });
@@ -26,8 +27,6 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
   @state() private yamlFiles: string[] = [];
   @state() private hasYoutubeLink = false;
   @state() private extractingVitals = false;
-  @state() private migrating = false;
-  @state() private migrationStatus: 'idle' | 'success' | 'error' = 'idle';
   @state() private migrationMessage = '';
   @state() private apiKey = '';
 
@@ -65,8 +64,7 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
       this.taggingStatus = 'idle';
       this.taggingMessage = '';
       // reset migration status on new content
-      this.migrating = false;
-      this.migrationStatus = 'idle';
+      setMigrationStatus('idle');
       this.migrationMessage = '';
       // Sync checkbox state with actual file content
       this._syncCheckboxesFromContent(message.data.content);
@@ -90,8 +88,7 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
     }
 
     if (message.command === 'migrateResult') {
-      this.migrating = false;
-      this.migrationStatus = message.status;
+      setMigrationStatus(message.status === 'success' ? 'success' : 'error', message.status === 'error' ? message.message : null);
       this.migrationMessage = message.message;
     }
 
@@ -366,12 +363,11 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
 
   private _handleMigrateActiveFile() {
     if (!this.vscode) {
-      this.migrationStatus = 'error';
+      setMigrationStatus('error', 'VS Code API unavailable');
       this.migrationMessage = 'VS Code API unavailable';
       return;
     }
-    this.migrating = true;
-    this.migrationStatus = 'idle';
+    setMigrationStatus('indexing');
     this.migrationMessage = '';
     this.vscode.postMessage({
       command: 'migrateActiveFile'
@@ -404,6 +400,7 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
 
   override render() {
     const state = markdownTokensState.get() as MarkdownTokensState;
+    const elastic = elasticState.get() as ElasticState;
     const isError = state.status === 'error';
     const isLoading = state.status === 'counting';
     const isButtonDisabled = isLoading || this.isDirty;
@@ -511,33 +508,31 @@ export class DfYamlToolsApp extends SignalWatcher(LitElement) {
             <span class="saved-indicator">● saved</span>
           ` : ''}
           ${this.hasYoutubeLink ? html`
-            <button
+            <md-filled-button
               @click=${this._handleExtractYoutubeVitals}
-              ?disabled=${this.isDirty || this.extractingVitals}
-              style="display: flex; align-items: center; gap: 8px;">
+              ?disabled=${this.isDirty || this.extractingVitals}>
               ${this.extractingVitals
                 ? html`<md-circular-progress indeterminate style="--md-circular-progress-size: 16px;"></md-circular-progress> extracting...`
                 : 'extract vitals'}
-            </button>
+            </md-filled-button>
           ` : ''}
-          <button
+          <md-filled-button
             @click=${this._handleMigrateActiveFile}
-            ?disabled=${this.isDirty || this.migrating}
-            style="display: flex; align-items: center; gap: 8px;">
-            ${this.migrating
+            ?disabled=${this.isDirty || elastic.isMigrating}>
+            ${elastic.isMigrating
               ? html`<md-circular-progress indeterminate style="--md-circular-progress-size: 16px;"></md-circular-progress> migrating...`
               : 'migrate'}
-          </button>
-          ${this.migrationStatus === 'success' ? html`
+          </md-filled-button>
+          ${elastic.status === 'success' ? html`
             <span style="color: var(--vscode-testing-iconPassed, #73c991);">✓</span>
-          ` : this.migrationStatus === 'error' ? html`
+          ` : elastic.status === 'error' ? html`
             <span style="color: var(--vscode-errorForeground, #f48771);" title="${this.migrationMessage}">✗</span>
           ` : ''}
-          <button
+          <md-filled-button
             @click=${this._handleCountTokens}
             ?disabled=${isButtonDisabled}>
             ${isLoading ? 'counting...' : 'count tokens'}
-          </button>
+          </md-filled-button>
           ${state.tokenCount > 0 ? html`
             <span class="token-result">${state.tokenCount}</span>
           ` : ''}

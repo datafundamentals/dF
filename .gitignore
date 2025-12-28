@@ -24,6 +24,7 @@ lib/
 
 # VS Code Extension build artifacts
 extensions/*/media/ui/**
+elastic-start-local
 **/*.vsix
 
 # Firebase/Cloud Functions compiled output (TypeScript → JavaScript)
