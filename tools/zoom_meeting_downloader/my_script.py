@@ -12,7 +12,7 @@ ACCOUNT_ID = os.getenv('ZOOM_ACCOUNT_ID')
 CLIENT_ID = os.getenv('ZOOM_CLIENT_ID')
 CLIENT_SECRET = os.getenv('ZOOM_CLIENT_SECRET')
 DOWNLOAD_BASE_DIR = '/Volumes/Seagate2T/ccZoomRecordings'
-START_DATE = "2025-01-01" 
+START_DATE = "2026-01-01" 
 LOG_FILE = "download_log.txt"
 
 # --- LOGGING SETUP ---
