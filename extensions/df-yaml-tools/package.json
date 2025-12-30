@@ -2,7 +2,7 @@
   "name": "df-yaml-tools",
   "displayName": "DF YAML Tools",
   "description": "YAML tools for DF Monorepo",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "publisher": "datafundamentals",
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
     "Other"
   ],
   "activationEvents": [
+    "onCommand:df.openYamlTools",
     "onLanguage:yaml",
     "onStartupFinished"
   ],

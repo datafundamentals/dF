@@ -1,0 +1,824 @@
+2025-12-28 16:57:30,560 - INFO - Opening browser for authorization...
+2025-12-30 08:16:38,487 - ERROR - Failed to get access token: 400 Client Error: Bad Request for url: https://zoom.us/oauth/token?grant_type=account_credentials&account_id=2cqzP2RuThiaJaXqa1Zo5Q
+2025-12-30 08:16:38,489 - ERROR - Authentication failed.
+2025-12-30 08:18:20,920 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:18:21,108 - ERROR - Failed to list users: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users?page_size=300&next_page_token=
+2025-12-30 08:18:21,109 - INFO - Found 0 users.
+2025-12-30 08:18:21,109 - INFO - Process finished.
+2025-12-30 08:18:43,726 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:18:43,858 - ERROR - Failed to list users: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users?page_size=300
+2025-12-30 08:18:43,859 - INFO - Found 0 users.
+2025-12-30 08:18:43,859 - INFO - Process finished.
+2025-12-30 08:20:10,210 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:20:10,410 - ERROR - Failed to list users: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users?page_size=300
+2025-12-30 08:20:10,410 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[user:read:list_users:admin]."}
+2025-12-30 08:20:10,411 - INFO - Found 0 users.
+2025-12-30 08:20:10,412 - INFO - Process finished.
+2025-12-30 08:21:12,286 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:21:12,463 - ERROR - Failed to list users: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users?page_size=300
+2025-12-30 08:21:12,463 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[user:read:list_users:admin]."}
+2025-12-30 08:21:12,465 - INFO - Found 0 users.
+2025-12-30 08:21:12,465 - INFO - Process finished.
+2025-12-30 08:30:41,245 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:30:41,419 - INFO - Found 1 users.
+2025-12-30 08:30:41,426 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 08:30:41,426 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 08:30:41,567 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-01-01&to=2023-01-31&page_size=300&next_page_token=
+2025-12-30 08:30:41,567 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:41,567 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 08:30:41,758 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-01-31&to=2023-03-02&page_size=300&next_page_token=
+2025-12-30 08:30:41,758 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:41,758 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 08:30:41,905 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-03-02&to=2023-04-01&page_size=300&next_page_token=
+2025-12-30 08:30:41,905 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:41,905 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 08:30:42,058 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-04-01&to=2023-05-01&page_size=300&next_page_token=
+2025-12-30 08:30:42,059 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:42,059 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 08:30:42,351 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-05-01&to=2023-05-31&page_size=300&next_page_token=
+2025-12-30 08:30:42,351 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:42,351 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 08:30:42,518 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-05-31&to=2023-06-30&page_size=300&next_page_token=
+2025-12-30 08:30:42,519 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:42,519 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 08:30:42,698 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-06-30&to=2023-07-30&page_size=300&next_page_token=
+2025-12-30 08:30:42,699 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:42,699 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 08:30:42,842 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-07-30&to=2023-08-29&page_size=300&next_page_token=
+2025-12-30 08:30:42,842 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:42,843 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 08:30:43,015 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-08-29&to=2023-09-28&page_size=300&next_page_token=
+2025-12-30 08:30:43,015 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:43,015 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 08:30:43,168 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-09-28&to=2023-10-28&page_size=300&next_page_token=
+2025-12-30 08:30:43,168 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:43,168 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 08:30:43,334 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-10-28&to=2023-11-27&page_size=300&next_page_token=
+2025-12-30 08:30:43,334 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:43,334 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 08:30:43,529 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-11-27&to=2023-12-27&page_size=300&next_page_token=
+2025-12-30 08:30:43,529 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:43,529 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 08:30:43,710 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-12-27&to=2024-01-26&page_size=300&next_page_token=
+2025-12-30 08:30:43,710 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:43,710 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 08:30:43,858 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-01-26&to=2024-02-25&page_size=300&next_page_token=
+2025-12-30 08:30:43,858 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:43,858 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 08:30:44,007 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-02-25&to=2024-03-26&page_size=300&next_page_token=
+2025-12-30 08:30:44,007 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:44,008 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 08:30:44,159 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-03-26&to=2024-04-25&page_size=300&next_page_token=
+2025-12-30 08:30:44,159 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:44,159 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 08:30:44,332 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-04-25&to=2024-05-25&page_size=300&next_page_token=
+2025-12-30 08:30:44,332 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:44,332 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 08:30:44,510 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-05-25&to=2024-06-24&page_size=300&next_page_token=
+2025-12-30 08:30:44,510 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:44,510 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 08:30:44,662 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-06-24&to=2024-07-24&page_size=300&next_page_token=
+2025-12-30 08:30:44,662 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:44,662 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 08:30:44,819 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-07-24&to=2024-08-23&page_size=300&next_page_token=
+2025-12-30 08:30:44,819 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:44,819 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 08:30:44,973 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-08-23&to=2024-09-22&page_size=300&next_page_token=
+2025-12-30 08:30:44,974 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:44,974 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 08:30:45,121 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-09-22&to=2024-10-22&page_size=300&next_page_token=
+2025-12-30 08:30:45,121 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:45,121 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 08:30:45,277 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-10-22&to=2024-11-21&page_size=300&next_page_token=
+2025-12-30 08:30:45,277 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:45,277 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 08:30:45,417 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-11-21&to=2024-12-21&page_size=300&next_page_token=
+2025-12-30 08:30:45,417 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:45,417 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 08:30:45,572 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-12-21&to=2025-01-20&page_size=300&next_page_token=
+2025-12-30 08:30:45,572 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:45,572 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 08:30:45,744 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-01-20&to=2025-02-19&page_size=300&next_page_token=
+2025-12-30 08:30:45,744 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:45,744 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 08:30:45,911 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-02-19&to=2025-03-21&page_size=300&next_page_token=
+2025-12-30 08:30:45,912 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:45,912 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 08:30:46,079 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-03-21&to=2025-04-20&page_size=300&next_page_token=
+2025-12-30 08:30:46,079 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:46,079 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 08:30:46,225 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-04-20&to=2025-05-20&page_size=300&next_page_token=
+2025-12-30 08:30:46,225 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:46,225 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 08:30:46,375 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-05-20&to=2025-06-19&page_size=300&next_page_token=
+2025-12-30 08:30:46,375 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:46,375 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 08:30:46,549 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-06-19&to=2025-07-19&page_size=300&next_page_token=
+2025-12-30 08:30:46,549 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:46,549 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 08:30:46,721 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-07-19&to=2025-08-18&page_size=300&next_page_token=
+2025-12-30 08:30:46,721 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:46,722 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 08:30:46,987 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-08-18&to=2025-09-17&page_size=300&next_page_token=
+2025-12-30 08:30:46,987 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:46,987 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 08:30:47,171 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-09-17&to=2025-10-17&page_size=300&next_page_token=
+2025-12-30 08:30:47,172 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:47,172 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 08:30:47,360 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-10-17&to=2025-11-16&page_size=300&next_page_token=
+2025-12-30 08:30:47,360 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:47,360 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 08:30:47,518 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-11-16&to=2025-12-16&page_size=300&next_page_token=
+2025-12-30 08:30:47,518 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:47,518 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 08:30:47,675 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-12-16&to=2026-01-15&page_size=300&next_page_token=
+2025-12-30 08:30:47,675 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:30:47,677 - INFO - Process finished.
+2025-12-30 08:34:02,962 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:34:03,162 - INFO - Found 1 users.
+2025-12-30 08:34:03,164 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 08:34:03,164 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 08:34:03,347 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-01-01&to=2023-01-31&page_size=300&next_page_token=
+2025-12-30 08:34:03,347 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:03,347 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 08:34:03,520 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-01-31&to=2023-03-02&page_size=300&next_page_token=
+2025-12-30 08:34:03,520 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:03,520 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 08:34:03,676 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-03-02&to=2023-04-01&page_size=300&next_page_token=
+2025-12-30 08:34:03,676 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:03,676 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 08:34:03,820 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-04-01&to=2023-05-01&page_size=300&next_page_token=
+2025-12-30 08:34:03,820 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:03,820 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 08:34:03,969 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-05-01&to=2023-05-31&page_size=300&next_page_token=
+2025-12-30 08:34:03,969 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:03,969 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 08:34:04,121 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-05-31&to=2023-06-30&page_size=300&next_page_token=
+2025-12-30 08:34:04,121 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:04,121 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 08:34:04,296 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-06-30&to=2023-07-30&page_size=300&next_page_token=
+2025-12-30 08:34:04,296 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:04,296 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 08:34:04,440 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-07-30&to=2023-08-29&page_size=300&next_page_token=
+2025-12-30 08:34:04,440 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:04,440 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 08:34:04,699 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-08-29&to=2023-09-28&page_size=300&next_page_token=
+2025-12-30 08:34:04,699 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:04,699 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 08:34:04,854 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-09-28&to=2023-10-28&page_size=300&next_page_token=
+2025-12-30 08:34:04,854 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:04,854 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 08:34:05,010 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-10-28&to=2023-11-27&page_size=300&next_page_token=
+2025-12-30 08:34:05,010 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:05,011 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 08:34:05,182 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-11-27&to=2023-12-27&page_size=300&next_page_token=
+2025-12-30 08:34:05,182 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:05,182 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 08:34:05,346 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-12-27&to=2024-01-26&page_size=300&next_page_token=
+2025-12-30 08:34:05,346 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:05,347 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 08:34:05,500 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-01-26&to=2024-02-25&page_size=300&next_page_token=
+2025-12-30 08:34:05,500 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:05,500 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 08:34:05,679 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-02-25&to=2024-03-26&page_size=300&next_page_token=
+2025-12-30 08:34:05,679 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:05,680 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 08:34:05,830 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-03-26&to=2024-04-25&page_size=300&next_page_token=
+2025-12-30 08:34:05,831 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:05,831 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 08:34:05,996 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-04-25&to=2024-05-25&page_size=300&next_page_token=
+2025-12-30 08:34:05,996 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:05,996 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 08:34:06,142 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-05-25&to=2024-06-24&page_size=300&next_page_token=
+2025-12-30 08:34:06,142 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:06,142 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 08:34:06,297 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-06-24&to=2024-07-24&page_size=300&next_page_token=
+2025-12-30 08:34:06,298 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:06,298 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 08:34:06,441 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-07-24&to=2024-08-23&page_size=300&next_page_token=
+2025-12-30 08:34:06,441 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:06,441 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 08:34:06,610 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-08-23&to=2024-09-22&page_size=300&next_page_token=
+2025-12-30 08:34:06,610 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:06,610 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 08:34:06,795 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-09-22&to=2024-10-22&page_size=300&next_page_token=
+2025-12-30 08:34:06,795 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:06,795 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 08:34:06,946 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-10-22&to=2024-11-21&page_size=300&next_page_token=
+2025-12-30 08:34:06,946 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:06,946 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 08:34:07,117 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-11-21&to=2024-12-21&page_size=300&next_page_token=
+2025-12-30 08:34:07,118 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:07,118 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 08:34:07,281 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-12-21&to=2025-01-20&page_size=300&next_page_token=
+2025-12-30 08:34:07,281 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:07,281 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 08:34:07,461 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-01-20&to=2025-02-19&page_size=300&next_page_token=
+2025-12-30 08:34:07,461 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:07,461 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 08:34:07,612 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-02-19&to=2025-03-21&page_size=300&next_page_token=
+2025-12-30 08:34:07,612 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:07,612 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 08:34:07,779 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-03-21&to=2025-04-20&page_size=300&next_page_token=
+2025-12-30 08:34:07,779 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:07,779 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 08:34:07,928 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-04-20&to=2025-05-20&page_size=300&next_page_token=
+2025-12-30 08:34:07,928 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:07,928 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 08:34:08,090 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-05-20&to=2025-06-19&page_size=300&next_page_token=
+2025-12-30 08:34:08,090 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:08,090 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 08:34:08,254 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-06-19&to=2025-07-19&page_size=300&next_page_token=
+2025-12-30 08:34:08,254 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:08,254 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 08:34:08,412 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-07-19&to=2025-08-18&page_size=300&next_page_token=
+2025-12-30 08:34:08,412 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:08,412 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 08:34:08,592 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-08-18&to=2025-09-17&page_size=300&next_page_token=
+2025-12-30 08:34:08,592 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:08,592 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 08:34:08,767 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-09-17&to=2025-10-17&page_size=300&next_page_token=
+2025-12-30 08:34:08,767 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:08,767 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 08:34:08,918 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-10-17&to=2025-11-16&page_size=300&next_page_token=
+2025-12-30 08:34:08,918 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:08,918 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 08:34:09,089 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-11-16&to=2025-12-16&page_size=300&next_page_token=
+2025-12-30 08:34:09,089 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:09,089 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 08:34:09,227 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-12-16&to=2026-01-15&page_size=300&next_page_token=
+2025-12-30 08:34:09,227 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:34:09,230 - INFO - Process finished.
+2025-12-30 08:38:28,628 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:38:28,832 - INFO - Found 1 users.
+2025-12-30 08:38:28,835 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 08:38:28,835 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 08:38:29,015 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-01-01&to=2023-01-31&page_size=300&next_page_token=
+2025-12-30 08:38:29,015 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:29,016 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 08:38:29,190 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-01-31&to=2023-03-02&page_size=300&next_page_token=
+2025-12-30 08:38:29,190 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:29,190 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 08:38:29,359 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-03-02&to=2023-04-01&page_size=300&next_page_token=
+2025-12-30 08:38:29,359 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:29,360 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 08:38:29,501 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-04-01&to=2023-05-01&page_size=300&next_page_token=
+2025-12-30 08:38:29,501 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:29,501 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 08:38:29,670 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-05-01&to=2023-05-31&page_size=300&next_page_token=
+2025-12-30 08:38:29,670 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:29,670 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 08:38:29,845 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-05-31&to=2023-06-30&page_size=300&next_page_token=
+2025-12-30 08:38:29,845 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:29,845 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 08:38:30,002 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-06-30&to=2023-07-30&page_size=300&next_page_token=
+2025-12-30 08:38:30,002 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:30,002 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 08:38:30,184 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-07-30&to=2023-08-29&page_size=300&next_page_token=
+2025-12-30 08:38:30,184 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:30,184 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 08:38:30,334 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-08-29&to=2023-09-28&page_size=300&next_page_token=
+2025-12-30 08:38:30,334 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:30,334 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 08:38:30,524 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-09-28&to=2023-10-28&page_size=300&next_page_token=
+2025-12-30 08:38:30,524 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:30,525 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 08:38:30,672 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-10-28&to=2023-11-27&page_size=300&next_page_token=
+2025-12-30 08:38:30,672 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:30,672 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 08:38:30,932 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-11-27&to=2023-12-27&page_size=300&next_page_token=
+2025-12-30 08:38:30,932 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:30,932 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 08:38:31,123 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-12-27&to=2024-01-26&page_size=300&next_page_token=
+2025-12-30 08:38:31,124 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:31,124 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 08:38:31,283 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-01-26&to=2024-02-25&page_size=300&next_page_token=
+2025-12-30 08:38:31,284 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:31,284 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 08:38:31,426 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-02-25&to=2024-03-26&page_size=300&next_page_token=
+2025-12-30 08:38:31,426 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:31,426 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 08:38:31,573 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-03-26&to=2024-04-25&page_size=300&next_page_token=
+2025-12-30 08:38:31,573 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:31,573 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 08:38:31,753 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-04-25&to=2024-05-25&page_size=300&next_page_token=
+2025-12-30 08:38:31,753 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:31,753 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 08:38:31,904 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-05-25&to=2024-06-24&page_size=300&next_page_token=
+2025-12-30 08:38:31,904 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:31,904 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 08:38:32,051 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-06-24&to=2024-07-24&page_size=300&next_page_token=
+2025-12-30 08:38:32,052 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:32,052 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 08:38:32,219 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-07-24&to=2024-08-23&page_size=300&next_page_token=
+2025-12-30 08:38:32,220 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:32,220 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 08:38:32,362 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-08-23&to=2024-09-22&page_size=300&next_page_token=
+2025-12-30 08:38:32,362 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:32,362 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 08:38:32,510 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-09-22&to=2024-10-22&page_size=300&next_page_token=
+2025-12-30 08:38:32,510 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:32,510 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 08:38:32,651 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-10-22&to=2024-11-21&page_size=300&next_page_token=
+2025-12-30 08:38:32,651 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:32,651 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 08:38:32,830 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-11-21&to=2024-12-21&page_size=300&next_page_token=
+2025-12-30 08:38:32,831 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:32,831 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 08:38:32,984 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-12-21&to=2025-01-20&page_size=300&next_page_token=
+2025-12-30 08:38:32,984 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:32,984 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 08:38:33,114 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-01-20&to=2025-02-19&page_size=300&next_page_token=
+2025-12-30 08:38:33,114 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:33,114 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 08:38:33,283 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-02-19&to=2025-03-21&page_size=300&next_page_token=
+2025-12-30 08:38:33,283 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:33,283 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 08:38:33,438 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-03-21&to=2025-04-20&page_size=300&next_page_token=
+2025-12-30 08:38:33,438 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:33,438 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 08:38:33,588 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-04-20&to=2025-05-20&page_size=300&next_page_token=
+2025-12-30 08:38:33,588 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:33,588 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 08:38:33,752 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-05-20&to=2025-06-19&page_size=300&next_page_token=
+2025-12-30 08:38:33,752 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:33,752 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 08:38:33,901 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-06-19&to=2025-07-19&page_size=300&next_page_token=
+2025-12-30 08:38:33,901 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:33,902 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 08:38:34,072 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-07-19&to=2025-08-18&page_size=300&next_page_token=
+2025-12-30 08:38:34,072 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:34,072 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 08:38:34,235 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-08-18&to=2025-09-17&page_size=300&next_page_token=
+2025-12-30 08:38:34,235 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:34,235 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 08:38:34,397 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-09-17&to=2025-10-17&page_size=300&next_page_token=
+2025-12-30 08:38:34,397 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:34,397 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 08:38:34,553 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-10-17&to=2025-11-16&page_size=300&next_page_token=
+2025-12-30 08:38:34,556 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:34,556 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 08:38:34,720 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-11-16&to=2025-12-16&page_size=300&next_page_token=
+2025-12-30 08:38:34,720 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:34,720 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 08:38:34,875 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-12-16&to=2026-01-15&page_size=300&next_page_token=
+2025-12-30 08:38:34,876 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:38:34,878 - INFO - Process finished.
+2025-12-30 08:39:19,789 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:39:19,975 - INFO - Found 1 users.
+2025-12-30 08:39:19,976 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 08:39:19,976 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 08:39:20,157 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-01-01&to=2023-01-31&page_size=300&next_page_token=
+2025-12-30 08:39:20,157 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:20,157 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 08:39:20,319 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-01-31&to=2023-03-02&page_size=300&next_page_token=
+2025-12-30 08:39:20,319 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:20,319 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 08:39:20,474 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-03-02&to=2023-04-01&page_size=300&next_page_token=
+2025-12-30 08:39:20,474 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:20,474 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 08:39:20,633 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-04-01&to=2023-05-01&page_size=300&next_page_token=
+2025-12-30 08:39:20,633 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:20,633 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 08:39:20,804 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-05-01&to=2023-05-31&page_size=300&next_page_token=
+2025-12-30 08:39:20,804 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:20,804 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 08:39:20,954 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-05-31&to=2023-06-30&page_size=300&next_page_token=
+2025-12-30 08:39:20,954 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:20,954 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 08:39:21,107 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-06-30&to=2023-07-30&page_size=300&next_page_token=
+2025-12-30 08:39:21,107 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:21,107 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 08:39:21,258 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-07-30&to=2023-08-29&page_size=300&next_page_token=
+2025-12-30 08:39:21,259 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:21,259 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 08:39:21,403 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-08-29&to=2023-09-28&page_size=300&next_page_token=
+2025-12-30 08:39:21,404 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:21,404 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 08:39:21,562 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-09-28&to=2023-10-28&page_size=300&next_page_token=
+2025-12-30 08:39:21,562 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:21,562 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 08:39:21,747 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-10-28&to=2023-11-27&page_size=300&next_page_token=
+2025-12-30 08:39:21,747 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:21,747 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 08:39:22,010 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-11-27&to=2023-12-27&page_size=300&next_page_token=
+2025-12-30 08:39:22,010 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:22,010 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 08:39:22,170 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2023-12-27&to=2024-01-26&page_size=300&next_page_token=
+2025-12-30 08:39:22,170 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:22,170 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 08:39:22,349 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-01-26&to=2024-02-25&page_size=300&next_page_token=
+2025-12-30 08:39:22,349 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:22,349 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 08:39:22,513 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-02-25&to=2024-03-26&page_size=300&next_page_token=
+2025-12-30 08:39:22,514 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:22,514 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 08:39:22,684 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-03-26&to=2024-04-25&page_size=300&next_page_token=
+2025-12-30 08:39:22,684 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:22,684 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 08:39:22,866 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-04-25&to=2024-05-25&page_size=300&next_page_token=
+2025-12-30 08:39:22,866 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:22,867 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 08:39:23,028 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-05-25&to=2024-06-24&page_size=300&next_page_token=
+2025-12-30 08:39:23,028 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:23,028 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 08:39:23,201 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-06-24&to=2024-07-24&page_size=300&next_page_token=
+2025-12-30 08:39:23,201 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:23,201 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 08:39:23,349 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-07-24&to=2024-08-23&page_size=300&next_page_token=
+2025-12-30 08:39:23,349 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:23,349 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 08:39:23,511 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-08-23&to=2024-09-22&page_size=300&next_page_token=
+2025-12-30 08:39:23,511 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:23,511 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 08:39:23,688 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-09-22&to=2024-10-22&page_size=300&next_page_token=
+2025-12-30 08:39:23,688 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:23,688 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 08:39:23,877 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-10-22&to=2024-11-21&page_size=300&next_page_token=
+2025-12-30 08:39:23,877 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:23,878 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 08:39:24,019 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-11-21&to=2024-12-21&page_size=300&next_page_token=
+2025-12-30 08:39:24,019 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:24,019 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 08:39:24,184 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2024-12-21&to=2025-01-20&page_size=300&next_page_token=
+2025-12-30 08:39:24,184 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:24,184 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 08:39:24,337 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-01-20&to=2025-02-19&page_size=300&next_page_token=
+2025-12-30 08:39:24,337 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:24,337 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 08:39:24,602 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-02-19&to=2025-03-21&page_size=300&next_page_token=
+2025-12-30 08:39:24,602 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:24,603 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 08:39:24,779 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-03-21&to=2025-04-20&page_size=300&next_page_token=
+2025-12-30 08:39:24,780 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:24,780 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 08:39:24,932 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-04-20&to=2025-05-20&page_size=300&next_page_token=
+2025-12-30 08:39:24,932 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:24,932 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 08:39:25,087 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-05-20&to=2025-06-19&page_size=300&next_page_token=
+2025-12-30 08:39:25,087 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:25,087 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 08:39:25,254 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-06-19&to=2025-07-19&page_size=300&next_page_token=
+2025-12-30 08:39:25,254 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:25,254 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 08:39:25,415 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-07-19&to=2025-08-18&page_size=300&next_page_token=
+2025-12-30 08:39:25,415 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:25,415 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 08:39:25,574 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-08-18&to=2025-09-17&page_size=300&next_page_token=
+2025-12-30 08:39:25,574 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:25,574 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 08:39:25,728 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-09-17&to=2025-10-17&page_size=300&next_page_token=
+2025-12-30 08:39:25,728 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:25,728 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 08:39:25,899 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-10-17&to=2025-11-16&page_size=300&next_page_token=
+2025-12-30 08:39:25,899 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:25,899 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 08:39:26,049 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-11-16&to=2025-12-16&page_size=300&next_page_token=
+2025-12-30 08:39:26,050 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:26,050 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 08:39:26,227 - ERROR - API Request failed for pete.carapetyan@gmail.com: 400 Client Error: Bad Request for url: https://api.zoom.us/v2/users/9JlwmCb9RrqyyKSV8huSzw/recordings?from=2025-12-16&to=2026-01-15&page_size=300&next_page_token=
+2025-12-30 08:39:26,227 - ERROR - Response: {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:read:list_user_recordings, cloud_recording:read:list_user_recordings:admin]."}
+2025-12-30 08:39:26,229 - INFO - Process finished.
+2025-12-30 08:40:10,364 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:40:10,552 - INFO - Found 1 users.
+2025-12-30 08:40:10,553 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 08:40:10,553 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 08:40:10,748 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 08:40:10,937 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 08:40:11,127 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 08:40:11,317 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 08:40:11,516 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 08:40:11,711 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 08:40:11,943 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 08:40:12,136 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 08:40:12,331 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 08:40:12,657 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 08:40:12,874 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 08:40:13,074 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 08:40:13,282 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 08:40:13,506 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 08:40:13,732 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 08:40:13,964 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 08:40:14,167 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 08:40:14,370 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 08:40:14,562 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 08:40:14,781 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 08:40:14,969 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 08:40:15,188 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 08:40:15,390 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 08:40:15,636 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 08:40:15,837 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 08:40:16,023 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 08:40:16,307 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 08:40:16,533 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 08:40:16,746 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 08:40:16,933 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 08:40:17,131 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 08:40:17,307 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 08:40:17,597 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 08:40:17,793 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 08:40:17,984 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 08:40:18,220 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 08:40:19,208 - INFO - SUCCESS: 2025-12-30_Checkin_94d88.m4a
+2025-12-30 08:40:19,648 - INFO - SUCCESS: 2025-12-30_Checkin_f3c1c.timeline
+2025-12-30 08:40:20,057 - INFO - SUCCESS: 2025-12-30_Checkin_a0ca5.transcript
+2025-12-30 08:40:20,797 - INFO - SUCCESS: 2025-12-30_Checkin_de181.mp4
+2025-12-30 08:40:20,799 - INFO - Process finished.
+2025-12-30 08:41:00,405 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:41:00,591 - INFO - Found 1 users.
+2025-12-30 08:41:00,593 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 08:41:00,593 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 08:41:00,800 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 08:41:01,027 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 08:41:01,264 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 08:41:01,493 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 08:41:01,723 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 08:41:01,934 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 08:41:02,168 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 08:41:02,401 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 08:41:02,605 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 08:41:02,844 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 08:41:03,077 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 08:41:03,331 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 08:41:03,522 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 08:41:03,718 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 08:41:03,920 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 08:41:04,128 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 08:41:04,334 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 08:41:04,530 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 08:41:04,736 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 08:41:04,947 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 08:41:05,160 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 08:41:05,368 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 08:41:05,561 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 08:41:05,764 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 08:41:05,965 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 08:41:06,187 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 08:41:06,382 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 08:41:06,723 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 08:41:06,907 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 08:41:07,145 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 08:41:07,364 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 08:41:07,568 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 08:41:07,779 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 08:41:07,978 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 08:41:08,190 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 08:41:08,417 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 08:41:08,688 - INFO - SKIPPED: 2025-12-30_Checkin_94d88.m4a (Already exists)
+2025-12-30 08:41:08,688 - INFO - SKIPPED: 2025-12-30_Checkin_f3c1c.timeline (Already exists)
+2025-12-30 08:41:08,688 - INFO - SKIPPED: 2025-12-30_Checkin_a0ca5.transcript (Already exists)
+2025-12-30 08:41:08,688 - INFO - SKIPPED: 2025-12-30_Checkin_de181.mp4 (Already exists)
+2025-12-30 08:41:08,690 - INFO - Process finished.
+2025-12-30 08:41:29,921 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:41:30,165 - INFO - Found 1 users.
+2025-12-30 08:41:30,168 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 08:41:30,168 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 08:41:30,361 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 08:41:30,576 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 08:41:30,909 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 08:41:31,123 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 08:41:31,331 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 08:41:31,569 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 08:41:31,803 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 08:41:32,032 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 08:41:32,223 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 08:41:32,500 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 08:41:32,735 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 08:41:32,955 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 08:41:33,164 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 08:41:33,390 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 08:41:33,585 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 08:41:33,774 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 08:41:34,068 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 08:41:34,269 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 08:41:34,471 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 08:41:34,689 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 08:41:34,877 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 08:41:35,091 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 08:41:35,289 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 08:41:35,508 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 08:41:35,735 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 08:41:35,941 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 08:41:36,154 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 08:41:36,361 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 08:41:36,581 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 08:41:36,810 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 08:41:37,007 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 08:41:37,200 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 08:41:37,398 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 08:41:37,628 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 08:41:37,834 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 08:41:38,067 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 08:41:38,372 - INFO - SKIPPED: 2025-12-30_Checkin_94d88.m4a (Already exists)
+2025-12-30 08:41:38,372 - INFO - SKIPPED: 2025-12-30_Checkin_f3c1c.timeline (Already exists)
+2025-12-30 08:41:38,373 - INFO - SKIPPED: 2025-12-30_Checkin_a0ca5.transcript (Already exists)
+2025-12-30 08:41:38,373 - INFO - SKIPPED: 2025-12-30_Checkin_de181.mp4 (Already exists)
+2025-12-30 08:41:38,375 - INFO - Process finished.
+2025-12-30 08:59:06,716 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 08:59:06,925 - INFO - Found 1 users.
+2025-12-30 08:59:06,928 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 08:59:06,928 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 08:59:07,150 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 08:59:07,342 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 08:59:07,551 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 08:59:07,746 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 08:59:07,975 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 08:59:08,281 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 08:59:08,493 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 08:59:08,721 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 08:59:08,918 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 08:59:09,119 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 08:59:09,309 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 08:59:09,530 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 08:59:09,898 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 08:59:10,143 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 08:59:10,358 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 08:59:10,577 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 08:59:10,775 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 08:59:11,016 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 08:59:11,230 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 08:59:11,457 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 08:59:11,682 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 08:59:11,871 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 08:59:12,106 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 08:59:12,347 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 08:59:12,548 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 08:59:12,781 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 08:59:13,001 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 08:59:13,203 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 08:59:13,425 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 08:59:13,631 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 08:59:13,840 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 08:59:14,038 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 08:59:14,220 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 08:59:14,430 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 08:59:14,631 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 08:59:14,864 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 08:59:15,555 - INFO - SUCCESS: 2025-12-30_Checkin_5aa85.transcript
+2025-12-30 08:59:15,706 - ERROR - Failed to delete 4ac3a98a-823d-4ccd-b886-41100fd5aa85: 400 - {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:delete:recording_file, cloud_recording:delete:recording_file:admin]."}
+2025-12-30 08:59:16,455 - INFO - SUCCESS: 2025-12-30_Checkin_9afac.m4a
+2025-12-30 08:59:16,712 - ERROR - Failed to delete b5354efb-3073-4d78-a746-5830bc89afac: 400 - {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:delete:recording_file, cloud_recording:delete:recording_file:admin]."}
+2025-12-30 08:59:17,101 - INFO - SUCCESS: 2025-12-30_Checkin_523fa.timeline
+2025-12-30 08:59:17,255 - ERROR - Failed to delete 48d504cc-7219-441a-95a6-5f8c23c523fa: 400 - {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:delete:recording_file, cloud_recording:delete:recording_file:admin]."}
+2025-12-30 08:59:17,996 - INFO - SUCCESS: 2025-12-30_Checkin_15e78.mp4
+2025-12-30 08:59:18,163 - ERROR - Failed to delete e754d5b8-cefc-4c87-934e-12fb0f115e78: 400 - {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:delete:recording_file, cloud_recording:delete:recording_file:admin]."}
+2025-12-30 08:59:18,165 - INFO - SKIPPED: 2025-12-30_Checkin_94d88.m4a (Already exists)
+2025-12-30 08:59:18,324 - ERROR - Failed to delete 76860c2a-2774-489b-82e1-3be2a8294d88: 400 - {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:delete:recording_file, cloud_recording:delete:recording_file:admin]."}
+2025-12-30 08:59:18,326 - INFO - SKIPPED: 2025-12-30_Checkin_f3c1c.timeline (Already exists)
+2025-12-30 08:59:18,502 - ERROR - Failed to delete 791b9981-c8fc-4b7d-8090-6969be3f3c1c: 400 - {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:delete:recording_file, cloud_recording:delete:recording_file:admin]."}
+2025-12-30 08:59:18,503 - INFO - SKIPPED: 2025-12-30_Checkin_a0ca5.transcript (Already exists)
+2025-12-30 08:59:18,665 - ERROR - Failed to delete 77f4c387-e411-4601-a7fc-9a98b37a0ca5: 400 - {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:delete:recording_file, cloud_recording:delete:recording_file:admin]."}
+2025-12-30 08:59:18,667 - INFO - SKIPPED: 2025-12-30_Checkin_de181.mp4 (Already exists)
+2025-12-30 08:59:18,836 - ERROR - Failed to delete 870a0cf9-627e-4cf8-9fb0-67932a4de181: 400 - {"code":4711,"message":"Invalid access token, does not contain scopes:[cloud_recording:delete:recording_file, cloud_recording:delete:recording_file:admin]."}
+2025-12-30 08:59:18,840 - INFO - Process finished.
+2025-12-30 09:07:35,919 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 09:07:36,226 - INFO - Found 1 users.
+2025-12-30 09:07:36,228 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 09:07:36,228 - INFO - Checking range: 2023-01-01 to 2023-01-31 for pete.carapetyan@gmail.com
+2025-12-30 09:07:36,423 - INFO - Checking range: 2023-01-31 to 2023-03-02 for pete.carapetyan@gmail.com
+2025-12-30 09:07:36,627 - INFO - Checking range: 2023-03-02 to 2023-04-01 for pete.carapetyan@gmail.com
+2025-12-30 09:07:36,831 - INFO - Checking range: 2023-04-01 to 2023-05-01 for pete.carapetyan@gmail.com
+2025-12-30 09:07:37,055 - INFO - Checking range: 2023-05-01 to 2023-05-31 for pete.carapetyan@gmail.com
+2025-12-30 09:07:37,274 - INFO - Checking range: 2023-05-31 to 2023-06-30 for pete.carapetyan@gmail.com
+2025-12-30 09:07:37,473 - INFO - Checking range: 2023-06-30 to 2023-07-30 for pete.carapetyan@gmail.com
+2025-12-30 09:07:37,710 - INFO - Checking range: 2023-07-30 to 2023-08-29 for pete.carapetyan@gmail.com
+2025-12-30 09:07:37,937 - INFO - Checking range: 2023-08-29 to 2023-09-28 for pete.carapetyan@gmail.com
+2025-12-30 09:07:38,134 - INFO - Checking range: 2023-09-28 to 2023-10-28 for pete.carapetyan@gmail.com
+2025-12-30 09:07:38,326 - INFO - Checking range: 2023-10-28 to 2023-11-27 for pete.carapetyan@gmail.com
+2025-12-30 09:07:38,518 - INFO - Checking range: 2023-11-27 to 2023-12-27 for pete.carapetyan@gmail.com
+2025-12-30 09:07:38,718 - INFO - Checking range: 2023-12-27 to 2024-01-26 for pete.carapetyan@gmail.com
+2025-12-30 09:07:38,937 - INFO - Checking range: 2024-01-26 to 2024-02-25 for pete.carapetyan@gmail.com
+2025-12-30 09:07:39,125 - INFO - Checking range: 2024-02-25 to 2024-03-26 for pete.carapetyan@gmail.com
+2025-12-30 09:07:39,325 - INFO - Checking range: 2024-03-26 to 2024-04-25 for pete.carapetyan@gmail.com
+2025-12-30 09:07:39,543 - INFO - Checking range: 2024-04-25 to 2024-05-25 for pete.carapetyan@gmail.com
+2025-12-30 09:07:39,726 - INFO - Checking range: 2024-05-25 to 2024-06-24 for pete.carapetyan@gmail.com
+2025-12-30 09:07:39,936 - INFO - Checking range: 2024-06-24 to 2024-07-24 for pete.carapetyan@gmail.com
+2025-12-30 09:07:40,112 - INFO - Checking range: 2024-07-24 to 2024-08-23 for pete.carapetyan@gmail.com
+2025-12-30 09:07:40,304 - INFO - Checking range: 2024-08-23 to 2024-09-22 for pete.carapetyan@gmail.com
+2025-12-30 09:07:40,513 - INFO - Checking range: 2024-09-22 to 2024-10-22 for pete.carapetyan@gmail.com
+2025-12-30 09:07:40,729 - INFO - Checking range: 2024-10-22 to 2024-11-21 for pete.carapetyan@gmail.com
+2025-12-30 09:07:40,914 - INFO - Checking range: 2024-11-21 to 2024-12-21 for pete.carapetyan@gmail.com
+2025-12-30 09:07:41,127 - INFO - Checking range: 2024-12-21 to 2025-01-20 for pete.carapetyan@gmail.com
+2025-12-30 09:07:41,316 - INFO - Checking range: 2025-01-20 to 2025-02-19 for pete.carapetyan@gmail.com
+2025-12-30 09:07:41,508 - INFO - Checking range: 2025-02-19 to 2025-03-21 for pete.carapetyan@gmail.com
+2025-12-30 09:07:41,733 - INFO - Checking range: 2025-03-21 to 2025-04-20 for pete.carapetyan@gmail.com
+2025-12-30 09:07:41,959 - INFO - Checking range: 2025-04-20 to 2025-05-20 for pete.carapetyan@gmail.com
+2025-12-30 09:07:42,151 - INFO - Checking range: 2025-05-20 to 2025-06-19 for pete.carapetyan@gmail.com
+2025-12-30 09:07:42,358 - INFO - Checking range: 2025-06-19 to 2025-07-19 for pete.carapetyan@gmail.com
+2025-12-30 09:07:42,568 - INFO - Checking range: 2025-07-19 to 2025-08-18 for pete.carapetyan@gmail.com
+2025-12-30 09:07:42,781 - INFO - Checking range: 2025-08-18 to 2025-09-17 for pete.carapetyan@gmail.com
+2025-12-30 09:07:43,001 - INFO - Checking range: 2025-09-17 to 2025-10-17 for pete.carapetyan@gmail.com
+2025-12-30 09:07:43,201 - INFO - Checking range: 2025-10-17 to 2025-11-16 for pete.carapetyan@gmail.com
+2025-12-30 09:07:43,381 - INFO - Checking range: 2025-11-16 to 2025-12-16 for pete.carapetyan@gmail.com
+2025-12-30 09:07:43,615 - INFO - Checking range: 2025-12-16 to 2026-01-15 for pete.carapetyan@gmail.com
+2025-12-30 09:07:43,861 - INFO - SKIPPED: 2025-12-30_Checkin_5aa85.transcript (Already exists)
+2025-12-30 09:07:44,071 - INFO - DELETED from Zoom: 4ac3a98a-823d-4ccd-b886-41100fd5aa85
+2025-12-30 09:07:44,074 - INFO - SKIPPED: 2025-12-30_Checkin_9afac.m4a (Already exists)
+2025-12-30 09:07:44,306 - INFO - DELETED from Zoom: b5354efb-3073-4d78-a746-5830bc89afac
+2025-12-30 09:07:44,308 - INFO - SKIPPED: 2025-12-30_Checkin_523fa.timeline (Already exists)
+2025-12-30 09:07:44,553 - INFO - DELETED from Zoom: 48d504cc-7219-441a-95a6-5f8c23c523fa
+2025-12-30 09:07:44,555 - INFO - SKIPPED: 2025-12-30_Checkin_15e78.mp4 (Already exists)
+2025-12-30 09:07:44,788 - INFO - DELETED from Zoom: e754d5b8-cefc-4c87-934e-12fb0f115e78
+2025-12-30 09:07:44,790 - INFO - SKIPPED: 2025-12-30_Checkin_94d88.m4a (Already exists)
+2025-12-30 09:07:44,998 - ERROR - Failed to delete 76860c2a-2774-489b-82e1-3be2a8294d88: 404 - {"code":3301,"message":"Invalid recording ID. A recording file with the recording ID: 76860c2a-2774-489b-82e1-3be2a8294d88 does not exist."}
+2025-12-30 09:07:45,000 - INFO - SKIPPED: 2025-12-30_Checkin_f3c1c.timeline (Already exists)
+2025-12-30 09:07:45,201 - ERROR - Failed to delete 791b9981-c8fc-4b7d-8090-6969be3f3c1c: 404 - {"code":3301,"message":"Invalid recording ID. A recording file with the recording ID: 791b9981-c8fc-4b7d-8090-6969be3f3c1c does not exist."}
+2025-12-30 09:07:45,203 - INFO - SKIPPED: 2025-12-30_Checkin_a0ca5.transcript (Already exists)
+2025-12-30 09:07:45,414 - ERROR - Failed to delete 77f4c387-e411-4601-a7fc-9a98b37a0ca5: 404 - {"code":3301,"message":"Invalid recording ID. A recording file with the recording ID: 77f4c387-e411-4601-a7fc-9a98b37a0ca5 does not exist."}
+2025-12-30 09:07:45,416 - INFO - SKIPPED: 2025-12-30_Checkin_de181.mp4 (Already exists)
+2025-12-30 09:07:45,675 - ERROR - Failed to delete 870a0cf9-627e-4cf8-9fb0-67932a4de181: 404 - {"code":3301,"message":"Invalid recording ID. A recording file with the recording ID: 870a0cf9-627e-4cf8-9fb0-67932a4de181 does not exist."}
+2025-12-30 09:07:45,677 - INFO - Process finished.
+2025-12-30 09:16:37,724 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 09:16:37,919 - INFO - Found 1 users.
+2025-12-30 09:16:37,921 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 09:16:37,921 - INFO - Checking range: 2025-12-25 to 2026-01-24 for pete.carapetyan@gmail.com
+2025-12-30 09:16:39,148 - INFO - SUCCESS: 2025-12-30_Checkin_8c008.mp4
+2025-12-30 09:16:39,387 - INFO - DELETED from Zoom: 03084eb6-c871-4392-9075-d1e75598c008
+2025-12-30 09:16:39,790 - INFO - SUCCESS: 2025-12-30_Checkin_8319c.transcript
+2025-12-30 09:16:40,011 - INFO - DELETED from Zoom: c63eb4b2-4fb8-4e00-91e5-a082b8c8319c
+2025-12-30 09:16:40,619 - INFO - SUCCESS: 2025-12-30_Checkin_f3ead.m4a
+2025-12-30 09:16:40,868 - INFO - DELETED from Zoom: efddc4d9-6fb6-4237-9699-73b7daff3ead
+2025-12-30 09:16:41,065 - ERROR - FAILED: 2025-12-30_Checkin_3f2e9.timeline - Error: 404 Client Error: Not Found for url: https://us06web.zoom.us/rec/download/C4eoJf6_R5tvP7U4vexzt1FcvAomw38kD6ISkSq2GMPqNskULbTBYAMyqsSBW6hG8z5ijqy-5XQsIAEh.TO1kWOHfpfInXDPZ?access_token=eyJzdiI6IjAwMDAwMiIsImFsZyI6IkhTNTEyIiwidiI6IjIuMCIsImtpZCI6ImNhNDkxY2E3LTJhZDAtNDE4Ny04YzgxLWFlYWY3NmU4ZTJlMiJ9.eyJhdWQiOiJodHRwczovL29hdXRoLnpvb20udXMiLCJ1aWQiOiI5Smx3bUNiOVJycXl5S1NWOGh1U3p3IiwidmVyIjoxMCwiYXVpZCI6ImRmNjUxMDhlNzg1YTlkMWQyMmI5NWRmNTRjOGFiMzdmNzVmZDNiOTg4NjcwYmU5MjM2MWY1MmEzZTNlNjc0YTkiLCJuYmYiOjE3NjcxMDc3OTcsImNvZGUiOiJqVUpCdUszbFJ2eW96X3c3a2VnY0t3eFBabEFtVHRKSUUiLCJpc3MiOiJ6bTpjaWQ6ZkhSR2ZacWdSdUNkR0lZUnMwMWNrQSIsImdubyI6MCwiZXhwIjoxNzY3MTExMzk3LCJ0eXBlIjozLCJpYXQiOjE3NjcxMDc3OTcsImFpZCI6IjJjcXpQMlJ1VGhpYUphWHFhMVpvNVEifQ.O7e1oyoq3ap4AzADKGC6RYrWIfJyNn8pGulTOT_XNLFewE92q9tYVtfnN0FT_OmG2x9zPjju9CgVCmH1x8P3NQ
+2025-12-30 09:16:41,065 - INFO - SKIPPED: 2025-12-30_Checkin_94d88.m4a (Already exists)
+2025-12-30 09:16:41,306 - ERROR - Failed to delete 76860c2a-2774-489b-82e1-3be2a8294d88: 404 - {"code":3301,"message":"Invalid recording ID. A recording file with the recording ID: 76860c2a-2774-489b-82e1-3be2a8294d88 does not exist."}
+2025-12-30 09:16:41,308 - INFO - SKIPPED: 2025-12-30_Checkin_f3c1c.timeline (Already exists)
+2025-12-30 09:16:41,546 - INFO - DELETED from Zoom: 791b9981-c8fc-4b7d-8090-6969be3f3c1c
+2025-12-30 09:16:41,548 - INFO - SKIPPED: 2025-12-30_Checkin_a0ca5.transcript (Already exists)
+2025-12-30 09:16:41,759 - ERROR - Failed to delete 77f4c387-e411-4601-a7fc-9a98b37a0ca5: 404 - {"code":3301,"message":"Invalid recording ID. A recording file with the recording ID: 77f4c387-e411-4601-a7fc-9a98b37a0ca5 does not exist."}
+2025-12-30 09:16:41,760 - INFO - SKIPPED: 2025-12-30_Checkin_de181.mp4 (Already exists)
+2025-12-30 09:16:41,989 - ERROR - Failed to delete 870a0cf9-627e-4cf8-9fb0-67932a4de181: 404 - {"code":3301,"message":"Invalid recording ID. A recording file with the recording ID: 870a0cf9-627e-4cf8-9fb0-67932a4de181 does not exist."}
+2025-12-30 09:16:41,993 - INFO - Process finished.
+2025-12-30 09:46:01,741 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 09:46:01,949 - INFO - Found 1 users.
+2025-12-30 09:46:01,950 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 09:46:01,950 - INFO - Process finished.
+2025-12-30 09:53:40,142 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 09:53:40,346 - INFO - Found 1 users.
+2025-12-30 09:53:40,347 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 09:53:40,347 - INFO - Process finished.
+2025-12-30 10:01:28,061 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 10:01:28,283 - INFO - Found 1 users.
+2025-12-30 10:01:28,286 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 10:01:28,286 - INFO - Checking range: 2025-01-01 to 2025-01-31 for pete.carapetyan@gmail.com
+2025-12-30 10:01:28,491 - INFO - Checking range: 2025-01-31 to 2025-03-02 for pete.carapetyan@gmail.com
+2025-12-30 10:01:28,717 - INFO - Checking range: 2025-03-02 to 2025-04-01 for pete.carapetyan@gmail.com
+2025-12-30 10:01:28,953 - INFO - Checking range: 2025-04-01 to 2025-05-01 for pete.carapetyan@gmail.com
+2025-12-30 10:01:29,169 - INFO - Checking range: 2025-05-01 to 2025-05-31 for pete.carapetyan@gmail.com
+2025-12-30 10:01:29,448 - INFO - Checking range: 2025-05-31 to 2025-06-30 for pete.carapetyan@gmail.com
+2025-12-30 10:01:29,698 - INFO - Checking range: 2025-06-30 to 2025-07-30 for pete.carapetyan@gmail.com
+2025-12-30 10:01:30,021 - INFO - Checking range: 2025-07-30 to 2025-08-29 for pete.carapetyan@gmail.com
+2025-12-30 10:01:30,230 - INFO - Checking range: 2025-08-29 to 2025-09-28 for pete.carapetyan@gmail.com
+2025-12-30 10:01:30,452 - INFO - Checking range: 2025-09-28 to 2025-10-28 for pete.carapetyan@gmail.com
+2025-12-30 10:01:30,684 - INFO - Checking range: 2025-10-28 to 2025-11-27 for pete.carapetyan@gmail.com
+2025-12-30 10:01:30,922 - INFO - Checking range: 2025-11-27 to 2025-12-27 for pete.carapetyan@gmail.com
+2025-12-30 10:01:31,152 - INFO - Checking range: 2025-12-27 to 2026-01-26 for pete.carapetyan@gmail.com
+2025-12-30 10:01:32,267 - INFO - SUCCESS: 2025-12-30_Checkin_34393.m4a
+2025-12-30 10:01:32,511 - INFO - DELETED from Zoom: 2ae27366-d297-4e58-ad88-83332d934393
+2025-12-30 10:01:32,969 - INFO - SUCCESS: 2025-12-30_Checkin_c9d6d.timeline
+2025-12-30 10:01:33,228 - INFO - DELETED from Zoom: ed3d5a21-bb0c-4b81-82bb-737be8ec9d6d
+2025-12-30 10:01:33,591 - INFO - SUCCESS: 2025-12-30_Checkin_76e87.transcript
+2025-12-30 10:01:33,891 - INFO - DELETED from Zoom: 3d2677da-3127-440f-ae42-d9fe6ca76e87
+2025-12-30 10:01:34,767 - INFO - SUCCESS: 2025-12-30_Checkin_2a3ed.mp4
+2025-12-30 10:01:34,989 - INFO - DELETED from Zoom: fa020a28-f4b2-4bb0-bb55-f5d836c2a3ed
+2025-12-30 10:01:34,992 - INFO - Process finished.
+2025-12-30 10:01:56,365 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 10:01:56,537 - INFO - Found 1 users.
+2025-12-30 10:01:56,539 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 10:01:56,539 - INFO - Checking range: 2025-01-01 to 2025-01-31 for pete.carapetyan@gmail.com
+2025-12-30 10:01:56,746 - INFO - Checking range: 2025-01-31 to 2025-03-02 for pete.carapetyan@gmail.com
+2025-12-30 10:01:56,945 - INFO - Checking range: 2025-03-02 to 2025-04-01 for pete.carapetyan@gmail.com
+2025-12-30 10:01:57,167 - INFO - Checking range: 2025-04-01 to 2025-05-01 for pete.carapetyan@gmail.com
+2025-12-30 10:01:57,476 - INFO - Checking range: 2025-05-01 to 2025-05-31 for pete.carapetyan@gmail.com
+2025-12-30 10:01:57,665 - INFO - Checking range: 2025-05-31 to 2025-06-30 for pete.carapetyan@gmail.com
+2025-12-30 10:01:57,875 - INFO - Checking range: 2025-06-30 to 2025-07-30 for pete.carapetyan@gmail.com
+2025-12-30 10:01:58,078 - INFO - Checking range: 2025-07-30 to 2025-08-29 for pete.carapetyan@gmail.com
+2025-12-30 10:01:58,269 - INFO - Checking range: 2025-08-29 to 2025-09-28 for pete.carapetyan@gmail.com
+2025-12-30 10:01:58,470 - INFO - Checking range: 2025-09-28 to 2025-10-28 for pete.carapetyan@gmail.com
+2025-12-30 10:01:58,699 - INFO - Checking range: 2025-10-28 to 2025-11-27 for pete.carapetyan@gmail.com
+2025-12-30 10:01:58,906 - INFO - Checking range: 2025-11-27 to 2025-12-27 for pete.carapetyan@gmail.com
+2025-12-30 10:01:59,131 - INFO - Checking range: 2025-12-27 to 2026-01-26 for pete.carapetyan@gmail.com
+2025-12-30 10:01:59,358 - INFO - Process finished.
+2025-12-30 10:13:49,531 - INFO - Successfully authenticated with Server-to-Server OAuth.
+2025-12-30 10:13:49,715 - INFO - Found 1 users.
+2025-12-30 10:13:49,717 - INFO - Starting download for user: pete.carapetyan@gmail.com (9JlwmCb9RrqyyKSV8huSzw)
+2025-12-30 10:13:49,717 - INFO - Checking range: 2025-01-01 to 2025-01-31 for pete.carapetyan@gmail.com
+2025-12-30 10:13:49,936 - INFO - Checking range: 2025-01-31 to 2025-03-02 for pete.carapetyan@gmail.com
+2025-12-30 10:13:50,137 - INFO - Checking range: 2025-03-02 to 2025-04-01 for pete.carapetyan@gmail.com
+2025-12-30 10:13:50,378 - INFO - Checking range: 2025-04-01 to 2025-05-01 for pete.carapetyan@gmail.com
+2025-12-30 10:13:50,596 - INFO - Checking range: 2025-05-01 to 2025-05-31 for pete.carapetyan@gmail.com
+2025-12-30 10:13:50,793 - INFO - Checking range: 2025-05-31 to 2025-06-30 for pete.carapetyan@gmail.com
+2025-12-30 10:13:51,014 - INFO - Checking range: 2025-06-30 to 2025-07-30 for pete.carapetyan@gmail.com
+2025-12-30 10:13:51,220 - INFO - Checking range: 2025-07-30 to 2025-08-29 for pete.carapetyan@gmail.com
+2025-12-30 10:13:51,425 - INFO - Checking range: 2025-08-29 to 2025-09-28 for pete.carapetyan@gmail.com
+2025-12-30 10:13:51,645 - INFO - Checking range: 2025-09-28 to 2025-10-28 for pete.carapetyan@gmail.com
+2025-12-30 10:13:51,880 - INFO - Checking range: 2025-10-28 to 2025-11-27 for pete.carapetyan@gmail.com
+2025-12-30 10:13:52,092 - INFO - Checking range: 2025-11-27 to 2025-12-27 for pete.carapetyan@gmail.com
+2025-12-30 10:13:52,317 - INFO - Checking range: 2025-12-27 to 2026-01-26 for pete.carapetyan@gmail.com
+2025-12-30 10:13:53,097 - INFO - SUCCESS: 2025-12-30_Checkin_895ed.chat
+2025-12-30 10:13:53,425 - INFO - DELETED from Zoom: 10dcb40b-bbb1-4da0-aea2-91e2bba895ed
+2025-12-30 10:13:54,396 - INFO - SUCCESS: 2025-12-30_Checkin_9fda8.mp4
+2025-12-30 10:13:54,630 - INFO - DELETED from Zoom: 807bf9ec-0cb9-42e0-ac4c-de279689fda8
+2025-12-30 10:13:55,251 - INFO - SUCCESS: 2025-12-30_Checkin_af67c.m4a
+2025-12-30 10:13:55,549 - INFO - DELETED from Zoom: 8cf49085-bfea-4a36-b7ae-85bf5cfaf67c
+2025-12-30 10:13:55,725 - ERROR - FAILED: 2025-12-30_Checkin_c910f.timeline - Error: 404 Client Error: Not Found for url: https://us06web.zoom.us/rec/download/RP8ME7n3LdoSkJeiCO25iw8j-HUo6UEcrbF7MvmFGmziV3xRQdOa8yo_IEd_NcTdWL5w2h17U23Cr0oA.LCWvia1-UW75Knt0?access_token=eyJzdiI6IjAwMDAwMiIsImFsZyI6IkhTNTEyIiwidiI6IjIuMCIsImtpZCI6ImY4MjhiMjFmLTY3MDctNDkzZC1hNjAzLWYwODM5NDM4N2JhYSJ9.eyJhdWQiOiJodHRwczovL29hdXRoLnpvb20udXMiLCJ1aWQiOiI5Smx3bUNiOVJycXl5S1NWOGh1U3p3IiwidmVyIjoxMCwiYXVpZCI6ImRmNjUxMDhlNzg1YTlkMWQyMmI5NWRmNTRjOGFiMzdmNzVmZDNiOTg4NjcwYmU5MjM2MWY1MmEzZTNlNjc0YTkiLCJuYmYiOjE3NjcxMTEyMjksImNvZGUiOiJPVkctYnRYbVRiLVoydnpwcDVwNlZRTU9ueldjT3BJWnIiLCJpc3MiOiJ6bTpjaWQ6ZkhSR2ZacWdSdUNkR0lZUnMwMWNrQSIsImdubyI6MCwiZXhwIjoxNzY3MTE0ODI5LCJ0eXBlIjozLCJpYXQiOjE3NjcxMTEyMjksImFpZCI6IjJjcXpQMlJ1VGhpYUphWHFhMVpvNVEifQ.4WK-4eRIQadUBUzf2mksOUQWNm2EIpALTRBuU8mNlNKcVFW9MvQXx6SQ6sn-kVj8uFRfIFbHtunYpFFf_G8h3g
+2025-12-30 10:13:55,727 - INFO - Process finished.
