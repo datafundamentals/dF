@@ -39,6 +39,8 @@
     "./firebase/index.js": "./dist/firebase/index.js",
     "./firebase/df-firestore-demo": "./dist/firebase/df-firestore-demo.js",
     "./firebase/df-firestore-demo.js": "./dist/firebase/df-firestore-demo.js",
+    "./firebase/df-activity-types-crud": "./dist/firebase/df-activity-types-crud.js",
+    "./firebase/df-activity-types-crud.js": "./dist/firebase/df-activity-types-crud.js",
     "./firebase/df-functions-demo": "./dist/firebase/df-functions-demo.js",
     "./firebase/df-functions-demo.js": "./dist/firebase/df-functions-demo.js",
     "./firebase/df-storage-demo": "./dist/firebase/df-storage-demo.js",

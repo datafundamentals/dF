@@ -368,6 +368,8 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
               </div>
             `}
       </section>
+
+      <df-activity-types-crud></df-activity-types-crud>
     `;
   }
 

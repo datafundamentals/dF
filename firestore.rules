@@ -232,6 +232,10 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    match /activity/{userId}/activityTypes/{activityTypeId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // =============================================================================
     // DEFAULT DENY
     // =============================================================================

@@ -73,6 +73,26 @@ export interface ExerciseDraft {
   recordedAt?: Date | null;
 }
 
+/** Activity type configuration persisted per user. */
+export interface ActivityTypeDocument extends FirestoreDocument {
+  typeName: string;
+  unit: string;
+  defaultNumber: number;
+  order: number;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  ownerId: string;
+  /** Managed internally for ordering. */
+  typeNameLower?: string;
+}
+
+export interface ActivityTypeDraft {
+  typeName: string;
+  unit: string;
+  defaultNumber: number;
+  order: number;
+}
+
 /** Backward compatibility: Pushup entry is now an exercise entry. */
 export type PushupEntry = ExerciseEntry;
 
