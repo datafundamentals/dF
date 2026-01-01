@@ -434,9 +434,9 @@ export class DfActivityTypesCrud extends SignalWatcher(LitElement) {
     const demoDocs: ActivityTypeDocument[] = [
       {
         id: 'activity-1',
-        typeName: 'Pushups',
+        typeName: 'Daily Steps',
         unit: 'count',
-        defaultNumber: 15,
+        defaultNumber: 10000,
         order: 1,
         createdAt: new Date('2025-09-18T10:00:00Z'),
         updatedAt: new Date('2025-09-19T10:00:00Z'),

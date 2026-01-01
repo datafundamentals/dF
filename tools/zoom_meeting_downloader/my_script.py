@@ -11,7 +11,7 @@ load_dotenv(os.path.expanduser("~/.env.keys"))
 ACCOUNT_ID = os.getenv('ZOOM_ACCOUNT_ID')
 CLIENT_ID = os.getenv('ZOOM_CLIENT_ID')
 CLIENT_SECRET = os.getenv('ZOOM_CLIENT_SECRET')
-DOWNLOAD_BASE_DIR = '/Volumes/Seagate2T/ccZoomRecordings'
+DOWNLOAD_BASE_DIR = '/Volumes/Seagate5T/fomoZoomRecordings'
 START_DATE = "2026-01-01" 
 LOG_FILE = "download_log.txt"
 

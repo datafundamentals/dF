@@ -1,0 +1,110 @@
+sites:
+  appwriter:
+    url: appwriter.com
+    host: netlify
+    status: active, but lame
+    purpose: primary revenue builder
+    theme: not-npr
+  aspie:
+    url: https://aspieautomator.com/
+    host: firebase
+    firebaseProject: aspieautomator
+    status: decent
+    purpose:
+    theme: not-alphabet
+  betterologist:
+    url: https://betterologist.net/
+    host: dreamhost?? - not sure - see /Users/petecarapetyan/work/primary/sites/betterologist/scpme.sh
+    status: lame home page only
+    purpose:
+    theme: not-fuelcell
+  betterology_com:
+    url: https://betterology.com/
+    host: firebase
+    firebaseProject: betterology
+    status: lame but spare
+    purpose: 
+    theme: not-virgin
+  betterology_net:
+    url: https://betterology.net/
+    host: firebase
+    firebaseProject: betterology-net
+    status: still on rocket
+    purpose: none?
+    theme: not-fuelcell
+  btrg:
+    url: https://www.btrg.org/
+    host: dreamhost
+    status: lorem + MPA Demos
+    purpose: personal demos and test site
+    theme: not-reddit
+  couldbe:
+    url: https://couldbe.net/
+    host: firebase
+    firebaseProject: couldbe
+    status: home + lorem
+    purpose: examples of things that could be
+    theme: not-wired
+  datafundamentals:
+    url: https://datafundamentals.com/
+    host: firebase
+    firebaseProject: datafundamentals
+    status: pretty close plus a lotta legacy
+    purpose: ...
+    theme: not-axios
+  hi2035:
+    url: https://jeren-5de92.web.app/
+    host: firebase
+    firebaseProject: hi2035
+    status: home + lorem
+    purpose: compare ai to hi
+    theme: not-wikipedia
+  mymodeler:
+    url: https://mymodeler.com/
+    host: firebase
+    firebaseProject: mymodelercom
+    status: lorem
+    purpose: platform modeling as a basis for better
+    theme: not-slashdot
+  pullmodel:
+    url: https://pullmodel.com/
+    host: firebase
+    firebaseProject: pullmodel
+    status: home + lorem (theme broken at footer)
+    purpose: provide basis for moving away from ḇ.porn
+    theme: not-github
+  smoslt:
+    note: This site is legacy deployed on dreamhost, but also has a lorem site deployed on firebase https://pullmodel-5d998.web.app/
+    url: https://smoslt.com/
+    host: dreamhost
+    firebaseProject: pullmodel
+    status: legacy deployed on dreamhost working
+    purpose: legacy only, for the time being
+    theme: not-github
+  walktown:
+    url: https://walktown.net/
+    host: firebase
+    firebaseProject: walktownnet
+    status: home + lorem
+    purpose: platform alternatives
+    theme: not-ibm
+  webappwriter:
+    url: https://webappwriter.com/
+    host: netlify
+    firebaseProject: webappwriter - but not used - netlify!
+    status: broken in my codebase, do not deploy!
+    purpose: legacy
+    theme: not-five38
+  wysinati:
+    url: https://wysinati.com/
+    host: dreamhost
+    status: home + lorem
+    purpose: platform WYSINATI
+    theme: not-codesign
+  jukelox:
+    url: https://jukelox-7ec89.web.app/
+    host: firebase
+    firebaseProject: jukelox-not-nyt
+    status: this is the one that you need to keep as an old working version of home and lorem links
+    purpose: example only, theme too complex for normal usage
+    theme: not-nyt

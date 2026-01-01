@@ -77,7 +77,7 @@ export async function initializeActivityTypeStore(
   const ref = collection(db, collectionPath);
 
   const newStore = new FirestoreCollectionStore<ActivityTypeDocument>(ref, {
-    defaultConstraints: [orderBy('order', 'asc'), orderBy('typeNameLower', 'asc')],
+    defaultConstraints: [orderBy('order', 'asc')],
     defaultQueryDescription: 'Activity types (ordered)',
     pageSize: PAGE_SIZE,
     mapDocument: normalizeActivityType,

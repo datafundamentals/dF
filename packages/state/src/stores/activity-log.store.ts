@@ -8,9 +8,8 @@ import {
 import type {
   FirestoreCollectionState,
   FirestoreDocumentData,
-  ExerciseDraft,
-  ExerciseEntry,
-  PushupDraft,
+  ActivityDraft,
+  ActivityEntry,
 } from '@df/types';
 import {FirestoreCollectionStore} from './firestore-base.store.js';
 import {
@@ -25,7 +24,7 @@ const FIRESTORE_HOST = '127.0.0.1';
 const FIRESTORE_PORT = 8280;
 const PAGE_SIZE = 20;
 
-const defaultState: FirestoreCollectionState<ExerciseEntry> = {
+const defaultState: FirestoreCollectionState<ActivityEntry> = {
   status: 'idle',
   documents: [],
   error: null,
@@ -38,30 +37,30 @@ const defaultState: FirestoreCollectionState<ExerciseEntry> = {
   queryDescription: 'Awaiting authentication',
 };
 
-const fallbackStateSignal = signal<FirestoreCollectionState<ExerciseEntry>>({...defaultState});
-const storeSignal = signal<FirestoreCollectionStore<ExerciseEntry> | null>(null);
+const fallbackStateSignal = signal<FirestoreCollectionState<ActivityEntry>>({...defaultState});
+const storeSignal = signal<FirestoreCollectionStore<ActivityEntry> | null>(null);
 const collectionRefSignal = signal<CollectionReference<DocumentData> | null>(null);
 const activeUserIdSignal = signal<string | null>(null);
 
-export const pushupCollectionState = computed<FirestoreCollectionState<ExerciseEntry>>(() => {
+export const activityCollectionState = computed<FirestoreCollectionState<ActivityEntry>>(() => {
   const store = storeSignal.get();
   return store ? store.state.get() : fallbackStateSignal.get();
 });
 
-export async function initializePushupStore(
+export async function initializeActivityStore(
   app: FirebaseApp,
   userId: string,
   useEmulator: boolean
 ): Promise<void> {
   if (!userId) {
-    throw new Error('A Firebase Auth user id is required to initialize the pushup store.');
+    throw new Error('A Firebase Auth user id is required to initialize the activity store.');
   }
 
   if (userId === activeUserIdSignal.get() && storeSignal.get()) {
     return;
   }
 
-  teardownPushupStore();
+  teardownActivityStore();
 
   const db = getFirestoreDb(app);
 
@@ -77,7 +76,7 @@ export async function initializePushupStore(
   const collectionPath = buildCollectionPath(userId);
   const ref = collection(db, collectionPath);
 
-  const newStore = new FirestoreCollectionStore<ExerciseEntry>(ref, {
+  const newStore = new FirestoreCollectionStore<ActivityEntry>(ref, {
     defaultConstraints: [orderBy('recordedAt', 'desc')],
     defaultQueryDescription: 'Your activity history (newest first)',
     pageSize: PAGE_SIZE,
@@ -92,7 +91,7 @@ export async function initializePushupStore(
   newStore.startRealtime();
 }
 
-export function teardownPushupStore(): void {
+export function teardownActivityStore(): void {
   const store = storeSignal.get();
   if (store) {
     store.stopRealtime();
@@ -104,31 +103,20 @@ export function teardownPushupStore(): void {
   fallbackStateSignal.set({...defaultState});
 }
 
-export async function logPushupEntry(draft: PushupDraft): Promise<string> {
-  // Convert legacy pushup format to new exercise format
-  const exerciseDraft: ExerciseDraft = {
-    exerciseType: 'pushups',
-    value: draft.count,
-    note: draft.note,
-    recordedAt: draft.recordedAt,
-  };
-  return logExerciseEntry(exerciseDraft);
-}
-
-export async function logExerciseEntry(draft: ExerciseDraft): Promise<string> {
+export async function logActivityEntry(draft: ActivityDraft): Promise<string> {
   if (!Number.isFinite(draft.value)) {
-    throw new Error('Exercise value must be a valid number.');
+    throw new Error('Activity value must be a valid number.');
   }
 
   const value = Math.max(0, Math.trunc(draft.value));
   if (value <= 0) {
-    throw new Error('Exercise value must be greater than zero.');
+    throw new Error('Activity value must be greater than zero.');
   }
 
   const now = new Date();
   const recordedAt = draft.recordedAt ?? now;
-  const payload: FirestoreDocumentData<ExerciseEntry> = {
-    exerciseType: draft.exerciseType,
+  const payload: FirestoreDocumentData<ActivityEntry> = {
+    activityType: draft.activityType,
     value,
     note: normalizeNote(draft.note),
     recordedAt,
@@ -143,23 +131,23 @@ export async function logExerciseEntry(draft: ExerciseDraft): Promise<string> {
   return id;
 }
 
-export async function deletePushupEntry(id: string): Promise<void> {
+export async function deleteActivityEntry(id: string): Promise<void> {
   const activeStore = ensureStore();
   await activeStore.delete(id);
   await activeStore.refresh();
 }
 
-export async function refreshPushupEntries(): Promise<void> {
+export async function refreshActivityEntries(): Promise<void> {
   const activeStore = ensureStore();
   await activeStore.refresh();
 }
 
-export function getActivePushupCollectionPath(): string | null {
+export function getActiveActivityCollectionPath(): string | null {
   const ref = collectionRefSignal.get();
   return ref?.path ?? null;
 }
 
-function normalizeEntry(entry: ExerciseEntry): ExerciseEntry {
+function normalizeEntry(entry: ActivityEntry): ActivityEntry {
   const recordedAt = entry.recordedAt instanceof Timestamp ? entry.recordedAt.toDate() : entry.recordedAt ?? null;
   const createdAt = entry.createdAt instanceof Timestamp ? entry.createdAt.toDate() : entry.createdAt ?? null;
   const updatedAt = entry.updatedAt instanceof Timestamp ? entry.updatedAt.toDate() : entry.updatedAt ?? null;
@@ -172,10 +160,10 @@ function normalizeEntry(entry: ExerciseEntry): ExerciseEntry {
   };
 }
 
-function ensureStore(): FirestoreCollectionStore<ExerciseEntry> {
+function ensureStore(): FirestoreCollectionStore<ActivityEntry> {
   const store = storeSignal.get();
   if (!store) {
-    throw new Error('Exercise store has not been initialized. Call initializePushupStore() after authentication.');
+    throw new Error('Activity store has not been initialized. Call initializeActivityStore() after authentication.');
   }
   return store;
 }
@@ -183,12 +171,12 @@ function ensureStore(): FirestoreCollectionStore<ExerciseEntry> {
 function ensureActiveUserId(): string {
   const userId = activeUserIdSignal.get();
   if (!userId) {
-    throw new Error('Pushup actions require an authenticated user.');
+    throw new Error('Activity actions require an authenticated user.');
   }
   return userId;
 }
 
-function normalizeNote(note: PushupDraft['note']): string | null {
+function normalizeNote(note: ActivityDraft['note']): string | null {
   if (typeof note !== 'string') {
     return null;
   }
@@ -198,5 +186,5 @@ function normalizeNote(note: PushupDraft['note']): string | null {
 }
 
 function buildCollectionPath(userId: string): string {
-  return `activity/${userId}/pushups`;
+  return `activity/${userId}/activities`;
 }

@@ -1,16 +1,18 @@
 import {css, html, LitElement, nothing} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import type {FirebaseUser, ExerciseType} from '@df/types';
-import {EXERCISE_TYPE_CONFIG} from '../../../packages/types/dist/index.js';
+import type {FirebaseUser, ActivityType} from '@df/types';
 import {
   firebaseAuthState,
-  initializePushupStore,
-  pushupCollectionState,
-  logExerciseEntry,
-  deletePushupEntry,
-  refreshPushupEntries,
-  teardownPushupStore,
+  initializeActivityStore,
+  activityCollectionState,
+  logActivityEntry,
+  deleteActivityEntry,
+  refreshActivityEntries,
+  teardownActivityStore,
+  initializeActivityTypeStore,
+  activityTypeCollectionState,
+  teardownActivityTypeStore,
   getInitializedFirebaseApp,
   shouldUseEmulatorForService,
 } from '@df/state';
@@ -220,7 +222,7 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
   @state() private initializedUserId: string | null = null;
   @state() private storeError: string | null = null;
-  @state() private selectedExerciseType: ExerciseType = 'pushups';
+  @state() private selectedActivityType: ActivityType = '';
   @state() private formValue = '10';
   @state() private formNote = '';
   @state() private isSubmitting = false;
@@ -244,12 +246,17 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
       void this.initializeStore(authUser);
     }
 
-    const pushups = this.initializedUserId ? pushupCollectionState.get() : null;
+    const activities = this.initializedUserId ? activityCollectionState.get() : null;
 
     return html`
       <section class="shell">
         ${isAuthenticated
-          ? html`<h1 class="page-title">Fitness Log · ${authUser?.displayName || authUser?.email || 'User'}</h1>`
+          ? html`
+              <h1 class="page-title">
+                Activity Log · ${authUser?.displayName || authUser?.email || 'User'}
+                <span style="color: #10b981; font-size: 0.75em; margin-left: 0.5rem;">✓ v2.0.1</span>
+              </h1>
+            `
           : nothing}
         ${this.storeError
           ? html`<div class="status error">
@@ -261,7 +268,7 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
               </div>
             </div>`
           : nothing}
-        ${isAuthenticated ? this.renderActivityAreas(pushups) : this.renderSignedOutMessage()}
+        ${isAuthenticated ? this.renderActivityAreas(activities) : this.renderSignedOutMessage()}
       </section>
     `;
   }
@@ -270,62 +277,80 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
   private renderSignedOutMessage() {
     return html`
       <div class="empty-state">
-        <p>Authenticate above to unlock the pushup form and history feed.</p>
+        <p>Authenticate above to unlock the activity form and history feed.</p>
       </div>
     `;
   }
 
-  private renderActivityAreas(pushups: ReturnType<typeof pushupCollectionState.get> | null) {
+  private renderActivityAreas(activities: ReturnType<typeof activityCollectionState.get> | null) {
     if (!this.initializedUserId) {
       return html`<div class="empty-state">Initialising Firestore connection…</div>`;
     }
 
-    const documents = pushups?.documents ?? [];
-    const status = pushups?.status ?? 'idle';
+    const documents = activities?.documents ?? [];
+    const status = activities?.status ?? 'idle';
+    const activityTypes = activityTypeCollectionState.get();
+    const availableTypes = activityTypes.documents;
+
+    // Auto-select first activity type if none selected and types are available
+    if (availableTypes.length > 0 && !this.selectedActivityType) {
+      this.selectedActivityType = availableTypes[0].typeName;
+      this.formValue = String(availableTypes[0].defaultNumber);
+    }
+
+    // Find the currently selected activity type for form labels
+    const selectedType = availableTypes.find((t) => t.typeName === this.selectedActivityType);
 
     return html`
       <section class="activity-grid">
         <div class="card">
-          <h3>Log exercise</h3>
+          <h3>Log activity</h3>
           ${this.submitMessage
             ? html`<div class="status ${this.submitMessage.variant}">${this.submitMessage.text}</div>`
             : nothing}
-          <form @submit=${this.handleSubmit}>
-            <md-filled-select
-              label="Exercise type"
-              value=${this.selectedExerciseType}
-              @change=${this.handleExerciseTypeChange}
-              ?disabled=${this.isSubmitting}
-            >
-              ${Object.entries(EXERCISE_TYPE_CONFIG).map(
-                ([type, config]) => html`
-                  <md-select-option value=${type}>
-                    <div slot="headline">${config.label}</div>
-                  </md-select-option>
-                `
-              )}
-            </md-filled-select>
-            <md-outlined-text-field
-              label="${EXERCISE_TYPE_CONFIG[this.selectedExerciseType].label} (${EXERCISE_TYPE_CONFIG[this.selectedExerciseType].unit})"
-              type="number"
-              required
-              inputmode="numeric"
-              helper=${EXERCISE_TYPE_CONFIG[this.selectedExerciseType].description}
-              value=${this.formValue}
-              @input=${this.handleValueInput}
-              ?disabled=${this.isSubmitting}
-            ></md-outlined-text-field>
-            <md-outlined-text-field
-              label="Optional note"
-              value=${this.formNote}
-              supporting-text="Example: morning warm-up"
-              @input=${this.handleNoteInput}
-              ?disabled=${this.isSubmitting}
-            ></md-outlined-text-field>
-            <md-filled-button ?disabled=${this.isSubmitting} type="submit">
-              ${this.isSubmitting ? 'Saving…' : 'Save entry'}
-            </md-filled-button>
-          </form>
+          ${availableTypes.length === 0
+            ? html`<div class="empty-state">
+                No activity types available. Please add activity types below before logging activities.
+              </div>`
+            : html`
+                <form @submit=${this.handleSubmit}>
+                  <md-filled-select
+                    key="activity-select-${availableTypes.length}"
+                    label="Activity type"
+                    value=${this.selectedActivityType}
+                    @change=${this.handleActivityTypeChange}
+                    ?disabled=${this.isSubmitting}
+                  >
+                    ${availableTypes.map(
+                      (type) => html`
+                        <md-select-option value=${type.typeName}>
+                          <div slot="headline">${type.typeName}</div>
+                        </md-select-option>
+                      `
+                    )}
+                  </md-filled-select>
+                  <md-outlined-text-field
+                    label="${selectedType?.typeName || 'Activity'} (${selectedType?.unit || 'count'})"
+                    type="number"
+                    required
+                    inputmode="numeric"
+                    helper="Enter the value for this activity"
+                    .value=${this.formValue}
+                    @input=${this.handleValueInput}
+                    ?disabled=${this.isSubmitting}
+                  ></md-outlined-text-field>
+                  <md-outlined-text-field
+                    label="Optional note"
+                    .value=${this.formNote}
+                    supporting-text="Example: morning warm-up"
+                    @input=${this.handleNoteInput}
+                    ?disabled=${this.isSubmitting}
+                  ></md-outlined-text-field>
+                  <md-filled-button ?disabled=${this.isSubmitting} type="submit">
+                    ${this.isSubmitting ? 'Saving…' : 'Save entry'}
+                  </md-filled-button>
+                </form>
+              `}
         </div>
       </section>
 
@@ -343,16 +368,17 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
           </div>
         </div>
         ${documents.length === 0
-          ? html`<div class="empty-state">No exercises logged yet. Submit your first entry above.</div>`
+          ? html`<div class="empty-state">No activities logged yet. Submit your first entry above.</div>`
           : html`
               <div style="overflow-x: auto;">
                 <table class="history-table">
                   <tbody>
-                    ${documents.map(
-                      (entry) => html`
+                    ${documents.map((entry) => {
+                      const typeInfo = availableTypes.find((t) => t.typeName === entry.activityType);
+                      return html`
                         <tr>
-                          <td>${EXERCISE_TYPE_CONFIG[entry.exerciseType].label}</td>
-                          <td><strong>${entry.value}</strong> ${EXERCISE_TYPE_CONFIG[entry.exerciseType].unit}</td>
+                          <td>${typeInfo?.typeName || entry.activityType}</td>
+                          <td><strong>${entry.value}</strong> ${typeInfo?.unit || 'count'}</td>
                           <td>${this.formatDate(entry.recordedAt)}</td>
                           <td>${entry.note || '-'}</td>
                           <td class="actions-cell">
@@ -361,8 +387,8 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
                             </md-text-button>
                           </td>
                         </tr>
-                      `
-                    )}
+                      `;
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -375,30 +401,52 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
   private async initializeStore(user: FirebaseUser): Promise<void> {
     try {
-      await initializePushupStore(
-        getInitializedFirebaseApp(),
-        user.uid,
-        shouldUseEmulatorForService('firestore')
-      );
+      await Promise.all([
+        initializeActivityStore(
+          getInitializedFirebaseApp(),
+          user.uid,
+          shouldUseEmulatorForService('firestore')
+        ),
+        initializeActivityTypeStore(
+          getInitializedFirebaseApp(),
+          user.uid,
+          shouldUseEmulatorForService('firestore')
+        ),
+      ]);
       this.initializedUserId = user.uid;
       this.storeError = null;
+
+      // Set default selected activity type to the first available activity type
+      const activityTypes = activityTypeCollectionState.get();
+      if (activityTypes.documents.length > 0 && !this.selectedActivityType) {
+        this.selectedActivityType = activityTypes.documents[0].typeName;
+        this.formValue = String(activityTypes.documents[0].defaultNumber);
+      }
     } catch (error) {
-      console.error('[df-activity-log] Failed to initialize pushup store', error);
+      console.error('[df-activity-log] Failed to initialize stores', error);
       this.storeError = 'Unable to connect to the Firestore emulator. Verify it is running and reload the page.';
     }
   }
 
   private resetStoreState(): void {
-    teardownPushupStore();
+    teardownActivityStore();
+    teardownActivityTypeStore();
     this.initializedUserId = null;
     this.storeError = null;
   }
 
-  private handleExerciseTypeChange(event: Event): void {
+  private handleActivityTypeChange(event: Event): void {
     const target = event.target as HTMLSelectElement | null;
     if (target?.value) {
-      this.selectedExerciseType = target.value as ExerciseType;
-      this.formValue = '10';
+      this.selectedActivityType = target.value as ActivityType;
+
+      // Set the default value from the selected activity type
+      const activityTypes = activityTypeCollectionState.get();
+      const selectedType = activityTypes.documents.find((t) => t.typeName === target.value);
+      this.formValue = selectedType ? String(selectedType.defaultNumber) : '10';
+
+      // Force re-render to update the label with new unit
+      this.requestUpdate();
     }
   }
 
@@ -423,20 +471,24 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
     try {
       const parsed = Number(this.formValue);
-      await logExerciseEntry({
-        exerciseType: this.selectedExerciseType,
+      await logActivityEntry({
+        activityType: this.selectedActivityType,
         value: parsed,
         note: this.formNote,
       });
-      this.formValue = '10';
+
+      // Reset form with default value from the selected activity type
+      const activityTypes = activityTypeCollectionState.get();
+      const selectedType = activityTypes.documents.find((t) => t.typeName === this.selectedActivityType);
+      this.formValue = selectedType ? String(selectedType.defaultNumber) : '10';
       this.formNote = '';
-      const exerciseLabel = EXERCISE_TYPE_CONFIG[this.selectedExerciseType].label;
-      this.submitMessage = {variant: 'success', text: `${exerciseLabel} entry saved to Firestore.`};
+
+      this.submitMessage = {variant: 'success', text: `${this.selectedActivityType} entry saved to Firestore.`};
     } catch (error) {
-      console.error('[df-activity-log] Failed to log exercise', error);
+      console.error('[df-activity-log] Failed to log activity', error);
       this.submitMessage = {
         variant: 'error',
-        text: (error as Error)?.message ?? 'Unable to save exercise. Check the console for details.',
+        text: (error as Error)?.message ?? 'Unable to save activity. Check the console for details.',
       };
     } finally {
       this.isSubmitting = false;
@@ -445,7 +497,7 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
   private async handleDelete(id: string): Promise<void> {
     try {
-      await deletePushupEntry(id);
+      await deleteActivityEntry(id);
       this.submitMessage = {variant: 'success', text: 'Deleted entry.'};
     } catch (error) {
       console.error('[df-activity-log] Failed to delete entry', error);
@@ -455,9 +507,9 @@ export class DfActivityLogApp extends SignalWatcher(LitElement) {
 
   private async handleRefresh(): Promise<void> {
     try {
-      await refreshPushupEntries();
+      await refreshActivityEntries();
     } catch (error) {
-      console.error('[df-activity-log] Failed to refresh pushups', error);
+      console.error('[df-activity-log] Failed to refresh activities', error);
       this.submitMessage = {variant: 'error', text: 'Unable to refresh right now.'};
     }
   }

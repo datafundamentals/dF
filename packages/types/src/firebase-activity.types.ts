@@ -1,61 +1,21 @@
 import type {FirestoreDocument} from './firebase-firestore.types.js';
 
-/** Supported exercise types in the activity log. */
-export type ExerciseType = 'pushups' | 'squats' | 'plank' | 'dumbbells' | 'bands' | 'hang';
+/**
+ * Activity type identifier (now dynamic, loaded from user's activity types).
+ * Previously this was a hardcoded union type, but now users create their own
+ * activity types via the df-activity-types-crud component.
+ */
+export type ActivityType = string;
 
-/** Unit of measurement for each exercise type. */
-export type ExerciseUnit = 'count' | 'seconds';
-
-/** Configuration for each exercise type. */
-export interface ExerciseTypeConfig {
-  label: string;
-  unit: ExerciseUnit;
-  description: string;
-}
-
-/** Exercise type configurations. */
-export const EXERCISE_TYPE_CONFIG: Record<ExerciseType, ExerciseTypeConfig> = {
-  pushups: {
-    label: 'Pushups',
-    unit: 'count',
-    description: 'Count of pushups completed',
-  },
-  squats: {
-    label: 'Squats',
-    unit: 'seconds',
-    description: 'Duration in seconds',
-  },
-  plank: {
-    label: 'Plank',
-    unit: 'seconds',
-    description: 'Hold duration in seconds',
-  },
-  dumbbells: {
-    label: 'Dumbbells',
-    unit: 'count',
-    description: 'Count of reps completed',
-  },
-  bands: {
-    label: 'Bands',
-    unit: 'seconds',
-    description: 'Pull duration in seconds',
-  },
-  hang: {
-    label: 'Hang',
-    unit: 'seconds',
-    description: 'Hold duration in seconds',
-  },
-};
-
-/** Exercise entry persisted inside the per-user activity collection. */
-export interface ExerciseEntry extends FirestoreDocument {
-  /** Type of exercise performed. */
-  exerciseType: ExerciseType;
-  /** Value recorded (count or seconds depending on exercise type). */
+/** Activity entry persisted inside the per-user activity collection. */
+export interface ActivityEntry extends FirestoreDocument {
+  /** Type of activity performed. */
+  activityType: ActivityType;
+  /** Value recorded (count or seconds depending on activity type). */
   value: number;
   /** Optional user-provided note about the effort. */
   note: string | null;
-  /** When the exercise was performed. */
+  /** When the activity was performed. */
   recordedAt: Date | null;
   /** Creation timestamp for auditing. */
   createdAt: Date | null;
@@ -66,8 +26,8 @@ export interface ExerciseEntry extends FirestoreDocument {
 }
 
 /** Payload accepted by the UI before persisting to Firestore. */
-export interface ExerciseDraft {
-  exerciseType: ExerciseType;
+export interface ActivityDraft {
+  activityType: ActivityType;
   value: number;
   note?: string | null;
   recordedAt?: Date | null;
@@ -91,14 +51,4 @@ export interface ActivityTypeDraft {
   unit: string;
   defaultNumber: number;
   order: number;
-}
-
-/** Backward compatibility: Pushup entry is now an exercise entry. */
-export type PushupEntry = ExerciseEntry;
-
-/** Backward compatibility: Pushup draft is now an exercise draft. */
-export interface PushupDraft {
-  count: number;
-  note?: string | null;
-  recordedAt?: Date | null;
 }

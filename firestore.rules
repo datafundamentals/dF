@@ -228,7 +228,7 @@ service cloud.firestore {
      * Activity tracking with user-scoped subcollections
      * Users can only access their own activity data
      */
-    match /activity/{userId}/pushups/{pushupId} {
+    match /activity/{userId}/activities/{activityId} {
       allow read, write: if isOwner(userId);
     }
 

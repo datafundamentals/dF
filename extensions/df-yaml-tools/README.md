@@ -6,7 +6,7 @@
 
 The video that sort of documents this process - for what it is worth - is here
 
-`/Volumes/Seagate2T/videoRecordings/howToVSCodeExtLaunch2025-12-12_04-49-30.mp4`
+`/Volumes/Seagate5T/videoRecordings/howToVSCodeExtLaunch2025-12-12_04-49-30.mp4`
 
 
 ## how to make a vsix

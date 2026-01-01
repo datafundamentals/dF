@@ -45,7 +45,7 @@ last time i ran this it worked with this:
 
 Open `my_script.py` to adjust settings if needed:
 
-*   `DOWNLOAD_BASE_DIR`: Target directory for downloads (default: `/Volumes/Seagate2T/ccZoomRecordings`).
+*   `DOWNLOAD_BASE_DIR`: Target directory for downloads (default: `/Volumes/Seagate5T/fomoZoomRecordings`).
 *   `START_DATE`: The date to start checking for recordings (default: `2023-01-01`).
 
 ## Usage
