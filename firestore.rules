@@ -237,6 +237,22 @@ service cloud.firestore {
     }
 
     // =============================================================================
+    // GOLDILOCKS VISUALIZER COLLECTION (df-goldilocks-host)
+    // =============================================================================
+
+    /**
+     * Goldilocks visualizer with user-scoped subcollections
+     * Users can only access their own goldilocks data
+     */
+    match /goldilocks/{userId}/goldilocksTypes/{typeId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /goldilocks/{userId}/configurations/{configId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // =============================================================================
     // DEFAULT DENY
     // =============================================================================
 
