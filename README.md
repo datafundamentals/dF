@@ -1,6 +1,6 @@
 <img src="https://datafundamentals.com/static/datafundamentals.gif" alt="datafundamentals" />
 
-# df
+# df - Sorting through options to prioritize the basics → intelligence.
 
 datafundamentals monorepo for:
 - playing
