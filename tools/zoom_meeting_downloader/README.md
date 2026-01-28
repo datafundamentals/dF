@@ -25,6 +25,23 @@ last time i ran this it worked with this:
 
 ## Setup
 
+**Recommended: Use Shared Environment**
+
+This tool now supports the shared workspace environment at `dF/tools/venv`.
+
+1.  Setup the environment (if not already done):
+    ```bash
+    # From dF root
+    pip install -r tools/requirements.txt
+    ```
+
+2.  Run the script:
+    ```bash
+    ../venv/bin/python my_script.py
+    ```
+
+**(Legacy) Individual Environment**
+
 1.  Navigate to the tool directory:
     ```bash
     cd tools/zoom_meeting_downloader

@@ -1,21 +1,40 @@
 <img src="https://datafundamentals.com/static/datafundamentals.gif" alt="datafundamentals" />
 
-# df - Sorting through options to prioritize the basics → intelligence.
+# Sorting through options to prioritize the basics → intelligence.
 
-datafundamentals monorepo for:
-- playing
-- learning
-- teaching
-- building apps in a day without using whacko vibe coding with dead-end non-standard libraries
+The intent of this monorepo is to provide myself a way to code whatever i want, **while filtering out these annoying options**
 
-Read [Why?](./guides/WHY.md) for insights on what motivates the maintenance of this repository, and why you might even be interested.
+- Having to duplicate or copypaste any shared tech, ever.
+- Fighting code hairballs and technical debt.
+- Reinventing whatever is already standardized and nearly perfect.
+- External libraries where a later emerging standard is provided and excellent.
+- Manually performed daily tasks, that are easily automated instead.
+- One-of coding agent contexts that can instead be easily componentized and standardized.
+- Creative styling options where MD3 is good enough
+- code that compromises on speed and/or security
 
-_**Extra Bonus:**_ This monorepo is so full of markdown docs for coding agents, any time you get lost you can probably just ask your favorite coding agent what to do next, and it will know, just from reading all the docs.
+### Why?
+
+I have been writing abandonware since 1973. 
+
+Enough.
+
+I can use AI to help me write code that has a chance of remaining useful for a long time.
+
+## Arbitrarily Selected Hosting/BAAS Providers:
+
+- Firebase
+- Elasticsearch
+- Dreamhost
+- Netlify
+- Hostinger (future)
 
 ## Workspaces
 - `apps/` – runnable front ends and local tooling (e.g., `df-lit-starter`, `df-storybook`)
+- `extensions/` – vscode extensions (e.g., `df-markdown-tools`, `df-yaml-tools`)
 - `packages/` – shareable libraries consumed across apps (e.g., `ui-lit`)
-- `services/` – backend-oriented projects and API facades
+- `services/` – backend-oriented projects and API facades. Typically, anything deployed as a server.
+- `tools/` – hairball scripts for internal automation only
 
 Turbo and pnpm see every workspace via `pnpm-workspace.yaml`, so all standard commands (`pnpm install`, `pnpm dev`, `pnpm build`, etc.) can be run from the repo root.
 

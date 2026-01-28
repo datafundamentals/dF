@@ -1,79 +1,231 @@
 sites:
   appwriter:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: brokenBecauseNetlify
     url: appwriter.com
     host: netlify
-    status: active, but lame
+    status: 
+    - the latest is not deployed - see dev 260126 for splainer
+    - extra menus still disfunctional
+    - zero nada phone menu
+    - github link broken
+    - theme border margins disappear on regular pages
+    - may be minor image cleanup still to do
+    - re-theme!!! whoa! 3 css files require manual reconciliation
     purpose: primary revenue builder
     theme: not-npr
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - hairball code that requires maintenance
+      basics:
+        - automation in direct proportion to frequency of usage
   aspie:
+    since: 2025-12-05 17:58:33
+    contentRoot: ../content
+    content: aspieautomator
     url: https://aspieautomator.com/
     host: firebase
     firebaseProject: aspieautomator
-    status: decent
+    status: 
+    - has mobile file differences with theme that need to be investigated
+    - seems to have a broken favicon
+    - minor lorem on home page
+    - may be minor image cleanup still to do
+    - re-theme 100% clean
     purpose:
     theme: not-alphabet
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - assumptions that my feelings can ever be trusted
+      basics:
+        - can't believe I'm lucky enough to always be wrong
   betterologist:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: betterologist
     url: https://betterologist.net/
     host: dreamhost?? - not sure - see /Users/petecarapetyan/work/primary/sites/betterologist/scpme.sh
-    status: lame home page only
-    purpose:
+    status:
+    - phone header has weird bump at bottom
+    - margin issue especially noticeable
+    - about content really borderline
+    - github linked to fins not site
+    - may be minor image cleanup still to do
+    - re-theme no manual reconciliation required
+    purpose: this person is not well
     theme: not-fuelcell
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      note: really this stuff is basic ontology. Noted here only to get the juices flowing
+      filter-out:
+        - solved, and therefore uninteresting problems:
+          - scale
+          - attention economy and trickery
+          - force and chimp like behaviors
+          - specialization
+        - anything easily falsifiable
+        - feelings
+        - porn as behavior maintained beyond intention that behavior was designed to resolve
+      basics:
+        - information from data
+        - state or condition of basic needs
+        - how far back in history we have to go before things are not divisive
+        - design
   betterology_com:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: betterology
     url: https://betterology.com/
     host: firebase
     firebaseProject: betterology
-    status: lame but spare
+    status: 
+    - re-theme has mobile file differences with theme that need to be investigated
     purpose: 
     theme: not-virgin
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      note: really this stuff is basic ontology. Noted here only as related to corporate concerns
+      filter-out:
+        - 
+      basics:
+        - 
   betterology_net:
+    ignore: true
+    note: this appears to be a rocket theme, not yet updated
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: noidea
     url: https://betterology.net/
     host: firebase
     firebaseProject: betterology-net
     status: still on rocket
     purpose: none?
     theme: not-fuelcell
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      note: WTF, in general
+      filter-out:
+        - 
+      basics:
+        - 
   btrg:
+    note: this should be the only remaining place where the static images and lorem impsum are maintained. Should never be used for daily use.
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: btrg
     url: https://www.btrg.org/
     host: dreamhost
-    status: lorem + MPA Demos
+    status: 
+    - lorem + MPA Demos
+    - may need to leave as only version of lorem????
+    - has extremely minor fix for theme that needs to be applied to theme
+    - re-theme has at least one manual override or else needs to look at theme.css and layout.css
     purpose: personal demos and test site
     theme: not-reddit
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   couldbe:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: datafundamentals
     url: https://couldbe.net/
     host: firebase
     firebaseProject: couldbe
-    status: home + lorem
+    status: 
+    - re-theme seems to work flawlessly
+    - rest seems to work perfectly as well
+    - content leaves something to be desired
     purpose: examples of things that could be
     theme: not-wired
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   datafundamentals:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: datafundamentals
     url: https://datafundamentals.com/
     host: firebase
     firebaseProject: datafundamentals
-    status: pretty close plus a lotta legacy
+    status: 
+    - re-theme has layout.css that requires manual override
+    - re-theme has datafundamentals/_includes/block/header-logo-background.njk that requires manual override
     purpose: ...
     theme: not-axios
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   hi2035:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: hi2035
     url: https://jeren-5de92.web.app/
     host: firebase
     firebaseProject: hi2035
-    status: home + lorem
+    status:
+    - icon folder is a mess
+    - note jive url
     purpose: compare ai to hi
     theme: not-wikipedia
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   mymodeler:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: mymodeler
     url: https://mymodeler.com/
     host: firebase
     firebaseProject: mymodelercom
-    status: lorem
+    status:
+      - annoying jagged at mobile header
     purpose: platform modeling as a basis for better
     theme: not-slashdot
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   pullmodel:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: pullmodel
     url: https://pullmodel.com/
     host: firebase
     firebaseProject: pullmodel
-    status: home + lorem (theme broken at footer)
+    status: 
+      - jagged header bottom
+      - theme needs a lotta work pretty obvious
     purpose: provide basis for moving away from ḇ.porn
     theme: not-github
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   smoslt:
+    ignore: true
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: noidea
     note: This site is legacy deployed on dreamhost, but also has a lorem site deployed on firebase https://pullmodel-5d998.web.app/
     url: https://smoslt.com/
     host: dreamhost
@@ -81,30 +233,77 @@ sites:
     status: legacy deployed on dreamhost working
     purpose: legacy only, for the time being
     theme: not-github
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   walktown:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: walktown
     url: https://walktown.net/
     host: firebase
     firebaseProject: walktownnet
-    status: home + lorem
+    status: 
+    - the typeface doesn't all work - needs replacing
     purpose: platform alternatives
     theme: not-ibm
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   webappwriter:
+    ignore: true
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: brokenBecauseNetlify
     url: https://webappwriter.com/
     host: netlify
     firebaseProject: webappwriter - but not used - netlify!
     status: broken in my codebase, do not deploy!
     purpose: legacy
     theme: not-five38
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   wysinati:
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: wysinati
     url: https://wysinati.com/
     host: dreamhost
-    status: home + lorem
+    status:
+    - still lorem on home page theme
     purpose: platform WYSINATI
     theme: not-codesign
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
   jukelox:
+    ignore: true
+    note: this should remain untouched as a last remaining rocket sample, but never linked to. Nothing else below about jukelox matters
+    since: 2026-01-27 17:58:33
+    contentRoot: ../content
+    content: datafundamentals
     url: https://jukelox-7ec89.web.app/
     host: firebase
     firebaseProject: jukelox-not-nyt
     status: this is the one that you need to keep as an old working version of home and lorem links
     purpose: example only, theme too complex for normal usage
     theme: not-nyt
+    slogan: 
+      trial: Sorting through options to prioritize the basics → intelligence.
+      filter-out:
+        - 
+      basics:
+        - 
