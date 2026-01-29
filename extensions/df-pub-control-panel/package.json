@@ -1,0 +1,52 @@
+{
+  "name": "df-pub-control-panel",
+  "displayName": "DF Pub Control Panel",
+  "description": "Pub Control Panel for DF Monorepo",
+  "version": "0.0.1",
+  "publisher": "datafundamentals",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/datafundamentals/dF"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "df.openPubControlPanel",
+        "title": "Open Pub Control Panel",
+        "category": "DF"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "tsup src/extension.ts --format cjs --external vscode",
+    "lint": "eslint ./src",
+    "copy:ui": "mkdir -p media/ui",
+    "build:ui": "echo 'No UI build needed'"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "eslint": "^9.0.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  }
+}
