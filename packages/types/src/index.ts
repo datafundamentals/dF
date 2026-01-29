@@ -13,3 +13,4 @@ export * from './firebase-activity.types.js';
 export * from './firebase-goldilocks.types.js';
 export * from './firebase-rbac.types.js';
 export * from './elastic.types.js';
+export * from './pub-control-panel.js';

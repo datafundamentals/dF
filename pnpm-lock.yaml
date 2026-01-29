@@ -769,6 +769,12 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
     devDependencies:
+      '@df/df-pub-control-panel-ui':
+        specifier: workspace:*
+        version: link:../df-pub-control-panel-ui
+      '@df/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -793,6 +799,34 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
+
+  extensions/df-pub-control-panel-ui:
+    dependencies:
+      '@df/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+      '@df/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@df/ui-lit':
+        specifier: workspace:*
+        version: link:../../packages/ui-lit
+      '@lit-labs/signals':
+        specifier: ^0.1.0
+        version: 0.1.3
+      '@material/web':
+        specifier: ^1.0.0
+        version: 1.5.1
+      lit:
+        specifier: ^3.1.0
+        version: 3.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vite:
+        specifier: ^5.0.10
+        version: 5.4.20(@types/node@22.18.10)(terser@5.44.0)
 
   extensions/df-yaml-tools:
     dependencies:

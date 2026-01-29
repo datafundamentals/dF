@@ -27,6 +27,8 @@
     "./df-chat-widget.js": "./dist/df-chat-widget.js",
     "./df-markdown-codemirror": "./dist/df-markdown-codemirror.js",
     "./df-markdown-codemirror.js": "./dist/df-markdown-codemirror.js",
+    "./df-pub-control-panel": "./dist/df-pub-control-panel.js",
+    "./df-pub-control-panel.js": "./dist/df-pub-control-panel.js",
     "./df-google-signin": "./dist/df-google-signin.js",
     "./df-google-signin.js": "./dist/df-google-signin.js",
     "./df-auth-wrapper": "./dist/df-auth-wrapper.js",

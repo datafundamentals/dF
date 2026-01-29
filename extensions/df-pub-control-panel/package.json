@@ -28,15 +28,18 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run package",
+    "build": "pnpm run build:ui && pnpm run copy:ui && pnpm run package",
+    "vscode:prepublish": "pnpm run build",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "tsup src/extension.ts --format cjs --external vscode",
     "lint": "eslint ./src",
-    "copy:ui": "mkdir -p media/ui",
-    "build:ui": "echo 'No UI build needed'"
+    "build:ui": "pnpm --filter @df/df-pub-control-panel-ui build",
+    "copy:ui": "rm -rf media/ui && mkdir -p media/ui && cp -r ../df-pub-control-panel-ui/dist/* media/ui/"
   },
   "devDependencies": {
+    "@df/df-pub-control-panel-ui": "workspace:*",
+    "@df/types": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "20.x",
     "@types/vscode": "^1.85.0",
