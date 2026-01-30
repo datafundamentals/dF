@@ -1,5 +1,5 @@
 sites:
-  appwriter:
+  appwriter.com:
     since: 2026-01-27 17:58:33
     contentRoot: ../content
     content: brokenBecauseNetlify
@@ -21,7 +21,7 @@ sites:
         - hairball code that requires maintenance
       basics:
         - automation in direct proportion to frequency of usage
-  aspie:
+  aspieautomator:
     since: 2025-12-05 17:58:33
     contentRoot: ../content
     content: aspieautomator

@@ -12,8 +12,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@df/types": "workspace:*",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.0.0",
     "typescript": "^5.3.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "simple-git": "^3.30.0"
+  }
 }

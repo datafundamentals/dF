@@ -40,7 +40,6 @@
   "devDependencies": {
     "@df/df-pub-control-panel-ui": "workspace:*",
     "@df/types": "workspace:*",
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "20.x",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
@@ -50,6 +49,6 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "js-yaml": "^4.1.1"
+    "@df/node-utils": "workspace:*"
   }
 }

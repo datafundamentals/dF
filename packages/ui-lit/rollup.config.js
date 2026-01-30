@@ -29,49 +29,57 @@ const envObject = {
   ...Object.fromEntries(firebaseEnvKeys.map((key) => [key, process.env[key]])),
 };
 
-/* global console */ 
-export default {
-  input: 'dist/df-auth-wrapper.js',
-  output: {
-    file: 'dist/df-auth-wrapper.bundled.js',
-    format: 'esm',
-  },
-  onwarn(warning) {
-    if (warning.code !== 'THIS_IS_UNDEFINED') {
-      console.error(`(!) ${warning.message}`);
-    }
-  },
-  plugins: [
-    replace({
-      preventAssignment: true,
-      delimiters: ['', ''],
-      values: {
-        'process.env.NODE_ENV': JSON.stringify(mode),
-        'import.meta.env': `(${JSON.stringify(envObject)})`,
-        'Reflect.decorate': 'undefined',
+const commonPlugins = [
+  replace({
+    preventAssignment: true,
+    delimiters: ['', ''],
+    values: {
+      'process.env.NODE_ENV': JSON.stringify(mode),
+      'import.meta.env': `(${JSON.stringify(envObject)})`,
+      'Reflect.decorate': 'undefined',
+    },
+  }),
+  resolve(),
+  terser({
+    ecma: 2021,
+    module: true,
+    warnings: true,
+    mangle: {
+      properties: {
+        regex: /^__/,
       },
-    }),
-    resolve(),
-    terser({
-      ecma: 2021,
-      module: true,
-      warnings: true,
-      mangle: {
-        properties: {
-          regex: /^__/,
-        },
-      },
-    }),
-    summary({
-      showBrotliSize: true,
-      showGzippedSize: true,
-    }),
-    visualizer({
-      filename: 'dist/bundle-stats.html',
-      open: true,
-      gzipSize: true,
-      brotliSize: true,
-      template: 'treemap',
-    }),
-  ],
-};
+    },
+  }),
+  summary({
+    showBrotliSize: true,
+    showGzippedSize: true,
+  }),
+];
+
+function onwarn(warning) {
+  if (warning.code !== 'THIS_IS_UNDEFINED') {
+    console.error(`(!) ${warning.message}`);
+  }
+}
+
+/* global console */
+export default [
+  {
+    input: 'dist/df-auth-wrapper.js',
+    output: {
+      file: 'dist/df-auth-wrapper.bundled.js',
+      format: 'esm',
+    },
+    onwarn,
+    plugins: commonPlugins,
+  },
+  {
+    input: 'dist/df-pub-control-panel.js',
+    output: {
+      file: 'dist/df-pub-control-panel.bundled.js',
+      format: 'esm',
+    },
+    onwarn,
+    plugins: commonPlugins,
+  },
+];

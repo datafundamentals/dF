@@ -6,13 +6,43 @@
 import {LitElement, html, css, nothing} from 'lit';
 import {customElement} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
-import {pubControlPanelState} from '@df/state';
+import {
+  pubControlPanelState,
+  setPubControlPanelSites,
+  setPubControlPanelError,
+} from '@df/state';
 
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/circular-progress.js';
+import '@material/web/checkbox/checkbox.js';
 
 @customElement('df-pub-control-panel')
 export class DfPubControlPanel extends SignalWatcher(LitElement) {
+  override connectedCallback() {
+    super.connectedCallback();
+    // Listen for state updates from the VS Code extension
+    window.addEventListener('df-pub-update-state', this.handleStateUpdate);
+    window.addEventListener('df-pub-error', this.handleErrorUpdate);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('df-pub-update-state', this.handleStateUpdate);
+    window.removeEventListener('df-pub-error', this.handleErrorUpdate);
+  }
+
+  private handleStateUpdate = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    const {sites, lastUpdated} = customEvent.detail;
+    setPubControlPanelSites(sites, lastUpdated);
+  };
+
+  private handleErrorUpdate = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    const {message} = customEvent.detail;
+    setPubControlPanelError(message);
+  };
+
   static override styles = css`
     :host {
       display: block;
@@ -105,6 +135,18 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
       opacity: 0.8;
     }
 
+    .git-status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .git-status-label {
+      color: var(--vscode-foreground, var(--md-sys-color-on-surface, #1f1f1f));
+      opacity: 0.9;
+    }
+
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -174,6 +216,22 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
                       ${site.url ? html`<div class="site-meta">${site.url}</div>` : nothing}
                       ${site.host ? html`<div class="site-meta">Host: ${site.host}</div>` : nothing}
                       ${site.theme ? html`<div class="site-meta">Theme: ${site.theme}</div>` : nothing}
+                      ${site.gitStatus
+                        ? html`<div class="git-status-row">
+                            <md-checkbox
+                              touch-target="wrapper"
+                              ?checked=${site.gitStatus.isInternal && !site.gitStatus.hasUncommittedChanges}
+                              disabled
+                            ></md-checkbox>
+                            <span class="site-meta git-status-label"
+                              >${site.gitStatus.isInternal
+                                ? site.gitStatus.hasUncommittedChanges
+                                  ? 'Has uncommitted changes'
+                                  : 'All changes committed'
+                                : 'External site'}</span
+                            >
+                          </div>`
+                        : nothing}
                       ${site.status && site.status.length > 0
                         ? html`
                             <div class="site-status">

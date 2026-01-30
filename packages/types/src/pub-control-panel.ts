@@ -16,6 +16,12 @@ export interface PubSiteEntry {
   content?: string;
   contentRoot?: string;
   since?: string;
+  gitStatus?: {
+    isInternal: boolean;
+    hasUncommittedChanges: boolean;
+    untrackedFiles: number;
+    modifiedFiles: number;
+  };
 }
 
 export interface PubControlPanelState {
