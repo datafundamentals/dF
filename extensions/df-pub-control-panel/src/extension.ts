@@ -86,7 +86,8 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel) {
     return;
   }
 
-  outputChannel.appendLine(`Loaded ${sites.length} sites`);
+  const withContentChanges = sites.filter((s) => s.contentChanges).length;
+  outputChannel.appendLine(`Loaded ${sites.length} sites (${withContentChanges} with contentChanges)`);
 
   panel.webview.postMessage({
     command: 'updateSites',

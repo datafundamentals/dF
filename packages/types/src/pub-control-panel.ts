@@ -22,6 +22,10 @@ export interface PubSiteEntry {
     untrackedFiles: number;
     modifiedFiles: number;
   };
+  contentChanges?: {
+    hasChanges: boolean;
+    changedFileCount: number;
+  };
 }
 
 export interface PubControlPanelState {

@@ -6,7 +6,9 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import type {PubSiteEntry} from '@df/types';
+import * as path from 'path';
 import {getGitStatus} from './git-status.js';
+import {getContentChanges} from './content-changes.js';
 
 interface SiteConfig {
   ignore?: boolean;
@@ -67,15 +69,22 @@ export async function loadSites(options: LoadSitesOptions): Promise<LoadSitesRes
         return mapSiteEntry(id, site);
       });
 
-    // Enhance with git status
+    // Enhance with git status and content changes
+    const workspaceRoot = path.dirname(sitesYamlPath);
     const enhancedSites = await Promise.all(
       siteEntries.map(async (site) => {
+        let enhanced = site;
         try {
-          return await enhanceWithGitStatus(sitesDirectory, site);
-        } catch (e) {
+          enhanced = await enhanceWithGitStatus(sitesDirectory, enhanced);
+        } catch {
           // Return site without git status on error
-          return site;
         }
+        try {
+          enhanced = await enhanceWithContentChanges(workspaceRoot, enhanced);
+        } catch {
+          // Return site without content changes on error
+        }
+        return enhanced;
       }),
     );
 
@@ -103,7 +112,11 @@ function mapSiteEntry(id: string, site: SiteConfig): PubSiteEntry {
     theme: typeof site.theme === 'string' ? site.theme : undefined,
     content: typeof site.content === 'string' ? site.content : undefined,
     contentRoot: typeof site.contentRoot === 'string' ? site.contentRoot : undefined,
-    since: typeof site.since === 'string' ? site.since : undefined,
+    since: typeof site.since === 'string'
+      ? site.since
+      : site.since instanceof Date
+        ? site.since.toISOString()
+        : undefined,
   };
 }
 
@@ -119,5 +132,19 @@ async function enhanceWithGitStatus(sitesDirectory: string, site: PubSiteEntry):
       untrackedFiles: gitStatus.untrackedFiles,
       modifiedFiles: gitStatus.modifiedFiles,
     },
+  };
+}
+
+async function enhanceWithContentChanges(workspaceRoot: string, site: PubSiteEntry): Promise<PubSiteEntry> {
+  if (!site.since || !site.contentRoot || !site.content) {
+    return site;
+  }
+
+  const resolvedContentRoot = path.resolve(workspaceRoot, site.contentRoot);
+  const contentChanges = await getContentChanges(resolvedContentRoot, site.content, site.since);
+
+  return {
+    ...site,
+    contentChanges,
   };
 }

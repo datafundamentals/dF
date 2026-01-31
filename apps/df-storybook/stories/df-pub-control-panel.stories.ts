@@ -16,6 +16,8 @@ const sampleSites: PubSiteEntry[] = [
     host: 'netlify',
     theme: 'not-npr',
     status: ['latest not deployed', 'extra menus broken'],
+    gitStatus: {isInternal: true, hasUncommittedChanges: true, untrackedFiles: 2, modifiedFiles: 1},
+    contentChanges: {hasChanges: true, changedFileCount: 3},
   },
   {
     id: 'aspie',
@@ -23,6 +25,8 @@ const sampleSites: PubSiteEntry[] = [
     host: 'firebase',
     theme: 'not-alphabet',
     status: ['favicon missing', 'mobile layout issues'],
+    gitStatus: {isInternal: true, hasUncommittedChanges: false, untrackedFiles: 0, modifiedFiles: 0},
+    contentChanges: {hasChanges: false, changedFileCount: 0},
   },
   {
     id: 'betterologist',
@@ -30,6 +34,7 @@ const sampleSites: PubSiteEntry[] = [
     host: 'dreamhost',
     theme: 'not-fuelcell',
     status: ['header bump', 'margin issue'],
+    gitStatus: {isInternal: false, hasUncommittedChanges: false, untrackedFiles: 0, modifiedFiles: 0},
   },
 ];
 

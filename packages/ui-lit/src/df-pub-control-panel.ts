@@ -232,6 +232,20 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
                             >
                           </div>`
                         : nothing}
+                      ${site.contentChanges
+                        ? html`<div class="git-status-row">
+                            <md-checkbox
+                              touch-target="wrapper"
+                              ?checked=${!site.contentChanges.hasChanges}
+                              disabled
+                            ></md-checkbox>
+                            <span class="site-meta git-status-label"
+                              >${site.contentChanges.hasChanges
+                                ? `${site.contentChanges.changedFileCount} files changed since pub`
+                                : 'No changes since pub'}</span
+                            >
+                          </div>`
+                        : nothing}
                       ${site.status && site.status.length > 0
                         ? html`
                             <div class="site-status">
