@@ -1,7 +1,7 @@
 sites:
   appwriter.com:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/appwriter
     content: brokenBecauseNetlify
     url: appwriter.com
     host: netlify
@@ -23,7 +23,7 @@ sites:
         - automation in direct proportion to frequency of usage
   aspieautomator:
     since: 2025-12-05 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/aspieautomator
     content: aspieautomator
     url: https://aspieautomator.com/
     host: firebase
@@ -44,7 +44,7 @@ sites:
         - can't believe I'm lucky enough to always be wrong
   betterologist:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/betterologist
     content: betterologist
     url: https://betterologist.net/
     host: dreamhost?? - not sure - see /Users/petecarapetyan/work/primary/sites/betterologist/scpme.sh
@@ -76,7 +76,7 @@ sites:
         - design
   betterology_com:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/betterology
     content: betterology
     url: https://betterology.com/
     host: firebase
@@ -114,7 +114,7 @@ sites:
   btrg:
     note: this should be the only remaining place where the static images and lorem impsum are maintained. Should never be used for daily use.
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/btrg
     content: btrg
     url: https://www.btrg.org/
     host: dreamhost
@@ -133,7 +133,7 @@ sites:
         - 
   couldbe:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/couldbe
     content: datafundamentals
     url: https://couldbe.net/
     host: firebase
@@ -152,7 +152,7 @@ sites:
         - 
   datafundamentals:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/datafundamentals
     content: datafundamentals
     url: https://datafundamentals.com/
     host: firebase
@@ -170,7 +170,7 @@ sites:
         - 
   hi2035:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/hi2035
     content: hi2035
     url: https://jeren-5de92.web.app/
     host: firebase
@@ -188,7 +188,7 @@ sites:
         - 
   mymodeler:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/mymodeler
     content: mymodeler
     url: https://mymodeler.com/
     host: firebase
@@ -205,7 +205,7 @@ sites:
         - 
   pullmodel:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/pullmodel
     content: pullmodel
     url: https://pullmodel.com/
     host: firebase
@@ -241,7 +241,7 @@ sites:
         - 
   walktown:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/walktown
     content: walktown
     url: https://walktown.net/
     host: firebase
@@ -275,7 +275,7 @@ sites:
         - 
   wysinati:
     since: 2026-01-27 17:58:33
-    contentRoot: ../content
+    contentRoot: ../content/wysinati
     content: wysinati
     url: https://wysinati.com/
     host: dreamhost

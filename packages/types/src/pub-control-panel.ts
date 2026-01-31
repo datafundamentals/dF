@@ -26,6 +26,16 @@ export interface PubSiteEntry {
     hasChanges: boolean;
     changedFileCount: number;
   };
+  contentGitStatus?: {
+    isInternal: boolean;
+    hasUncommittedChanges: boolean;
+    untrackedFiles: number;
+    modifiedFiles: number;
+  };
+  contentRootChanges?: {
+    hasChanges: boolean;
+    changedFileCount: number;
+  };
 }
 
 export interface PubControlPanelState {

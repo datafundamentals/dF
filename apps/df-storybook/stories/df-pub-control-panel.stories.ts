@@ -18,6 +18,8 @@ const sampleSites: PubSiteEntry[] = [
     status: ['latest not deployed', 'extra menus broken'],
     gitStatus: {isInternal: true, hasUncommittedChanges: true, untrackedFiles: 2, modifiedFiles: 1},
     contentChanges: {hasChanges: true, changedFileCount: 3},
+    contentGitStatus: {isInternal: true, hasUncommittedChanges: false, untrackedFiles: 0, modifiedFiles: 0},
+    contentRootChanges: {hasChanges: true, changedFileCount: 9},
   },
   {
     id: 'aspie',
@@ -27,6 +29,8 @@ const sampleSites: PubSiteEntry[] = [
     status: ['favicon missing', 'mobile layout issues'],
     gitStatus: {isInternal: true, hasUncommittedChanges: false, untrackedFiles: 0, modifiedFiles: 0},
     contentChanges: {hasChanges: false, changedFileCount: 0},
+    contentGitStatus: {isInternal: true, hasUncommittedChanges: true, untrackedFiles: 1, modifiedFiles: 2},
+    contentRootChanges: {hasChanges: true, changedFileCount: 4},
   },
   {
     id: 'betterologist',

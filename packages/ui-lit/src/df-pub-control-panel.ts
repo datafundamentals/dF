@@ -226,9 +226,9 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
                             <span class="site-meta git-status-label"
                               >${site.gitStatus.isInternal
                                 ? site.gitStatus.hasUncommittedChanges
-                                  ? 'Has uncommitted changes'
-                                  : 'All changes committed'
-                                : 'External site'}</span
+                                  ? 'Site repo: Has uncommitted changes'
+                                  : 'Site repo: All changes committed'
+                                : 'Site repo: External site'}</span
                             >
                           </div>`
                         : nothing}
@@ -241,8 +241,38 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
                             ></md-checkbox>
                             <span class="site-meta git-status-label"
                               >${site.contentChanges.hasChanges
-                                ? `${site.contentChanges.changedFileCount} files changed since pub`
-                                : 'No changes since pub'}</span
+                                ? `Site repo: ${site.contentChanges.changedFileCount} files changed since pub`
+                                : 'Site repo: No changes since pub'}</span
+                            >
+                          </div>`
+                        : nothing}
+                      ${site.contentGitStatus
+                        ? html`<div class="git-status-row">
+                            <md-checkbox
+                              touch-target="wrapper"
+                              ?checked=${site.contentGitStatus.isInternal && !site.contentGitStatus.hasUncommittedChanges}
+                              disabled
+                            ></md-checkbox>
+                            <span class="site-meta git-status-label"
+                              >${site.contentGitStatus.isInternal
+                                ? site.contentGitStatus.hasUncommittedChanges
+                                  ? 'Content repo: Has uncommitted changes'
+                                  : 'Content repo: All changes committed'
+                                : 'Content repo: External site'}</span
+                            >
+                          </div>`
+                        : nothing}
+                      ${site.contentRootChanges
+                        ? html`<div class="git-status-row">
+                            <md-checkbox
+                              touch-target="wrapper"
+                              ?checked=${!site.contentRootChanges.hasChanges}
+                              disabled
+                            ></md-checkbox>
+                            <span class="site-meta git-status-label"
+                              >${site.contentRootChanges.hasChanges
+                                ? `Content repo: ${site.contentRootChanges.changedFileCount} files changed since pub`
+                                : 'Content repo: No changes since pub'}</span
                             >
                           </div>`
                         : nothing}

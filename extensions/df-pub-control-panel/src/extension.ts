@@ -1,11 +1,14 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
+import * as crypto from 'crypto';
 import {loadSites} from '@df/node-utils';
 
 const outputChannel = vscode.window.createOutputChannel('DF Pub Control Panel');
 
 export function activate(context: vscode.ExtensionContext) {
   outputChannel.appendLine('=== DF Pub Control Panel Extension Activated ===');
+  outputChannel.appendLine(getUiBundleInfo(context.extensionUri));
 
   let currentPanel: vscode.WebviewPanel | undefined;
 
@@ -18,6 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
         await sendSitesUpdate(currentPanel);
         return;
       }
+
+      outputChannel.appendLine(getUiBundleInfo(context.extensionUri));
 
       currentPanel = vscode.window.createWebviewPanel(
         'dfPubControlPanel',
@@ -87,7 +92,10 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel) {
   }
 
   const withContentChanges = sites.filter((s) => s.contentChanges).length;
-  outputChannel.appendLine(`Loaded ${sites.length} sites (${withContentChanges} with contentChanges)`);
+  const withContentRootChanges = sites.filter((s) => s.contentRootChanges).length;
+  outputChannel.appendLine(
+    `Loaded ${sites.length} sites (${withContentChanges} with site repo changes, ${withContentRootChanges} with content repo changes)`,
+  );
 
   panel.webview.postMessage({
     command: 'updateSites',
@@ -100,7 +108,11 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel) {
 
 function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
   const uiDistUri = vscode.Uri.joinPath(extensionUri, '..', '..', 'packages', 'ui-lit', 'dist');
-  const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(uiDistUri, 'df-pub-control-panel.bundled.js'));
+  const bundleHash = getUiBundleHash(extensionUri);
+  const baseScriptUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(uiDistUri, 'df-pub-control-panel.bundled.js'),
+  );
+  const scriptUri = bundleHash ? `${baseScriptUri}?v=${bundleHash}` : `${baseScriptUri}?v=${Date.now()}`;
 
   const nonce = getNonce();
 
@@ -158,3 +170,44 @@ function getNonce() {
 }
 
 export function deactivate() {}
+
+function getUiBundleInfo(extensionUri: vscode.Uri): string {
+  const uiBundlePath = path.join(
+    extensionUri.fsPath,
+    '..',
+    '..',
+    'packages',
+    'ui-lit',
+    'dist',
+    'df-pub-control-panel.bundled.js',
+  );
+
+  if (!fs.existsSync(uiBundlePath)) {
+    return `UI bundle missing: ${uiBundlePath}`;
+  }
+
+  const stats = fs.statSync(uiBundlePath);
+  const buffer = fs.readFileSync(uiBundlePath);
+  const hash = crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 12);
+
+  return `UI bundle: ${path.basename(uiBundlePath)} size=${stats.size} mtime=${stats.mtime.toISOString()} sha256=${hash}`;
+}
+
+function getUiBundleHash(extensionUri: vscode.Uri): string | null {
+  const uiBundlePath = path.join(
+    extensionUri.fsPath,
+    '..',
+    '..',
+    'packages',
+    'ui-lit',
+    'dist',
+    'df-pub-control-panel.bundled.js',
+  );
+
+  if (!fs.existsSync(uiBundlePath)) {
+    return null;
+  }
+
+  const buffer = fs.readFileSync(uiBundlePath);
+  return crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 12);
+}

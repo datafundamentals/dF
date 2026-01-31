@@ -50,6 +50,49 @@ export async function getGitStatus(directoryPath: string): Promise<GitStatus> {
 }
 
 /**
+ * Check git status scoped to a subdirectory within a repository
+ * @param directoryPath Absolute path to a directory inside a git repo
+ * @param subdir Subdirectory to scope status to (relative to repo root or ".")
+ * @returns Git status information for the subdir only
+ */
+export async function getGitStatusForSubdir(
+  directoryPath: string,
+  subdir: string,
+): Promise<GitStatus> {
+  if (!fs.existsSync(directoryPath)) {
+    return {
+      isRepository: false,
+      hasUncommittedChanges: false,
+      untrackedFiles: 0,
+      modifiedFiles: 0,
+    };
+  }
+
+  try {
+    const git = simplegit.simpleGit(directoryPath);
+    await git.raw(['rev-parse', '--show-toplevel']);
+    const output = await git.raw(['status', '--porcelain', '--', subdir]);
+    const lines = output.split('\n').filter((line) => line.trim().length > 0);
+    const untrackedFiles = lines.filter((line) => line.startsWith('??')).length;
+    const modifiedFiles = lines.length - untrackedFiles;
+
+    return {
+      isRepository: true,
+      hasUncommittedChanges: lines.length > 0,
+      untrackedFiles,
+      modifiedFiles,
+    };
+  } catch {
+    return {
+      isRepository: false,
+      hasUncommittedChanges: false,
+      untrackedFiles: 0,
+      modifiedFiles: 0,
+    };
+  }
+}
+
+/**
  * Check if a directory exists and is a git repository
  * @param directoryPath Absolute path to check
  * @returns true if directory exists and has .git folder

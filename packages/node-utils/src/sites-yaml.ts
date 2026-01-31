@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import type {PubSiteEntry} from '@df/types';
 import * as path from 'path';
-import {getGitStatus} from './git-status.js';
+import {getGitStatus, getGitStatusForSubdir} from './git-status.js';
 import {getContentChanges} from './content-changes.js';
 
 interface SiteConfig {
@@ -80,9 +80,19 @@ export async function loadSites(options: LoadSitesOptions): Promise<LoadSitesRes
           // Return site without git status on error
         }
         try {
-          enhanced = await enhanceWithContentChanges(workspaceRoot, enhanced);
+          enhanced = await enhanceWithContentChanges(sitesDirectory, enhanced);
         } catch {
           // Return site without content changes on error
+        }
+        try {
+          enhanced = await enhanceWithContentGitStatus(workspaceRoot, enhanced);
+        } catch {
+          // Return site without content git status on error
+        }
+        try {
+          enhanced = await enhanceWithContentRootChanges(workspaceRoot, enhanced);
+        } catch {
+          // Return site without content root changes on error
         }
         return enhanced;
       }),
@@ -135,16 +145,55 @@ async function enhanceWithGitStatus(sitesDirectory: string, site: PubSiteEntry):
   };
 }
 
-async function enhanceWithContentChanges(workspaceRoot: string, site: PubSiteEntry): Promise<PubSiteEntry> {
-  if (!site.since || !site.contentRoot || !site.content) {
+async function enhanceWithContentChanges(sitesDirectory: string, site: PubSiteEntry): Promise<PubSiteEntry> {
+  if (!site.since) {
     return site;
   }
 
-  const resolvedContentRoot = path.resolve(workspaceRoot, site.contentRoot);
-  const contentChanges = await getContentChanges(resolvedContentRoot, site.content, site.since);
+  const sitePath = `${sitesDirectory}/${site.id}`;
+  const contentChanges = await getContentChanges(sitePath, '.', site.since);
 
   return {
     ...site,
     contentChanges,
+  };
+}
+
+async function enhanceWithContentGitStatus(
+  workspaceRoot: string,
+  site: PubSiteEntry,
+): Promise<PubSiteEntry> {
+  if (!site.contentRoot) {
+    return site;
+  }
+
+  const resolvedContentRoot = path.resolve(workspaceRoot, site.contentRoot);
+  const gitStatus = await getGitStatusForSubdir(resolvedContentRoot, '.');
+
+  return {
+    ...site,
+    contentGitStatus: {
+      isInternal: gitStatus.isRepository,
+      hasUncommittedChanges: gitStatus.hasUncommittedChanges,
+      untrackedFiles: gitStatus.untrackedFiles,
+      modifiedFiles: gitStatus.modifiedFiles,
+    },
+  };
+}
+
+async function enhanceWithContentRootChanges(
+  workspaceRoot: string,
+  site: PubSiteEntry,
+): Promise<PubSiteEntry> {
+  if (!site.since || !site.contentRoot) {
+    return site;
+  }
+
+  const resolvedContentRoot = path.resolve(workspaceRoot, site.contentRoot);
+  const contentRootChanges = await getContentChanges(resolvedContentRoot, '.', site.since);
+
+  return {
+    ...site,
+    contentRootChanges,
   };
 }

@@ -53,9 +53,9 @@
     "./role-picker.js": "./dist/role-picker.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && rollup -c",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "build:rollup": "pnpm build && rollup -c",
+    "build:rollup": "pnpm run build",
     "lint": "eslint src",
     "test": "vitest run",
     "test:watch": "vitest",
