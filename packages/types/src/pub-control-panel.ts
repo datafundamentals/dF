@@ -36,6 +36,10 @@ export interface PubSiteEntry {
     hasChanges: boolean;
     changedFileCount: number;
   };
+  frontmatterStatus?: {
+    hasMissingFrontmatter: boolean;
+    missingFileCount: number;
+  };
 }
 
 export interface PubControlPanelState {

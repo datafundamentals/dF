@@ -9,6 +9,7 @@ import type {PubSiteEntry} from '@df/types';
 import * as path from 'path';
 import {getGitStatus, getGitStatusForSubdir} from './git-status.js';
 import {getContentChanges} from './content-changes.js';
+import {checkFrontmatter} from './frontmatter-check.js';
 
 interface SiteConfig {
   ignore?: boolean;
@@ -93,6 +94,11 @@ export async function loadSites(options: LoadSitesOptions): Promise<LoadSitesRes
           enhanced = await enhanceWithContentRootChanges(workspaceRoot, enhanced);
         } catch {
           // Return site without content root changes on error
+        }
+        try {
+          enhanced = await enhanceWithFrontmatterStatus(workspaceRoot, enhanced);
+        } catch {
+          // Return site without frontmatter status on error
         }
         return enhanced;
       }),
@@ -195,5 +201,22 @@ async function enhanceWithContentRootChanges(
   return {
     ...site,
     contentRootChanges,
+  };
+}
+
+async function enhanceWithFrontmatterStatus(
+  workspaceRoot: string,
+  site: PubSiteEntry,
+): Promise<PubSiteEntry> {
+  if (!site.contentRoot) {
+    return site;
+  }
+
+  const resolvedContentRoot = path.resolve(workspaceRoot, site.contentRoot);
+  const frontmatterStatus = await checkFrontmatter(resolvedContentRoot);
+
+  return {
+    ...site,
+    frontmatterStatus,
   };
 }

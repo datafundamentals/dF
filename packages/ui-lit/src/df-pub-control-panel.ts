@@ -276,6 +276,20 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
                             >
                           </div>`
                         : nothing}
+                      ${site.frontmatterStatus
+                        ? html`<div class="git-status-row">
+                            <md-checkbox
+                              touch-target="wrapper"
+                              ?checked=${!site.frontmatterStatus.hasMissingFrontmatter}
+                              disabled
+                            ></md-checkbox>
+                            <span class="site-meta git-status-label"
+                              >${site.frontmatterStatus.hasMissingFrontmatter
+                                ? `Content repo: ${site.frontmatterStatus.missingFileCount} index.md files missing frontmatter`
+                                : 'Content repo: All index.md files have frontmatter'}</span
+                            >
+                          </div>`
+                        : nothing}
                       ${site.status && site.status.length > 0
                         ? html`
                             <div class="site-status">
