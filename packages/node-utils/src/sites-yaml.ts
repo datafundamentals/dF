@@ -9,7 +9,7 @@ import type {PubSiteEntry} from '@df/types';
 import * as path from 'path';
 import {getGitStatus, getGitStatusForSubdir} from './git-status.js';
 import {getContentChanges} from './content-changes.js';
-import {checkFrontmatter} from './frontmatter-check.js';
+import {checkFrontmatter, countPleaseReview, repairFrontmatter} from './frontmatter-check.js';
 
 interface SiteConfig {
   ignore?: boolean;
@@ -214,9 +214,54 @@ async function enhanceWithFrontmatterStatus(
 
   const resolvedContentRoot = path.resolve(workspaceRoot, site.contentRoot);
   const frontmatterStatus = await checkFrontmatter(resolvedContentRoot);
+  const pleaseReviewCount = await countPleaseReview(resolvedContentRoot);
 
   return {
     ...site,
-    frontmatterStatus,
+    frontmatterStatus: {
+      ...frontmatterStatus,
+      pleaseReviewCount,
+    },
+  };
+}
+
+/**
+ * Repair frontmatter for a single site's content root, then return updated status.
+ * @param workspaceRoot Path to the workspace root (where SITES.yaml lives)
+ * @param site The site entry to repair
+ * @returns Updated site entry with repair results reflected in frontmatterStatus
+ */
+export async function repairSiteFrontmatter(
+  workspaceRoot: string,
+  site: PubSiteEntry,
+): Promise<PubSiteEntry> {
+  if (!site.contentRoot) {
+    return site;
+  }
+
+  const resolvedContentRoot = path.resolve(workspaceRoot, site.contentRoot);
+  const result = await repairFrontmatter(resolvedContentRoot);
+
+  if (result.error) {
+    return {
+      ...site,
+      frontmatterStatus: {
+        hasMissingFrontmatter: site.frontmatterStatus?.hasMissingFrontmatter ?? false,
+        missingFileCount: site.frontmatterStatus?.missingFileCount ?? 0,
+        pleaseReviewCount: result.pleaseReviewCount,
+        repairError: result.error,
+      },
+    };
+  }
+
+  // Re-check frontmatter status after repair
+  const updatedStatus = await checkFrontmatter(resolvedContentRoot);
+
+  return {
+    ...site,
+    frontmatterStatus: {
+      ...updatedStatus,
+      pleaseReviewCount: result.pleaseReviewCount,
+    },
   };
 }

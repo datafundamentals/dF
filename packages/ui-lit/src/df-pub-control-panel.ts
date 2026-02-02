@@ -162,7 +162,23 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
       --md-filled-button-container-color: var(--vscode-button-background, #0e639c);
       --md-filled-button-label-text-color: var(--vscode-button-foreground, #fff);
     }
+
+    .repair-button {
+      --md-filled-button-container-height: 28px;
+      --md-filled-button-label-text-size: 0.75rem;
+      margin-left: 8px;
+    }
   `;
+
+  private handleRepairFrontmatter(siteId: string) {
+    this.dispatchEvent(
+      new CustomEvent('df-pub-control-panel-repair-frontmatter', {
+        detail: {siteId},
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
 
   private handleRefresh() {
     this.dispatchEvent(
@@ -280,14 +296,26 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
                         ? html`<div class="git-status-row">
                             <md-checkbox
                               touch-target="wrapper"
-                              ?checked=${!site.frontmatterStatus.hasMissingFrontmatter}
+                              ?checked=${!site.frontmatterStatus.hasMissingFrontmatter &&
+                                !(site.frontmatterStatus.pleaseReviewCount != null && site.frontmatterStatus.pleaseReviewCount > 0)}
                               disabled
                             ></md-checkbox>
                             <span class="site-meta git-status-label"
-                              >${site.frontmatterStatus.hasMissingFrontmatter
-                                ? `Content repo: ${site.frontmatterStatus.missingFileCount} index.md files missing frontmatter`
-                                : 'Content repo: All index.md files have frontmatter'}</span
+                              >${site.frontmatterStatus.repairError
+                                ? `Repair error: ${site.frontmatterStatus.repairError}`
+                                : site.frontmatterStatus.hasMissingFrontmatter
+                                  ? `Content repo: ${site.frontmatterStatus.missingFileCount} index.md files missing frontmatter`
+                                  : site.frontmatterStatus.pleaseReviewCount != null && site.frontmatterStatus.pleaseReviewCount > 0
+                                    ? `Content repo: ${site.frontmatterStatus.pleaseReviewCount} index.md files have pleaseReview=true`
+                                    : 'Content repo: All index.md frontmatter reviewed'}</span
                             >
+                            ${site.frontmatterStatus.hasMissingFrontmatter
+                              ? html`<md-filled-button
+                                  class="repair-button"
+                                  @click=${() => this.handleRepairFrontmatter(site.id)}
+                                  >Repair</md-filled-button
+                                >`
+                              : nothing}
                           </div>`
                         : nothing}
                       ${site.status && site.status.length > 0

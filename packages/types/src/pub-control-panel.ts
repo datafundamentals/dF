@@ -39,6 +39,8 @@ export interface PubSiteEntry {
   frontmatterStatus?: {
     hasMissingFrontmatter: boolean;
     missingFileCount: number;
+    pleaseReviewCount?: number;
+    repairError?: string;
   };
 }
 

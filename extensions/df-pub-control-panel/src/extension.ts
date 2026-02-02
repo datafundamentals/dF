@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-import {loadSites} from '@df/node-utils';
+import {loadSites, repairSiteFrontmatter} from '@df/node-utils';
 
 const outputChannel = vscode.window.createOutputChannel('DF Pub Control Panel');
 
@@ -51,6 +51,9 @@ export function activate(context: vscode.ExtensionContext) {
         async (message) => {
           if ((message?.command === 'requestSites' || message?.command === 'refresh') && currentPanel) {
             await sendSitesUpdate(currentPanel);
+          }
+          if (message?.command === 'repairFrontmatter' && currentPanel) {
+            await handleRepairFrontmatter(currentPanel, message.data?.siteId);
           }
         },
         undefined,
@@ -106,6 +109,58 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel) {
   });
 }
 
+async function handleRepairFrontmatter(panel: vscode.WebviewPanel, siteId?: string) {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders || workspaceFolders.length === 0) {
+    return;
+  }
+
+  const rootPath = workspaceFolders[0].uri.fsPath;
+  const sitesYamlPath = path.join(rootPath, 'SITES.yaml');
+  const sitesDirectory = path.join(path.dirname(rootPath), 'sites');
+
+  const {sites, errorMessage} = await loadSites({
+    sitesYamlPath,
+    sitesDirectory,
+    onWarning: (message) => outputChannel.appendLine(`WARNING: ${message}`),
+  });
+
+  if (errorMessage) {
+    outputChannel.appendLine(`Repair error: ${errorMessage}`);
+    return;
+  }
+
+  const workspaceRoot = path.dirname(sitesYamlPath);
+  const repairedSites = await Promise.all(
+    sites.map(async (site) => {
+      if (siteId && site.id !== siteId) {
+        return site;
+      }
+      if (!site.contentRoot) {
+        return site;
+      }
+      try {
+        const repaired = await repairSiteFrontmatter(workspaceRoot, site);
+        outputChannel.appendLine(
+          `Repaired frontmatter for ${site.id}: pleaseReview=${repaired.frontmatterStatus?.pleaseReviewCount ?? 0}`,
+        );
+        return repaired;
+      } catch (err) {
+        outputChannel.appendLine(`Repair failed for ${site.id}: ${err}`);
+        return site;
+      }
+    }),
+  );
+
+  panel.webview.postMessage({
+    command: 'updateSites',
+    data: {
+      sites: repairedSites,
+      lastUpdated: Date.now(),
+    },
+  });
+}
+
 function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
   const uiDistUri = vscode.Uri.joinPath(extensionUri, '..', '..', 'packages', 'ui-lit', 'dist');
   const bundleHash = getUiBundleHash(extensionUri);
@@ -152,6 +207,11 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
         // Listen for refresh requests from UI
         window.addEventListener('df-pub-control-panel-refresh', () => {
              vscode.postMessage({ command: 'refresh' });
+        });
+
+        // Listen for repair frontmatter requests from UI
+        window.addEventListener('df-pub-control-panel-repair-frontmatter', (event) => {
+             vscode.postMessage({ command: 'repairFrontmatter', data: event.detail });
         });
 
     </script>
