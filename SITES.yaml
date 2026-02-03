@@ -5,6 +5,7 @@ sites:
     content: brokenBecauseNetlify
     url: appwriter.com
     host: netlify
+    apps: [ df-chat, df-activity-log ]
     status: 
     - the latest is not deployed - see dev 260126 for splainer
     - extra menus still disfunctional
@@ -28,6 +29,7 @@ sites:
     url: https://aspieautomator.com/
     host: firebase
     firebaseProject: aspieautomator
+    apps: [ ]
     status: 
     - has mobile file differences with theme that need to be investigated
     - seems to have a broken favicon
@@ -81,6 +83,7 @@ sites:
     url: https://betterology.com/
     host: firebase
     firebaseProject: betterology
+    apps: [ ]
     status: 
     - re-theme has mobile file differences with theme that need to be investigated
     purpose: 
@@ -101,6 +104,7 @@ sites:
     url: https://betterology.net/
     host: firebase
     firebaseProject: betterology-net
+    apps: [ ]
     status: still on rocket
     purpose: none?
     theme: not-fuelcell
@@ -118,6 +122,7 @@ sites:
     content: btrg
     url: https://www.btrg.org/
     host: dreamhost
+    apps: [ ]
     status: 
     - lorem + MPA Demos
     - may need to leave as only version of lorem????
@@ -138,6 +143,7 @@ sites:
     url: https://couldbe.net/
     host: firebase
     firebaseProject: couldbe
+    apps: [ ]
     status: 
     - re-theme seems to work flawlessly
     - rest seems to work perfectly as well
@@ -157,6 +163,7 @@ sites:
     url: https://datafundamentals.com/
     host: firebase
     firebaseProject: datafundamentals
+    apps: [ ]
     status: 
     - re-theme has layout.css that requires manual override
     - re-theme has datafundamentals/_includes/block/header-logo-background.njk that requires manual override
@@ -210,6 +217,7 @@ sites:
     url: https://pullmodel.com/
     host: firebase
     firebaseProject: pullmodel
+    apps: [ ]
     status: 
       - jagged header bottom
       - theme needs a lotta work pretty obvious
@@ -230,6 +238,7 @@ sites:
     url: https://smoslt.com/
     host: dreamhost
     firebaseProject: pullmodel
+    apps: [ ]
     status: legacy deployed on dreamhost working
     purpose: legacy only, for the time being
     theme: not-github
@@ -246,6 +255,7 @@ sites:
     url: https://walktown.net/
     host: firebase
     firebaseProject: walktownnet
+    apps: [ ]
     status: 
     - the typeface doesn't all work - needs replacing
     purpose: platform alternatives
@@ -264,6 +274,7 @@ sites:
     url: https://webappwriter.com/
     host: netlify
     firebaseProject: webappwriter - but not used - netlify!
+    apps: [ ]
     status: broken in my codebase, do not deploy!
     purpose: legacy
     theme: not-five38
@@ -298,6 +309,7 @@ sites:
     url: https://jukelox-7ec89.web.app/
     host: firebase
     firebaseProject: jukelox-not-nyt
+    apps: [ ]
     status: this is the one that you need to keep as an old working version of home and lorem links
     purpose: example only, theme too complex for normal usage
     theme: not-nyt
