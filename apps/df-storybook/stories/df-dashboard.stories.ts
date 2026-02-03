@@ -69,7 +69,12 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => {
     resetDashboardState();
-    setDashboardSites(sampleSites, Date.now());
+    setDashboardSites(sampleSites, Date.now(), {
+      isInternal: true,
+      hasUncommittedChanges: true,
+      untrackedFiles: 1,
+      modifiedFiles: 1,
+    });
     return html`<df-dashboard></df-dashboard>`;
   },
 };

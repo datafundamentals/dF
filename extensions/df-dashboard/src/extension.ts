@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-import {loadSites, repairSiteFrontmatter} from '@df/node-utils';
+import {loadSites, repairSiteFrontmatter, getGitStatus} from '@df/node-utils';
 
 const outputChannel = vscode.window.createOutputChannel('DF Dashboard');
 
@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       if (currentPanel) {
         currentPanel.reveal(columnToShowIn);
-        await sendSitesUpdate(currentPanel);
+        await sendSitesUpdate(currentPanel, context.extensionPath);
         return;
       }
 
@@ -50,32 +50,46 @@ export function activate(context: vscode.ExtensionContext) {
       currentPanel.webview.onDidReceiveMessage(
         async (message) => {
           if ((message?.command === 'requestSites' || message?.command === 'refresh') && currentPanel) {
-            await sendSitesUpdate(currentPanel);
+            await sendSitesUpdate(currentPanel, context.extensionPath);
           }
           if (message?.command === 'repairFrontmatter' && currentPanel) {
-            await handleRepairFrontmatter(currentPanel, message.data?.siteId);
+            await handleRepairFrontmatter(currentPanel, context.extensionPath, message.data?.siteId);
           }
         },
         undefined,
         context.subscriptions,
       );
 
-      await sendSitesUpdate(currentPanel);
+      await sendSitesUpdate(currentPanel, context.extensionPath);
     }),
   );
 }
 
-async function sendSitesUpdate(panel: vscode.WebviewPanel) {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) {
+async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string) {
+  // Determine root path: Priority to extension's monorepo root (Dev/Repo Context),
+  // fallback to active workspace (Installed Context).
+  let rootPath: string | undefined;
+
+  const dFMonorepoRoot = path.resolve(extensionPath, '..', '..');
+  const dFSitesYaml = path.join(dFMonorepoRoot, 'SITES.yaml');
+
+  if (fs.existsSync(dFSitesYaml)) {
+    rootPath = dFMonorepoRoot;
+  } else {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length > 0) {
+      rootPath = workspaceFolders[0].uri.fsPath;
+    }
+  }
+
+  if (!rootPath) {
     panel.webview.postMessage({
       command: 'updateSitesError',
-      data: {message: 'No workspace folder open.'},
+      data: {message: 'No SITES.yaml found (checked extension root and workspace).'},
     });
     return;
   }
 
-  const rootPath = workspaceFolders[0].uri.fsPath;
   const sitesYamlPath = path.join(rootPath, 'SITES.yaml');
   const sitesDirectory = path.join(path.dirname(rootPath), 'sites');
 
@@ -100,22 +114,45 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel) {
     `Loaded ${sites.length} sites (${withContentChanges} with site repo changes, ${withContentRootChanges} with content repo changes)`,
   );
 
+  // We change logic for git status to match root path logic
+  const dfRepoGitStatus = await getGitStatus(rootPath);
+
   panel.webview.postMessage({
     command: 'updateSites',
     data: {
       sites,
       lastUpdated: Date.now(),
+      dfRepoStatus: {
+        isInternal: true,
+        hasUncommittedChanges: dfRepoGitStatus.hasUncommittedChanges,
+        untrackedFiles: dfRepoGitStatus.untrackedFiles,
+        modifiedFiles: dfRepoGitStatus.modifiedFiles,
+      },
     },
   });
 }
 
-async function handleRepairFrontmatter(panel: vscode.WebviewPanel, siteId?: string) {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) {
+async function handleRepairFrontmatter(panel: vscode.WebviewPanel, extensionPath: string, siteId?: string) {
+  // Determine root path: Priority to extension's monorepo root (Dev/Repo Context),
+  // fallback to active workspace (Installed Context).
+  let rootPath: string | undefined;
+
+  const dFMonorepoRoot = path.resolve(extensionPath, '..', '..');
+  const dFSitesYaml = path.join(dFMonorepoRoot, 'SITES.yaml');
+
+  if (fs.existsSync(dFSitesYaml)) {
+    rootPath = dFMonorepoRoot;
+  } else {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length > 0) {
+      rootPath = workspaceFolders[0].uri.fsPath;
+    }
+  }
+
+  if (!rootPath) {
     return;
   }
 
-  const rootPath = workspaceFolders[0].uri.fsPath;
   const sitesYamlPath = path.join(rootPath, 'SITES.yaml');
   const sitesDirectory = path.join(path.dirname(rootPath), 'sites');
 

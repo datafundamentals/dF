@@ -29,6 +29,8 @@
     "./df-markdown-codemirror.js": "./dist/df-markdown-codemirror.js",
     "./df-dashboard": "./dist/df-dashboard.js",
     "./df-dashboard.js": "./dist/df-dashboard.js",
+    "./df-dashboard-df-card": "./dist/df-dashboard-df-card.js",
+    "./df-dashboard-df-card.js": "./dist/df-dashboard-df-card.js",
     "./df-google-signin": "./dist/df-google-signin.js",
     "./df-google-signin.js": "./dist/df-google-signin.js",
     "./df-auth-wrapper": "./dist/df-auth-wrapper.js",

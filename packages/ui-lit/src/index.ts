@@ -19,6 +19,7 @@ export * from './df-npm-info-widget.js';
 export * from './df-chat-widget.js';
 export * from './df-markdown-codemirror.js';
 export * from './df-dashboard.js';
+export * from './df-dashboard-df-card.js';
 export * from './df-google-signin.js';
 export * from './df-auth-wrapper.js';
 export * from './df-environment-banner.js';

@@ -49,4 +49,10 @@ export interface DashboardState {
   sites: PubSiteEntry[];
   lastUpdated: number | null;
   errorMessage: string | null;
+  dfRepoStatus?: {
+    isInternal: boolean;
+    hasUncommittedChanges: boolean;
+    untrackedFiles: number;
+    modifiedFiles: number;
+  };
 }

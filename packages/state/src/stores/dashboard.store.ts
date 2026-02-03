@@ -10,12 +10,14 @@ const statusSignal = signal<DashboardStatus>('idle');
 const sitesSignal = signal<PubSiteEntry[]>([]);
 const lastUpdatedSignal = signal<number | null>(null);
 const errorMessageSignal = signal<string | null>(null);
+const dfRepoStatusSignal = signal<DashboardState['dfRepoStatus']>(undefined);
 
 export const dashboardState = computed<DashboardState>(() => ({
   status: statusSignal.get(),
   sites: sitesSignal.get(),
   lastUpdated: lastUpdatedSignal.get(),
   errorMessage: errorMessageSignal.get(),
+  dfRepoStatus: dfRepoStatusSignal.get(),
 }));
 
 export function setDashboardLoading(): void {
@@ -23,11 +25,18 @@ export function setDashboardLoading(): void {
   errorMessageSignal.set(null);
 }
 
-export function setDashboardSites(sites: PubSiteEntry[], lastUpdated?: number): void {
+export function setDashboardSites(
+  sites: PubSiteEntry[],
+  lastUpdated?: number,
+  dfRepoStatus?: DashboardState['dfRepoStatus'],
+): void {
   sitesSignal.set(sites);
   statusSignal.set('ready');
   errorMessageSignal.set(null);
   lastUpdatedSignal.set(lastUpdated ?? Date.now());
+  if (dfRepoStatus) {
+    dfRepoStatusSignal.set(dfRepoStatus);
+  }
 }
 
 export function setDashboardError(message: string): void {
