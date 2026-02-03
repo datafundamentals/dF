@@ -1,42 +1,42 @@
 /**
- * Pub Control Panel store
- * Tracks sites list for the VS Code pub control panel extension
+ * Dashboard store
+ * Tracks sites list for the VS Code dashboard extension
  */
 
 import {computed, signal} from '@lit-labs/signals';
-import type {PubControlPanelState, PubControlPanelStatus, PubSiteEntry} from '@df/types';
+import type {DashboardState, DashboardStatus, PubSiteEntry} from '@df/types';
 
-const statusSignal = signal<PubControlPanelStatus>('idle');
+const statusSignal = signal<DashboardStatus>('idle');
 const sitesSignal = signal<PubSiteEntry[]>([]);
 const lastUpdatedSignal = signal<number | null>(null);
 const errorMessageSignal = signal<string | null>(null);
 
-export const pubControlPanelState = computed<PubControlPanelState>(() => ({
+export const dashboardState = computed<DashboardState>(() => ({
   status: statusSignal.get(),
   sites: sitesSignal.get(),
   lastUpdated: lastUpdatedSignal.get(),
   errorMessage: errorMessageSignal.get(),
 }));
 
-export function setPubControlPanelLoading(): void {
+export function setDashboardLoading(): void {
   statusSignal.set('loading');
   errorMessageSignal.set(null);
 }
 
-export function setPubControlPanelSites(sites: PubSiteEntry[], lastUpdated?: number): void {
+export function setDashboardSites(sites: PubSiteEntry[], lastUpdated?: number): void {
   sitesSignal.set(sites);
   statusSignal.set('ready');
   errorMessageSignal.set(null);
   lastUpdatedSignal.set(lastUpdated ?? Date.now());
 }
 
-export function setPubControlPanelError(message: string): void {
+export function setDashboardError(message: string): void {
   statusSignal.set('error');
   errorMessageSignal.set(message);
   lastUpdatedSignal.set(Date.now());
 }
 
-export function resetPubControlPanelState(): void {
+export function resetDashboardState(): void {
   statusSignal.set('idle');
   sitesSignal.set([]);
   lastUpdatedSignal.set(null);

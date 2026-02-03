@@ -4,16 +4,16 @@ import * as fs from 'fs';
 import * as crypto from 'crypto';
 import {loadSites, repairSiteFrontmatter} from '@df/node-utils';
 
-const outputChannel = vscode.window.createOutputChannel('DF Pub Control Panel');
+const outputChannel = vscode.window.createOutputChannel('DF Dashboard');
 
 export function activate(context: vscode.ExtensionContext) {
-  outputChannel.appendLine('=== DF Pub Control Panel Extension Activated ===');
+  outputChannel.appendLine('=== DF Dashboard Extension Activated ===');
   outputChannel.appendLine(getUiBundleInfo(context.extensionUri));
 
   let currentPanel: vscode.WebviewPanel | undefined;
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('df.openPubControlPanel', async () => {
+    vscode.commands.registerCommand('df.openDashboard', async () => {
       const columnToShowIn = vscode.ViewColumn.Beside;
 
       if (currentPanel) {
@@ -25,8 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
       outputChannel.appendLine(getUiBundleInfo(context.extensionUri));
 
       currentPanel = vscode.window.createWebviewPanel(
-        'dfPubControlPanel',
-        'Pub Control Panel',
+        'dfDashboard',
+        'Dashboard',
         columnToShowIn,
         {
           enableScripts: true,
@@ -165,7 +165,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
   const uiDistUri = vscode.Uri.joinPath(extensionUri, '..', '..', 'packages', 'ui-lit', 'dist');
   const bundleHash = getUiBundleHash(extensionUri);
   const baseScriptUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(uiDistUri, 'df-pub-control-panel.bundled.js'),
+    vscode.Uri.joinPath(uiDistUri, 'df-dashboard.bundled.js'),
   );
   const scriptUri = bundleHash ? `${baseScriptUri}?v=${bundleHash}` : `${baseScriptUri}?v=${Date.now()}`;
 
@@ -177,13 +177,13 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' ${webview.cspSource}; font-src ${webview.cspSource}; connect-src ${webview.cspSource};">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pub Control Panel</title>
+    <title>Dashboard</title>
     <style>
         body { padding: 0; margin: 0; background: transparent; }
     </style>
 </head>
 <body>
-    <df-pub-control-panel></df-pub-control-panel>
+    <df-dashboard></df-dashboard>
 
     <script nonce="${nonce}">
         const vscode = acquireVsCodeApi();
@@ -193,10 +193,10 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
             const message = event.data;
             switch (message.command) {
                 case 'updateSites':
-                    window.dispatchEvent(new CustomEvent('df-pub-update-state', { detail: message.data }));
+                    window.dispatchEvent(new CustomEvent('df-dashboard-update-state', { detail: message.data }));
                     break;
                 case 'updateSitesError':
-                    window.dispatchEvent(new CustomEvent('df-pub-error', { detail: message.data }));
+                    window.dispatchEvent(new CustomEvent('df-dashboard-error', { detail: message.data }));
                     break;
             }
         });
@@ -205,12 +205,12 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
         vscode.postMessage({ command: 'requestSites' });
         
         // Listen for refresh requests from UI
-        window.addEventListener('df-pub-control-panel-refresh', () => {
+        window.addEventListener('df-dashboard-refresh', () => {
              vscode.postMessage({ command: 'refresh' });
         });
 
         // Listen for repair frontmatter requests from UI
-        window.addEventListener('df-pub-control-panel-repair-frontmatter', (event) => {
+        window.addEventListener('df-dashboard-repair-frontmatter', (event) => {
              vscode.postMessage({ command: 'repairFrontmatter', data: event.detail });
         });
 
@@ -239,7 +239,7 @@ function getUiBundleInfo(extensionUri: vscode.Uri): string {
     'packages',
     'ui-lit',
     'dist',
-    'df-pub-control-panel.bundled.js',
+    'df-dashboard.bundled.js',
   );
 
   if (!fs.existsSync(uiBundlePath)) {
@@ -261,7 +261,7 @@ function getUiBundleHash(extensionUri: vscode.Uri): string | null {
     'packages',
     'ui-lit',
     'dist',
-    'df-pub-control-panel.bundled.js',
+    'df-dashboard.bundled.js',
   );
 
   if (!fs.existsSync(uiBundlePath)) {

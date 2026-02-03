@@ -1,9 +1,9 @@
 /**
- * Pub Control Panel types
- * Used by the Pub Control Panel UI and state store
+ * Dashboard types
+ * Used by the dashboard UI and state store
  */
 
-export type PubControlPanelStatus = 'idle' | 'loading' | 'ready' | 'error';
+export type DashboardStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 export interface PubSiteEntry {
   id: string;
@@ -44,8 +44,8 @@ export interface PubSiteEntry {
   };
 }
 
-export interface PubControlPanelState {
-  status: PubControlPanelStatus;
+export interface DashboardState {
+  status: DashboardStatus;
   sites: PubSiteEntry[];
   lastUpdated: number | null;
   errorMessage: string | null;

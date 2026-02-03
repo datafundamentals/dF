@@ -1,5 +1,5 @@
 /**
- * Pub Control Panel UI
+ * Dashboard UI
  * Presentation-only component that renders site metadata from @df/state
  */
 
@@ -7,40 +7,40 @@ import {LitElement, html, css, nothing} from 'lit';
 import {customElement} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {
-  pubControlPanelState,
-  setPubControlPanelSites,
-  setPubControlPanelError,
+  dashboardState,
+  setDashboardSites,
+  setDashboardError,
 } from '@df/state';
 
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/circular-progress.js';
 import '@material/web/checkbox/checkbox.js';
 
-@customElement('df-pub-control-panel')
-export class DfPubControlPanel extends SignalWatcher(LitElement) {
+@customElement('df-dashboard')
+export class DfDashboard extends SignalWatcher(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     // Listen for state updates from the VS Code extension
-    window.addEventListener('df-pub-update-state', this.handleStateUpdate);
-    window.addEventListener('df-pub-error', this.handleErrorUpdate);
+    window.addEventListener('df-dashboard-update-state', this.handleStateUpdate);
+    window.addEventListener('df-dashboard-error', this.handleErrorUpdate);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener('df-pub-update-state', this.handleStateUpdate);
-    window.removeEventListener('df-pub-error', this.handleErrorUpdate);
+    window.removeEventListener('df-dashboard-update-state', this.handleStateUpdate);
+    window.removeEventListener('df-dashboard-error', this.handleErrorUpdate);
   }
 
   private handleStateUpdate = (event: Event) => {
     const customEvent = event as CustomEvent;
     const {sites, lastUpdated} = customEvent.detail;
-    setPubControlPanelSites(sites, lastUpdated);
+    setDashboardSites(sites, lastUpdated);
   };
 
   private handleErrorUpdate = (event: Event) => {
     const customEvent = event as CustomEvent;
     const {message} = customEvent.detail;
-    setPubControlPanelError(message);
+    setDashboardError(message);
   };
 
   static override styles = css`
@@ -172,7 +172,7 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
 
   private handleRepairFrontmatter(siteId: string) {
     this.dispatchEvent(
-      new CustomEvent('df-pub-control-panel-repair-frontmatter', {
+      new CustomEvent('df-dashboard-repair-frontmatter', {
         detail: {siteId},
         bubbles: true,
         composed: true,
@@ -182,7 +182,7 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
 
   private handleRefresh() {
     this.dispatchEvent(
-      new CustomEvent('df-pub-control-panel-refresh', {
+      new CustomEvent('df-dashboard-refresh', {
         bubbles: true,
         composed: true,
       }),
@@ -190,7 +190,7 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
   }
 
   override render() {
-    const state = pubControlPanelState.get();
+    const state = dashboardState.get();
     const isLoading = state.status === 'loading';
     const isError = state.status === 'error';
     const hasSites = state.sites.length > 0;
@@ -202,7 +202,7 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
       <div class="container">
         <div class="header">
           <div class="title-block">
-            <h1>Pub Control Panel</h1>
+            <h1>Dashboard</h1>
             <p class="subtitle">
               ${hasSites ? `${state.sites.length} sites loaded` : 'No sites loaded yet'}
             </p>
@@ -345,6 +345,6 @@ export class DfPubControlPanel extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'df-pub-control-panel': DfPubControlPanel;
+    'df-dashboard': DfDashboard;
   }
 }

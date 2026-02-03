@@ -74,9 +74,9 @@ export default [
     plugins: commonPlugins,
   },
   {
-    input: 'dist/df-pub-control-panel.js',
+    input: 'dist/df-dashboard.js',
     output: {
-      file: 'dist/df-pub-control-panel.bundled.js',
+      file: 'dist/df-dashboard.bundled.js',
       format: 'esm',
     },
     onwarn,

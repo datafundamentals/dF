@@ -1,8 +1,8 @@
-import '@df/ui-lit/df-pub-control-panel';
+import '@df/ui-lit/df-dashboard';
 import {
-  setPubControlPanelError,
-  setPubControlPanelLoading,
-  setPubControlPanelSites,
+  setDashboardError,
+  setDashboardLoading,
+  setDashboardSites,
 } from '@df/state';
 import type {PubSiteEntry} from '@df/types';
 
@@ -11,7 +11,7 @@ declare const acquireVsCodeApi: undefined | (() => { postMessage: (message: unkn
 const vscode = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : undefined;
 
 function requestSites() {
-  setPubControlPanelLoading();
+  setDashboardLoading();
   vscode?.postMessage({ command: 'requestSites' });
 }
 
@@ -21,22 +21,22 @@ window.addEventListener('message', (event) => {
     const payload = message.data ?? {};
     const sites = Array.isArray(payload.sites) ? (payload.sites as PubSiteEntry[]) : [];
     const lastUpdated = typeof payload.lastUpdated === 'number' ? payload.lastUpdated : undefined;
-    setPubControlPanelSites(sites, lastUpdated);
+    setDashboardSites(sites, lastUpdated);
     return;
   }
 
   if (message?.command === 'updateSitesError') {
     const errorMessage = (message.data?.message ?? 'Failed to load sites').toString();
-    setPubControlPanelError(errorMessage);
+    setDashboardError(errorMessage);
   }
 });
 
-document.addEventListener('df-pub-control-panel-refresh', () => {
+document.addEventListener('df-dashboard-refresh', () => {
   requestSites();
 });
 
 if (vscode) {
   requestSites();
 } else {
-  setPubControlPanelError('VS Code API unavailable');
+  setDashboardError('VS Code API unavailable');
 }

@@ -763,15 +763,15 @@ importers:
         specifier: ^5.0.10
         version: 5.4.20(@types/node@22.18.10)(terser@5.44.0)
 
-  extensions/df-pub-control-panel:
+  extensions/df-dashboard:
     dependencies:
       '@df/node-utils':
         specifier: workspace:*
         version: link:../../packages/node-utils
     devDependencies:
-      '@df/df-pub-control-panel-ui':
+      '@df/df-dashboard-ui':
         specifier: workspace:*
-        version: link:../df-pub-control-panel-ui
+        version: link:../df-dashboard-ui
       '@df/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -797,7 +797,7 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
-  extensions/df-pub-control-panel-ui:
+  extensions/df-dashboard-ui:
     dependencies:
       '@df/state':
         specifier: workspace:*

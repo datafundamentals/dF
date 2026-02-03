@@ -1,7 +1,7 @@
 {
-  "name": "df-pub-control-panel",
-  "displayName": "DF Pub Control Panel",
-  "description": "Pub Control Panel for DF Monorepo",
+  "name": "df-dashboard",
+  "displayName": "DF Dashboard",
+  "description": "Dashboard for DF Monorepo",
   "version": "0.0.1",
   "publisher": "datafundamentals",
   "repository": {
@@ -21,8 +21,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "df.openPubControlPanel",
-        "title": "Open Pub Control Panel",
+        "command": "df.openDashboard",
+        "title": "Open Dashboard",
         "category": "DF"
       }
     ]
@@ -34,11 +34,11 @@
     "watch": "tsc -watch -p ./",
     "package": "tsup src/extension.ts --format cjs --external vscode",
     "lint": "eslint ./src",
-    "build:ui": "pnpm --filter @df/df-pub-control-panel-ui build",
-    "copy:ui": "rm -rf media/ui && mkdir -p media/ui && cp -r ../df-pub-control-panel-ui/dist/* media/ui/"
+    "build:ui": "pnpm --filter @df/df-dashboard-ui build",
+    "copy:ui": "rm -rf media/ui && mkdir -p media/ui && cp -r ../df-dashboard-ui/dist/* media/ui/"
   },
   "devDependencies": {
-    "@df/df-pub-control-panel-ui": "workspace:*",
+    "@df/df-dashboard-ui": "workspace:*",
     "@df/types": "workspace:*",
     "@types/node": "20.x",
     "@types/vscode": "^1.85.0",

@@ -1,11 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/web-components';
 import {html} from 'lit';
-import '@df/ui-lit/df-pub-control-panel';
+import '@df/ui-lit/df-dashboard';
 import {
-  resetPubControlPanelState,
-  setPubControlPanelError,
-  setPubControlPanelLoading,
-  setPubControlPanelSites,
+  resetDashboardState,
+  setDashboardError,
+  setDashboardLoading,
+  setDashboardSites,
 } from '@df/state';
 import type {PubSiteEntry} from '@df/types';
 
@@ -43,16 +43,16 @@ const sampleSites: PubSiteEntry[] = [
 ];
 
 const meta: Meta = {
-  title: 'Components/df Pub Control Panel',
-  component: 'df-pub-control-panel',
+  title: 'Components/df Dashboard',
+  component: 'df-dashboard',
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: `Pub Control Panel summary for sites stored in SITES.yaml.
+        component: `Dashboard summary for sites stored in SITES.yaml.
 
 ## Events
-- \`df-pub-control-panel-refresh\`: Fired when the user requests a refresh.
+- \`df-dashboard-refresh\`: Fired when the user requests a refresh.
 
 ## Accessibility
 - Uses MD3 buttons and semantic structure for readable site cards.`,
@@ -68,9 +68,9 @@ type Story = StoryObj;
 
 export const Default: Story = {
   render: () => {
-    resetPubControlPanelState();
-    setPubControlPanelSites(sampleSites, Date.now());
-    return html`<df-pub-control-panel></df-pub-control-panel>`;
+    resetDashboardState();
+    setDashboardSites(sampleSites, Date.now());
+    return html`<df-dashboard></df-dashboard>`;
   },
 };
 
@@ -79,9 +79,9 @@ export const Loading: Story = {
     docs: {disable: true},
   },
   render: () => {
-    resetPubControlPanelState();
-    setPubControlPanelLoading();
-    return html`<df-pub-control-panel></df-pub-control-panel>`;
+    resetDashboardState();
+    setDashboardLoading();
+    return html`<df-dashboard></df-dashboard>`;
   },
 };
 
@@ -90,8 +90,8 @@ export const Error: Story = {
     docs: {disable: true},
   },
   render: () => {
-    resetPubControlPanelState();
-    setPubControlPanelError('Unable to read SITES.yaml');
-    return html`<df-pub-control-panel></df-pub-control-panel>`;
+    resetDashboardState();
+    setDashboardError('Unable to read SITES.yaml');
+    return html`<df-dashboard></df-dashboard>`;
   },
 };
