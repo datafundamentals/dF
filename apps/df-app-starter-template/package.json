@@ -1,6 +1,6 @@
 {
   "name": "@df/df-app-starter-template",
-  "version": "0.0.0",
+  "version": "0.0.1-260103",
   "private": true,
   "type": "module",
   "scripts": {

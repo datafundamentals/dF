@@ -1,6 +1,6 @@
 {
   "name": "@df/df-auth-trigd-func-tool",
-  "version": "0.0.0",
+  "version": "0.0.1-251201",
   "private": true,
   "type": "module",
   "scripts": {
