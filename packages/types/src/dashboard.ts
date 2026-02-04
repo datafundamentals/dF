@@ -44,6 +44,16 @@ export interface PubSiteEntry {
   };
 }
 
+export interface AppEntry {
+  name: string;
+  version: string;
+  releaseDate: string;
+  appChanges?: {
+    hasChanges: boolean;
+    changedFileCount: number;
+  };
+}
+
 export interface DashboardState {
   status: DashboardStatus;
   sites: PubSiteEntry[];
@@ -55,4 +65,5 @@ export interface DashboardState {
     untrackedFiles: number;
     modifiedFiles: number;
   };
+  apps?: AppEntry[];
 }

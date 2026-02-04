@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-import {loadSites, repairSiteFrontmatter, getGitStatus} from '@df/node-utils';
+import {loadSites, repairSiteFrontmatter, getGitStatus, getFirebaseApps, enhanceAppWithChanges} from '@df/node-utils';
 
 const outputChannel = vscode.window.createOutputChannel('DF Dashboard');
 
@@ -117,6 +117,12 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string
   // We change logic for git status to match root path logic
   const dfRepoGitStatus = await getGitStatus(rootPath);
 
+  // Scan for firebase apps and check for changes since release
+  const firebaseApps = await getFirebaseApps(rootPath);
+  const appsWithChanges = await Promise.all(
+    firebaseApps.map((app) => enhanceAppWithChanges(rootPath!, app)),
+  );
+
   panel.webview.postMessage({
     command: 'updateSites',
     data: {
@@ -128,6 +134,7 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string
         untrackedFiles: dfRepoGitStatus.untrackedFiles,
         modifiedFiles: dfRepoGitStatus.modifiedFiles,
       },
+      apps: appsWithChanges,
     },
   });
 }

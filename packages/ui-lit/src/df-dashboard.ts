@@ -16,6 +16,7 @@ import '@material/web/button/filled-button.js';
 import '@material/web/progress/circular-progress.js';
 import '@material/web/checkbox/checkbox.js';
 import './df-dashboard-df-card.js';
+import './df-dashboard-app-card.js';
 
 @customElement('df-dashboard')
 export class DfDashboard extends SignalWatcher(LitElement) {
@@ -34,8 +35,8 @@ export class DfDashboard extends SignalWatcher(LitElement) {
 
   private handleStateUpdate = (event: Event) => {
     const customEvent = event as CustomEvent;
-    const {sites, lastUpdated, dfRepoStatus} = customEvent.detail;
-    setDashboardSites(sites, lastUpdated, dfRepoStatus);
+    const {sites, lastUpdated, dfRepoStatus, apps} = customEvent.detail;
+    setDashboardSites(sites, lastUpdated, dfRepoStatus, apps);
   };
 
   private handleErrorUpdate = (event: Event) => {
@@ -344,6 +345,18 @@ export class DfDashboard extends SignalWatcher(LitElement) {
                     <hr class="separator" />
                     <div class="site-grid">
                       <df-dashboard-df-card></df-dashboard-df-card>
+                    </div>
+                  `
+                : nothing}
+              ${state.apps && state.apps.length > 0
+                ? html`
+                    <hr class="separator" />
+                    <div class="site-grid">
+                      ${state.apps.map(
+                        (app) => html`
+                          <df-dashboard-app-card .app=${app}></df-dashboard-app-card>
+                        `,
+                      )}
                     </div>
                   `
                 : nothing}

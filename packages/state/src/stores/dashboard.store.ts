@@ -4,13 +4,14 @@
  */
 
 import {computed, signal} from '@lit-labs/signals';
-import type {DashboardState, DashboardStatus, PubSiteEntry} from '@df/types';
+import type {AppEntry, DashboardState, DashboardStatus, PubSiteEntry} from '@df/types';
 
 const statusSignal = signal<DashboardStatus>('idle');
 const sitesSignal = signal<PubSiteEntry[]>([]);
 const lastUpdatedSignal = signal<number | null>(null);
 const errorMessageSignal = signal<string | null>(null);
 const dfRepoStatusSignal = signal<DashboardState['dfRepoStatus']>(undefined);
+const appsSignal = signal<AppEntry[]>([]);
 
 export const dashboardState = computed<DashboardState>(() => ({
   status: statusSignal.get(),
@@ -18,6 +19,7 @@ export const dashboardState = computed<DashboardState>(() => ({
   lastUpdated: lastUpdatedSignal.get(),
   errorMessage: errorMessageSignal.get(),
   dfRepoStatus: dfRepoStatusSignal.get(),
+  apps: appsSignal.get(),
 }));
 
 export function setDashboardLoading(): void {
@@ -29,6 +31,7 @@ export function setDashboardSites(
   sites: PubSiteEntry[],
   lastUpdated?: number,
   dfRepoStatus?: DashboardState['dfRepoStatus'],
+  apps?: AppEntry[],
 ): void {
   sitesSignal.set(sites);
   statusSignal.set('ready');
@@ -36,6 +39,9 @@ export function setDashboardSites(
   lastUpdatedSignal.set(lastUpdated ?? Date.now());
   if (dfRepoStatus) {
     dfRepoStatusSignal.set(dfRepoStatus);
+  }
+  if (apps) {
+    appsSignal.set(apps);
   }
 }
 
@@ -50,4 +56,5 @@ export function resetDashboardState(): void {
   sitesSignal.set([]);
   lastUpdatedSignal.set(null);
   errorMessageSignal.set(null);
+  appsSignal.set([]);
 }
