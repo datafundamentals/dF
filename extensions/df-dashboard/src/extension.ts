@@ -6,16 +6,65 @@ type NodeUtilsModule = typeof import('@df/node-utils');
 
 const outputChannel = vscode.window.createOutputChannel('DF Dashboard');
 let nodeUtilsPromise: Promise<NodeUtilsModule> | undefined;
+let nodeUtilsLoadError: unknown;
+let nodeUtilsLoadFailed = false;
+let hasShownNodeUtilsLoadError = false;
+
+const NODE_UTILS_UNAVAILABLE_MESSAGE =
+  'DF Dashboard could not load @df/node-utils. Check the "DF Dashboard" output for details.';
 
 function loadNodeUtils(): Promise<NodeUtilsModule> {
+  if (nodeUtilsLoadFailed) {
+    return Promise.reject(nodeUtilsLoadError ?? new Error('Failed to load @df/node-utils.'));
+  }
+
   if (!nodeUtilsPromise) {
     const dynamicImport = new Function(
       'specifier',
       'return import(specifier)',
     ) as (specifier: string) => Promise<NodeUtilsModule>;
-    nodeUtilsPromise = dynamicImport('@df/node-utils');
+    nodeUtilsPromise = dynamicImport('@df/node-utils')
+      .then((module) => {
+        nodeUtilsLoadFailed = false;
+        nodeUtilsLoadError = undefined;
+        return module;
+      })
+      .catch((error: unknown) => {
+        nodeUtilsLoadFailed = true;
+        nodeUtilsLoadError = error;
+        throw error;
+      });
   }
   return nodeUtilsPromise;
+}
+
+async function getNodeUtilsOrReport(failureContext: string): Promise<NodeUtilsModule | undefined> {
+  try {
+    return await loadNodeUtils();
+  } catch (error) {
+    const details = formatError(error);
+    outputChannel.appendLine(`[node-utils] load failed during ${failureContext}`);
+    outputChannel.appendLine(`[node-utils] ${details}`);
+    if (!hasShownNodeUtilsLoadError) {
+      hasShownNodeUtilsLoadError = true;
+      void vscode.window.showErrorMessage(NODE_UTILS_UNAVAILABLE_MESSAGE);
+    }
+    return undefined;
+  }
+}
+
+function formatError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  }
+  return String(error);
+}
+
+function postNodeUtilsUnavailable(panel: vscode.WebviewPanel) {
+  panel.webview.postMessage({
+    command: 'updateSitesError',
+    data: {message: NODE_UTILS_UNAVAILABLE_MESSAGE},
+  });
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -94,12 +143,18 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string) {
+  const nodeUtils = await getNodeUtilsOrReport('sendSitesUpdate');
+  if (!nodeUtils) {
+    postNodeUtilsUnavailable(panel);
+    return;
+  }
+
   const {
     loadSites,
     getGitStatus,
     getFirebaseApps,
     enhanceAppWithChanges,
-  } = await loadNodeUtils();
+  } = nodeUtils;
   const rootPath = resolveRootPath(extensionPath);
 
   if (!rootPath) {
@@ -160,10 +215,16 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string
 }
 
 async function handleRepairFrontmatter(panel: vscode.WebviewPanel, extensionPath: string, siteId?: string) {
+  const nodeUtils = await getNodeUtilsOrReport('handleRepairFrontmatter');
+  if (!nodeUtils) {
+    postNodeUtilsUnavailable(panel);
+    return;
+  }
+
   const {
     loadSites,
     repairSiteFrontmatter,
-  } = await loadNodeUtils();
+  } = nodeUtils;
   const rootPath = resolveRootPath(extensionPath);
 
   if (!rootPath) {
@@ -221,7 +282,13 @@ async function handleAppSiteTargetMutation(
   data: unknown,
   mode: 'add' | 'remove',
 ) {
-  const {updateSiteAppTarget} = await loadNodeUtils();
+  const nodeUtils = await getNodeUtilsOrReport(`handleAppSiteTargetMutation:${mode}`);
+  if (!nodeUtils) {
+    postNodeUtilsUnavailable(panel);
+    return;
+  }
+
+  const {updateSiteAppTarget} = nodeUtils;
   const rootPath = resolveRootPath(extensionPath);
   if (!rootPath) {
     panel.webview.postMessage({
