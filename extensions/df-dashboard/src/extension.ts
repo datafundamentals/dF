@@ -132,6 +132,9 @@ export function activate(context: vscode.ExtensionContext) {
               'remove',
             );
           }
+          if (message?.command === 'runTerminalCommand' && currentPanel) {
+            handleRunTerminalCommand(message.data, context.extensionPath);
+          }
         },
         undefined,
         context.subscriptions,
@@ -339,6 +342,34 @@ async function handleAppSiteTargetMutation(
   await sendSitesUpdate(panel, extensionPath);
 }
 
+function handleRunTerminalCommand(data: unknown, extensionPath: string) {
+  const name =
+    data && typeof data === 'object' && 'name' in data && typeof data.name === 'string'
+      ? data.name
+      : 'DF Terminal';
+  const command =
+    data && typeof data === 'object' && 'command' in data && typeof data.command === 'string'
+      ? data.command
+      : '';
+
+  if (!command) {
+    return;
+  }
+
+  const rootPath = resolveRootPath(extensionPath);
+
+  let terminal = vscode.window.terminals.find((t) => t.name === name);
+  if (!terminal) {
+    terminal = vscode.window.createTerminal({
+      name,
+      cwd: rootPath, // Will be undefined if not found, defaulting to workspace root
+    });
+  }
+
+  terminal.show();
+  terminal.sendText(command);
+}
+
 function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
   const uiDistUri = vscode.Uri.joinPath(extensionUri, '..', '..', 'packages', 'ui-lit', 'dist');
   const bundleHash = getUiBundleHash(extensionUri);
@@ -399,6 +430,11 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
 
         window.addEventListener('df-dashboard-app-card-remove-site', (event) => {
              vscode.postMessage({ command: 'removeAppSiteTarget', data: event.detail });
+        });
+
+        // Listen for terminal command execution
+        window.addEventListener('df-dashboard-run-command', (event) => {
+             vscode.postMessage({ command: 'runTerminalCommand', data: event.detail });
         });
 
     </script>

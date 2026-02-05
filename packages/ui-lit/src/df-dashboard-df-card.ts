@@ -3,6 +3,7 @@ import {customElement} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {dashboardState} from '@df/state';
 import '@material/web/checkbox/checkbox.js';
+import '@material/web/button/outlined-button.js';
 
 @customElement('df-dashboard-df-card')
 export class DfDashboardDfCard extends SignalWatcher(LitElement) {
@@ -34,7 +35,31 @@ export class DfDashboardDfCard extends SignalWatcher(LitElement) {
       opacity: 0.9;
       font-size: 0.8rem;
     }
+    .actions-row {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.12));
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    md-outlined-button {
+      --md-outlined-button-container-height: 30px;
+    }
   `;
+
+  private handleRunCommand(name: string, command: string): void {
+    this.dispatchEvent(
+      new CustomEvent('df-dashboard-run-command', {
+        detail: {
+          name,
+          command,
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
 
   override render() {
     const state = dashboardState.get();
@@ -60,6 +85,23 @@ export class DfDashboardDfCard extends SignalWatcher(LitElement) {
                 : 'Repo: All changes committed'
               : 'Repo: External'}
           </span>
+        </div>
+        <div class="actions-row">
+          <md-outlined-button @click=${() => this.handleRunCommand('DF: Install', 'pnpm install')}>
+            Install
+          </md-outlined-button>
+          <md-outlined-button @click=${() => this.handleRunCommand('DF: Build', 'pnpm build')}>
+            Build
+          </md-outlined-button>
+          <md-outlined-button @click=${() => this.handleRunCommand('DF: Lint', 'pnpm lint')}>
+            Lint
+          </md-outlined-button>
+          <md-outlined-button @click=${() => this.handleRunCommand('DF: Test', 'pnpm test')}>
+            Test
+          </md-outlined-button>
+          <md-outlined-button @click=${() => this.handleRunCommand('DF: Storybook', 'pnpm --filter @df/df-storybook run dev')}>
+            Storybook
+          </md-outlined-button>
         </div>
       </div>
     `;

@@ -96,6 +96,13 @@ export class DfDashboardAppCard extends LitElement {
     md-outlined-button {
       --md-outlined-button-container-height: 30px;
     }
+    .actions-row {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.12));
+      display: flex;
+      justify-content: flex-end;
+    }
   `;
 
   private get unassignedSites(): string[] {
@@ -130,6 +137,54 @@ export class DfDashboardAppCard extends LitElement {
     this.dispatchEvent(
       new CustomEvent('df-dashboard-app-card-remove-site', {
         detail: {appName: app.name, siteId},
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private handleDev(): void {
+    const app = this.app;
+    if (!app) return;
+
+    this.dispatchEvent(
+      new CustomEvent('df-dashboard-run-command', {
+        detail: {
+          name: `DF: ${app.name}`,
+          command: `pnpm --filter ${app.name} dev`,
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private handleBuild(): void {
+    const app = this.app;
+    if (!app) return;
+
+    this.dispatchEvent(
+      new CustomEvent('df-dashboard-run-command', {
+        detail: {
+          name: `DF: ${app.name}`,
+          command: `pnpm --filter ${app.name} build`,
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private handleTest(): void {
+    const app = this.app;
+    if (!app) return;
+
+    this.dispatchEvent(
+      new CustomEvent('df-dashboard-run-command', {
+        detail: {
+          name: `DF: ${app.name}`,
+          command: `pnpm --filter ${app.name} test`,
+        },
         bubbles: true,
         composed: true,
       }),
@@ -198,6 +253,17 @@ export class DfDashboardAppCard extends LitElement {
             ?disabled=${!this.selectedSiteId}
           >
             Add site
+          </md-outlined-button>
+        </div>
+        <div class="actions-row" style="gap: 8px;">
+          <md-outlined-button @click=${this.handleDev}>
+            Dev
+          </md-outlined-button>
+          <md-outlined-button @click=${this.handleBuild}>
+            Build
+          </md-outlined-button>
+          <md-outlined-button @click=${this.handleTest}>
+            Test
           </md-outlined-button>
         </div>
       </div>
