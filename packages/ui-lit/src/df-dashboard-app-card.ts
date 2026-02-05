@@ -1,12 +1,31 @@
 import {LitElement, html, css, nothing} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement, property, state} from 'lit/decorators.js';
 import type {AppEntry} from '@df/types';
 import '@material/web/checkbox/checkbox.js';
+import '@material/web/button/text-button.js';
+import '@material/web/button/outlined-button.js';
+import '@material/web/select/filled-select.js';
+import '@material/web/select/select-option.js';
 
 @customElement('df-dashboard-app-card')
 export class DfDashboardAppCard extends LitElement {
   @property({type: Object})
   declare app: AppEntry | undefined;
+
+  @property({type: Array})
+  declare assignedSites: string[];
+
+  @property({type: Array})
+  declare allSites: string[];
+
+  @state()
+  private selectedSiteId = '';
+
+  constructor() {
+    super();
+    this.assignedSites = [];
+    this.allSites = [];
+  }
 
   static override styles = css`
     :host {
@@ -40,7 +59,82 @@ export class DfDashboardAppCard extends LitElement {
       opacity: 0.9;
       font-size: 0.8rem;
     }
+    .deploy-targets {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .targets-title {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+    .target-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      background: var(--vscode-editor-background, rgba(255, 255, 255, 0.02));
+      border: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.12));
+      border-radius: 8px;
+      padding: 6px 8px;
+    }
+    .target-site {
+      word-break: break-word;
+    }
+    .add-target {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    md-filled-select {
+      --md-filled-select-text-field-container-color: var(--vscode-input-background, rgba(255, 255, 255, 0.04));
+      --md-filled-select-text-field-input-text-color: var(--vscode-input-foreground, #fff);
+    }
+    md-outlined-button {
+      --md-outlined-button-container-height: 30px;
+    }
   `;
+
+  private get unassignedSites(): string[] {
+    return this.allSites.filter((siteId) => !this.assignedSites.includes(siteId));
+  }
+
+  private handleSelectedSiteChange(event: Event): void {
+    const target = event.target as {value?: string};
+    this.selectedSiteId = target.value ?? '';
+  }
+
+  private handleAddTarget(): void {
+    const app = this.app;
+    if (!app || !this.selectedSiteId) {
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent('df-dashboard-app-card-add-site', {
+        detail: {appName: app.name, siteId: this.selectedSiteId},
+        bubbles: true,
+        composed: true,
+      }),
+    );
+    this.selectedSiteId = '';
+  }
+
+  private handleRemoveTarget(siteId: string): void {
+    const app = this.app;
+    if (!app) {
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent('df-dashboard-app-card-remove-site', {
+        detail: {appName: app.name, siteId},
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
 
   override render() {
     const app = this.app;
@@ -66,6 +160,46 @@ export class DfDashboardAppCard extends LitElement {
               </span>
             </div>`
           : nothing}
+        <div class="deploy-targets">
+          <div class="targets-title">Deploy targets</div>
+          ${this.assignedSites.length > 0
+            ? this.assignedSites.map(
+                (siteId) => html`
+                  <div class="target-row">
+                    <span class="target-site">${siteId}</span>
+                    <md-text-button @click=${() => this.handleRemoveTarget(siteId)}>
+                      Remove
+                    </md-text-button>
+                  </div>
+                `,
+              )
+            : html`<div class="version">No deploy targets</div>`}
+        </div>
+        <div class="add-target">
+          <md-filled-select
+            label="Add deploy target"
+            .value=${this.selectedSiteId}
+            @change=${this.handleSelectedSiteChange}
+            ?disabled=${this.unassignedSites.length === 0}
+          >
+            <md-select-option value="">
+              <div slot="headline">Choose a site</div>
+            </md-select-option>
+            ${this.unassignedSites.map(
+              (siteId) => html`
+                <md-select-option value=${siteId}>
+                  <div slot="headline">${siteId}</div>
+                </md-select-option>
+              `,
+            )}
+          </md-filled-select>
+          <md-outlined-button
+            @click=${this.handleAddTarget}
+            ?disabled=${!this.selectedSiteId}
+          >
+            Add site
+          </md-outlined-button>
+        </div>
       </div>
     `;
   }

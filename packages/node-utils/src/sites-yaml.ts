@@ -22,6 +22,7 @@ interface SiteConfig {
   content?: unknown;
   contentRoot?: unknown;
   since?: unknown;
+  apps?: unknown;
   [key: string]: unknown;
 }
 
@@ -37,6 +38,18 @@ export interface LoadSitesOptions {
 
 export interface LoadSitesResult {
   sites: PubSiteEntry[];
+  errorMessage?: string;
+}
+
+export interface UpdateSiteAppTargetOptions {
+  sitesYamlPath: string;
+  siteId: string;
+  appName: string;
+  mode: 'add' | 'remove';
+}
+
+export interface UpdateSiteAppTargetResult {
+  updated: boolean;
   errorMessage?: string;
 }
 
@@ -117,6 +130,9 @@ function mapSiteEntry(id: string, site: SiteConfig): PubSiteEntry {
     : site.status
       ? [String(site.status)]
       : undefined;
+  const appEntries = Array.isArray(site.apps)
+    ? site.apps.filter((entry): entry is string => typeof entry === 'string')
+    : undefined;
 
   return {
     id,
@@ -133,6 +149,7 @@ function mapSiteEntry(id: string, site: SiteConfig): PubSiteEntry {
       : site.since instanceof Date
         ? site.since.toISOString()
         : undefined,
+    apps: appEntries,
   };
 }
 
@@ -264,4 +281,125 @@ export async function repairSiteFrontmatter(
       pleaseReviewCount: result.pleaseReviewCount,
     },
   };
+}
+
+/**
+ * Update one site's apps list in SITES.yaml.
+ * @param options Update configuration
+ * @returns Mutation status and optional error
+ */
+export function updateSiteAppTarget(
+  options: UpdateSiteAppTargetOptions,
+): UpdateSiteAppTargetResult {
+  const {sitesYamlPath, siteId, appName, mode} = options;
+
+  try {
+    if (!fs.existsSync(sitesYamlPath)) {
+      return {updated: false, errorMessage: `SITES.yaml not found at ${sitesYamlPath}`};
+    }
+
+    const fileContent = fs.readFileSync(sitesYamlPath, 'utf8');
+    const parsed = yaml.load(fileContent) as SitesYaml | undefined;
+    if (!parsed?.sites) {
+      return {updated: false, errorMessage: 'Invalid SITES.yaml structure.'};
+    }
+
+    const siteConfig = parsed.sites[siteId];
+    if (!siteConfig) {
+      return {updated: false, errorMessage: `Site "${siteId}" not found in SITES.yaml.`};
+    }
+
+    const currentApps = Array.isArray(siteConfig.apps)
+      ? siteConfig.apps.filter((entry): entry is string => typeof entry === 'string')
+      : [];
+
+    let nextApps: string[];
+    if (mode === 'add') {
+      if (currentApps.includes(appName)) {
+        return {updated: false};
+      }
+      nextApps = [...currentApps, appName];
+    } else {
+      if (!currentApps.includes(appName)) {
+        return {updated: false};
+      }
+      nextApps = currentApps.filter((entry) => entry !== appName);
+    }
+
+    const nextContent = updateAppsListInYamlText(fileContent, siteId, nextApps);
+    fs.writeFileSync(sitesYamlPath, nextContent, 'utf8');
+    return {updated: true};
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error updating SITES.yaml.';
+    return {updated: false, errorMessage: message};
+  }
+}
+
+function updateAppsListInYamlText(content: string, siteId: string, apps: string[]): string {
+  const eol = content.includes('\r\n') ? '\r\n' : '\n';
+  const lines = content.split(/\r?\n/);
+  const siteHeaderPattern = new RegExp(`^\\s{2}${escapeRegExp(siteId)}:\\s*$`);
+  const siteStart = lines.findIndex((line) => siteHeaderPattern.test(line));
+
+  if (siteStart === -1) {
+    throw new Error(`Site "${siteId}" not found in SITES.yaml.`);
+  }
+
+  let siteEnd = lines.length;
+  for (let i = siteStart + 1; i < lines.length; i++) {
+    if (/^\s{2}[^\s#][^:]*:\s*$/.test(lines[i])) {
+      siteEnd = i;
+      break;
+    }
+  }
+
+  const nextAppsLine = apps.length > 0
+    ? `    apps: [ ${apps.join(', ')} ]`
+    : '    apps: [ ]';
+  let appsStart = -1;
+  let appsEnd = -1;
+
+  for (let i = siteStart + 1; i < siteEnd; i++) {
+    if (/^\s{4}apps:\s*$/.test(lines[i])) {
+      appsStart = i;
+      appsEnd = i;
+      for (let j = i + 1; j < siteEnd; j++) {
+        if (/^\s{6}-\s+/.test(lines[j]) || /^\s*$/.test(lines[j])) {
+          appsEnd = j;
+          continue;
+        }
+        break;
+      }
+      break;
+    }
+    if (/^\s{4}apps:\s*\[[^\]]*\]\s*$/.test(lines[i])) {
+      appsStart = i;
+      appsEnd = i;
+      break;
+    }
+  }
+
+  if (appsStart !== -1) {
+    lines.splice(appsStart, appsEnd - appsStart + 1, nextAppsLine);
+    return lines.join(eol);
+  }
+
+  // Insert near other primary metadata when apps is missing.
+  let insertAt = -1;
+  for (let i = siteStart + 1; i < siteEnd; i++) {
+    if (/^\s{4}status:\s*$/.test(lines[i])) {
+      insertAt = i;
+      break;
+    }
+  }
+  if (insertAt === -1) {
+    insertAt = siteEnd;
+  }
+
+  lines.splice(insertAt, 0, nextAppsLine);
+  return lines.join(eol);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

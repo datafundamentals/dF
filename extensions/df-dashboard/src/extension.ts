@@ -2,7 +2,14 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-import {loadSites, repairSiteFrontmatter, getGitStatus, getFirebaseApps, enhanceAppWithChanges} from '@df/node-utils';
+import {
+  loadSites,
+  repairSiteFrontmatter,
+  updateSiteAppTarget,
+  getGitStatus,
+  getFirebaseApps,
+  enhanceAppWithChanges,
+} from '@df/node-utils';
 
 const outputChannel = vscode.window.createOutputChannel('DF Dashboard');
 
@@ -55,6 +62,22 @@ export function activate(context: vscode.ExtensionContext) {
           if (message?.command === 'repairFrontmatter' && currentPanel) {
             await handleRepairFrontmatter(currentPanel, context.extensionPath, message.data?.siteId);
           }
+          if (message?.command === 'addAppSiteTarget' && currentPanel) {
+            await handleAppSiteTargetMutation(
+              currentPanel,
+              context.extensionPath,
+              message.data,
+              'add',
+            );
+          }
+          if (message?.command === 'removeAppSiteTarget' && currentPanel) {
+            await handleAppSiteTargetMutation(
+              currentPanel,
+              context.extensionPath,
+              message.data,
+              'remove',
+            );
+          }
         },
         undefined,
         context.subscriptions,
@@ -66,21 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string) {
-  // Determine root path: Priority to extension's monorepo root (Dev/Repo Context),
-  // fallback to active workspace (Installed Context).
-  let rootPath: string | undefined;
-
-  const dFMonorepoRoot = path.resolve(extensionPath, '..', '..');
-  const dFSitesYaml = path.join(dFMonorepoRoot, 'SITES.yaml');
-
-  if (fs.existsSync(dFSitesYaml)) {
-    rootPath = dFMonorepoRoot;
-  } else {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (workspaceFolders && workspaceFolders.length > 0) {
-      rootPath = workspaceFolders[0].uri.fsPath;
-    }
-  }
+  const rootPath = resolveRootPath(extensionPath);
 
   if (!rootPath) {
     panel.webview.postMessage({
@@ -140,21 +149,7 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string
 }
 
 async function handleRepairFrontmatter(panel: vscode.WebviewPanel, extensionPath: string, siteId?: string) {
-  // Determine root path: Priority to extension's monorepo root (Dev/Repo Context),
-  // fallback to active workspace (Installed Context).
-  let rootPath: string | undefined;
-
-  const dFMonorepoRoot = path.resolve(extensionPath, '..', '..');
-  const dFSitesYaml = path.join(dFMonorepoRoot, 'SITES.yaml');
-
-  if (fs.existsSync(dFSitesYaml)) {
-    rootPath = dFMonorepoRoot;
-  } else {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (workspaceFolders && workspaceFolders.length > 0) {
-      rootPath = workspaceFolders[0].uri.fsPath;
-    }
-  }
+  const rootPath = resolveRootPath(extensionPath);
 
   if (!rootPath) {
     return;
@@ -203,6 +198,62 @@ async function handleRepairFrontmatter(panel: vscode.WebviewPanel, extensionPath
       lastUpdated: Date.now(),
     },
   });
+}
+
+async function handleAppSiteTargetMutation(
+  panel: vscode.WebviewPanel,
+  extensionPath: string,
+  data: unknown,
+  mode: 'add' | 'remove',
+) {
+  const rootPath = resolveRootPath(extensionPath);
+  if (!rootPath) {
+    panel.webview.postMessage({
+      command: 'updateSitesError',
+      data: {message: 'No SITES.yaml found (checked extension root and workspace).'},
+    });
+    return;
+  }
+
+  const siteId =
+    data && typeof data === 'object' && 'siteId' in data && typeof data.siteId === 'string'
+      ? data.siteId.trim()
+      : '';
+  const appName =
+    data && typeof data === 'object' && 'appName' in data && typeof data.appName === 'string'
+      ? data.appName.trim()
+      : '';
+
+  if (!siteId || !appName) {
+    panel.webview.postMessage({
+      command: 'updateSitesError',
+      data: {message: 'Missing siteId or appName for deploy target update.'},
+    });
+    return;
+  }
+
+  const sitesYamlPath = path.join(rootPath, 'SITES.yaml');
+  const result = updateSiteAppTarget({
+    sitesYamlPath,
+    siteId,
+    appName,
+    mode,
+  });
+
+  if (result.errorMessage) {
+    outputChannel.appendLine(`App target update error: ${result.errorMessage}`);
+    panel.webview.postMessage({
+      command: 'updateSitesError',
+      data: {message: result.errorMessage},
+    });
+    return;
+  }
+
+  outputChannel.appendLine(
+    `${mode === 'add' ? 'Added' : 'Removed'} app "${appName}" ${mode === 'add' ? 'to' : 'from'} site "${siteId}"`,
+  );
+
+  await sendSitesUpdate(panel, extensionPath);
 }
 
 function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
@@ -258,6 +309,15 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
              vscode.postMessage({ command: 'repairFrontmatter', data: event.detail });
         });
 
+        // Listen for app/site deploy target changes from UI
+        window.addEventListener('df-dashboard-app-card-add-site', (event) => {
+             vscode.postMessage({ command: 'addAppSiteTarget', data: event.detail });
+        });
+
+        window.addEventListener('df-dashboard-app-card-remove-site', (event) => {
+             vscode.postMessage({ command: 'removeAppSiteTarget', data: event.detail });
+        });
+
     </script>
     <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
 </body>
@@ -274,6 +334,22 @@ function getNonce() {
 }
 
 export function deactivate() {}
+
+function resolveRootPath(extensionPath: string): string | undefined {
+  const dFMonorepoRoot = path.resolve(extensionPath, '..', '..');
+  const dFSitesYaml = path.join(dFMonorepoRoot, 'SITES.yaml');
+
+  if (fs.existsSync(dFSitesYaml)) {
+    return dFMonorepoRoot;
+  }
+
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (workspaceFolders && workspaceFolders.length > 0) {
+    return workspaceFolders[0].uri.fsPath;
+  }
+
+  return undefined;
+}
 
 function getUiBundleInfo(extensionUri: vscode.Uri): string {
   const uiBundlePath = path.join(

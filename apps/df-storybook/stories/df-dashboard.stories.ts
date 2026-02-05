@@ -20,6 +20,7 @@ const sampleSites: PubSiteEntry[] = [
     contentChanges: {hasChanges: true, changedFileCount: 3},
     contentGitStatus: {isInternal: true, hasUncommittedChanges: false, untrackedFiles: 0, modifiedFiles: 0},
     contentRootChanges: {hasChanges: true, changedFileCount: 9},
+    apps: ['df-chat-app', 'df-activity-log'],
   },
   {
     id: 'aspie',
@@ -31,6 +32,7 @@ const sampleSites: PubSiteEntry[] = [
     contentChanges: {hasChanges: false, changedFileCount: 0},
     contentGitStatus: {isInternal: true, hasUncommittedChanges: true, untrackedFiles: 1, modifiedFiles: 2},
     contentRootChanges: {hasChanges: true, changedFileCount: 4},
+    apps: ['df-chat-app'],
   },
   {
     id: 'betterologist',
@@ -62,6 +64,21 @@ const meta: Meta = {
   tags: ['autodocs'],
 };
 
+const sampleApps = [
+  {
+    name: 'df-chat-app',
+    version: '0.0.1-260204',
+    releaseDate: '2026-02-04',
+    appChanges: {hasChanges: true, changedFileCount: 2},
+  },
+  {
+    name: 'df-activity-log',
+    version: '0.0.1-260201',
+    releaseDate: '2026-02-01',
+    appChanges: {hasChanges: false, changedFileCount: 0},
+  },
+];
+
 export default meta;
 
 type Story = StoryObj;
@@ -74,7 +91,7 @@ export const Default: Story = {
       hasUncommittedChanges: true,
       untrackedFiles: 1,
       modifiedFiles: 1,
-    });
+    }, sampleApps);
     return html`<df-dashboard></df-dashboard>`;
   },
 };

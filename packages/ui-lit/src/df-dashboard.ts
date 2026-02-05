@@ -353,9 +353,19 @@ export class DfDashboard extends SignalWatcher(LitElement) {
                     <hr class="separator" />
                     <div class="site-grid">
                       ${state.apps.map(
-                        (app) => html`
-                          <df-dashboard-app-card .app=${app}></df-dashboard-app-card>
-                        `,
+                        (app) => {
+                          const assignedSites = state.sites
+                            .filter((site) => site.apps?.includes(app.name))
+                            .map((site) => site.id);
+                          const allSites = state.sites.map((site) => site.id);
+                          return html`
+                          <df-dashboard-app-card
+                            .app=${app}
+                            .assignedSites=${assignedSites}
+                            .allSites=${allSites}
+                          ></df-dashboard-app-card>
+                        `;
+                        },
                       )}
                     </div>
                   `

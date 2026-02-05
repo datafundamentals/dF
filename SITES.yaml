@@ -5,7 +5,7 @@ sites:
     content: brokenBecauseNetlify
     url: appwriter.com
     host: netlify
-    apps: [ df-chat, df-activity-log ]
+    apps: [ df-chat-app, df-activity-log, df-app-starter-template, df-user-admin-app ]
     status: 
     - the latest is not deployed - see dev 260126 for splainer
     - extra menus still disfunctional

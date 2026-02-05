@@ -16,6 +16,7 @@ export interface PubSiteEntry {
   content?: string;
   contentRoot?: string;
   since?: string;
+  apps?: string[];
   gitStatus?: {
     isInternal: boolean;
     hasUncommittedChanges: boolean;
