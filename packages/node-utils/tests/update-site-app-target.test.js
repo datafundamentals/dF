@@ -1,10 +1,13 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const os = require('node:os');
-const path = require('node:path');
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
+import {fileURLToPath} from 'node:url';
+import {updateSiteAppTarget} from '../dist/index.js';
 
-const {updateSiteAppTarget} = require('../dist/index.js');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function makeTempYaml(content) {
   const tmpPath = path.join(

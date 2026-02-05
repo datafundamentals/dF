@@ -2,12 +2,19 @@
   "name": "@df/node-utils",
   "version": "0.0.0",
   "description": "Node.js utilities for dF extensions and tools",
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist",
-    "test": "pnpm run build && node --test tests/**/*.test.cjs"
+    "test": "pnpm run build && node --test tests/**/*.test.js"
   },
   "keywords": ["node", "utilities", "env", "config"],
   "author": "",

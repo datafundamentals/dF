@@ -2,16 +2,21 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-import {
-  loadSites,
-  repairSiteFrontmatter,
-  updateSiteAppTarget,
-  getGitStatus,
-  getFirebaseApps,
-  enhanceAppWithChanges,
-} from '@df/node-utils';
+type NodeUtilsModule = typeof import('@df/node-utils');
 
 const outputChannel = vscode.window.createOutputChannel('DF Dashboard');
+let nodeUtilsPromise: Promise<NodeUtilsModule> | undefined;
+
+function loadNodeUtils(): Promise<NodeUtilsModule> {
+  if (!nodeUtilsPromise) {
+    const dynamicImport = new Function(
+      'specifier',
+      'return import(specifier)',
+    ) as (specifier: string) => Promise<NodeUtilsModule>;
+    nodeUtilsPromise = dynamicImport('@df/node-utils');
+  }
+  return nodeUtilsPromise;
+}
 
 export function activate(context: vscode.ExtensionContext) {
   outputChannel.appendLine('=== DF Dashboard Extension Activated ===');
@@ -89,6 +94,12 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string) {
+  const {
+    loadSites,
+    getGitStatus,
+    getFirebaseApps,
+    enhanceAppWithChanges,
+  } = await loadNodeUtils();
   const rootPath = resolveRootPath(extensionPath);
 
   if (!rootPath) {
@@ -149,6 +160,10 @@ async function sendSitesUpdate(panel: vscode.WebviewPanel, extensionPath: string
 }
 
 async function handleRepairFrontmatter(panel: vscode.WebviewPanel, extensionPath: string, siteId?: string) {
+  const {
+    loadSites,
+    repairSiteFrontmatter,
+  } = await loadNodeUtils();
   const rootPath = resolveRootPath(extensionPath);
 
   if (!rootPath) {
@@ -206,6 +221,7 @@ async function handleAppSiteTargetMutation(
   data: unknown,
   mode: 'add' | 'remove',
 ) {
+  const {updateSiteAppTarget} = await loadNodeUtils();
   const rootPath = resolveRootPath(extensionPath);
   if (!rootPath) {
     panel.webview.postMessage({
