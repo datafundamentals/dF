@@ -10,6 +10,21 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../../');
 const APPS_DIR = join(PROJECT_ROOT, 'apps');
 
+/**
+ * Generate YYMMDDHHMM tag from current date/time
+ * Used as fallback if no bundle manifest exists
+ * @returns {string} Tag like "2602061430"
+ */
+function generateBundleTag() {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  return `${yy}${mm}${dd}${hh}${min}`;
+}
+
 // Parse .env.deploy files (simple key=value parser)
 function parseEnvFile(filePath) {
   const env = {};
@@ -127,30 +142,26 @@ if (!existsSync(pkgJsonPath)) {
 
 const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
 const hasRollup = pkgJson.scripts && pkgJson.scripts['build:rollup'];
-const hasBundle = pkgJson.scripts && pkgJson.scripts['build:bundle'];
 
-if (!hasRollup && !hasBundle) {
-  console.log(`❌ Error: App '${appName}' does not have a 'build:rollup' or 'build:bundle' script`);
-  process.exit(1);
-}
-
-// Determine build strategy
-const buildScript = hasRollup ? 'build:rollup' : 'build:bundle';
+// Determine source directory based on build type
 // Rollup builds to dist/bundle, Vite builds to dist
 const buildSourceDir = hasRollup ? join(appDir, 'dist/bundle') : join(appDir, 'dist');
 
-// Build fresh bundle
-console.log(`📦 Building fresh bundle for ${appName} using ${buildScript}...`);
-const buildSuccess = runCommand(`pnpm --filter "@df/${appName}" ${buildScript}`);
-if (!buildSuccess) {
-  console.log('❌ Build failed.');
+// Validate bundle exists (must run bundle:release first)
+if (!existsSync(buildSourceDir)) {
+  console.log(`❌ Error: No bundle found at ${buildSourceDir}`);
+  console.log('');
+  console.log('Run "pnpm bundle:release ' + appName + '" first to create a release bundle.');
   process.exit(1);
 }
 
-// Validate source exists
-if (!existsSync(buildSourceDir)) {
-  console.log(`❌ Error: ${buildSourceDir} not found after build`);
-  console.log('Build may have failed. Check output above.');
+// Validate bundle manifest exists (ensures this is an intentional release)
+const bundleManifestPath = join(buildSourceDir, '.bundle-manifest.json');
+if (!existsSync(bundleManifestPath)) {
+  console.log(`❌ Error: No bundle manifest found at ${bundleManifestPath}`);
+  console.log('');
+  console.log('The bundle exists but has no release manifest.');
+  console.log('Run "pnpm bundle:release ' + appName + '" to create a proper release bundle.');
   process.exit(1);
 }
 
@@ -275,6 +286,22 @@ if (existsSync(exampleFile)) {
      console.log(`📄 Copied ${targetExampleName} (updated script source to ./${appName}.js)`);
   }
 }
+
+// Read bundle manifest (already validated to exist at script start)
+const bundleManifest = JSON.parse(readFileSync(bundleManifestPath, 'utf-8'));
+const bundleTag = bundleManifest.bundleTag;
+console.log(`📋 Deploying release: tag ${bundleTag}`);
+
+// Write deploy manifest to target
+const deployManifest = {
+  deployedTag: bundleTag,
+  deployedAt: new Date().toISOString(),
+  appName,
+  sourceBundle: buildSourceDir,
+};
+const deployManifestPath = join(targetPath, '.deploy-manifest.json');
+writeFileSync(deployManifestPath, JSON.stringify(deployManifest, null, 2) + '\n');
+console.log(`📋 Deploy manifest written: ${deployManifestPath}`);
 
 // Show what was copied
 console.log('');

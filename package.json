@@ -25,6 +25,7 @@
     "generate:compliance-report": "node tools/compliance/src/generate-compliance-report.mjs",
     "scan:compliance:interactive": "node tools/compliance/src/check-md3-compliance.mjs --interactive",
     "deploy:copy-bundle": "node tools/deploy-scripts/src/copy-app-bundle.mjs",
+    "bundle:release": "node tools/deploy-scripts/src/bundle-release.mjs",
     "emulators:start": "pnpm --filter @df/firebase-emulator ensure-ports && firebase emulators:start --project peg-2035 --import packages/firebase-emulator/emulator-data --export-on-exit packages/firebase-emulator/emulator-data --only firestore,storage,functions",
     "emulators:clear": "pnpm --filter @df/firebase-emulator emulators:clear"
   },

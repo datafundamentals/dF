@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type {AppEntry} from '@df/types';
 import {getContentChanges} from './content-changes.js';
+import {readBundleManifest} from './bundle-manifests.js';
 
 /**
  * Parse YYMMDD metadata from a version string like "0.0.1-260202"
@@ -60,10 +61,14 @@ export async function getFirebaseApps(monorepoRoot: string): Promise<AppEntry[]>
         continue;
       }
 
+      // Read bundle manifest if exists
+      const bundleManifest = readBundleManifest(monorepoRoot, entry.name);
+
       apps.push({
         name: entry.name,
         version,
         releaseDate,
+        bundleTag: bundleManifest?.bundleTag,
       });
     } catch {
       continue;

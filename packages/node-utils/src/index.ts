@@ -12,3 +12,10 @@ export {
 } from './sites-yaml.js';
 export {checkFrontmatter, repairFrontmatter, countPleaseReview, type FrontmatterStatus, type RepairFrontmatterResult} from './frontmatter-check.js';
 export {getFirebaseApps, enhanceAppWithChanges, parseVersionDate} from './app-changes.js';
+export {
+  readBundleManifest,
+  readDeployManifest,
+  getAppDeployStatusForSite,
+  type BundleManifest,
+  type DeployManifest,
+} from './bundle-manifests.js';

@@ -101,6 +101,8 @@ export class DfDashboardAppCard extends LitElement {
       padding-top: 12px;
       border-top: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.12));
       display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       justify-content: flex-end;
     }
   `;
@@ -191,6 +193,27 @@ export class DfDashboardAppCard extends LitElement {
     );
   }
 
+  private handleBundle(): void {
+    const app = this.app;
+    if (!app) return;
+
+    this.dispatchEvent(
+      new CustomEvent('df-dashboard-run-command', {
+        detail: {
+          name: `DF: Bundle ${app.name}`,
+          command: `pnpm bundle:release ${app.name}`,
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+
+    // Auto-refresh dashboard after bundle completes (delay to allow build time)
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('df-dashboard-refresh'));
+    }, 15000);
+  }
+
   override render() {
     const app = this.app;
     if (!app) {
@@ -201,6 +224,9 @@ export class DfDashboardAppCard extends LitElement {
       <div class="card">
         <div class="header">${app.name}</div>
         <div class="version">v${app.version}</div>
+        ${app.bundleTag
+          ? html`<div class="version">Bundle: ${app.bundleTag}</div>`
+          : html`<div class="version">No bundle</div>`}
         ${app.appChanges
           ? html`<div class="git-status-row">
               <md-checkbox
@@ -255,7 +281,7 @@ export class DfDashboardAppCard extends LitElement {
             Add site
           </md-outlined-button>
         </div>
-        <div class="actions-row" style="gap: 8px;">
+        <div class="actions-row">
           <md-outlined-button @click=${this.handleDev}>
             Dev
           </md-outlined-button>
@@ -264,6 +290,9 @@ export class DfDashboardAppCard extends LitElement {
           </md-outlined-button>
           <md-outlined-button @click=${this.handleTest}>
             Test
+          </md-outlined-button>
+          <md-outlined-button @click=${this.handleBundle}>
+            Bundle
           </md-outlined-button>
         </div>
       </div>

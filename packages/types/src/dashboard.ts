@@ -43,6 +43,8 @@ export interface PubSiteEntry {
     pleaseReviewCount?: number;
     repairError?: string;
   };
+  /** Deploy status for each app assigned to this site */
+  appDeployStatus?: AppDeployStatus[];
 }
 
 export interface AppEntry {
@@ -53,6 +55,19 @@ export interface AppEntry {
     hasChanges: boolean;
     changedFileCount: number;
   };
+  /** YYMMDDHHMM tag from .bundle-manifest.json, if bundle exists */
+  bundleTag?: string;
+}
+
+/** Deploy status for a single app on a single site */
+export interface AppDeployStatus {
+  appName: string;
+  /** The bundle tag available in the app's dist/bundle */
+  bundleTag?: string;
+  /** The deployed tag from the site's .deploy-manifest.json */
+  deployedTag?: string;
+  /** True if bundleTag > deployedTag (newer bundle available) */
+  needsDeploy: boolean;
 }
 
 export interface DashboardState {

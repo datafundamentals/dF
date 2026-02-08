@@ -177,6 +177,12 @@ export class DfDashboard extends SignalWatcher(LitElement) {
       --md-filled-button-label-text-size: 0.75rem;
       margin-left: 8px;
     }
+
+    .deploy-section {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.12));
+    }
   `;
 
   private handleRepairFrontmatter(siteId: string) {
@@ -196,6 +202,24 @@ export class DfDashboard extends SignalWatcher(LitElement) {
         composed: true,
       }),
     );
+  }
+
+  private handleDeployApp(siteId: string, appName: string) {
+    this.dispatchEvent(
+      new CustomEvent('df-dashboard-run-command', {
+        detail: {
+          name: `DF: Deploy ${appName} → ${siteId}`,
+          command: `pnpm deploy:copy-bundle ${appName} ../sites/${siteId}/static/wc`,
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+
+    // Auto-refresh dashboard after deploy completes
+    setTimeout(() => {
+      this.handleRefresh();
+    }, 10000);
   }
 
   override render() {
@@ -332,6 +356,34 @@ export class DfDashboard extends SignalWatcher(LitElement) {
                             <div class="site-status">
                               ${site.status.map(
                                 (entry) => html`<span class="status-pill">${entry}</span>`,
+                              )}
+                            </div>
+                          `
+                        : nothing}
+                      ${site.appDeployStatus && site.appDeployStatus.length > 0
+                        ? html`
+                            <div class="deploy-section">
+                              ${site.appDeployStatus.map(
+                                (status) => html`
+                                  <div class="git-status-row">
+                                    <md-checkbox
+                                      touch-target="wrapper"
+                                      ?checked=${!status.needsDeploy}
+                                      disabled
+                                    ></md-checkbox>
+                                    <span class="site-meta git-status-label">
+                                      ${status.appName}: ${status.bundleTag ?? 'no bundle'}
+                                      → ${status.deployedTag ?? 'not deployed'}
+                                    </span>
+                                    ${status.needsDeploy
+                                      ? html`<md-filled-button
+                                          class="repair-button"
+                                          @click=${() => this.handleDeployApp(site.id, status.appName)}
+                                          >Deploy</md-filled-button
+                                        >`
+                                      : nothing}
+                                  </div>
+                                `,
                               )}
                             </div>
                           `

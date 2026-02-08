@@ -10,6 +10,7 @@ import * as path from 'path';
 import {getGitStatus, getGitStatusForSubdir} from './git-status.js';
 import {getContentChanges} from './content-changes.js';
 import {checkFrontmatter, countPleaseReview, repairFrontmatter} from './frontmatter-check.js';
+import {getAppDeployStatusForSite} from './bundle-manifests.js';
 
 interface SiteConfig {
   ignore?: boolean;
@@ -112,6 +113,11 @@ export async function loadSites(options: LoadSitesOptions): Promise<LoadSitesRes
           enhanced = await enhanceWithFrontmatterStatus(workspaceRoot, enhanced);
         } catch {
           // Return site without frontmatter status on error
+        }
+        try {
+          enhanced = enhanceWithAppDeployStatus(workspaceRoot, sitesDirectory, enhanced);
+        } catch {
+          // Return site without app deploy status on error
         }
         return enhanced;
       }),
@@ -239,6 +245,28 @@ async function enhanceWithFrontmatterStatus(
       ...frontmatterStatus,
       pleaseReviewCount,
     },
+  };
+}
+
+function enhanceWithAppDeployStatus(
+  workspaceRoot: string,
+  sitesDirectory: string,
+  site: PubSiteEntry,
+): PubSiteEntry {
+  if (!site.apps || site.apps.length === 0) {
+    return site;
+  }
+
+  const appDeployStatus = getAppDeployStatusForSite(
+    workspaceRoot,
+    sitesDirectory,
+    site.id,
+    site.apps,
+  );
+
+  return {
+    ...site,
+    appDeployStatus,
   };
 }
 
