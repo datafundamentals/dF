@@ -10,6 +10,7 @@ export * from './stores/firebase-auth.store.js';
 export * from './stores/firestore-base.store.js';
 export * from './stores/todos.store.js';
 export * from './stores/chat.store.js';
+export * from './stores/openclaw-chat.store.js';
 export * from './stores/storage.store.js';
 export * from './stores/functions-demo.store.js';
 export * from './stores/firebase-init.js';

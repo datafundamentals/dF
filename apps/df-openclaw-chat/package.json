@@ -1,0 +1,36 @@
+{
+  "name": "@df/df-openclaw-chat",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "build:prod": "vite build --mode production",
+    "build:bundle": "vite build --mode production",
+    "build:rollup": "pnpm clean && pnpm build && rollup -c",
+    "dev": "vite",
+    "preview": "vite preview --host 127.0.0.1 --port 4182",
+    "preview:prod": "vite preview --mode production --host 127.0.0.1 --port 4182",
+    "start:test": "pnpm build && vite dev --host 127.0.0.1 --port 4182 --strictPort --mode test --logLevel error",
+    "emulators:start": "echo '⚠️  Please run \"pnpm emulators:start\" from the repo root. See guides/firebase-emulator-workflow.md for details.' && exit 1",
+    "emulators:clear": "echo '⚠️  Please run \"pnpm emulators:clear\" from the repo root. See guides/firebase-emulator-workflow.md for details.' && exit 1"
+  },
+  "dependencies": {
+    "@df/firebase": "workspace:*",
+    "@df/state": "workspace:*",
+    "@df/ui-lit": "workspace:*",
+    "@lit-labs/signals": "^0.1.0",
+    "@material/web": "^2.4.0",
+    "firebase": "^11.7.0",
+    "lit": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "dotenv": "^16.4.5",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.2",
+    "vite": "^5.4.10"
+  }
+}

@@ -555,6 +555,46 @@ importers:
         specifier: ^5.4.10
         version: 5.4.20(@types/node@22.18.10)(terser@5.44.0)
 
+  apps/df-openclaw-chat:
+    dependencies:
+      '@df/firebase':
+        specifier: workspace:*
+        version: link:../../packages/firebase
+      '@df/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+      '@df/ui-lit':
+        specifier: workspace:*
+        version: link:../../packages/ui-lit
+      '@lit-labs/signals':
+        specifier: ^0.1.0
+        version: 0.1.3
+      '@material/web':
+        specifier: ^2.4.0
+        version: 2.4.0
+      firebase:
+        specifier: ^11.7.0
+        version: 11.10.0
+      lit:
+        specifier: ^3.3.1
+        version: 3.3.1
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.18.10
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vite:
+        specifier: ^5.4.10
+        version: 5.4.20(@types/node@22.18.10)(terser@5.44.0)
+
   apps/df-storybook:
     dependencies:
       '@df/ui-lit':
@@ -687,6 +727,68 @@ importers:
         specifier: ^5.4.10
         version: 5.4.20(@types/node@22.18.10)(terser@5.44.0)
 
+  extensions/df-dashboard:
+    dependencies:
+      '@df/node-utils':
+        specifier: workspace:*
+        version: link:../../packages/node-utils
+    devDependencies:
+      '@df/df-dashboard-ui':
+        specifier: workspace:*
+        version: link:../df-dashboard-ui
+      '@df/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@types/node':
+        specifier: 20.x
+        version: 20.19.21
+      '@types/vscode':
+        specifier: ^1.85.0
+        version: 1.106.1
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.46.1
+        version: 8.46.1(@typescript-eslint/parser@8.46.1(eslint@9.37.0)(typescript@5.9.3))(eslint@9.37.0)(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.46.1
+        version: 8.46.1(eslint@9.37.0)(typescript@5.9.3)
+      eslint:
+        specifier: ^9.0.0
+        version: 9.37.0
+      tsup:
+        specifier: ^8.0.1
+        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  extensions/df-dashboard-ui:
+    dependencies:
+      '@df/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+      '@df/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@df/ui-lit':
+        specifier: workspace:*
+        version: link:../../packages/ui-lit
+      '@lit-labs/signals':
+        specifier: ^0.1.0
+        version: 0.1.3
+      '@material/web':
+        specifier: ^1.0.0
+        version: 1.5.1
+      lit:
+        specifier: ^3.1.0
+        version: 3.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vite:
+        specifier: ^5.0.10
+        version: 5.4.20(@types/node@22.18.10)(terser@5.44.0)
+
   extensions/df-markdown-tools:
     devDependencies:
       '@types/glob':
@@ -752,68 +854,6 @@ importers:
       firebase:
         specifier: ^10.7.1
         version: 10.14.1
-      lit:
-        specifier: ^3.1.0
-        version: 3.3.1
-    devDependencies:
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-      vite:
-        specifier: ^5.0.10
-        version: 5.4.20(@types/node@22.18.10)(terser@5.44.0)
-
-  extensions/df-dashboard:
-    dependencies:
-      '@df/node-utils':
-        specifier: workspace:*
-        version: link:../../packages/node-utils
-    devDependencies:
-      '@df/df-dashboard-ui':
-        specifier: workspace:*
-        version: link:../df-dashboard-ui
-      '@df/types':
-        specifier: workspace:*
-        version: link:../../packages/types
-      '@types/node':
-        specifier: 20.x
-        version: 20.19.21
-      '@types/vscode':
-        specifier: ^1.85.0
-        version: 1.106.1
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^8.46.1
-        version: 8.46.1(@typescript-eslint/parser@8.46.1(eslint@9.37.0)(typescript@5.9.3))(eslint@9.37.0)(typescript@5.9.3)
-      '@typescript-eslint/parser':
-        specifier: ^8.46.1
-        version: 8.46.1(eslint@9.37.0)(typescript@5.9.3)
-      eslint:
-        specifier: ^9.0.0
-        version: 9.37.0
-      tsup:
-        specifier: ^8.0.1
-        version: 8.5.1(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
-  extensions/df-dashboard-ui:
-    dependencies:
-      '@df/state':
-        specifier: workspace:*
-        version: link:../../packages/state
-      '@df/types':
-        specifier: workspace:*
-        version: link:../../packages/types
-      '@df/ui-lit':
-        specifier: workspace:*
-        version: link:../../packages/ui-lit
-      '@lit-labs/signals':
-        specifier: ^0.1.0
-        version: 0.1.3
-      '@material/web':
-        specifier: ^1.0.0
-        version: 1.5.1
       lit:
         specifier: ^3.1.0
         version: 3.3.1

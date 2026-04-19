@@ -8,6 +8,7 @@ export * from './firebase-auth.types.js';
 export * from './firebase-firestore.types.js';
 export * from './firebase-todos.types.js';
 export * from './firebase-chat.types.js';
+export * from './openclaw-chat.types.js';
 export * from './firebase-storage.types.js';
 export * from './firebase-activity.types.js';
 export * from './firebase-goldilocks.types.js';

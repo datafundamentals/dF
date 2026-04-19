@@ -52,6 +52,7 @@ export {
   onTodoUpdated,
   onTodoDeleted,
 } from './triggers/onTodoCreated.js';
+export {onOpenclawMessage} from './triggers/onOpenclawMessage.js';
 
 /**
  * Scheduled Functions

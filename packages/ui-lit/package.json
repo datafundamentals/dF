@@ -25,6 +25,8 @@
     "./df-npm-info-widget.js": "./dist/df-npm-info-widget.js",
     "./df-chat-widget": "./dist/df-chat-widget.js",
     "./df-chat-widget.js": "./dist/df-chat-widget.js",
+    "./df-openclaw-chat-widget": "./dist/df-openclaw-chat-widget.js",
+    "./df-openclaw-chat-widget.js": "./dist/df-openclaw-chat-widget.js",
     "./df-markdown-codemirror": "./dist/df-markdown-codemirror.js",
     "./df-markdown-codemirror.js": "./dist/df-markdown-codemirror.js",
     "./df-dashboard": "./dist/df-dashboard.js",
