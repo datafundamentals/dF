@@ -13,7 +13,7 @@ CLIENT_ID = os.getenv('ZOOM_CLIENT_ID')
 CLIENT_SECRET = os.getenv('ZOOM_CLIENT_SECRET')
 DOWNLOAD_BASE_DIR = '/Volumes/Seagate5T/fomoZoomRecordings'
 START_DATE = "2026-01-01" 
-LOG_FILE = "download_log.txt"
+LOG_FILE = "log/download_log.txt"
 
 # --- LOGGING SETUP ---
 logging.basicConfig(
