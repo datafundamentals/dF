@@ -14,23 +14,22 @@ import {
   Timestamp,
   addDoc,
   collection,
-  doc,
-  getDoc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
-  setDoc,
   type CollectionReference,
   type DocumentData,
   type Unsubscribe,
 } from 'firebase/firestore';
+import {getFunctions, httpsCallable, connectFunctionsEmulator} from 'firebase/functions';
 
 const FIRESTORE_HOST = '127.0.0.1';
 const FIRESTORE_PORT = 8280;
+const FUNCTIONS_HOST = '127.0.0.1';
+const FUNCTIONS_PORT = 5001;
 const SESSIONS_COLLECTION = 'sessions';
 const MESSAGES_SUBCOLLECTION = 'messages';
-const USERS_COLLECTION = 'users';
 
 const messagesSignal = signal<readonly OpenclawMessage[]>([]);
 const statusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
@@ -64,25 +63,26 @@ export const openclawChatSendState = computed(() => ({
 
 export async function initializeOpenclawChatStore(
   app: FirebaseApp,
-  useEmulator: boolean,
-  userId: string
+  useEmulator: boolean
 ): Promise<void> {
   if (initializedDb) {
     return;
   }
 
   const db = getFirestoreDb(app);
+  const fns = getFunctions(app, 'us-central1');
 
   if (useEmulator) {
-    connectFirestoreToEmulator(db, {
-      host: FIRESTORE_HOST,
-      port: FIRESTORE_PORT,
-    });
+    connectFirestoreToEmulator(db, {host: FIRESTORE_HOST, port: FIRESTORE_PORT});
+    connectFunctionsEmulator(fns, FUNCTIONS_HOST, FUNCTIONS_PORT);
   }
 
   initializedDb = db;
 
-  const sessionId = await resolveOrCreateSession(db, userId);
+  const spawn = httpsCallable<Record<string, unknown>, {sessionId: string}>(fns, 'spawnOpenclawSession');
+  const result = await spawn({});
+  const sessionId = result.data.sessionId;
+
   startSessionListener(db, sessionId);
 }
 
@@ -131,22 +131,6 @@ export async function sendOpenclawMessage(content: string): Promise<void> {
     sendErrorSignal.set(message);
     throw error;
   }
-}
-
-async function resolveOrCreateSession(db: Firestore, userId: string): Promise<string> {
-  const userDocRef = doc(db, USERS_COLLECTION, userId);
-  const userSnap = await getDoc(userDocRef);
-
-  if (userSnap.exists() && userSnap.data().openclawSessionId) {
-    return userSnap.data().openclawSessionId as string;
-  }
-
-  const sessionRef = doc(collection(db, SESSIONS_COLLECTION));
-  const newSessionId = sessionRef.id;
-
-  await setDoc(userDocRef, {openclawSessionId: newSessionId}, {merge: true});
-
-  return newSessionId;
 }
 
 function startSessionListener(db: Firestore, sessionId: string): void {

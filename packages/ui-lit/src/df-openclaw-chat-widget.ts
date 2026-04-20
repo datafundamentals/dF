@@ -238,12 +238,11 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
         <section class="composer" aria-label="Send a message">
           <md-outlined-text-field
             label="Message"
-            type="text"
+            type="textarea"
             .value=${this.messageText}
             @input=${this.handleInput}
             @keydown=${this.handleKeydown}
             ?disabled=${disabled}
-            .supportingText=${'Shift+Enter for a new line'}
             .maxLength=${2000}
             .charCounter=${true}>
           </md-outlined-text-field>
