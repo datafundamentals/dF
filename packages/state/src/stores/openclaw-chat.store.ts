@@ -22,14 +22,15 @@ import {
   type DocumentData,
   type Unsubscribe,
 } from 'firebase/firestore';
-import {getFunctions, httpsCallable, connectFunctionsEmulator} from 'firebase/functions';
 
 const FIRESTORE_HOST = '127.0.0.1';
 const FIRESTORE_PORT = 8280;
-const FUNCTIONS_HOST = '127.0.0.1';
-const FUNCTIONS_PORT = 5001;
 const SESSIONS_COLLECTION = 'sessions';
 const MESSAGES_SUBCOLLECTION = 'messages';
+
+// OpenClaw session keys must carry the 'hook:' prefix so OpenClaw
+// allows the caller to supply them (hooks.allowRequestSessionKey must be true).
+const SESSION_KEY_PREFIX = 'hook:';
 
 const messagesSignal = signal<readonly OpenclawMessage[]>([]);
 const statusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
@@ -63,26 +64,24 @@ export const openclawChatSendState = computed(() => ({
 
 export async function initializeOpenclawChatStore(
   app: FirebaseApp,
-  useEmulator: boolean
+  useEmulator: boolean,
+  userId: string
 ): Promise<void> {
   if (initializedDb) {
     return;
   }
 
   const db = getFirestoreDb(app);
-  const fns = getFunctions(app, 'us-central1');
 
   if (useEmulator) {
     connectFirestoreToEmulator(db, {host: FIRESTORE_HOST, port: FIRESTORE_PORT});
-    connectFunctionsEmulator(fns, FUNCTIONS_HOST, FUNCTIONS_PORT);
   }
 
   initializedDb = db;
 
-  const spawn = httpsCallable<Record<string, unknown>, {sessionId: string}>(fns, 'spawnOpenclawSession');
-  const result = await spawn({});
-  const sessionId = result.data.sessionId;
-
+  // Session key is deterministic per user: 'hook:<userId>'
+  // OpenClaw creates the session implicitly on first use.
+  const sessionId = `${SESSION_KEY_PREFIX}${userId}`;
   startSessionListener(db, sessionId);
 }
 

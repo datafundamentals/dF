@@ -28,7 +28,6 @@ initializeApp();
  * They provide type-safe, authenticated RPC-style communication.
  */
 export {helloWorld} from './callable/helloWorld.js';
-export {spawnOpenclawSession} from './callable/spawnOpenclawSession.js';
 export {createTodoAdvanced} from './callable/createTodoAdvanced.js';
 export {getUserList} from './callable/getUserList.js';
 export {updateUserRole, setUserRoles} from './callable/updateUserRole.js';

@@ -44,16 +44,17 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
   override updated(): void {
     const {authUser} = firebaseAuthState.get();
     if (authUser && !this.isStoreReady && !this.isStoreInitializing) {
-      void this.initializeStore();
+      void this.initializeStore(authUser.uid);
     }
   }
 
-  private async initializeStore(): Promise<void> {
+  private async initializeStore(userId: string): Promise<void> {
     this.isStoreInitializing = true;
     try {
       await initializeOpenclawChatStore(
         getInitializedFirebaseApp(),
-        shouldUseEmulatorForService('firestore')
+        shouldUseEmulatorForService('firestore'),
+        userId
       );
       this.isStoreReady = true;
     } catch (error) {
