@@ -253,6 +253,35 @@ service cloud.firestore {
     }
 
     // =============================================================================
+    // OPENCLAW CHAT SESSIONS (df-openclaw-chat)
+    // =============================================================================
+
+    /**
+     * Session messages for OpenClaw chat bridge.
+     * Session keys use format: hook:<userId>
+     * Users can read/create in their own session; updates handled by Cloud Function.
+     */
+    match /sessions/{sessionId}/messages/{messageId} {
+      function isOwnSession() {
+        return isAuthenticated() && sessionId == ('hook:' + request.auth.uid);
+      }
+
+      allow read: if isOwnSession();
+
+      allow create: if isOwnSession()
+        && hasRequiredFields(['role', 'content', 'sessionId', 'status', 'createdAt'])
+        && request.resource.data.role == 'user'
+        && request.resource.data.status == 'pending'
+        && request.resource.data.sessionId == sessionId
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 10000;
+
+      allow update: if false; // Cloud Function handles status updates
+      allow delete: if false;
+    }
+
+    // =============================================================================
     // DEFAULT DENY
     // =============================================================================
 

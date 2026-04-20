@@ -7,15 +7,13 @@
  * Condition: role === 'user' and status === 'pending' (idempotency guard)
  *
  * Session keys carry the 'hook:' prefix (e.g. 'hook:<uid>').
- * OpenClaw creates the session implicitly on first use when
- * hooks.allowRequestSessionKey is true.
+ * Session state persists via x-openclaw-session-key header.
  *
  * Operation sequence:
  * 1. Update triggered document: status → 'processing'
- * 2. POST to OpenClaw /hooks/agent — returns { ok, runId } (async dispatch)
- * 3. Poll /sessions/{sessionId}/history until a new assistant message appears
- * 4. Write new assistant message doc (status: 'complete')
- * 5. Update original user doc: status → 'complete'
+ * 2. POST to OpenClaw /v1/chat/completions (synchronous — blocks until reply)
+ * 3. Write new assistant message doc (status: 'complete')
+ * 4. Update original user doc: status → 'complete'
  *
  * Runtime: Node.js, Firebase Functions v2 (540s timeout)
  */
@@ -25,16 +23,9 @@ import {getFirestore, FieldValue} from 'firebase-admin/firestore';
 import type {FirestoreEvent, Change} from 'firebase-functions/v2/firestore';
 import type {DocumentSnapshot} from 'firebase-admin/firestore';
 
-// Full endpoint URL, e.g. http://192.168.64.3:18789/hooks/agent
-const OPENCLAW_ENDPOINT = process.env.OPENCLAW_API_URL ?? '';
-const OPENCLAW_API_KEY = process.env.OPENCLAW_API_KEY ?? '';
-const OPENCLAW_AGENT_ID = process.env.OPENCLAW_AGENT_ID ?? 'cathy';
-const OPENCLAW_CHANNEL = process.env.OPENCLAW_CHANNEL ?? 'last';
-// Base URL for session history polling, e.g. http://192.168.64.3:18789
 const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
-
-const POLL_INTERVAL_MS = 2000;
-const POLL_TIMEOUT_MS = 120_000;
+const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
+const OPENCLAW_AGENT_ID = process.env.OPENCLAW_AGENT_ID ?? 'cathy';
 
 interface OpenclawMessageData {
   role: string;
@@ -43,25 +34,13 @@ interface OpenclawMessageData {
   status: string;
 }
 
-interface OpenclawHookResponse {
-  ok: boolean;
-  runId: string;
-}
-
-interface OpenclawContentBlock {
-  type: string;
-  text: string;
-}
-
-interface OpenclawHistoryMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: OpenclawContentBlock[];
-  __openclaw?: {seq: number; id: string};
-}
-
-interface OpenclawHistoryResponse {
-  messages: OpenclawHistoryMessage[];
-  hasMore: boolean;
+interface ChatCompletionResponse {
+  choices: Array<{
+    message: {
+      role: string;
+      content: string;
+    };
+  }>;
 }
 
 export const onOpenclawMessage = functions.firestore.onDocumentWritten({
@@ -90,30 +69,33 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   functions.logger.info('OpenClaw message processing started', {sessionId, messageId});
 
   try {
-    const baselineCount = await fetchHistoryMessageCount(sessionId);
-
-    const hookResponse = await fetch(OPENCLAW_ENDPOINT, {
+    const endpoint = `${OPENCLAW_BASE_URL}/v1/chat/completions`;
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENCLAW_API_KEY}`,
+        'Authorization': `Bearer ${OPENCLAW_GATEWAY_TOKEN}`,
+        'x-openclaw-session-key': sessionId,
       },
       body: JSON.stringify({
-        message: content,
-        agentId: OPENCLAW_AGENT_ID,
-        sessionKey: sessionId,
-        channel: OPENCLAW_CHANNEL,
+        model: `openclaw/${OPENCLAW_AGENT_ID}`,
+        messages: [{role: 'user', content}],
       }),
     });
 
-    if (!hookResponse.ok) {
-      throw new Error(`OpenClaw hook error: ${hookResponse.status} ${hookResponse.statusText}`);
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`OpenClaw chat completions error: ${response.status} ${body}`);
     }
 
-    const hookResult = await hookResponse.json() as OpenclawHookResponse;
-    functions.logger.info('OpenClaw hook dispatched', {runId: hookResult.runId, sessionId});
+    const result = await response.json() as ChatCompletionResponse;
+    const assistantContent = result.choices?.[0]?.message?.content ?? '';
 
-    const assistantContent = await pollForAssistantReply(sessionId, hookResult.runId, baselineCount);
+    if (!assistantContent) {
+      throw new Error('Empty assistant reply from OpenClaw');
+    }
+
+    functions.logger.info('Got assistant reply', {sessionId, messageId});
 
     await db.collection('sessions').doc(sessionId).collection('messages').add({
       role: 'assistant',
@@ -128,61 +110,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     functions.logger.info('OpenClaw message processed successfully', {sessionId, messageId});
   } catch (error) {
     functions.logger.error('Failed to process OpenClaw message', {error, sessionId, messageId});
-    await messageRef.update({status: 'complete'});
+    await messageRef.update({status: 'error'});
     throw error;
   }
 });
-
-async function fetchHistoryMessageCount(sessionId: string): Promise<number> {
-  const historyUrl = `${OPENCLAW_BASE_URL}/sessions/${encodeURIComponent(sessionId)}/history`;
-  const res = await fetch(historyUrl, {
-    headers: {'Authorization': `Bearer ${OPENCLAW_API_KEY}`},
-  });
-  if (!res.ok) {
-    return 0;
-  }
-  const body = await res.json() as OpenclawHistoryResponse;
-  return body.messages.length;
-}
-
-async function pollForAssistantReply(
-  sessionId: string,
-  runId: string,
-  baselineCount: number
-): Promise<string> {
-  const historyUrl = `${OPENCLAW_BASE_URL}/sessions/${encodeURIComponent(sessionId)}/history`;
-  const deadline = Date.now() + POLL_TIMEOUT_MS;
-
-  while (Date.now() < deadline) {
-    await sleep(POLL_INTERVAL_MS);
-
-    const res = await fetch(historyUrl, {
-      headers: {'Authorization': `Bearer ${OPENCLAW_API_KEY}`},
-    });
-
-    if (!res.ok) {
-      functions.logger.warn('History poll returned non-OK', {status: res.status, sessionId});
-      continue;
-    }
-
-    const body = await res.json() as OpenclawHistoryResponse;
-    const newMessages = body.messages.slice(baselineCount);
-    const assistantMsg = newMessages.find((m) => m.role === 'assistant');
-
-    if (assistantMsg) {
-      const text = assistantMsg.content
-        .filter((block) => block.type === 'text')
-        .map((block) => block.text)
-        .join('');
-
-      functions.logger.info('Got assistant reply via history poll', {runId, sessionId});
-      return text;
-    }
-  }
-
-  throw new Error(`Timed out waiting for assistant reply (runId: ${runId})`);
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
