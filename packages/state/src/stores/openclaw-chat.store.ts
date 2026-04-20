@@ -42,6 +42,7 @@ const sessionIdSignal = signal<string | null>(null);
 
 let unsubscribeMessages: Unsubscribe | null = null;
 let messagesCollectionRef: CollectionReference<DocumentData> | null = null;
+let initializedDb: Firestore | null = null;
 
 export const openclawChatMessagesState = computed<FirestoreCollectionState<OpenclawMessage>>(() => ({
   status: statusSignal.get(),
@@ -66,6 +67,10 @@ export async function initializeOpenclawChatStore(
   useEmulator: boolean,
   userId: string
 ): Promise<void> {
+  if (initializedDb) {
+    return;
+  }
+
   const db = getFirestoreDb(app);
 
   if (useEmulator) {
@@ -75,8 +80,27 @@ export async function initializeOpenclawChatStore(
     });
   }
 
+  initializedDb = db;
+
   const sessionId = await resolveOrCreateSession(db, userId);
-  await startSessionListener(db, sessionId);
+  startSessionListener(db, sessionId);
+}
+
+export function startOpenclawRealtime(): void {
+  const db = initializedDb;
+  const sessionId = sessionIdSignal.get();
+  if (!db || !sessionId || isListeningSignal.get()) {
+    return;
+  }
+  startSessionListener(db, sessionId);
+}
+
+export function stopOpenclawRealtime(): void {
+  if (unsubscribeMessages) {
+    unsubscribeMessages();
+    unsubscribeMessages = null;
+    isListeningSignal.set(false);
+  }
 }
 
 export async function sendOpenclawMessage(content: string): Promise<void> {
@@ -109,18 +133,7 @@ export async function sendOpenclawMessage(content: string): Promise<void> {
   }
 }
 
-export function stopOpenclawRealtime(): void {
-  if (unsubscribeMessages) {
-    unsubscribeMessages();
-    unsubscribeMessages = null;
-    isListeningSignal.set(false);
-  }
-}
-
-async function resolveOrCreateSession(
-  db: Firestore,
-  userId: string
-): Promise<string> {
+async function resolveOrCreateSession(db: Firestore, userId: string): Promise<string> {
   const userDocRef = doc(db, USERS_COLLECTION, userId);
   const userSnap = await getDoc(userDocRef);
 
@@ -136,10 +149,7 @@ async function resolveOrCreateSession(
   return newSessionId;
 }
 
-async function startSessionListener(
-  db: Firestore,
-  sessionId: string
-): Promise<void> {
+function startSessionListener(db: Firestore, sessionId: string): void {
   if (unsubscribeMessages) {
     unsubscribeMessages();
     unsubscribeMessages = null;

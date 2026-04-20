@@ -20,8 +20,11 @@ import {getFirestore, FieldValue} from 'firebase-admin/firestore';
 import type {FirestoreEvent, Change} from 'firebase-functions/v2/firestore';
 import type {DocumentSnapshot} from 'firebase-admin/firestore';
 
-const OPENCLAW_API_URL = process.env.OPENCLAW_API_URL ?? '';
+// Full endpoint URL, e.g. http://127.0.0.1:18789/hooks/agent
+const OPENCLAW_ENDPOINT = process.env.OPENCLAW_API_URL ?? '';
 const OPENCLAW_API_KEY = process.env.OPENCLAW_API_KEY ?? '';
+const OPENCLAW_AGENT_ID = process.env.OPENCLAW_AGENT_ID ?? 'cathy';
+const OPENCLAW_CHANNEL = process.env.OPENCLAW_CHANNEL ?? '';
 
 interface OpenclawMessageData {
   role: string;
@@ -56,13 +59,18 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   functions.logger.info('OpenClaw message processing started', {sessionId, messageId});
 
   try {
-    const response = await fetch(`${OPENCLAW_API_URL}/sessions_send`, {
+    const response = await fetch(OPENCLAW_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENCLAW_API_KEY}`,
       },
-      body: JSON.stringify({sessionId, content}),
+      body: JSON.stringify({
+        message: content,
+        agentId: OPENCLAW_AGENT_ID,
+        sessionKey: sessionId,
+        channel: OPENCLAW_CHANNEL,
+      }),
     });
 
     if (!response.ok) {

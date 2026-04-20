@@ -26,6 +26,7 @@ import {
   openclawChatMessagesState,
   openclawChatSendState,
   sendOpenclawMessage,
+  startOpenclawRealtime,
   stopOpenclawRealtime,
 } from '@df/state';
 import type {OpenclawMessage, OpenclawSendStatus, FirestoreRequestState} from '@df/types';
@@ -192,6 +193,15 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     super();
     this.heading = 'Chatty Cathy Work Request System';
     this.submitOnEnter = true;
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    try {
+      startOpenclawRealtime();
+    } catch {
+      /* noop — store not initialized yet */
+    }
   }
 
   override disconnectedCallback(): void {
