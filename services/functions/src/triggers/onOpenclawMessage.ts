@@ -48,9 +48,20 @@ interface OpenclawHookResponse {
   runId: string;
 }
 
+interface OpenclawContentBlock {
+  type: string;
+  text: string;
+}
+
 interface OpenclawHistoryMessage {
-  role: string;
-  content: string;
+  role: 'user' | 'assistant' | 'system';
+  content: OpenclawContentBlock[];
+  __openclaw?: {seq: number; id: string};
+}
+
+interface OpenclawHistoryResponse {
+  messages: OpenclawHistoryMessage[];
+  hasMore: boolean;
 }
 
 export const onOpenclawMessage = functions.firestore.onDocumentWritten({
@@ -79,6 +90,8 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   functions.logger.info('OpenClaw message processing started', {sessionId, messageId});
 
   try {
+    const baselineCount = await fetchHistoryMessageCount(sessionId);
+
     const hookResponse = await fetch(OPENCLAW_ENDPOINT, {
       method: 'POST',
       headers: {
@@ -100,7 +113,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     const hookResult = await hookResponse.json() as OpenclawHookResponse;
     functions.logger.info('OpenClaw hook dispatched', {runId: hookResult.runId, sessionId});
 
-    const assistantContent = await pollForAssistantReply(sessionId, hookResult.runId);
+    const assistantContent = await pollForAssistantReply(sessionId, hookResult.runId, baselineCount);
 
     await db.collection('sessions').doc(sessionId).collection('messages').add({
       role: 'assistant',
@@ -120,7 +133,23 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   }
 });
 
-async function pollForAssistantReply(sessionId: string, runId: string): Promise<string> {
+async function fetchHistoryMessageCount(sessionId: string): Promise<number> {
+  const historyUrl = `${OPENCLAW_BASE_URL}/sessions/${encodeURIComponent(sessionId)}/history`;
+  const res = await fetch(historyUrl, {
+    headers: {'Authorization': `Bearer ${OPENCLAW_API_KEY}`},
+  });
+  if (!res.ok) {
+    return 0;
+  }
+  const body = await res.json() as OpenclawHistoryResponse;
+  return body.messages.length;
+}
+
+async function pollForAssistantReply(
+  sessionId: string,
+  runId: string,
+  baselineCount: number
+): Promise<string> {
   const historyUrl = `${OPENCLAW_BASE_URL}/sessions/${encodeURIComponent(sessionId)}/history`;
   const deadline = Date.now() + POLL_TIMEOUT_MS;
 
@@ -136,12 +165,18 @@ async function pollForAssistantReply(sessionId: string, runId: string): Promise<
       continue;
     }
 
-    const history = await res.json() as OpenclawHistoryMessage[];
-    const lastMsg = history[history.length - 1];
+    const body = await res.json() as OpenclawHistoryResponse;
+    const newMessages = body.messages.slice(baselineCount);
+    const assistantMsg = newMessages.find((m) => m.role === 'assistant');
 
-    if (lastMsg?.role === 'assistant' && lastMsg.content) {
+    if (assistantMsg) {
+      const text = assistantMsg.content
+        .filter((block) => block.type === 'text')
+        .map((block) => block.text)
+        .join('');
+
       functions.logger.info('Got assistant reply via history poll', {runId, sessionId});
-      return lastMsg.content;
+      return text;
     }
   }
 
