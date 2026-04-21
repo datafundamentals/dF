@@ -43,6 +43,7 @@ const sessionIdSignal = signal<string | null>(null);
 let unsubscribeMessages: Unsubscribe | null = null;
 let messagesCollectionRef: CollectionReference<DocumentData> | null = null;
 let initializedDb: Firestore | null = null;
+let initializedUserId: string | null = null;
 
 export const openclawChatMessagesState = computed<FirestoreCollectionState<OpenclawMessage>>(() => ({
   status: statusSignal.get(),
@@ -71,6 +72,7 @@ export async function initializeOpenclawChatStore(
     return;
   }
 
+  initializedUserId = userId;
   const db = getFirestoreDb(app);
 
   if (useEmulator) {
@@ -92,6 +94,16 @@ export function startOpenclawRealtime(): void {
     return;
   }
   startSessionListener(db, sessionId);
+}
+
+export function switchOpenclawSession(agentName: string): void {
+  if (!initializedDb || !initializedUserId) {
+    return;
+  }
+  const sessionId = `agent:${agentName}:hook:${initializedUserId}`;
+  sendStatusSignal.set('idle');
+  sendErrorSignal.set(null);
+  startSessionListener(initializedDb, sessionId);
 }
 
 export function stopOpenclawRealtime(): void {

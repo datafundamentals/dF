@@ -25,7 +25,13 @@ import type {DocumentSnapshot} from 'firebase-admin/firestore';
 
 const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
 const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
-const OPENCLAW_AGENT_ID = process.env.OPENCLAW_AGENT_ID ?? 'cathy';
+const OPENCLAW_DEFAULT_AGENT_ID = process.env.OPENCLAW_AGENT_ID ?? 'cathy';
+
+// Extracts agent name from session key format: agent:<name>:hook:<uid>
+function resolveAgentId(sessionId: string): string {
+  const match = sessionId.match(/^agent:([a-z_-]+):hook:/);
+  return match ? match[1] : OPENCLAW_DEFAULT_AGENT_ID;
+}
 
 interface OpenclawMessageData {
   role: string;
@@ -61,12 +67,13 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
 
   const {sessionId, messageId} = event.params;
   const {content} = data;
+  const agentId = resolveAgentId(sessionId);
 
   const db = getFirestore();
   const messageRef = db.collection('sessions').doc(sessionId).collection('messages').doc(messageId);
 
   await messageRef.update({status: 'processing'});
-  functions.logger.info('OpenClaw message processing started', {sessionId, messageId});
+  functions.logger.info('OpenClaw message processing started', {sessionId, messageId, agentId});
 
   try {
     const endpoint = `${OPENCLAW_BASE_URL}/v1/chat/completions`;
@@ -78,7 +85,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
         'x-openclaw-session-key': sessionId,
       },
       body: JSON.stringify({
-        model: `openclaw/${OPENCLAW_AGENT_ID}`,
+        model: `openclaw/${agentId}`,
         messages: [{role: 'user', content}],
       }),
     });

@@ -258,12 +258,12 @@ service cloud.firestore {
 
     /**
      * Session messages for OpenClaw chat bridge.
-     * Session keys use format: hook:<userId>
+     * Session keys use format: agent:<name>:hook:<userId>
      * Users can read/create in their own session; updates handled by Cloud Function.
      */
     match /sessions/{sessionId}/messages/{messageId} {
       function isOwnSession() {
-        return isAuthenticated() && sessionId == ('agent:cathy:hook:' + request.auth.uid);
+        return isAuthenticated() && sessionId.matches('agent:[a-z_-]+:hook:' + request.auth.uid);
       }
 
       allow read: if isOwnSession();
