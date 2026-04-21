@@ -38,7 +38,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
-      width: min(480px, 100%);
+      width: 100%;
       font-family: var(--df-font-family, 'Roboto', system-ui, sans-serif);
       color: var(--md-sys-color-on-surface, #1f1f1f);
     }
@@ -56,8 +56,25 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     }
 
     header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-img {
+      height: 4.5rem;
+      width: auto;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+
+    .header-text {
       display: grid;
       gap: 4px;
+      flex: 1;
+      text-align: center;
+      align-items: center;
+      justify-items: center;
     }
 
     h2 {
@@ -183,6 +200,12 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   /** Label shown in the widget header. */
   @property({type: String}) declare heading: string;
 
+  /** URL for the image shown on the left side of the header. */
+  @property({type: String, attribute: 'header-img-left'}) declare headerImgLeft: string;
+
+  /** URL for the image shown on the right side of the header. */
+  @property({type: String, attribute: 'header-img-right'}) declare headerImgRight: string;
+
   /** When true, pressing Enter submits the message (Shift+Enter adds line breaks). */
   @property({type: Boolean, attribute: 'submit-on-enter'}) declare submitOnEnter: boolean;
 
@@ -192,6 +215,8 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   constructor() {
     super();
     this.heading = 'Chatty Cathy Work Request System';
+    this.headerImgLeft = '';
+    this.headerImgRight = '';
     this.submitOnEnter = true;
   }
 
@@ -221,8 +246,12 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     return html`
       <div class="container" role="region" aria-live="polite">
         <header>
-          <h2>${this.heading}</h2>
-          <span class="subtitle">I am here to help you compose an Openclaw system request!</span>
+          ${this.headerImgLeft ? html`<img class="header-img" src=${this.headerImgLeft} alt="" aria-hidden="true" />` : nothing}
+          <div class="header-text">
+            <h2>${this.heading}</h2>
+            <span class="subtitle">I am here to help you compose an Openclaw system request!</span>
+          </div>
+          ${this.headerImgRight ? html`<img class="header-img" src=${this.headerImgRight} alt="" aria-hidden="true" />` : nothing}
         </header>
 
         <section class="messages" aria-label="Chat messages">

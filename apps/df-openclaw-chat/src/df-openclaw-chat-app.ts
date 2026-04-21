@@ -14,19 +14,22 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       min-height: 100vh;
-      padding: clamp(1.5rem, 4vw, 3rem);
+      padding: clamp(1rem, 2vw, 2rem);
       background: radial-gradient(circle at top, rgba(99, 102, 241, 0.12), transparent 55%),
         var(--md-sys-color-surface, #f8fafc);
       box-sizing: border-box;
     }
 
     .shell {
-      width: min(520px, 100%);
+      width: min(1100px, 100%);
       display: flex;
-      justify-content: center;
+    }
+
+    df-openclaw-chat-widget {
+      width: 100%;
     }
   `;
 
@@ -36,7 +39,10 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
   override render() {
     return html`
       <div class="shell">
-        <df-openclaw-chat-widget></df-openclaw-chat-widget>
+        <df-openclaw-chat-widget
+          header-img-left="/chatty-cathy-alt.jpg"
+          header-img-right="/lobster.png"
+        ></df-openclaw-chat-widget>
       </div>
     `;
   }
