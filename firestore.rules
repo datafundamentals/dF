@@ -263,7 +263,7 @@ service cloud.firestore {
      */
     match /sessions/{sessionId}/messages/{messageId} {
       function isOwnSession() {
-        return isAuthenticated() && sessionId == ('hook:' + request.auth.uid);
+        return isAuthenticated() && sessionId == ('agent:cathy:hook:' + request.auth.uid);
       }
 
       allow read: if isOwnSession();

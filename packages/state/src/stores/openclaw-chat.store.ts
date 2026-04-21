@@ -30,7 +30,7 @@ const MESSAGES_SUBCOLLECTION = 'messages';
 
 // OpenClaw session keys must carry the 'hook:' prefix so OpenClaw
 // allows the caller to supply them (hooks.allowRequestSessionKey must be true).
-const SESSION_KEY_PREFIX = 'hook:';
+const SESSION_KEY_PREFIX = 'agent:cathy:hook:';
 
 const messagesSignal = signal<readonly OpenclawMessage[]>([]);
 const statusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
