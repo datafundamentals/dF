@@ -1,7 +1,7 @@
 {
   "projects": {
-    "default": "peg-2035",
-    "prod": "peg-2035",
-    "production": "peg-2035"
+    "default": "melody-r2-d4",
+    "prod": "melody-r2-d4",
+    "production": "melody-r2-d4"
   }
 }

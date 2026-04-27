@@ -1,6 +1,6 @@
 {
   "name": "@df/df-openclaw-chat",
-  "version": "0.0.1",
+  "version": "0.0.1-260101",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "peg-2035"
+    "default": "melody-r2-d4"
   },
   "targets": {
     "peg-2035": {
@@ -19,6 +19,13 @@
         ],
         "df-app-starter-template": [
           "df-app-starter-template"
+        ]
+      }
+    },
+    "melody-r2-d4": {
+      "hosting": {
+        "df-openclaw-chat": [
+          "df-openclaw-chat"
         ]
       }
     }

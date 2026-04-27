@@ -193,6 +193,26 @@ sites:
         - 
       basics:
         - 
+  hbb:
+    since: 
+    contentRoot: ../content/hi2035
+    content: ../sites/hbb/site
+    url: https://hbb-a1.web.app/
+    host: firebase
+    firebaseProject: melody-r2-d4
+    apps: [ df-openclaw-chat ]
+    status:
+    - hand copied from couldbe
+    - the theme automation does not work
+    - appear also to be some number of hand changes even if theme automation worked
+    purpose: hbb investment site
+    theme: not-wired
+    slogan: 
+      trial: not applicable yet
+      filter-out:
+        - 
+      basics:
+        - 
   mymodeler:
     since: 2026-01-27 17:58:33
     contentRoot: ../content/mymodeler
