@@ -69,6 +69,36 @@ If your component is visible *immediately* when the page loads (e.g., a header e
     ```
 * **Why:** `defer` tells the browser to download the script but wait to run it until *after* the HTML is parsed. This is fast and non-blocking.
 
+---
+
+## WCPGW: Images Inside Bundled iframe Components
+
+**Problem:** A web component bundled as a JS file and deployed inside an `<iframe>` uses image paths like `/my-image.png`. In dev (Vite), these paths resolve against the dev server root and work fine. But in production, the iframe loads from a different origin or path — so `/my-image.png` 404s because the host 11ty site stores images at `/static/images/my-image.png` or some other location.
+
+**Rule: Component-specific images must be embedded as base64 data URIs in the TypeScript source — never referenced by path.**
+
+```typescript
+// ✅ Correct — image travels with the bundle
+const MY_IMG = 'data:image/png;base64,iVBORw0KGgo...';
+
+// ❌ Wrong — path only resolves in dev, 404s when deployed as iframe
+header-img-left="/my-image.png"
+```
+
+**How to embed an image as a data URI:**
+
+```bash
+# macOS
+base64 -i public/my-image.png | tr -d '\n'
+# Then prefix with: data:image/png;base64,
+```
+
+**When this applies:** Any image that is part of a bundled web component's own UI (not user-supplied content) — especially when the component is deployed as an iframe. Images in the `public/` directory work in Vite dev but are NOT bundled into the JS file.
+
+**Size consideration:** Images up to ~50KB are appropriate to embed. Larger images should be served from a CDN and the component should accept a URL as a configurable property (with the URL documented in the 11ty template that hosts the iframe).
+
+---
+
 ## Use Case: Microscopic Componponent on Every 11ty Page
 #### Option: In the Global `<head>`
 
