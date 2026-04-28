@@ -76,6 +76,17 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   functions.logger.info('OpenClaw message processing started', {sessionId, messageId, agentId});
 
   try {
+    const historySnap = await db
+      .collection('sessions').doc(sessionId)
+      .collection('messages')
+      .orderBy('createdAt', 'asc')
+      .get();
+
+    const historyMessages = historySnap.docs
+      .map((d) => d.data())
+      .filter((m) => m.status === 'complete')
+      .map((m) => ({role: m.role as string, content: m.content as string}));
+
     const endpoint = `${OPENCLAW_BASE_URL}/v1/chat/completions`;
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -86,7 +97,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       },
       body: JSON.stringify({
         model: `openclaw/${agentId}`,
-        messages: [{role: 'user', content}],
+        messages: [...historyMessages, {role: 'user', content}],
       }),
     });
 
