@@ -16,6 +16,8 @@ const firebaseEnvKeys = [
   'VITE_FIREBASE_MESSAGING_SENDER_ID',
   'VITE_FIREBASE_APP_ID',
   'VITE_FIREBASE_ENV',
+  'VITE_SUPERUSER_EMAIL',
+  'VITE_OPENCLAW_AGENTS',
 ];
 
 const mode = process.env.MODE ?? process.env.NODE_ENV ?? 'production';
