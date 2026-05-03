@@ -294,7 +294,7 @@ All functions **MUST** use ESM (ES Modules). Never use CommonJS.
 {
   "name": "@df/functions",
   "type": "module",
-  "engines": { "node": "20" },
+  "engines": { "node": "22" },
   "dependencies": {
     "firebase-admin": "^12.0.0",
     "firebase-functions": "^5.1.1"

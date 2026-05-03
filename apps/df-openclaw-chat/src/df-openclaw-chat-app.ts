@@ -29,7 +29,9 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
     }
 
     .shell {
-      width: min(1100px, 100%);
+      width: min(1400px, 100%);
+      min-width: 900px;
+      max-width: 100%;
       display: flex;
     }
 
@@ -47,8 +49,7 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
         <df-openclaw-chat-widget
           header-img-left=${CHATTY_CATHY_IMG}
           header-img-right=${LOBSTER_IMG}
-          superuser-email=${import.meta.env.VITE_SUPERUSER_EMAIL ?? ''}
-          openclaw-agents=${import.meta.env.VITE_OPENCLAW_AGENTS ?? ''}
+          @df-openclaw-chat-widget-error=${this.handleWidgetError}
         ></df-openclaw-chat-widget>
       </div>
     `;
@@ -74,6 +75,10 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
       console.error('[df-openclaw-chat-app] Failed to initialize store', error);
       this.isStoreInitializing = false;
     }
+  }
+
+  private handleWidgetError(event: CustomEvent<{error: unknown}>): void {
+    console.error('[df-openclaw-chat-app] Widget error', event.detail?.error);
   }
 }
 

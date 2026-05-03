@@ -14,10 +14,21 @@ export interface OpenclawMessage extends FirestoreDocument {
   /** The session this message belongs to. */
   sessionId: string;
   /** Lifecycle status of this message in the Firebase Function bridge. */
-  status: 'pending' | 'processing' | 'complete';
+  status: 'pending' | 'processing' | 'complete' | 'error';
 }
 
 /**
  * Lifecycle status for OpenClaw message submissions from the client perspective.
  */
 export type OpenclawSendStatus = 'idle' | 'sending' | 'error';
+
+export type OpenclawConversationStatus = 'active' | 'accepted';
+
+export interface OpenclawConversation extends FirestoreDocument {
+  userId: string;
+  agentId: string;
+  title: string | null;
+  status: OpenclawConversationStatus;
+  createdAt: Date | null;
+  lastMessageAt: Date | null;
+}

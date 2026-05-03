@@ -1,62 +1,109 @@
 import {computed, signal} from '@lit-labs/signals';
 import type {FirebaseApp} from 'firebase/app';
 import type {Firestore} from 'firebase/firestore';
-import {
-  connectFirestoreToEmulator,
-  getFirestoreDb,
-} from '@df/firebase';
-import type {
-  FirestoreCollectionState,
-  OpenclawMessage,
-  OpenclawSendStatus,
-} from '@df/types';
+import {connectFirestoreToEmulator, getFirestoreDb} from '@df/firebase';
+import type {FirestoreCollectionState} from '@df/types/firebase-firestore.types';
+import type {FirestoreDocument} from '@df/types/firebase-firestore.types';
+import type {OpenclawSendStatus} from '@df/types';
 import {
   Timestamp,
   addDoc,
   collection,
+  doc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
   type CollectionReference,
   type DocumentData,
+  type QueryDocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore';
 
 const FIRESTORE_HOST = '127.0.0.1';
 const FIRESTORE_PORT = 8280;
-const SESSIONS_COLLECTION = 'sessions';
+const WORK_REQUESTS_COLLECTION = 'openclawWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
+const DEFAULT_AGENT_ID = 'cathy';
 
-// OpenClaw session keys must carry the 'hook:' prefix so OpenClaw
-// allows the caller to supply them (hooks.allowRequestSessionKey must be true).
-const SESSION_KEY_PREFIX = 'agent:cathy:hook:';
+interface OpenclawMessage extends FirestoreDocument {
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: Date | null;
+  sessionId: string;
+  status: 'pending' | 'processing' | 'complete' | 'error';
+}
+
+interface OpenclawConversation extends FirestoreDocument {
+  userId: string;
+  agentId: string;
+  title: string | null;
+  status: 'active' | 'accepted';
+  createdAt: Date | null;
+  lastMessageAt: Date | null;
+}
 
 const messagesSignal = signal<readonly OpenclawMessage[]>([]);
-const statusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
-const errorSignal = signal<string | null>(null);
-const isListeningSignal = signal<boolean>(false);
+const conversationsSignal = signal<readonly OpenclawConversation[]>([]);
+
+const messagesStatusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
+const conversationsStatusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
+
+const messagesErrorSignal = signal<string | null>(null);
+const conversationsErrorSignal = signal<string | null>(null);
+
+const isMessagesListeningSignal = signal(false);
+const isConversationsListeningSignal = signal(false);
+
 const sendStatusSignal = signal<OpenclawSendStatus>('idle');
 const sendErrorSignal = signal<string | null>(null);
-const sessionIdSignal = signal<string | null>(null);
+const activeConversationIdSignal = signal<string | null>(null);
 
 let unsubscribeMessages: Unsubscribe | null = null;
+let unsubscribeConversations: Unsubscribe | null = null;
 let messagesCollectionRef: CollectionReference<DocumentData> | null = null;
 let initializedDb: Firestore | null = null;
 let initializedUserId: string | null = null;
+let ensureConversationPromise: Promise<string | null> | null = null;
 
 export const openclawChatMessagesState = computed<FirestoreCollectionState<OpenclawMessage>>(() => ({
-  status: statusSignal.get(),
+  status: messagesStatusSignal.get(),
   documents: messagesSignal.get(),
-  error: errorSignal.get(),
-  isListening: isListeningSignal.get(),
+  error: messagesErrorSignal.get(),
+  isListening: isMessagesListeningSignal.get(),
   lastUpdated: null,
   currentPage: 1,
   pageSize: 100,
   hasNextPage: false,
   hasPreviousPage: false,
-  queryDescription: 'Session messages (oldest first)',
+  queryDescription: 'Conversation messages (oldest first)',
 }));
+
+export const openclawConversationsState = computed<FirestoreCollectionState<OpenclawConversation>>(() => ({
+  status: conversationsStatusSignal.get(),
+  documents: conversationsSignal.get(),
+  error: conversationsErrorSignal.get(),
+  isListening: isConversationsListeningSignal.get(),
+  lastUpdated: null,
+  currentPage: 1,
+  pageSize: 100,
+  hasNextPage: false,
+  hasPreviousPage: false,
+  queryDescription: 'OpenClaw work requests for current user',
+}));
+
+export const openclawActiveConversationState = computed(() => {
+  const activeConversationId = activeConversationIdSignal.get();
+  const conversation = conversationsSignal.get().find((item) => item.id === activeConversationId) ?? null;
+
+  return {
+    activeConversationId,
+    conversation,
+  };
+});
 
 export const openclawChatSendState = computed(() => ({
   status: sendStatusSignal.get(),
@@ -68,56 +115,100 @@ export async function initializeOpenclawChatStore(
   useEmulator: boolean,
   userId: string
 ): Promise<void> {
-  if (initializedDb) {
+  if (initializedDb && initializedUserId === userId) {
+    startOpenclawRealtime();
     return;
   }
 
+  stopOpenclawRealtime();
   initializedUserId = userId;
-  const db = getFirestoreDb(app);
 
+  const db = getFirestoreDb(app);
   if (useEmulator) {
     connectFirestoreToEmulator(db, {host: FIRESTORE_HOST, port: FIRESTORE_PORT});
   }
 
   initializedDb = db;
-
-  // Session key is deterministic per user: 'hook:<userId>'
-  // OpenClaw creates the session implicitly on first use.
-  const sessionId = `${SESSION_KEY_PREFIX}${userId}`;
-  startSessionListener(db, sessionId);
+  startConversationsListener(db, userId);
 }
 
 export function startOpenclawRealtime(): void {
-  const db = initializedDb;
-  const sessionId = sessionIdSignal.get();
-  if (!db || !sessionId || isListeningSignal.get()) {
-    return;
-  }
-  startSessionListener(db, sessionId);
-}
-
-export function switchOpenclawSession(agentName: string): void {
   if (!initializedDb || !initializedUserId) {
     return;
   }
-  const sessionId = `agent:${agentName}:hook:${initializedUserId}`;
-  sendStatusSignal.set('idle');
-  sendErrorSignal.set(null);
-  startSessionListener(initializedDb, sessionId);
-}
 
-export function stopOpenclawRealtime(): void {
-  if (unsubscribeMessages) {
-    unsubscribeMessages();
-    unsubscribeMessages = null;
-    isListeningSignal.set(false);
+  if (!unsubscribeConversations) {
+    startConversationsListener(initializedDb, initializedUserId);
+    return;
+  }
+
+  const activeConversationId = activeConversationIdSignal.get();
+  if (activeConversationId && !unsubscribeMessages) {
+    startMessagesListener(initializedDb, activeConversationId);
   }
 }
 
+export function stopOpenclawRealtime(): void {
+  if (unsubscribeConversations) {
+    unsubscribeConversations();
+    unsubscribeConversations = null;
+  }
+
+  if (unsubscribeMessages) {
+    unsubscribeMessages();
+    unsubscribeMessages = null;
+  }
+
+  isConversationsListeningSignal.set(false);
+  isMessagesListeningSignal.set(false);
+}
+
+export async function createOpenclawConversation(): Promise<string> {
+  if (!initializedDb || !initializedUserId) {
+    throw new Error('OpenClaw chat store is not initialized.');
+  }
+
+  const conversationRef = doc(collection(initializedDb, WORK_REQUESTS_COLLECTION));
+  const requestId = conversationRef.id;
+
+  await setDoc(conversationRef, {
+    userId: initializedUserId,
+    agentId: DEFAULT_AGENT_ID,
+    title: null,
+    status: 'active',
+    createdAt: serverTimestamp(),
+    lastMessageAt: serverTimestamp(),
+  });
+
+  switchOpenclawConversation(requestId);
+  return requestId;
+}
+
+export function switchOpenclawConversation(requestId: string): void {
+  if (!initializedDb) {
+    return;
+  }
+
+  sendStatusSignal.set('idle');
+  sendErrorSignal.set(null);
+  startMessagesListener(initializedDb, requestId);
+}
+
+export async function renameOpenclawConversation(requestId: string, title: string): Promise<void> {
+  if (!initializedDb) {
+    throw new Error('OpenClaw chat store is not initialized.');
+  }
+
+  const normalizedTitle = title.trim();
+  await updateDoc(doc(initializedDb, WORK_REQUESTS_COLLECTION, requestId), {
+    title: normalizedTitle.length ? normalizedTitle : null,
+  });
+}
+
 export async function sendOpenclawMessage(content: string): Promise<void> {
-  const sessionId = sessionIdSignal.get();
-  if (!sessionId || !messagesCollectionRef) {
-    throw new Error('No active session.');
+  const requestId = activeConversationIdSignal.get();
+  if (!requestId || !messagesCollectionRef) {
+    throw new Error('No active conversation.');
   }
 
   const trimmed = content.trim();
@@ -133,7 +224,7 @@ export async function sendOpenclawMessage(content: string): Promise<void> {
       role: 'user',
       content: trimmed,
       createdAt: serverTimestamp(),
-      sessionId,
+      sessionId: requestId,
       status: 'pending',
     });
   } catch (error) {
@@ -144,45 +235,145 @@ export async function sendOpenclawMessage(content: string): Promise<void> {
   }
 }
 
-function startSessionListener(db: Firestore, sessionId: string): void {
+function startConversationsListener(db: Firestore, userId: string): void {
+  if (unsubscribeConversations) {
+    unsubscribeConversations();
+    unsubscribeConversations = null;
+  }
+
+  conversationsStatusSignal.set('loading');
+  conversationsErrorSignal.set(null);
+
+  const conversationsRef = collection(db, WORK_REQUESTS_COLLECTION);
+  const q = query(conversationsRef, where('userId', '==', userId));
+
+  isConversationsListeningSignal.set(true);
+  unsubscribeConversations = onSnapshot(
+    q,
+    (snapshot) => {
+      const docs = snapshot.docs
+        .map((item) => normalizeConversationDoc(item))
+        .sort(compareConversations);
+
+      conversationsSignal.set(docs);
+      conversationsStatusSignal.set('ready');
+
+      const activeConversationId = activeConversationIdSignal.get();
+      if (!docs.length) {
+        if (!ensureConversationPromise) {
+          ensureConversationPromise = createOpenclawConversation()
+            .then((requestId) => requestId)
+            .catch((error) => {
+              const message = error instanceof Error ? error.message : 'Failed to create conversation.';
+              conversationsErrorSignal.set(message);
+              conversationsStatusSignal.set('error');
+              return null;
+            })
+            .finally(() => {
+              ensureConversationPromise = null;
+            });
+        }
+        return;
+      }
+
+      const nextConversationId = activeConversationId && docs.some((item) => item.id === activeConversationId)
+        ? activeConversationId
+        : docs[0]?.id ?? null;
+
+      if (nextConversationId && nextConversationId !== activeConversationId) {
+        startMessagesListener(db, nextConversationId);
+      }
+    },
+    (error) => {
+      conversationsErrorSignal.set(error.message);
+      conversationsStatusSignal.set('error');
+    }
+  );
+}
+
+function startMessagesListener(db: Firestore, requestId: string): void {
   if (unsubscribeMessages) {
     unsubscribeMessages();
     unsubscribeMessages = null;
   }
 
-  sessionIdSignal.set(sessionId);
+  activeConversationIdSignal.set(requestId);
   messagesSignal.set([]);
-  statusSignal.set('loading');
-  errorSignal.set(null);
+  messagesStatusSignal.set('loading');
+  messagesErrorSignal.set(null);
 
-  messagesCollectionRef = collection(db, SESSIONS_COLLECTION, sessionId, MESSAGES_SUBCOLLECTION);
+  messagesCollectionRef = collection(db, WORK_REQUESTS_COLLECTION, requestId, MESSAGES_SUBCOLLECTION);
   const q = query(messagesCollectionRef, orderBy('createdAt', 'asc'));
 
-  isListeningSignal.set(true);
+  isMessagesListeningSignal.set(true);
   unsubscribeMessages = onSnapshot(
     q,
     (snapshot) => {
-      const docs = snapshot.docs.map((d) => normalizeMessage({id: d.id, ...d.data()} as OpenclawMessage));
+      const docs = snapshot.docs.map((item) => normalizeMessage({id: item.id, ...item.data()} as OpenclawMessage));
       messagesSignal.set(docs);
-      statusSignal.set('ready');
+      messagesStatusSignal.set('ready');
 
       if (sendStatusSignal.get() === 'sending') {
-        const lastUserMsg = [...docs].reverse().find((m) => m.role === 'user');
-        if (lastUserMsg && lastUserMsg.status === 'complete') {
+        const lastUserMessage = [...docs].reverse().find((item) => item.role === 'user');
+        if (lastUserMessage?.status === 'complete') {
           sendStatusSignal.set('idle');
+        } else if (lastUserMessage?.status === 'error') {
+          sendStatusSignal.set('error');
+          sendErrorSignal.set('Failed to send message.');
         }
       }
     },
     (error) => {
-      errorSignal.set(error.message);
-      statusSignal.set('error');
+      messagesErrorSignal.set(error.message);
+      messagesStatusSignal.set('error');
     }
   );
 }
 
-function normalizeMessage(msg: OpenclawMessage): OpenclawMessage {
-  const createdAt = msg.createdAt instanceof Timestamp
-    ? msg.createdAt.toDate()
-    : (msg.createdAt as unknown as Date | null) ?? null;
-  return {...msg, createdAt};
+function normalizeConversationDoc(
+  snapshot: QueryDocumentSnapshot<DocumentData, DocumentData>
+): OpenclawConversation {
+  const data = snapshot.data();
+
+  return {
+    id: snapshot.id,
+    userId: String(data.userId ?? ''),
+    agentId: String(data.agentId ?? DEFAULT_AGENT_ID),
+    title: typeof data.title === 'string' ? data.title : null,
+    status: data.status === 'accepted' ? 'accepted' : 'active',
+    createdAt: normalizeTimestamp(data.createdAt),
+    lastMessageAt: normalizeTimestamp(data.lastMessageAt),
+  };
+}
+
+function normalizeMessage(message: OpenclawMessage): OpenclawMessage {
+  return {
+    ...message,
+    createdAt: normalizeTimestamp(message.createdAt),
+  };
+}
+
+function normalizeTimestamp(value: unknown): Date | null {
+  if (value instanceof Timestamp) {
+    return value.toDate();
+  }
+
+  if (value instanceof Date) {
+    return value;
+  }
+
+  return null;
+}
+
+function compareConversations(a: OpenclawConversation, b: OpenclawConversation): number {
+  const lastMessageDelta = toSortableTime(b.lastMessageAt) - toSortableTime(a.lastMessageAt);
+  if (lastMessageDelta !== 0) {
+    return lastMessageDelta;
+  }
+
+  return toSortableTime(b.createdAt) - toSortableTime(a.createdAt);
+}
+
+function toSortableTime(value: Date | null): number {
+  return value?.getTime() ?? 0;
 }

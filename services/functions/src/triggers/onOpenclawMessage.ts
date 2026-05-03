@@ -3,11 +3,15 @@
  *
  * Bridges the df-openclaw-chat app to the OpenClaw agent API.
  *
- * Trigger: onWrite on sessions/{sessionId}/messages/{messageId}
+ * Trigger: onWrite on openclawWorkRequests/{requestId}/messages/{messageId}
  * Condition: role === 'user' and status === 'pending' (idempotency guard)
  *
- * Session keys carry the 'hook:' prefix (e.g. 'hook:<uid>').
- * Session state persists via x-openclaw-session-key header.
+ * Request ids are stable from conversation creation through acceptance and are
+ * reused as the OpenClaw session key in the request body. This path is
+ * Cathy-only, so the session key is namespaced accordingly. We also send the
+ * agent id in the request body because OpenClaw routing on this endpoint is
+ * body-driven, and the session-key header has been observed to override
+ * routing incorrectly.
  *
  * Operation sequence:
  * 1. Update triggered document: status → 'processing'
@@ -25,19 +29,22 @@ import type {DocumentSnapshot} from 'firebase-admin/firestore';
 
 const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
 const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
-const OPENCLAW_DEFAULT_AGENT_ID = process.env.OPENCLAW_AGENT_ID ?? 'cathy';
-
-// Extracts agent name from session key format: agent:<name>:hook:<uid>
-function resolveAgentId(sessionId: string): string {
-  const match = sessionId.match(/^agent:([a-z_-]+):hook:/);
-  return match ? match[1] : OPENCLAW_DEFAULT_AGENT_ID;
-}
+const WORK_REQUESTS_COLLECTION = 'openclawWorkRequests';
+const MESSAGES_SUBCOLLECTION = 'messages';
+const OPENCLAW_WORK_REQUEST_AGENT_ID = 'cathy';
+const OPENCLAW_WORK_REQUEST_SESSION_PREFIX = 'openclaw-work-request-v2:cathy:';
+const ACCEPTANCE_SIGNAL = 'This all sounds good to me';
+const ACCEPTANCE_NOTICE = [
+  'This work request has been accepted and submitted.',
+  'Any further messages in this conversation will not change that submission.',
+  'A new conversation should be used for anything additional.',
+].join(' ');
 
 interface OpenclawMessageData {
   role: string;
   content: string;
   sessionId: string;
-  status: string;
+  status: 'pending' | 'processing' | 'complete' | 'error';
 }
 
 interface ChatCompletionResponse {
@@ -50,10 +57,10 @@ interface ChatCompletionResponse {
 }
 
 export const onOpenclawMessage = functions.firestore.onDocumentWritten({
-  document: 'sessions/{sessionId}/messages/{messageId}',
+  document: 'openclawWorkRequests/{requestId}/messages/{messageId}',
   region: 'us-central1',
   timeoutSeconds: 540,
-}, async (event: FirestoreEvent<Change<DocumentSnapshot> | undefined, {sessionId: string; messageId: string}>) => {
+}, async (event: FirestoreEvent<Change<DocumentSnapshot> | undefined, {requestId: string; messageId: string}>) => {
   const afterSnap = event.data?.after;
   if (!afterSnap || !afterSnap.exists) {
     return;
@@ -65,20 +72,25 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     return;
   }
 
-  const {sessionId, messageId} = event.params;
+  const {requestId, messageId} = event.params;
   const {content} = data;
-  const agentId = resolveAgentId(sessionId);
 
   const db = getFirestore();
-  const messageRef = db.collection('sessions').doc(sessionId).collection('messages').doc(messageId);
+  const conversationRef = db.collection(WORK_REQUESTS_COLLECTION).doc(requestId);
+  const messageRef = conversationRef.collection(MESSAGES_SUBCOLLECTION).doc(messageId);
+  const conversationSnap = await conversationRef.get();
+  const agentId = OPENCLAW_WORK_REQUEST_AGENT_ID;
 
   await messageRef.update({status: 'processing'});
-  functions.logger.info('OpenClaw message processing started', {sessionId, messageId, agentId});
+  functions.logger.info('OpenClaw message processing started', {
+    requestId,
+    messageId,
+    agentId,
+  });
 
   try {
-    const historySnap = await db
-      .collection('sessions').doc(sessionId)
-      .collection('messages')
+    const historySnap = await conversationRef
+      .collection(MESSAGES_SUBCOLLECTION)
       .orderBy('createdAt', 'asc')
       .get();
 
@@ -86,6 +98,13 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       .map((d) => d.data())
       .filter((m) => m.status === 'complete')
       .map((m) => ({role: m.role as string, content: m.content as string}));
+    const sessionKey = `${OPENCLAW_WORK_REQUEST_SESSION_PREFIX}${requestId}`;
+    const requestBody = {
+      agentId,
+      sessionKey,
+      model: `openclaw/${agentId}`,
+      messages: [...historyMessages, {role: 'user', content}],
+    };
 
     const endpoint = `${OPENCLAW_BASE_URL}/v1/chat/completions`;
     const response = await fetch(endpoint, {
@@ -93,12 +112,8 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENCLAW_GATEWAY_TOKEN}`,
-        'x-openclaw-session-key': sessionId,
       },
-      body: JSON.stringify({
-        model: `openclaw/${agentId}`,
-        messages: [...historyMessages, {role: 'user', content}],
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -113,22 +128,82 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       throw new Error('Empty assistant reply from OpenClaw');
     }
 
-    functions.logger.info('Got assistant reply', {sessionId, messageId});
+    functions.logger.info('Got assistant reply', {requestId, messageId});
 
-    await db.collection('sessions').doc(sessionId).collection('messages').add({
+    await conversationRef.collection(MESSAGES_SUBCOLLECTION).add({
       role: 'assistant',
       content: assistantContent,
-      sessionId,
+      sessionId: requestId,
       status: 'complete',
       createdAt: FieldValue.serverTimestamp(),
     });
 
-    await messageRef.update({status: 'complete'});
+    const accepted = assistantContent.includes(ACCEPTANCE_SIGNAL);
+    const currentTitle = conversationSnap.get('title');
+    const currentStatus = conversationSnap.get('status');
 
-    functions.logger.info('OpenClaw message processed successfully', {sessionId, messageId});
+    const conversationUpdate: Record<string, unknown> = {
+      lastMessageAt: FieldValue.serverTimestamp(),
+    };
+
+    if (accepted && currentStatus !== 'accepted') {
+      conversationUpdate.status = 'accepted';
+      if (typeof currentTitle !== 'string' || !currentTitle.trim()) {
+        conversationUpdate.title = buildConversationTitle(historyMessages, content);
+      }
+    }
+
+    const writes: Array<Promise<unknown>> = [
+      messageRef.update({status: 'complete'}),
+      conversationRef.set(conversationUpdate, {merge: true}),
+    ];
+
+    if (accepted && currentStatus !== 'accepted') {
+      writes.push(
+        conversationRef.collection(MESSAGES_SUBCOLLECTION).add({
+          role: 'assistant',
+          content: ACCEPTANCE_NOTICE,
+          sessionId: requestId,
+          status: 'complete',
+          createdAt: FieldValue.serverTimestamp(),
+        })
+      );
+    }
+
+    await Promise.all(writes);
+
+    functions.logger.info('OpenClaw message processed successfully', {requestId, messageId, accepted});
   } catch (error) {
-    functions.logger.error('Failed to process OpenClaw message', {error, sessionId, messageId});
-    await messageRef.update({status: 'error'});
+    functions.logger.error('Failed to process OpenClaw message', {error, requestId, messageId});
+    await Promise.all([
+      messageRef.update({status: 'error'}),
+      conversationRef.set({lastMessageAt: FieldValue.serverTimestamp()}, {merge: true}),
+    ]);
     throw error;
   }
 });
+
+function buildConversationTitle(
+  historyMessages: Array<{role: string; content: string}>,
+  latestUserContent: string
+): string {
+  const combined = [...historyMessages, {role: 'user', content: latestUserContent}]
+    .filter((message) => message.role === 'user')
+    .map((message) => message.content.trim())
+    .filter(Boolean)
+    .join(' ');
+
+  const normalized = combined
+    .replace(/\s+/g, ' ')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .trim();
+
+  if (!normalized) {
+    return 'Untitled';
+  }
+
+  const words = normalized.split(' ').slice(0, 8);
+  const title = words.join(' ');
+
+  return title.length > 72 ? `${title.slice(0, 69).trimEnd()}...` : title;
+}

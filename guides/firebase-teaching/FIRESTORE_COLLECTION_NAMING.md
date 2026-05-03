@@ -80,8 +80,8 @@ This is the living inventory of all Firestore collections in this project. Updat
 
 | Collection Path | Owner / App | Status | Notes |
 |---|---|---|---|
-| `sessions/` | `df-openclaw-chat` | ⚠️ Legacy — rename pending | Stores OpenClaw work request messages. Ambiguous name. Scheduled for rename to `openclawWorkRequests/` in a future data model migration ticket. |
-| `sessions/{id}/messages/` | `df-openclaw-chat` | ⚠️ Legacy — rename pending | Messages subcollection for OpenClaw sessions. |
+| `openclawWorkRequests/` | `df-openclaw-chat` | ✅ Active | Root collection for OpenClaw work request conversations. |
+| `openclawWorkRequests/{id}/messages/` | `df-openclaw-chat` | ✅ Active | Messages subcollection under the OpenClaw work request root. |
 | `chatMessage/` | `df-teaching-app` (Mon/Wed chat widget) | ⚠️ Ambiguous name | Generic chat messages for the teaching app chat widget. Should be renamed `monWedChatMessages/` or similar. |
 | `todos/` | `df-teaching-app` | ✅ Acceptable | Sufficiently scoped by context; low collision risk in this project. |
 | `todoAnalytics/` | `df-teaching-app` | ✅ Good | Prefixed with feature name. |
@@ -97,8 +97,6 @@ This is the living inventory of all Firestore collections in this project. Updat
 
 | Collection Path | Owner / App | Notes |
 |---|---|---|
-| `openclawWorkRequests/` | `df-openclaw-chat` | Replacement for `sessions/`. Pending data model migration ticket. See `guides/firebase-teaching/FIRESTORE_RULES_MANAGEMENT.md`. |
-| `openclawWorkRequests/{id}/messages/` | `df-openclaw-chat` | Messages subcollection under the new name. |
 | `openclawWorkRequests/{id}/attachments/` | `df-openclaw-chat` | File attachment references (future). |
 
 ---

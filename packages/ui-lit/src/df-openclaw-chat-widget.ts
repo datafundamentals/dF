@@ -19,21 +19,44 @@
  * Build will FAIL if native HTML elements are detected.
  */
 
-import {signal, SignalWatcher} from '@lit-labs/signals';
+import {SignalWatcher} from '@lit-labs/signals';
 import {css, html, LitElement, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {
-  firebaseAuthState,
+  createOpenclawConversation,
+  openclawActiveConversationState,
   openclawChatMessagesState,
   openclawChatSendState,
+  openclawConversationsState,
+  renameOpenclawConversation,
   sendOpenclawMessage,
   startOpenclawRealtime,
   stopOpenclawRealtime,
-  switchOpenclawSession,
+  switchOpenclawConversation,
 } from '@df/state';
-import type {OpenclawMessage, OpenclawSendStatus, FirestoreRequestState} from '@df/types';
+import type {FirestoreRequestState} from '@df/types/firebase-firestore.types';
+import type {OpenclawSendStatus} from '@df/types';
 
 const ENTER_KEY = 'Enter';
+
+interface OpenclawConversation {
+  id: string;
+  userId: string;
+  agentId: string;
+  title: string | null;
+  status: 'active' | 'accepted';
+  createdAt: Date | null;
+  lastMessageAt: Date | null;
+}
+
+interface OpenclawMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: Date | null;
+  sessionId: string;
+  status: 'pending' | 'processing' | 'complete' | 'error';
+}
 
 @customElement('df-openclaw-chat-widget')
 export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
@@ -41,26 +64,156 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     :host {
       display: block;
       width: 100%;
-      font-family: var(--df-font-family, 'Roboto', system-ui, sans-serif);
       color: var(--md-sys-color-on-surface, #1f1f1f);
+      font-family: var(--df-font-family, 'Roboto', system-ui, sans-serif);
     }
 
-    .container {
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-width, 272px) minmax(0, 1fr);
+      gap: 20px;
+      min-height: var(--df-chat-height, 720px);
+      padding: 20px;
+      border-radius: 28px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 250, 252, 0.98)),
+        var(--md-sys-color-surface, #ffffff);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 28px 60px rgba(15, 23, 42, 0.14);
+      box-sizing: border-box;
+    }
+
+    .layout--collapsed {
+      --sidebar-width: 88px;
+    }
+
+    .sidebar {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+      min-height: 0;
+      padding: 16px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at top, rgba(99, 102, 241, 0.12), transparent 55%),
+        var(--md-sys-color-surface-container-low, #f8fafc);
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+
+    .sidebar-controls {
+      display: grid;
+      gap: 10px;
+    }
+
+    .sidebar-title {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(15, 23, 42, 0.56);
+    }
+
+    .sidebar-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .conversation-list {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .conversation-item {
+      display: grid;
+      gap: 6px;
+      padding: 14px 12px;
+      border-radius: 18px;
+      cursor: pointer;
+      outline: none;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .conversation-item:hover,
+    .conversation-item:focus-visible {
+      background: rgba(255, 255, 255, 0.96);
+      border-color: rgba(99, 102, 241, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .conversation-item[data-active='true'] {
+      background: rgba(99, 102, 241, 0.14);
+      border-color: rgba(99, 102, 241, 0.55);
+      box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.08);
+    }
+
+    .conversation-item-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .conversation-title {
+      font-size: 0.94rem;
+      line-height: 1.35;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface, #0f172a);
+      word-break: break-word;
+    }
+
+    .conversation-timestamp {
+      flex-shrink: 0;
+      font-size: 0.72rem;
+      color: rgba(71, 85, 105, 0.82);
+    }
+
+    .conversation-status {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(79, 70, 229, 0.9);
+    }
+
+    .layout--collapsed .sidebar-title,
+    .layout--collapsed .conversation-title,
+    .layout--collapsed .conversation-status {
+      display: none;
+    }
+
+    .layout--collapsed .conversation-item {
+      justify-items: center;
+      padding-inline: 10px;
+    }
+
+    .layout--collapsed .conversation-item-header {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .layout--collapsed .conversation-timestamp {
+      font-size: 0.68rem;
+      text-align: center;
+    }
+
+    .chat-panel {
       display: grid;
       grid-template-rows: auto 1fr auto;
       gap: 16px;
-      border-radius: 20px;
-      padding: 20px;
-      background: var(--md-sys-color-surface, rgba(255, 255, 255, 0.98));
-      box-shadow: 0 24px 45px rgba(15, 23, 42, 0.18);
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      height: var(--df-chat-height, 600px);
+      min-height: 0;
     }
 
-    header {
+    .chat-header {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
+      min-height: 72px;
     }
 
     .header-img {
@@ -70,33 +223,56 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       object-fit: contain;
     }
 
-    .header-text {
+    .header-copy {
       display: grid;
-      gap: 4px;
+      gap: 6px;
+      min-width: 0;
       flex: 1;
-      text-align: center;
-      align-items: center;
-      justify-items: center;
     }
 
-    h2 {
+    .header-kicker {
       margin: 0;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--md-sys-color-on-surface, #0f172a);
+      font-size: 0.76rem;
+      line-height: 1.2;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(79, 70, 229, 0.84);
     }
 
-    .subtitle {
-      font-size: 0.85rem;
-      color: rgba(15, 23, 42, 0.65);
+    .header-title {
+      margin: 0;
+      font-size: clamp(1.2rem, 2vw, 1.55rem);
+      line-height: 1.2;
+      font-weight: 700;
+      color: var(--md-sys-color-on-surface, #0f172a);
+      word-break: break-word;
+      cursor: pointer;
+    }
+
+    .header-subtitle {
+      font-size: 0.88rem;
+      color: rgba(51, 65, 85, 0.78);
+    }
+
+    .rename-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .rename-form md-outlined-text-field {
+      width: 100%;
     }
 
     .messages {
-      position: relative;
       overflow-y: auto;
-      padding: 12px;
-      border-radius: 16px;
-      background: rgba(241, 245, 249, 0.65);
+      padding: 14px;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(241, 245, 249, 0.82), rgba(255, 255, 255, 0.92)),
+        var(--md-sys-color-surface-container-lowest, #ffffff);
+      border: 1px solid rgba(148, 163, 184, 0.18);
       display: grid;
       gap: 12px;
       align-content: start;
@@ -104,17 +280,17 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
     .message {
       display: grid;
-      gap: 6px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: var(--md-sys-color-surface-container-low, #ffffff);
-      border: 1px solid rgba(148, 163, 184, 0.24);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      gap: 8px;
+      padding: 13px 15px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
     }
 
     .message[data-role='user'] {
-      background: var(--md-sys-color-primary-container, rgba(99, 102, 241, 0.16));
-      border-color: rgba(99, 102, 241, 0.32);
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.26);
     }
 
     .message-header {
@@ -124,34 +300,35 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       gap: 12px;
     }
 
-    .role {
-      font-weight: 600;
-      font-size: 0.8rem;
+    .message-role {
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: rgba(15, 23, 42, 0.6);
+      font-weight: 700;
+      color: rgba(71, 85, 105, 0.82);
     }
 
-    .message[data-role='user'] .role {
-      color: rgba(99, 102, 241, 0.9);
+    .message[data-role='user'] .message-role {
+      color: rgba(79, 70, 229, 0.92);
     }
 
-    .timestamp {
-      font-size: 0.75rem;
-      color: rgba(100, 116, 139, 0.8);
+    .message-time {
+      font-size: 0.74rem;
+      color: rgba(100, 116, 139, 0.9);
     }
 
-    .body {
+    .message-body {
+      margin: 0;
       font-size: 0.95rem;
-      line-height: 1.55;
-      color: rgba(15, 23, 42, 0.85);
+      line-height: 1.6;
+      color: rgba(15, 23, 42, 0.88);
       white-space: pre-wrap;
       word-break: break-word;
     }
 
     .status-badge {
-      font-size: 0.7rem;
-      color: rgba(100, 116, 139, 0.7);
+      font-size: 0.72rem;
+      color: rgba(71, 85, 105, 0.88);
       font-style: italic;
     }
 
@@ -160,31 +337,31 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       gap: 12px;
     }
 
-    md-outlined-text-field {
+    .composer md-outlined-text-field {
       width: 100%;
     }
 
-    .actions {
+    .composer-actions {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
     }
 
-    .status {
-      font-size: 0.78rem;
-      color: rgba(100, 116, 139, 0.92);
-      display: flex;
+    .composer-status {
+      display: inline-flex;
       align-items: center;
       gap: 8px;
+      font-size: 0.79rem;
+      color: rgba(71, 85, 105, 0.92);
     }
 
-    .status[hidden] {
+    .composer-status[hidden] {
       display: none;
     }
 
-    .status--error {
-      color: rgba(220, 38, 38, 0.85);
+    .composer-status--error {
+      color: rgba(220, 38, 38, 0.88);
     }
 
     md-circular-progress {
@@ -192,91 +369,29 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     }
 
     .empty-state {
+      padding: 28px 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      color: rgba(71, 85, 105, 0.86);
+      font-size: 0.92rem;
       text-align: center;
-      color: rgba(100, 116, 139, 0.92);
-      font-size: 0.9rem;
-      padding: 24px 0;
-    }
-
-    .header-img--clickable {
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .superuser-panel {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-      border-radius: 12px;
-      background: var(--md-sys-color-tertiary-container, rgba(99, 102, 241, 0.1));
-      border: 2px solid var(--md-sys-color-tertiary, rgba(99, 102, 241, 0.5));
-    }
-
-    .superuser-title {
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--md-sys-color-tertiary, rgba(99, 102, 241, 0.9));
-    }
-
-    .superuser-controls {
-      display: flex;
-      gap: 12px;
-      align-items: flex-end;
-      flex-wrap: wrap;
-    }
-
-    .superuser-controls md-filled-select {
-      flex: 1;
-      min-width: 150px;
-    }
-
-    .superuser-current {
-      font-size: 0.8rem;
-      color: rgba(100, 116, 139, 0.85);
-    }
-
-    .superuser-active-agent {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--md-sys-color-error, #dc2626);
-      text-align: center;
-      letter-spacing: 0.02em;
     }
   `;
 
-  /** Label shown in the widget header. */
   @property({type: String}) declare heading: string;
-
-  /** URL for the image shown on the left side of the header. */
   @property({type: String, attribute: 'header-img-left'}) declare headerImgLeft: string;
-
-  /** URL for the image shown on the right side of the header. */
   @property({type: String, attribute: 'header-img-right'}) declare headerImgRight: string;
-
-  /** When true, pressing Enter submits the message (Shift+Enter adds line breaks). */
   @property({type: Boolean, attribute: 'submit-on-enter'}) declare submitOnEnter: boolean;
 
-  /** Email of the privileged account. Triple-clicking the right header image activates super user mode. */
-  @property({type: String, attribute: 'superuser-email'}) declare superuserEmail: string;
-
-  /** Comma-separated list of agent names shown in the super user agent selector. */
-  @property({type: String, attribute: 'openclaw-agents'}) declare openclawAgents: string;
-
-  private readonly isSuperUser = signal(false);
-
   @state() private messageText = '';
-  @state() private agentName = '';
-  @state() private currentAgentName = '';
+  @state() private isSidebarCollapsed = false;
+  @state() private isRenamingTitle = false;
+  @state() private titleDraft = '';
 
-  private get agentDisplayName(): string {
-    const name = this.currentAgentName || 'Cathy';
-    return name.charAt(0).toUpperCase() + name.slice(1);
-  }
   private previousMessageCount = 0;
-  private _clickCount = 0;
-  private _clickTimer: ReturnType<typeof setTimeout> | null = null;
+  private previousConversationId: string | null = null;
+  private previousConversationStatus: 'active' | 'accepted' | null = null;
+  private isCreatingAcceptedFollowup = false;
 
   constructor() {
     super();
@@ -284,8 +399,6 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     this.headerImgLeft = '';
     this.headerImgRight = '';
     this.submitOnEnter = true;
-    this.superuserEmail = '';
-    this.openclawAgents = '';
   }
 
   override connectedCallback(): void {
@@ -293,7 +406,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     try {
       startOpenclawRealtime();
     } catch {
-      /* noop — store not initialized yet */
+      /* noop */
     }
   }
 
@@ -303,72 +416,85 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   }
 
   override render() {
+    const conversationsState = openclawConversationsState.get();
+    const activeState = openclawActiveConversationState.get();
     const chatState = openclawChatMessagesState.get();
     const sendState = openclawChatSendState.get();
+    const activeConversationId = activeState.activeConversationId;
+    const activeConversation = activeState.conversation;
     const disabled = sendState.status === 'sending';
-
     const statusLabel = this.resolveStatusLabel(chatState.status, sendState.status, sendState.error);
-    const messages = chatState.documents;
-    const isEmpty = !messages.length && chatState.status !== 'loading';
-
-    const isSuperUser = this.isSuperUser.get();
 
     return html`
-      <div class="container" role="region" aria-live="polite">
-        ${isSuperUser ? this.renderSuperUserPanel() : html`
-          <header>
-            ${this.headerImgLeft ? html`<img class="header-img" src=${this.headerImgLeft} alt="" aria-hidden="true" />` : nothing}
-            <div class="header-text">
-              <h2>${this.heading}</h2>
-              <span class="subtitle">I am here to help you compose an Openclaw system request!</span>
+      <div class=${this.isSidebarCollapsed ? 'layout layout--collapsed' : 'layout'} role="region" aria-live="polite">
+        <aside class="sidebar" aria-label="Conversations">
+          <div class="sidebar-controls">
+            <h2 class="sidebar-title">Work Requests</h2>
+            <div class="sidebar-actions">
+              <md-filled-button @click=${this.handleCreateConversation}>
+                ${this.isSidebarCollapsed ? '+' : 'New conversation'}
+              </md-filled-button>
+              <md-outlined-button @click=${this.toggleSidebar}>
+                ${this.isSidebarCollapsed ? 'Expand' : 'Collapse'}
+              </md-outlined-button>
             </div>
-            ${this.headerImgRight ? html`<img
-              class="header-img header-img--clickable"
-              src=${this.headerImgRight}
-              alt=""
-              aria-hidden="true"
-              @click=${this.handleLobsterClick}
-            />` : nothing}
-          </header>
-        `}
-
-        <section class="messages" aria-label="Chat messages">
-          ${chatState.status === 'loading' && !messages.length
-            ? html`<div class="empty-state">Loading conversation…</div>`
-            : nothing}
-
-          ${isEmpty ? html`<div class="empty-state">Send your first message to start composing a work request.</div>` : nothing}
-
-          ${messages.map((message) => this.renderMessage(message))}
-        </section>
-
-        <section class="composer" aria-label="Send a message">
-          <md-outlined-text-field
-            label="Message"
-            type="textarea"
-            .value=${this.messageText}
-            @input=${this.handleInput}
-            @keydown=${this.handleKeydown}
-            ?disabled=${disabled}
-            .maxLength=${2000}
-            .charCounter=${true}>
-          </md-outlined-text-field>
-
-          <div class="actions">
-            <span class="status" ?hidden=${!statusLabel} role="status">
-              ${sendState.status === 'sending'
-                ? html`<md-circular-progress indeterminate></md-circular-progress>`
-                : nothing}
-              <span class=${sendState.status === 'error' ? 'status--error' : ''}>${statusLabel}</span>
-            </span>
-
-            <md-filled-button
-              ?disabled=${!this.canSubmit(disabled)}
-              @click=${this.submitMessage}
-            >
-              Send
-            </md-filled-button>
           </div>
+
+          <div class="conversation-list">
+            ${this.renderConversationList(conversationsState, activeState.activeConversationId)}
+          </div>
+        </aside>
+
+        <section class="chat-panel">
+          <header class="chat-header">
+            ${this.headerImgLeft ? html`<img class="header-img" src=${this.headerImgLeft} alt="" aria-hidden="true" />` : nothing}
+
+            <div class="header-copy">
+              <p class="header-kicker">${this.heading}</p>
+              ${this.isRenamingTitle && activeConversation
+                ? this.renderRenameForm(activeConversation)
+                : html`
+                    <h1 class="header-title" @click=${this.startRename}>
+                      ${this.resolveConversationTitle(activeConversation)}
+                    </h1>
+                  `}
+              <div class="header-subtitle">
+                ${this.resolveConversationSubtitle(activeConversation)}
+              </div>
+            </div>
+
+            ${this.headerImgRight ? html`<img class="header-img" src=${this.headerImgRight} alt="" aria-hidden="true" />` : nothing}
+          </header>
+
+          <section class="messages" aria-label="Chat messages">
+            ${this.renderMessages(chatState, activeConversation)}
+          </section>
+
+          <section class="composer" aria-label="Send a message">
+            <md-outlined-text-field
+              label="Message"
+              type="textarea"
+              .value=${this.messageText}
+              @input=${this.handleInput}
+              @keydown=${this.handleKeydown}
+              ?disabled=${disabled}
+              .maxLength=${2000}
+              .charCounter=${true}>
+            </md-outlined-text-field>
+
+            <div class="composer-actions">
+              <span class="composer-status" ?hidden=${!statusLabel} role="status">
+                ${sendState.status === 'sending'
+                  ? html`<md-circular-progress indeterminate></md-circular-progress>`
+                  : nothing}
+                <span class=${sendState.status === 'error' ? 'composer-status--error' : ''}>${statusLabel}</span>
+              </span>
+
+              <md-filled-button ?disabled=${!this.canSubmit(disabled, activeConversationId)} @click=${this.submitMessage}>
+                Send
+              </md-filled-button>
+            </div>
+          </section>
         </section>
       </div>
     `;
@@ -376,94 +502,213 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
   override updated(): void {
     const chatState = openclawChatMessagesState.get();
+    const activeState = openclawActiveConversationState.get();
+    const activeConversation = activeState.conversation;
     const messageCount = chatState.documents.length;
+    const activeConversationId = activeState.activeConversationId;
+    const activeConversationStatus = activeConversation?.status ?? null;
+
+    if (activeConversationId !== this.previousConversationId) {
+      this.previousConversationId = activeConversationId;
+      this.isRenamingTitle = false;
+      this.titleDraft = this.resolveConversationTitle(activeConversation);
+      this.previousConversationStatus = activeConversationStatus;
+    } else if (
+      activeConversationId &&
+      this.previousConversationStatus === 'active' &&
+      activeConversationStatus === 'accepted' &&
+      !this.isCreatingAcceptedFollowup
+    ) {
+      this.isCreatingAcceptedFollowup = true;
+      void this.createFollowupConversationAfterAcceptance();
+    }
+
     if (messageCount > this.previousMessageCount) {
       this.scrollToLatest();
     }
     this.previousMessageCount = messageCount;
+    this.previousConversationStatus = activeConversationStatus;
   }
 
-  private renderMessage(message: OpenclawMessage) {
-    const isPending = message.status === 'pending' || message.status === 'processing';
-    return html`
-      <article class="message" data-role=${message.role}>
-        <div class="message-header">
-          <span class="role">${message.role}</span>
-          <time class="timestamp" datetime=${this.formatIso(message.createdAt)}>
-            ${this.formatTimestamp(message.createdAt)}
+  private renderConversationList(
+    conversationsState: ReturnType<typeof openclawConversationsState.get>,
+    activeConversationId: string | null
+  ) {
+    if (conversationsState.status === 'loading' && !conversationsState.documents.length) {
+      return html`<div class="empty-state">Loading conversations…</div>`;
+    }
+
+    if (conversationsState.status === 'error') {
+      return html`<div class="empty-state">Failed to load conversations.</div>`;
+    }
+
+    if (!conversationsState.documents.length) {
+      return html`<div class="empty-state">No conversations yet.</div>`;
+    }
+
+    return conversationsState.documents.map((conversation: OpenclawConversation) => html`
+      <article
+        class="conversation-item"
+        data-active=${String(conversation.id === activeConversationId)}
+        role="button"
+        tabindex="0"
+        @click=${() => this.handleConversationSelect(conversation.id)}
+        @keydown=${(event: KeyboardEvent) => this.handleConversationKeydown(event, conversation.id)}
+      >
+        <div class="conversation-item-header">
+          <div class="conversation-title">${this.resolveConversationTitle(conversation)}</div>
+          <time class="conversation-timestamp" datetime=${this.formatIso(conversation.lastMessageAt)}>
+            ${this.formatRelativeTimestamp(conversation.lastMessageAt)}
           </time>
         </div>
-        <p class="body">${message.content}</p>
-        ${isPending && message.role === 'user'
-          ? html`<span class="status-badge">Sending to ${this.agentDisplayName}…</span>`
-          : nothing}
+        <div class="conversation-status">${conversation.status}</div>
       </article>
-    `;
+    `);
   }
 
-  private renderSuperUserPanel() {
-    const agents = this.openclawAgents
-      ? this.openclawAgents.split(',').map((a) => a.trim()).filter(Boolean)
-      : [];
-
+  private renderRenameForm(conversation: OpenclawConversation) {
     return html`
-      <div class="superuser-panel">
-        <div class="superuser-title">Super User — Agent Selection</div>
-        ${this.currentAgentName ? html`
-          <div class="superuser-active-agent">
-            Super User Bypass To ${this.agentDisplayName}
-          </div>
-        ` : nothing}
-        <div class="superuser-controls">
-          <md-filled-select
-            label="Select an agent"
-            .value=${this.agentName}
-            @change=${this.handleAgentSelectChange}
-          >
-            ${agents.map((agent) => html`
-              <md-select-option .value=${agent}>
-                <div slot="headline">${agent}</div>
-              </md-select-option>
-            `)}
-          </md-filled-select>
-        </div>
+      <div class="rename-form">
+        <md-outlined-text-field
+          label="Conversation title"
+          .value=${this.titleDraft}
+          @input=${this.handleRenameInput}
+          @keydown=${this.handleRenameKeydown}
+        >
+        </md-outlined-text-field>
+        <md-filled-button @click=${() => this.saveRename(conversation.id)}>Save</md-filled-button>
+        <md-text-button @click=${this.cancelRename}>Cancel</md-text-button>
       </div>
     `;
   }
 
-  private handleLobsterClick(): void {
-    this._clickCount++;
-
-    if (this._clickTimer) {
-      clearTimeout(this._clickTimer);
+  private renderMessages(
+    chatState: ReturnType<typeof openclawChatMessagesState.get>,
+    activeConversation: OpenclawConversation | null
+  ) {
+    if (!activeConversation) {
+      return html`<div class="empty-state">Preparing your first conversation…</div>`;
     }
 
-    if (this._clickCount >= 3) {
-      this._clickCount = 0;
-      this._clickTimer = null;
-      this.checkAndActivateSuperUser();
+    if (chatState.status === 'loading' && !chatState.documents.length) {
+      return html`<div class="empty-state">Loading conversation…</div>`;
+    }
+
+    if (chatState.status === 'error') {
+      return html`<div class="empty-state">Failed to load messages.</div>`;
+    }
+
+    if (!chatState.documents.length) {
+      return html`<div class="empty-state">Send your first message to start composing a work request.</div>`;
+    }
+
+    return chatState.documents.map((message) => this.renderMessage(message));
+  }
+
+  private renderMessage(message: OpenclawMessage) {
+    const isPending = message.role === 'user' && (message.status === 'pending' || message.status === 'processing');
+
+    return html`
+      <article class="message" data-role=${message.role}>
+        <div class="message-header">
+          <span class="message-role">${message.role}</span>
+          <time class="message-time" datetime=${this.formatIso(message.createdAt)}>
+            ${this.formatMessageTimestamp(message.createdAt)}
+          </time>
+        </div>
+        <p class="message-body">${message.content}</p>
+        ${isPending ? html`<span class="status-badge">Sending to Cathy…</span>` : nothing}
+      </article>
+    `;
+  }
+
+  private async handleCreateConversation(): Promise<void> {
+    try {
+      await createOpenclawConversation();
+    } catch (error) {
+      this.dispatchEvent(
+        new CustomEvent('df-openclaw-chat-widget-error', {
+          detail: {error},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
+  }
+
+  private async createFollowupConversationAfterAcceptance(): Promise<void> {
+    try {
+      await createOpenclawConversation();
+    } catch (error) {
+      this.dispatchEvent(
+        new CustomEvent('df-openclaw-chat-widget-error', {
+          detail: {error},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    } finally {
+      this.isCreatingAcceptedFollowup = false;
+    }
+  }
+
+  private toggleSidebar(): void {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
+
+  private handleConversationSelect(requestId: string): void {
+    switchOpenclawConversation(requestId);
+  }
+
+  private handleConversationKeydown(event: KeyboardEvent, requestId: string): void {
+    if (event.key === ENTER_KEY || event.key === ' ') {
+      event.preventDefault();
+      this.handleConversationSelect(requestId);
+    }
+  }
+
+  private startRename(): void {
+    const activeConversation = openclawActiveConversationState.get().conversation;
+    if (!activeConversation) {
       return;
     }
 
-    this._clickTimer = setTimeout(() => {
-      this._clickCount = 0;
-      this._clickTimer = null;
-    }, 500);
+    this.titleDraft = this.resolveConversationTitle(activeConversation);
+    this.isRenamingTitle = true;
   }
 
-  private checkAndActivateSuperUser(): void {
-    const {authUser} = firebaseAuthState.get();
-    if (authUser?.email && this.superuserEmail && authUser.email === this.superuserEmail) {
-      this.isSuperUser.set(true);
+  private cancelRename(): void {
+    this.isRenamingTitle = false;
+  }
+
+  private handleRenameInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.titleDraft = target.value;
+  }
+
+  private handleRenameKeydown(event: KeyboardEvent): void {
+    if (event.key === ENTER_KEY && !event.shiftKey) {
+      event.preventDefault();
+      const activeConversation = openclawActiveConversationState.get().conversation;
+      if (activeConversation) {
+        void this.saveRename(activeConversation.id);
+      }
     }
   }
 
-  private handleAgentSelectChange(event: Event): void {
-    const selected = (event.target as HTMLSelectElement).value;
-    if (!selected) return;
-    switchOpenclawSession(selected);
-    this.currentAgentName = selected;
-    this.agentName = '';
+  private async saveRename(requestId: string): Promise<void> {
+    try {
+      await renameOpenclawConversation(requestId, this.titleDraft);
+      this.isRenamingTitle = false;
+    } catch (error) {
+      this.dispatchEvent(
+        new CustomEvent('df-openclaw-chat-widget-error', {
+          detail: {error},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
   }
 
   private handleInput(event: Event): void {
@@ -485,8 +730,9 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   private async submitMessage(): Promise<void> {
     const trimmed = this.messageText.trim();
     const sending = openclawChatSendState.get().status === 'sending';
+    const activeConversationId = openclawActiveConversationState.get().activeConversationId;
 
-    if (!trimmed || sending) {
+    if (!trimmed || sending || !activeConversationId) {
       return;
     }
 
@@ -511,12 +757,28 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     }
   }
 
-  private canSubmit(disabled: boolean): boolean {
-    if (disabled) {
+  private canSubmit(disabled: boolean, activeConversationId: string | null): boolean {
+    if (disabled || !activeConversationId) {
       return false;
     }
 
     return Boolean(this.messageText.trim().length);
+  }
+
+  private resolveConversationTitle(conversation: OpenclawConversation | null): string {
+    return conversation?.title?.trim() || 'Untitled';
+  }
+
+  private resolveConversationSubtitle(conversation: OpenclawConversation | null): string {
+    if (!conversation) {
+      return 'I am here to help you compose an OpenClaw system request.';
+    }
+
+    const prefix = conversation.status === 'accepted'
+      ? 'Accepted work request.'
+      : 'Cathy is helping you compose a work request.';
+
+    return `${prefix} Click the title to rename this conversation.`;
   }
 
   private resolveStatusLabel(
@@ -525,7 +787,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     error: string | null
   ): string | null {
     if (sendStatus === 'sending') {
-      return `Waiting for ${this.agentDisplayName}…`;
+      return 'Waiting for Cathy…';
     }
 
     if (sendStatus === 'error') {
@@ -550,7 +812,32 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     }
   }
 
-  private formatTimestamp(value: Date | null): string {
+  private formatRelativeTimestamp(value: Date | null): string {
+    if (!value) {
+      return '';
+    }
+
+    const deltaMs = value.getTime() - Date.now();
+    const deltaMinutes = Math.round(deltaMs / 60000);
+
+    if (Math.abs(deltaMinutes) < 1) {
+      return 'now';
+    }
+
+    if (Math.abs(deltaMinutes) < 60) {
+      return new Intl.RelativeTimeFormat(undefined, {numeric: 'auto'}).format(deltaMinutes, 'minute');
+    }
+
+    const deltaHours = Math.round(deltaMinutes / 60);
+    if (Math.abs(deltaHours) < 24) {
+      return new Intl.RelativeTimeFormat(undefined, {numeric: 'auto'}).format(deltaHours, 'hour');
+    }
+
+    const deltaDays = Math.round(deltaHours / 24);
+    return new Intl.RelativeTimeFormat(undefined, {numeric: 'auto'}).format(deltaDays, 'day');
+  }
+
+  private formatMessageTimestamp(value: Date | null): string {
     if (!value) {
       return '';
     }

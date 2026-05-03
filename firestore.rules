@@ -253,31 +253,61 @@ service cloud.firestore {
     }
 
     // =============================================================================
-    // OPENCLAW CHAT SESSIONS (df-openclaw-chat)
+    // OPENCLAW WORK REQUESTS (df-openclaw-chat)
     // =============================================================================
 
     /**
-     * Session messages for OpenClaw chat bridge.
-     * Session keys use format: agent:<name>:hook:<userId>
-     * Users can read/create in their own session; updates handled by Cloud Function.
+     * Work request metadata documents for OpenClaw chat.
+     * Users can only access their own conversations.
      */
-    match /sessions/{sessionId}/messages/{messageId} {
-      function isOwnSession() {
-        return isAuthenticated() && sessionId.matches('agent:[a-z_-]+:hook:' + request.auth.uid);
+    match /openclawWorkRequests/{requestId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+
+      allow create: if isAuthenticated()
+        && request.auth.uid == request.resource.data.userId
+        && hasRequiredFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt'])
+        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt'])
+        && request.resource.data.agentId == 'cathy'
+        && (request.resource.data.title is string || request.resource.data.title == null)
+        && request.resource.data.status == 'active'
+        && (request.resource.data.createdAt is timestamp || request.resource.data.createdAt == null)
+        && (request.resource.data.lastMessageAt is timestamp || request.resource.data.lastMessageAt == null);
+
+      allow update: if isAuthenticated()
+        && isOwner(resource.data.userId)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.agentId == resource.data.agentId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.status in ['active', 'accepted']
+        && (request.resource.data.title is string || request.resource.data.title == null)
+        && (request.resource.data.lastMessageAt is timestamp || request.resource.data.lastMessageAt == null);
+
+      allow delete: if false;
+    }
+
+    /**
+     * Message subcollection for OpenClaw work requests.
+     * Users can read/create within conversations they own; Cloud Functions
+     * handle assistant messages and status transitions.
+     */
+    match /openclawWorkRequests/{requestId}/messages/{messageId} {
+      function isOwnWorkRequest() {
+        return isAuthenticated()
+          && get(/databases/$(database)/documents/openclawWorkRequests/$(requestId)).data.userId == request.auth.uid;
       }
 
-      allow read: if isOwnSession();
+      allow read: if isOwnWorkRequest();
 
-      allow create: if isOwnSession()
+      allow create: if isOwnWorkRequest()
         && hasRequiredFields(['role', 'content', 'sessionId', 'status', 'createdAt'])
         && request.resource.data.role == 'user'
         && request.resource.data.status == 'pending'
-        && request.resource.data.sessionId == sessionId
+        && request.resource.data.sessionId == requestId
         && request.resource.data.content is string
         && request.resource.data.content.size() > 0
         && request.resource.data.content.size() <= 10000;
 
-      allow update: if false; // Cloud Function handles status updates
+      allow update: if false;
       allow delete: if false;
     }
 
