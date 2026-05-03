@@ -19,11 +19,12 @@
  * Build will FAIL if native HTML elements are detected.
  */
 
-import {SignalWatcher} from '@lit-labs/signals';
+import {signal, SignalWatcher} from '@lit-labs/signals';
 import {css, html, LitElement, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {
   createOpenclawConversation,
+  firebaseAuthState,
   openclawActiveConversationState,
   openclawChatMessagesState,
   openclawChatSendState,
@@ -223,6 +224,48 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       object-fit: contain;
     }
 
+    .header-img--clickable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .superuser-panel {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--md-sys-color-tertiary-container, rgba(99, 102, 241, 0.1));
+      border: 2px solid var(--md-sys-color-tertiary, rgba(99, 102, 241, 0.5));
+    }
+
+    .superuser-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--md-sys-color-tertiary, rgba(99, 102, 241, 0.9));
+    }
+
+    .superuser-controls {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .superuser-controls md-filled-select {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .superuser-active-agent {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--md-sys-color-error, #dc2626);
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
     .header-copy {
       display: grid;
       gap: 6px;
@@ -383,15 +426,26 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   @property({type: String, attribute: 'header-img-right'}) declare headerImgRight: string;
   @property({type: Boolean, attribute: 'submit-on-enter'}) declare submitOnEnter: boolean;
 
+  /** Email of the privileged account. Triple-clicking the right header image activates super user mode. */
+  @property({type: String, attribute: 'superuser-email'}) declare superuserEmail: string;
+
+  /** Comma-separated list of agent names shown in the super user agent selector. */
+  @property({type: String, attribute: 'openclaw-agents'}) declare openclawAgents: string;
+
+  private readonly isSuperUser = signal(false);
+
   @state() private messageText = '';
   @state() private isSidebarCollapsed = false;
   @state() private isRenamingTitle = false;
   @state() private titleDraft = '';
+  @state() private activeAgentName = '';
 
   private previousMessageCount = 0;
   private previousConversationId: string | null = null;
   private previousConversationStatus: 'active' | 'accepted' | null = null;
   private isCreatingAcceptedFollowup = false;
+  private _clickCount = 0;
+  private _clickTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     super();
@@ -399,6 +453,8 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     this.headerImgLeft = '';
     this.headerImgRight = '';
     this.submitOnEnter = true;
+    this.superuserEmail = '';
+    this.openclawAgents = '';
   }
 
   override connectedCallback(): void {
@@ -463,8 +519,15 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
               </div>
             </div>
 
-            ${this.headerImgRight ? html`<img class="header-img" src=${this.headerImgRight} alt="" aria-hidden="true" />` : nothing}
+            ${this.headerImgRight ? html`<img
+              class="header-img header-img--clickable"
+              src=${this.headerImgRight}
+              alt=""
+              aria-hidden="true"
+              @click=${this.handleLobsterClick}
+            />` : nothing}
           </header>
+          ${this.isSuperUser.get() ? this.renderSuperUserPanel() : nothing}
 
           <section class="messages" aria-label="Chat messages">
             ${this.renderMessages(chatState, activeConversation)}
@@ -580,6 +643,79 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
         <md-text-button @click=${this.cancelRename}>Cancel</md-text-button>
       </div>
     `;
+  }
+
+  private renderSuperUserPanel() {
+    const agents = this.openclawAgents
+      ? this.openclawAgents.split(',').map((a) => a.trim()).filter(Boolean)
+      : [];
+
+    return html`
+      <div class="superuser-panel">
+        <div class="superuser-title">Super User — Agent Selection</div>
+        ${this.activeAgentName ? html`
+          <div class="superuser-active-agent">
+            Active: ${this.activeAgentName}
+          </div>
+        ` : nothing}
+        <div class="superuser-controls">
+          <md-filled-select
+            label="Select an agent"
+            @change=${this.handleAgentSelectChange}
+          >
+            ${agents.map((agent) => html`
+              <md-select-option .value=${agent}>
+                <div slot="headline">${agent}</div>
+              </md-select-option>
+            `)}
+          </md-filled-select>
+        </div>
+      </div>
+    `;
+  }
+
+  private handleLobsterClick(): void {
+    this._clickCount++;
+
+    if (this._clickTimer) {
+      clearTimeout(this._clickTimer);
+    }
+
+    if (this._clickCount >= 3) {
+      this._clickCount = 0;
+      this._clickTimer = null;
+      this.checkAndActivateSuperUser();
+      return;
+    }
+
+    this._clickTimer = setTimeout(() => {
+      this._clickCount = 0;
+      this._clickTimer = null;
+    }, 500);
+  }
+
+  private checkAndActivateSuperUser(): void {
+    const {authUser} = firebaseAuthState.get();
+    if (authUser?.email && this.superuserEmail && authUser.email === this.superuserEmail) {
+      this.isSuperUser.set(true);
+    }
+  }
+
+  private async handleAgentSelectChange(event: Event): Promise<void> {
+    const selected = (event.target as HTMLSelectElement).value;
+    if (!selected) return;
+    try {
+      await createOpenclawConversation(selected);
+      this.activeAgentName = selected;
+    } catch (error) {
+      this.dispatchEvent(
+        new CustomEvent('df-openclaw-chat-widget-error', {
+          detail: {error},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
   }
 
   private renderMessages(

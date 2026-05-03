@@ -49,6 +49,8 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
         <df-openclaw-chat-widget
           header-img-left=${CHATTY_CATHY_IMG}
           header-img-right=${LOBSTER_IMG}
+          superuser-email=${import.meta.env.VITE_SUPERUSER_EMAIL ?? ''}
+          openclaw-agents=${import.meta.env.VITE_OPENCLAW_AGENTS ?? ''}
           @df-openclaw-chat-widget-error=${this.handleWidgetError}
         ></df-openclaw-chat-widget>
       </div>

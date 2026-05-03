@@ -163,7 +163,7 @@ export function stopOpenclawRealtime(): void {
   isMessagesListeningSignal.set(false);
 }
 
-export async function createOpenclawConversation(): Promise<string> {
+export async function createOpenclawConversation(agentId?: string): Promise<string> {
   if (!initializedDb || !initializedUserId) {
     throw new Error('OpenClaw chat store is not initialized.');
   }
@@ -173,7 +173,7 @@ export async function createOpenclawConversation(): Promise<string> {
 
   await setDoc(conversationRef, {
     userId: initializedUserId,
-    agentId: DEFAULT_AGENT_ID,
+    agentId: agentId ?? DEFAULT_AGENT_ID,
     title: null,
     status: 'active',
     createdAt: serverTimestamp(),
