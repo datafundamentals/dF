@@ -267,7 +267,8 @@ service cloud.firestore {
         && request.auth.uid == request.resource.data.userId
         && hasRequiredFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt'])
         && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt'])
-        && request.resource.data.agentId == 'cathy'
+        && request.resource.data.agentId is string
+        && request.resource.data.agentId.size() > 0
         && (request.resource.data.title is string || request.resource.data.title == null)
         && request.resource.data.status == 'active'
         && (request.resource.data.createdAt is timestamp || request.resource.data.createdAt == null)

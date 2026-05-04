@@ -253,9 +253,8 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       flex-wrap: wrap;
     }
 
-    .superuser-controls md-filled-select {
-      flex: 1;
-      min-width: 150px;
+    .superuser-controls md-outlined-button {
+      min-width: 80px;
     }
 
     .superuser-active-agent {
@@ -624,7 +623,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
             ${this.formatRelativeTimestamp(conversation.lastMessageAt)}
           </time>
         </div>
-        <div class="conversation-status">${conversation.status}</div>
+        <div class="conversation-status">${conversation.agentId} · ${conversation.status}</div>
       </article>
     `);
   }
@@ -659,16 +658,11 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
           </div>
         ` : nothing}
         <div class="superuser-controls">
-          <md-filled-select
-            label="Select an agent"
-            @change=${this.handleAgentSelectChange}
-          >
-            ${agents.map((agent) => html`
-              <md-select-option .value=${agent}>
-                <div slot="headline">${agent}</div>
-              </md-select-option>
-            `)}
-          </md-filled-select>
+          ${agents.map((agent) => html`
+            <md-outlined-button @click=${() => this.handleAgentClick(agent)}>
+              ${agent}
+            </md-outlined-button>
+          `)}
         </div>
       </div>
     `;
@@ -701,12 +695,10 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     }
   }
 
-  private async handleAgentSelectChange(event: Event): Promise<void> {
-    const selected = (event.target as HTMLSelectElement).value;
-    if (!selected) return;
+  private async handleAgentClick(agent: string): Promise<void> {
     try {
-      await createOpenclawConversation(selected);
-      this.activeAgentName = selected;
+      await createOpenclawConversation(agent);
+      this.activeAgentName = agent;
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent('df-openclaw-chat-widget-error', {
@@ -753,7 +745,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
           </time>
         </div>
         <p class="message-body">${message.content}</p>
-        ${isPending ? html`<span class="status-badge">Sending to Cathy…</span>` : nothing}
+        ${isPending ? html`<span class="status-badge">Sending to ${this.activeAgentName || 'Cathy'}…</span>` : nothing}
       </article>
     `;
   }
@@ -923,7 +915,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     error: string | null
   ): string | null {
     if (sendStatus === 'sending') {
-      return 'Waiting for Cathy…';
+      return `Waiting for ${this.activeAgentName || 'Cathy'}…`;
     }
 
     if (sendStatus === 'error') {

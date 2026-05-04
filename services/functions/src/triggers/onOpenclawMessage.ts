@@ -79,7 +79,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   const conversationRef = db.collection(WORK_REQUESTS_COLLECTION).doc(requestId);
   const messageRef = conversationRef.collection(MESSAGES_SUBCOLLECTION).doc(messageId);
   const conversationSnap = await conversationRef.get();
-  const agentId = OPENCLAW_WORK_REQUEST_AGENT_ID;
+  const agentId = (conversationSnap.get('agentId') as string | undefined) ?? OPENCLAW_WORK_REQUEST_AGENT_ID;
 
   await messageRef.update({status: 'processing'});
   functions.logger.info('OpenClaw message processing started', {
@@ -98,7 +98,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       .map((d) => d.data())
       .filter((m) => m.status === 'complete')
       .map((m) => ({role: m.role as string, content: m.content as string}));
-    const sessionKey = `${OPENCLAW_WORK_REQUEST_SESSION_PREFIX}${requestId}`;
+    const sessionKey = `openclaw-work-request-v2:${agentId}:${requestId}`;
     const requestBody = {
       agentId,
       sessionKey,
