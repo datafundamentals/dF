@@ -68,6 +68,7 @@ let messagesCollectionRef: CollectionReference<DocumentData> | null = null;
 let initializedDb: Firestore | null = null;
 let initializedUserId: string | null = null;
 let ensureConversationPromise: Promise<string | null> | null = null;
+let demoMode = false;
 
 export const openclawChatMessagesState = computed<FirestoreCollectionState<OpenclawMessage>>(() => ({
   status: messagesStatusSignal.get(),
@@ -109,6 +110,62 @@ export const openclawChatSendState = computed(() => ({
   status: sendStatusSignal.get(),
   error: sendErrorSignal.get(),
 }));
+
+interface OpenclawDemoState {
+  conversations: readonly OpenclawConversation[];
+  messages: readonly OpenclawMessage[];
+  activeConversationId?: string | null;
+  conversationsStatus?: 'idle' | 'loading' | 'ready' | 'error';
+  messagesStatus?: 'idle' | 'loading' | 'ready' | 'error';
+  conversationsError?: string | null;
+  messagesError?: string | null;
+  sendStatus?: OpenclawSendStatus;
+  sendError?: string | null;
+  isConversationsListening?: boolean;
+  isMessagesListening?: boolean;
+}
+
+export function __setOpenclawDemoState(state: OpenclawDemoState): void {
+  if (initializedDb || initializedUserId || unsubscribeConversations || unsubscribeMessages) {
+    throw new Error('Cannot set OpenClaw demo state after the store has been initialized.');
+  }
+
+  demoMode = true;
+  conversationsSignal.set([...state.conversations]);
+  messagesSignal.set([...state.messages]);
+  activeConversationIdSignal.set(
+    state.activeConversationId
+      ?? state.conversations[0]?.id
+      ?? null
+  );
+  conversationsStatusSignal.set(state.conversationsStatus ?? 'ready');
+  messagesStatusSignal.set(state.messagesStatus ?? 'ready');
+  conversationsErrorSignal.set(state.conversationsError ?? null);
+  messagesErrorSignal.set(state.messagesError ?? null);
+  sendStatusSignal.set(state.sendStatus ?? 'idle');
+  sendErrorSignal.set(state.sendError ?? null);
+  isConversationsListeningSignal.set(state.isConversationsListening ?? false);
+  isMessagesListeningSignal.set(state.isMessagesListening ?? false);
+}
+
+export function __resetOpenclawDemoState(): void {
+  if (!demoMode) {
+    return;
+  }
+
+  demoMode = false;
+  conversationsSignal.set([]);
+  messagesSignal.set([]);
+  activeConversationIdSignal.set(null);
+  conversationsStatusSignal.set('idle');
+  messagesStatusSignal.set('idle');
+  conversationsErrorSignal.set(null);
+  messagesErrorSignal.set(null);
+  sendStatusSignal.set('idle');
+  sendErrorSignal.set(null);
+  isConversationsListeningSignal.set(false);
+  isMessagesListeningSignal.set(false);
+}
 
 export async function initializeOpenclawChatStore(
   app: FirebaseApp,

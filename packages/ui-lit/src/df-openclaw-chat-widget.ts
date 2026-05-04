@@ -22,6 +22,7 @@
 import {signal, SignalWatcher} from '@lit-labs/signals';
 import {css, html, LitElement, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
+import '@material/web/switch/switch.js';
 import {
   createOpenclawConversation,
   firebaseAuthState,
@@ -37,8 +38,12 @@ import {
 } from '@df/state';
 import type {FirestoreRequestState} from '@df/types/firebase-firestore.types';
 import type {OpenclawSendStatus} from '@df/types';
+import './df-upload-link.js';
 
 const ENTER_KEY = 'Enter';
+const SPACE_KEY = ' ';
+const STATUS_BASE_URL = 'https://hbb-a1.web.app/WR_Status/';
+const VISUAL_UPLOAD_FILES = ['foo.md', 'bar.jpg', 'yada.pdf'] as const;
 
 interface OpenclawConversation {
   id: string;
@@ -182,9 +187,23 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       color: rgba(79, 70, 229, 0.9);
     }
 
+    .conversation-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 10px;
+    }
+
+    .conversation-aux {
+      display: grid;
+      gap: 6px;
+    }
+
     .layout--collapsed .sidebar-title,
     .layout--collapsed .conversation-title,
-    .layout--collapsed .conversation-status {
+    .layout--collapsed .conversation-status,
+    .layout--collapsed .conversation-meta,
+    .layout--collapsed .conversation-aux {
       display: none;
     }
 
@@ -296,6 +315,141 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       color: rgba(51, 65, 85, 0.78);
     }
 
+    .panel-meta {
+      display: grid;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .panel-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 12px;
+    }
+
+    .meta-chip {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(79, 70, 229, 0.9);
+      text-decoration: none;
+    }
+
+    .meta-chip[role='button'] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .meta-chip--danger {
+      color: rgba(185, 28, 28, 0.92);
+    }
+
+    .meta-chip--muted {
+      color: rgba(71, 85, 105, 0.88);
+    }
+
+    .meta-chip:focus-visible {
+      outline: 2px solid rgba(99, 102, 241, 0.45);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
+    .delete-confirmation {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 12px;
+      font-size: 0.78rem;
+      color: rgba(71, 85, 105, 0.92);
+    }
+
+    .delete-confirmation strong {
+      color: rgba(185, 28, 28, 0.92);
+      font-weight: 700;
+    }
+
+    .panel-recurring {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-recurring-label,
+    .panel-recurring-copy {
+      font-size: 0.76rem;
+      line-height: 1.2;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(79, 70, 229, 0.84);
+    }
+
+    .panel-supporting-copy {
+      font-size: 0.88rem;
+      color: rgba(51, 65, 85, 0.78);
+    }
+
+    .panel-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .panel-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(248, 250, 252, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      min-width: 0;
+    }
+
+    .panel-card-title {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(15, 23, 42, 0.56);
+    }
+
+    .upload-shell {
+      pointer-events: none;
+      opacity: 0.82;
+      filter: saturate(0.94);
+    }
+
+    .upload-caption {
+      font-size: 0.82rem;
+      color: rgba(71, 85, 105, 0.82);
+    }
+
+    .uploaded-file-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .uploaded-file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .uploaded-file-name {
+      min-width: 0;
+      font-size: 0.92rem;
+      color: rgba(15, 23, 42, 0.88);
+      overflow-wrap: anywhere;
+    }
+
     .rename-form {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto auto;
@@ -344,8 +498,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
     .message-role {
       font-size: 0.76rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.01em;
       font-weight: 700;
       color: rgba(71, 85, 105, 0.82);
     }
@@ -418,6 +571,16 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       font-size: 0.92rem;
       text-align: center;
     }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-upload-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   `;
 
   @property({type: String}) declare heading: string;
@@ -438,6 +601,8 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   @state() private isRenamingTitle = false;
   @state() private titleDraft = '';
   @state() private activeAgentName = '';
+  @state() private recurringVisualState: Record<string, boolean> = {};
+  @state() private deleteConfirmationConversationId: string | null = null;
 
   private previousMessageCount = 0;
   private previousConversationId: string | null = null;
@@ -527,6 +692,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
             />` : nothing}
           </header>
           ${this.isSuperUser.get() ? this.renderSuperUserPanel() : nothing}
+          ${activeConversation ? this.renderPanelMeta(activeConversation) : nothing}
 
           <section class="messages" aria-label="Chat messages">
             ${this.renderMessages(chatState, activeConversation)}
@@ -623,7 +789,32 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
             ${this.formatRelativeTimestamp(conversation.lastMessageAt)}
           </time>
         </div>
-        <div class="conversation-status">${conversation.agentId} · ${conversation.status}</div>
+        <div class="conversation-aux">
+          <div class="conversation-status">${this.resolveConversationStatusText(conversation)}</div>
+          <div class="conversation-meta">
+            <a
+              class="meta-chip"
+              href=${this.resolveStatusUrl(conversation.id)}
+              target="_blank"
+              rel="noreferrer"
+              @click=${this.handleMetaActionClick}
+            >
+              Status
+            </a>
+            <span
+              class="meta-chip meta-chip--danger"
+              role="button"
+              tabindex="0"
+              @click=${(event: Event) => this.openDeleteConfirmation(event, conversation.id)}
+              @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => this.openDeleteConfirmation(event, conversation.id))}
+            >
+              Delete
+            </span>
+          </div>
+          ${this.deleteConfirmationConversationId === conversation.id
+            ? this.renderDeleteConfirmation(conversation.id)
+            : nothing}
+        </div>
       </article>
     `);
   }
@@ -664,6 +855,111 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
             </md-outlined-button>
           `)}
         </div>
+      </div>
+    `;
+  }
+
+  private renderPanelMeta(conversation: OpenclawConversation) {
+    const recurring = this.isRecurringVisual(conversation.id);
+
+    return html`
+      <section class="panel-meta" aria-label="Work request details">
+        <div class="panel-actions">
+          <div class="conversation-status">${this.resolveConversationStatusText(conversation)}</div>
+          <a
+            class="meta-chip"
+            href=${this.resolveStatusUrl(conversation.id)}
+            target="_blank"
+            rel="noreferrer"
+            @click=${this.handleMetaActionClick}
+          >
+            Status
+          </a>
+          <span
+            class="meta-chip meta-chip--danger"
+            role="button"
+            tabindex="0"
+            @click=${(event: Event) => this.openDeleteConfirmation(event, conversation.id)}
+            @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => this.openDeleteConfirmation(event, conversation.id))}
+          >
+            Delete
+          </span>
+        </div>
+
+        ${this.deleteConfirmationConversationId === conversation.id
+          ? this.renderDeleteConfirmation(conversation.id)
+          : nothing}
+
+        <div class="panel-recurring">
+          <span class="panel-recurring-label">Recurring?</span>
+          <md-switch
+            ?selected=${recurring}
+            aria-label="Recurring work request"
+            @change=${(event: Event) => this.handleRecurringVisualToggle(event, conversation.id)}
+          ></md-switch>
+          <span class="panel-recurring-copy">${recurring ? 'Daily' : 'One Time'}</span>
+        </div>
+
+        <div class="panel-supporting-copy">
+          ${recurring ? 'Recurring summary is visual only in this ticket.' : 'Actual scheduling remains agent-controlled.'}
+        </div>
+
+        <div class="panel-upload-grid">
+          <section class="panel-card" aria-label="Upload widget placement">
+            <p class="panel-card-title">Upload Widget</p>
+            <div class="upload-shell" aria-disabled="true">
+              <df-upload-link resourcePageType="storage" resourceLinkType="image"></df-upload-link>
+            </div>
+            <div class="upload-caption">Visual placement only in this ticket.</div>
+          </section>
+
+          <section class="panel-card" aria-label="Uploaded documents">
+            <p class="panel-card-title">Uploaded Docs</p>
+            <div class="uploaded-file-list">
+              ${VISUAL_UPLOAD_FILES.map((fileName) => html`
+                <div class="uploaded-file-item">
+                    <span class="uploaded-file-name">${fileName}</span>
+                    <span
+                    class="meta-chip meta-chip--danger"
+                    role="button"
+                    tabindex="0"
+                    @click=${this.handleMetaActionClick}
+                    @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => undefined)}
+                  >
+                    Delete
+                  </span>
+                </div>
+              `)}
+            </div>
+          </section>
+        </div>
+      </section>
+    `;
+  }
+
+  private renderDeleteConfirmation(conversationId: string) {
+    return html`
+      <div class="delete-confirmation">
+        <strong>Are you sure?</strong>
+        <span>This is not undoable.</span>
+        <span
+          class="meta-chip meta-chip--danger"
+          role="button"
+          tabindex="0"
+          @click=${(event: Event) => this.confirmVisualDelete(event, conversationId)}
+          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => this.confirmVisualDelete(event, conversationId))}
+        >
+          Confirm Delete
+        </span>
+        <span
+          class="meta-chip meta-chip--muted"
+          role="button"
+          tabindex="0"
+          @click=${this.closeDeleteConfirmation}
+          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, this.closeDeleteConfirmation)}
+        >
+          Cancel
+        </span>
       </div>
     `;
   }
@@ -735,17 +1031,18 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
   private renderMessage(message: OpenclawMessage) {
     const isPending = message.role === 'user' && (message.status === 'pending' || message.status === 'processing');
+    const activeConversation = openclawActiveConversationState.get().conversation;
 
     return html`
       <article class="message" data-role=${message.role}>
         <div class="message-header">
-          <span class="message-role">${message.role}</span>
+          <span class="message-role">${this.resolveMessageAuthorLabel(message, activeConversation)}</span>
           <time class="message-time" datetime=${this.formatIso(message.createdAt)}>
             ${this.formatMessageTimestamp(message.createdAt)}
           </time>
         </div>
         <p class="message-body">${message.content}</p>
-        ${isPending ? html`<span class="status-badge">Sending to ${this.activeAgentName || 'Cathy'}…</span>` : nothing}
+        ${isPending ? html`<span class="status-badge">Sending to ${this.resolveAssistantName(activeConversation)}…</span>` : nothing}
       </article>
     `;
   }
@@ -782,6 +1079,44 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
   private toggleSidebar(): void {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
+
+  private handleMetaActionClick(event: Event): void {
+    event.stopPropagation();
+  }
+
+  private handleActionKeydown(event: KeyboardEvent, action: () => void): void {
+    if (event.key === ENTER_KEY || event.key === SPACE_KEY) {
+      event.preventDefault();
+      event.stopPropagation();
+      action();
+    }
+  }
+
+  private openDeleteConfirmation(event: Event, conversationId: string): void {
+    event.stopPropagation();
+    this.deleteConfirmationConversationId = conversationId;
+  }
+
+  private closeDeleteConfirmation = (event?: Event): void => {
+    event?.stopPropagation();
+    this.deleteConfirmationConversationId = null;
+  };
+
+  private confirmVisualDelete(event: Event, conversationId: string): void {
+    event.stopPropagation();
+    this.deleteConfirmationConversationId = conversationId;
+  }
+
+  private handleRecurringVisualToggle(event: Event, conversationId: string): void {
+    const target = event.target as HTMLElement & {selected?: boolean};
+    const nextValue = typeof target.selected === 'boolean'
+      ? target.selected
+      : !this.isRecurringVisual(conversationId);
+    this.recurringVisualState = {
+      ...this.recurringVisualState,
+      [conversationId]: nextValue,
+    };
   }
 
   private handleConversationSelect(requestId: string): void {
@@ -904,7 +1239,9 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
     const prefix = conversation.status === 'accepted'
       ? 'Accepted work request.'
-      : 'Cathy is helping you compose a work request.';
+      : this.isSuperUser.get()
+        ? `${this.resolveAssistantName(conversation)} is helping you compose a work request.`
+        : 'An agent is helping you compose a work request.';
 
     return `${prefix} Click the title to rename this conversation.`;
   }
@@ -915,7 +1252,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     error: string | null
   ): string | null {
     if (sendStatus === 'sending') {
-      return `Waiting for ${this.activeAgentName || 'Cathy'}…`;
+      return `Waiting for ${this.resolveAssistantName(openclawActiveConversationState.get().conversation)}…`;
     }
 
     if (sendStatus === 'error') {
@@ -978,6 +1315,64 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
   private formatIso(value: Date | null): string {
     return value ? value.toISOString() : '';
+  }
+
+  private resolveMessageAuthorLabel(
+    message: OpenclawMessage,
+    activeConversation: OpenclawConversation | null
+  ): string {
+    if (message.role === 'user') {
+      return this.resolveUserDisplayName();
+    }
+
+    return this.resolveAssistantName(activeConversation);
+  }
+
+  private resolveUserDisplayName(): string {
+    const {authUser} = firebaseAuthState.get();
+    const displayName = authUser?.displayName?.trim();
+    if (displayName) {
+      return displayName;
+    }
+
+    const email = authUser?.email?.trim();
+    if (email) {
+      return email;
+    }
+
+    return 'User';
+  }
+
+  private resolveAssistantName(conversation: OpenclawConversation | null): string {
+    const preferredAgent = this.activeAgentName.trim() || conversation?.agentId?.trim() || 'cathy';
+    const normalized = preferredAgent
+      .replace(/[-_]+/g, ' ')
+      .trim();
+    const [firstWord] = normalized.split(/\s+/);
+    const token = firstWord || 'Cathy';
+    return token.charAt(0).toUpperCase() + token.slice(1);
+  }
+
+  private resolveConversationStatusText(conversation: OpenclawConversation): string {
+    const status = conversation.status === 'accepted' ? 'Accepted' : 'Active';
+    if (!this.isSuperuserAccount()) {
+      return status;
+    }
+
+    return `${this.resolveAssistantName(conversation)} - ${status}`;
+  }
+
+  private resolveStatusUrl(conversationId: string): string {
+    return `${STATUS_BASE_URL}${conversationId}/`;
+  }
+
+  private isRecurringVisual(conversationId: string): boolean {
+    return this.recurringVisualState[conversationId] ?? false;
+  }
+
+  private isSuperuserAccount(): boolean {
+    const {authUser} = firebaseAuthState.get();
+    return Boolean(authUser?.email && this.superuserEmail && authUser.email === this.superuserEmail);
   }
 }
 
