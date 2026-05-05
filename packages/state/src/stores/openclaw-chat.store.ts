@@ -2,8 +2,16 @@ import {computed, signal} from '@lit-labs/signals';
 import type {FirebaseApp} from 'firebase/app';
 import type {Firestore} from 'firebase/firestore';
 import {connectFirestoreToEmulator, getFirestoreDb} from '@df/firebase';
+import {
+  callable,
+  connectFunctionsToEmulator,
+  getFirebaseFunctions,
+  DEFAULT_FUNCTIONS_REGION,
+  type Functions,
+} from '@df/firebase/functions';
 import type {FirestoreCollectionState} from '@df/types/firebase-firestore.types';
 import type {FirestoreDocument} from '@df/types/firebase-firestore.types';
+import type {OpenclawDeleteStatus} from '@df/types/openclaw-chat.types';
 import type {OpenclawSendStatus} from '@df/types';
 import {
   Timestamp,
@@ -60,12 +68,16 @@ const isConversationsListeningSignal = signal(false);
 
 const sendStatusSignal = signal<OpenclawSendStatus>('idle');
 const sendErrorSignal = signal<string | null>(null);
+const deleteStatusSignal = signal<OpenclawDeleteStatus>('idle');
+const deleteErrorSignal = signal<string | null>(null);
+const deletingConversationIdSignal = signal<string | null>(null);
 const activeConversationIdSignal = signal<string | null>(null);
 
 let unsubscribeMessages: Unsubscribe | null = null;
 let unsubscribeConversations: Unsubscribe | null = null;
 let messagesCollectionRef: CollectionReference<DocumentData> | null = null;
 let initializedDb: Firestore | null = null;
+let initializedFunctions: Functions | null = null;
 let initializedUserId: string | null = null;
 let ensureConversationPromise: Promise<string | null> | null = null;
 let demoMode = false;
@@ -111,6 +123,12 @@ export const openclawChatSendState = computed(() => ({
   error: sendErrorSignal.get(),
 }));
 
+export const openclawChatDeleteState = computed(() => ({
+  status: deleteStatusSignal.get(),
+  error: deleteErrorSignal.get(),
+  deletingConversationId: deletingConversationIdSignal.get(),
+}));
+
 interface OpenclawDemoState {
   conversations: readonly OpenclawConversation[];
   messages: readonly OpenclawMessage[];
@@ -121,6 +139,9 @@ interface OpenclawDemoState {
   messagesError?: string | null;
   sendStatus?: OpenclawSendStatus;
   sendError?: string | null;
+  deleteStatus?: OpenclawDeleteStatus;
+  deleteError?: string | null;
+  deletingConversationId?: string | null;
   isConversationsListening?: boolean;
   isMessagesListening?: boolean;
 }
@@ -144,6 +165,9 @@ export function __setOpenclawDemoState(state: OpenclawDemoState): void {
   messagesErrorSignal.set(state.messagesError ?? null);
   sendStatusSignal.set(state.sendStatus ?? 'idle');
   sendErrorSignal.set(state.sendError ?? null);
+  deleteStatusSignal.set(state.deleteStatus ?? 'idle');
+  deleteErrorSignal.set(state.deleteError ?? null);
+  deletingConversationIdSignal.set(state.deletingConversationId ?? null);
   isConversationsListeningSignal.set(state.isConversationsListening ?? false);
   isMessagesListeningSignal.set(state.isMessagesListening ?? false);
 }
@@ -163,8 +187,37 @@ export function __resetOpenclawDemoState(): void {
   messagesErrorSignal.set(null);
   sendStatusSignal.set('idle');
   sendErrorSignal.set(null);
+  deleteStatusSignal.set('idle');
+  deleteErrorSignal.set(null);
+  deletingConversationIdSignal.set(null);
   isConversationsListeningSignal.set(false);
   isMessagesListeningSignal.set(false);
+}
+
+export function __setOpenclawFunctionsForTests(functions: Functions): void {
+  initializedFunctions = functions;
+}
+
+export function __resetOpenclawStoreForTests(): void {
+  stopOpenclawRealtime();
+  messagesSignal.set([]);
+  conversationsSignal.set([]);
+  messagesStatusSignal.set('idle');
+  conversationsStatusSignal.set('idle');
+  messagesErrorSignal.set(null);
+  conversationsErrorSignal.set(null);
+  sendStatusSignal.set('idle');
+  sendErrorSignal.set(null);
+  deleteStatusSignal.set('idle');
+  deleteErrorSignal.set(null);
+  deletingConversationIdSignal.set(null);
+  activeConversationIdSignal.set(null);
+  messagesCollectionRef = null;
+  initializedDb = null;
+  initializedFunctions = null;
+  initializedUserId = null;
+  ensureConversationPromise = null;
+  demoMode = false;
 }
 
 export async function initializeOpenclawChatStore(
@@ -185,7 +238,13 @@ export async function initializeOpenclawChatStore(
     connectFirestoreToEmulator(db, {host: FIRESTORE_HOST, port: FIRESTORE_PORT});
   }
 
+  const functions = getFirebaseFunctions(app, DEFAULT_FUNCTIONS_REGION);
+  if (useEmulator) {
+    connectFunctionsToEmulator(functions, {host: FIRESTORE_HOST, port: 5501});
+  }
+
   initializedDb = db;
+  initializedFunctions = functions;
   startConversationsListener(db, userId);
 }
 
@@ -260,6 +319,54 @@ export async function renameOpenclawConversation(requestId: string, title: strin
   await updateDoc(doc(initializedDb, WORK_REQUESTS_COLLECTION, requestId), {
     title: normalizedTitle.length ? normalizedTitle : null,
   });
+}
+
+interface DeleteOpenclawConversationResponse {
+  success: true;
+  requestId: string;
+  deletedMessageCount: number;
+}
+
+export async function deleteOpenclawConversation(requestId: string): Promise<void> {
+  if (demoMode) {
+    const nextConversations = conversationsSignal.get().filter((item) => item.id !== requestId);
+    conversationsSignal.set(nextConversations);
+    if (activeConversationIdSignal.get() === requestId) {
+      const nextConversationId = nextConversations[0]?.id ?? null;
+      activeConversationIdSignal.set(nextConversationId);
+      messagesSignal.set(nextConversationId
+        ? messagesSignal.get().filter((message) => message.sessionId === nextConversationId)
+        : []);
+    }
+    deleteStatusSignal.set('idle');
+    deleteErrorSignal.set(null);
+    deletingConversationIdSignal.set(null);
+    return;
+  }
+
+  if (!initializedFunctions) {
+    throw new Error('OpenClaw chat store is not initialized.');
+  }
+
+  deleteStatusSignal.set('deleting');
+  deleteErrorSignal.set(null);
+  deletingConversationIdSignal.set(requestId);
+
+  try {
+    const fn = callable<{requestId: string}, DeleteOpenclawConversationResponse>(
+      initializedFunctions,
+      'deleteOpenclawConversation'
+    );
+    await fn({requestId});
+    deleteStatusSignal.set('idle');
+    deletingConversationIdSignal.set(null);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to delete conversation.';
+    deleteStatusSignal.set('error');
+    deleteErrorSignal.set(message);
+    deletingConversationIdSignal.set(null);
+    throw error;
+  }
 }
 
 export async function sendOpenclawMessage(content: string): Promise<void> {

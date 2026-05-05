@@ -25,8 +25,10 @@ import {customElement, property, state} from 'lit/decorators.js';
 import '@material/web/switch/switch.js';
 import {
   createOpenclawConversation,
+  deleteOpenclawConversation,
   firebaseAuthState,
   openclawActiveConversationState,
+  openclawChatDeleteState,
   openclawChatMessagesState,
   openclawChatSendState,
   openclawConversationsState,
@@ -640,9 +642,10 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     const activeState = openclawActiveConversationState.get();
     const chatState = openclawChatMessagesState.get();
     const sendState = openclawChatSendState.get();
+    const deleteState = openclawChatDeleteState.get();
     const activeConversationId = activeState.activeConversationId;
     const activeConversation = activeState.conversation;
-    const disabled = sendState.status === 'sending';
+    const disabled = sendState.status === 'sending' || deleteState.status === 'deleting';
     const statusLabel = this.resolveStatusLabel(chatState.status, sendState.status, sendState.error);
 
     return html`
@@ -722,6 +725,9 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
                 Send
               </md-filled-button>
             </div>
+            ${deleteState.status === 'error' && deleteState.error
+              ? html`<span class="composer-status composer-status--error" role="status">${deleteState.error}</span>`
+              : nothing}
           </section>
         </section>
       </div>
@@ -938,6 +944,9 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   }
 
   private renderDeleteConfirmation(conversationId: string) {
+    const deleteState = openclawChatDeleteState.get();
+    const deleting = deleteState.status === 'deleting' && deleteState.deletingConversationId === conversationId;
+
     return html`
       <div class="delete-confirmation">
         <strong>Are you sure?</strong>
@@ -946,15 +955,17 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
           class="meta-chip meta-chip--danger"
           role="button"
           tabindex="0"
-          @click=${(event: Event) => this.confirmVisualDelete(event, conversationId)}
-          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => this.confirmVisualDelete(event, conversationId))}
+          aria-disabled=${String(deleting)}
+          @click=${(event: Event) => this.confirmDelete(event, conversationId)}
+          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => void this.confirmDelete(event, conversationId))}
         >
-          Confirm Delete
+          ${deleting ? 'Deleting…' : 'Confirm Delete'}
         </span>
         <span
           class="meta-chip meta-chip--muted"
           role="button"
           tabindex="0"
+          aria-disabled=${String(deleting)}
           @click=${this.closeDeleteConfirmation}
           @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, this.closeDeleteConfirmation)}
         >
@@ -1103,9 +1114,26 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     this.deleteConfirmationConversationId = null;
   };
 
-  private confirmVisualDelete(event: Event, conversationId: string): void {
+  private async confirmDelete(event: Event, conversationId: string): Promise<void> {
     event.stopPropagation();
-    this.deleteConfirmationConversationId = conversationId;
+    const deleteState = openclawChatDeleteState.get();
+    if (deleteState.status === 'deleting') {
+      return;
+    }
+
+    try {
+      await deleteOpenclawConversation(conversationId);
+      this.deleteConfirmationConversationId = null;
+      this.isRenamingTitle = false;
+    } catch (error) {
+      this.dispatchEvent(
+        new CustomEvent('df-openclaw-chat-widget-error', {
+          detail: {error},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
   }
 
   private handleRecurringVisualToggle(event: Event, conversationId: string): void {

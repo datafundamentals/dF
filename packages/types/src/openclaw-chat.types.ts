@@ -21,6 +21,7 @@ export interface OpenclawMessage extends FirestoreDocument {
  * Lifecycle status for OpenClaw message submissions from the client perspective.
  */
 export type OpenclawSendStatus = 'idle' | 'sending' | 'error';
+export type OpenclawDeleteStatus = 'idle' | 'deleting' | 'error';
 
 export type OpenclawConversationStatus = 'active' | 'accepted';
 
