@@ -25,7 +25,7 @@ This ticket is **host-side infrastructure only** — SSH configuration, a bash d
 
 ---
 
-## Phase 0: Connectivity Verification & Host Hardening
+## Phase 0: Connectivity Verification & Host Hardening ✅ COMPLETE
 **Context:** The VM must be able to "nudge" the Host via SSH without a password, and the Host must restrict that "nudge" to a specific script.
 
 **Action Item 1: VM Key Retrieval (User Intervention Required)**
@@ -49,7 +49,7 @@ This ticket is **host-side infrastructure only** — SSH configuration, a bash d
 
 ---
 
-## Step 1: Host-Side Build Script Creation
+## Step 1: Host-Side Build Script Creation ✅ COMPLETE
 **Action:** Create a robust bash script on the Host that handles the data pull and deployment.
 * **File Path:** `~/scripts/deploy_reports.sh`
 * **Confirmed variable values:**
@@ -72,7 +72,7 @@ This ticket is **host-side infrastructure only** — SSH configuration, a bash d
 
 ---
 
-## Step 2: SSH Key Restriction (The Security Gate)
+## Step 2: SSH Key Restriction (The Security Gate) ✅ COMPLETE
 **Action:** Configure the Host to allow the VM to trigger *only* the script created in Step 1.
 * **File Path:** `~/.ssh/authorized_keys` (on Host).
 * **Requirements:**
@@ -95,7 +95,7 @@ This ticket is **host-side infrastructure only** — SSH configuration, a bash d
 
 ---
 
-## Step 4: End-to-End Integration Test
+## Step 4: End-to-End Integration Test ✅ COMPLETE
 **Action:** Trigger the entire flow from within the VM.
 * **Command:** `ssh petecarapetyan@192.168.64.1`
 * **Note:** No command argument is needed or meaningful — the `command=` restriction in `authorized_keys` always runs `deploy_reports.sh` regardless of any argument passed.

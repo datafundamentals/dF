@@ -1,8 +1,19 @@
-# Ticket 05nnd: OpenClaw Work Request Delete Flow
+# Ticket 0505a: OpenClaw Work Request Delete Flow
 
 ## Why
 
-Ticket `0504a` added the visual placement for delete controls and the confirmation affordance, but intentionally deferred the actual backend delete implementation so the UI work could proceed without dragging in destructive Firestore behavior.
+Ticket `z_/0504b_TICKET_11ty_FROM_VM.md` added the visual placement for delete controls and the confirmation affordance, but intentionally deferred the actual backend delete implementation so the UI work could proceed without dragging in destructive Firestore behavior.
+
+---
+
+## Pre and Post Requirements
+
+1. Before loading the following ticket description into your context, read and follow `guides/1_TICKET_BEFORE_LOADING.md`
+2. Then read the contents of this file into your context.
+3. After loading the contents of this ticket into your context, read and follow `guides/2_TICKET_AFTER_LOADING.md`
+4. Please understand that you are always required to follow the contents of relevant guides/ documents, even if they are not enumerated as a part of this ticket.
+
+---
 
 ## Scope
 

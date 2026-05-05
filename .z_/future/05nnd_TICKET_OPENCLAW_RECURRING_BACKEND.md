@@ -2,7 +2,19 @@
 
 ## Why
 
-Ticket `0504a` added the recurring toggle and summary as a visual-only placement exercise. The data model and agent/backend behavior remain undefined.
+Ticket `z_/0504b_TICKET_11ty_FROM_VM.md` added the recurring toggle and summary as a visual-only placement exercise. The data model and agent/backend behavior remain undefined.
+
+
+---
+
+## Pre and Post Requirements
+
+1. Before loading the following ticket description into your context, read and follow `guides/1_TICKET_BEFORE_LOADING.md`
+2. Then read the contents of this file into your context.
+3. After loading the contents of this ticket into your context, read and follow `guides/2_TICKET_AFTER_LOADING.md`
+4. Please understand that you are always required to follow the contents of relevant guides/ documents, even if they are not enumerated as a part of this ticket.
+
+---
 
 ## Scope
 

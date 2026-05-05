@@ -2,7 +2,19 @@
 
 ## Why
 
-Ticket `0504a` kept the current acceptance visuals but did not resolve lifecycle questions around accepted requests, follow-up conversation creation, and future destructive actions such as delete.
+Ticket `z_/0504b_TICKET_11ty_FROM_VM.md` kept the current acceptance visuals but did not resolve lifecycle questions around accepted requests, follow-up conversation creation, and future destructive actions such as delete.
+
+
+---
+
+## Pre and Post Requirements
+
+1. Before loading the following ticket description into your context, read and follow `guides/1_TICKET_BEFORE_LOADING.md`
+2. Then read the contents of this file into your context.
+3. After loading the contents of this ticket into your context, read and follow `guides/2_TICKET_AFTER_LOADING.md`
+4. Please understand that you are always required to follow the contents of relevant guides/ documents, even if they are not enumerated as a part of this ticket.
+
+---
 
 ## Scope
 
