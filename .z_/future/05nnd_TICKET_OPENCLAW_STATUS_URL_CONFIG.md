@@ -13,6 +13,7 @@ Ticket `z_/0504b_TICKET_11ty_FROM_VM.md` added a status link in the UI using the
 2. Then read the contents of this file into your context.
 3. After loading the contents of this ticket into your context, read and follow `guides/2_TICKET_AFTER_LOADING.md`
 4. Please understand that you are always required to follow the contents of relevant guides/ documents, even if they are not enumerated as a part of this ticket.
+5. Always bring up and resolve with Pete(user) any ambiguities, wrong directions, or other difficulties with this ticket before beginning work.
 
 ---
 

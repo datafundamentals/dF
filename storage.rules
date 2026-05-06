@@ -145,20 +145,33 @@ service firebase.storage {
      */
     match /uploads/storage/image/{fileId} {
       allow read: if isAuthenticated();
-      
+
       allow write: if isAuthenticated()
                    && isImageFile()
                    && hasImageExtension()
                    && isWithinSizeLimit(5 * 1024 * 1024); // 5MB
     }
-    
+
+    /**
+     * OpenClaw chat file uploads — one folder per conversation
+     * Path: uploads/openclaw/{conversationId}/{fileId}
+     */
+    match /uploads/openclaw/{conversationId}/{fileId} {
+      allow read: if isAuthenticated();
+
+      allow write: if isAuthenticated()
+                   && isWithinSizeLimit(200 * 1024 * 1024); // 200MB
+
+      allow delete: if isAuthenticated();
+    }
+
     /**
      * Generic uploads path for non-storage/image uploads
      * Uses single-level wildcard to not conflict with more specific rules
      */
     match /uploads/{fileId} {
       allow read: if isAuthenticated();
-      
+
       // Authenticated users can upload with basic size limit
       allow write: if isAuthenticated()
                    && isWithinSizeLimit(10 * 1024 * 1024); // 10MB

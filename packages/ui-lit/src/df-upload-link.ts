@@ -1,7 +1,7 @@
 // src/df-upload-link.ts
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { fileToUpload, fileUploadProgress, uploadFileTask } from './df-upload-link-store';
+import { clearUploadObservables, fileToUpload, fileUploadProgress, uploadFileTask } from './df-upload-link-store';
 import '@material/web/progress/circular-progress.js';
 import '@material/web/textfield/outlined-text-field.js';
 import './df-segmented-button';
@@ -14,6 +14,8 @@ import { ResourcePageType, UrlMediaType } from './df-upload-link-types';
 export class DfUploadLink extends SignalWatcher(LitElement) {
   @property() declare resourceLinkType: UrlMediaType;
   @property() declare resourcePageType: ResourcePageType;
+  @property({ type: String }) declare label: string;
+  @property({ type: String }) declare uploadSubpath: string;
   @property({ type: String }) declare linkUrl: string;
   @property({ type: Boolean }) declare imageValid: boolean;
   @state()
@@ -37,10 +39,15 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
   @state()
   declare public disabledOptions: string[];
 
+  @state()
+  declare private uploadError: string | null;
+
   constructor() {
     super();
     this.resourceLinkType = 'void';
     this.resourcePageType = 'void';
+    this.label = '';
+    this.uploadSubpath = '';
     this.linkUrl = '';
     this.imageValid = false;
     this.showUrlContainer = false;
@@ -50,6 +57,7 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
     this.fileName = 'Select File to Upload';
     this.generatedLink = '';
     this.disabledOptions = ['Add', '0'];
+    this.uploadError = null;
   }
   static override styles = css`
     :host {
@@ -91,7 +99,12 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
     }
 
     .file-input {
-      display: none;
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
     }
 
     .input-container {
@@ -118,21 +131,88 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
       white-space: nowrap;
       width: auto; /* Set width to auto to fit content */
     }
+
+    .upload-error {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--md-sys-color-error, #b00020);
+    }
   `;
 
-  async uploadFile(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files ? input.files[0] : null;
-    if (file && isLoggedIn.get()) {
-      const uploadIdentifier = this.resourcePageType + '|' + this.resourceLinkType;
-      this.fileName = file ? file.name : 'No screenshot chosen';
-      fileToUpload.set(file);
+  public reset(): void {
+    this.linkUrl = '';
+    this.imageValid = false;
+    this.showUrlContainer = false;
+    this.showUploader = false;
+    this.showContent = false;
+    this.showLinkInput = false;
+    this.fileName = 'Select File to Upload';
+    this.generatedLink = '';
+    this.disabledOptions = ['Add', '0'];
+    clearUploadObservables();
+  }
+
+  private async _openFilePicker(_e: Event): Promise<void> {
+    if (!isLoggedIn.get()) {
+      this.uploadError = 'Sign in required to upload files.';
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const picker = (window as any).showOpenFilePicker;
+    if (picker) {
+      try {
+        const [fileHandle] = await picker({ multiple: false });
+        const file: File = await fileHandle.getFile();
+        await this._processFileUpload(file);
+      } catch (err) {
+        if ((err as {name?: string}).name !== 'AbortError') {
+          this.uploadError = this.resolveUploadErrorMessage(err);
+        }
+      }
+    } else {
+      const input = this.shadowRoot?.querySelector('.file-input') as HTMLInputElement | null;
+      input?.click();
+    }
+  }
+
+  private resolveUploadErrorMessage(error: unknown): string {
+    const code = (error as {code?: string})?.code ?? '';
+    if (code === 'storage/unauthorized') {
+      return 'Upload failed: file may be too large or you are not authorized.';
+    }
+    if (code === 'storage/quota-exceeded') {
+      return 'Upload failed: storage quota exceeded.';
+    }
+    if (code === 'storage/canceled') {
+      return 'Upload canceled.';
+    }
+    return 'Upload failed. Please try again.';
+  }
+
+  private async _processFileUpload(file: File): Promise<void> {
+    const uploadIdentifier = this.uploadSubpath || (this.resourcePageType + '|' + this.resourceLinkType);
+    this.uploadError = null;
+    this.fileName = file.name;
+    fileToUpload.set(file);
+    try {
       this.generatedLink = await uploadFileTask(uploadIdentifier);
       this.linkUrl = this.generatedLink;
       this.showUrlContainer = true;
       this.imageValid = true;
       this.disabledOptions = ['Site', 'Upload'];
       this.dispatchEvent(new CustomEvent('upload-link-gather-url', { detail: { linkUrl: this.linkUrl } }));
+    } catch (error) {
+      console.error('[df-upload-link] Upload failed:', error);
+      this.uploadError = this.resolveUploadErrorMessage(error);
+      this.reset();
+    }
+  }
+
+  async uploadFile(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file && isLoggedIn.get()) {
+      await this._processFileUpload(file);
     } else {
       console.error('No file selected or user not authenticated.');
     }
@@ -220,18 +300,19 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
     this.showUrlContainer = this.isValidUrl(this.generatedLink);
     this.showUrlContainer = true;
     return html`
-      <div>Gather [${this.resourceLinkType}s]:
+      <div>${this.label || 'Gather [' + this.resourceLinkType + 's]:'}
         <df-segmented-button
           @df-segmented-button-change=${this.handleSelectionChange}
           .disabledOptions=${this.disabledOptions}
         ></df-segmented-button>
         <div style="display: ${this.showContent ? 'flex' : 'none'};">
           <div style="display: ${this.showUploader ? 'block' : 'none'};">
-            <label class="file-label">
+            <!-- md3-gap: native file input required to invoke OS file picker per MD3 upload guidelines -->
+            <!-- shadow DOM workaround: label-wrapping-input doesn't reliably open file picker in shadow DOM -->
+            <label class="file-label" @click=${this._openFilePicker}>
               <span>${this.fileName}</span>
-              <!-- md3-gap: native file input required to invoke OS file picker per MD3 upload guidelines -->
-              <input type="file" class="file-input" @change="${this.uploadFile}"/>
             </label>
+            <input type="file" class="file-input" @change="${this.uploadFile}"/>
           </div>
           <a href="${this.generatedLink.valueOf()}" style="display: ${this.showUrlContainer ? 'block' : 'none'};"
              target="_blank"><img
@@ -245,6 +326,7 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
           <md-circular-progress four-color value="${fileUploadProgress.get()}"></md-circular-progress>
         </div>
       </div>
+      ${this.uploadError ? html`<div class="upload-error">${this.uploadError}</div>` : ''}
     `;
   }
 }

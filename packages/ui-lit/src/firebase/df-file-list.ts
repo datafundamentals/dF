@@ -251,6 +251,10 @@ export class DfFileList extends LitElement {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  private displayName(name: string): string {
+    return name.replace(/^\d{13}_/, '');
+  }
+
   private formatDate(date: Date): string {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -295,12 +299,7 @@ export class DfFileList extends LitElement {
     }
 
     if (this.files.length === 0) {
-      return html`
-        <div class="empty-container">
-          <md-icon>folder_open</md-icon>
-          <span>No files found in ${this.directory}</span>
-        </div>
-      `;
+      return html``;
     }
 
     return html`
@@ -317,7 +316,7 @@ export class DfFileList extends LitElement {
                   `}
 
               <div class="file-info">
-                <div class="file-name">${file.name}</div>
+                <div class="file-name">${this.displayName(file.name)}</div>
                 <div class="file-meta">
                   <span>${this.formatFileSize(file.size)}</span>
                   <span>•</span>

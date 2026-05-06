@@ -25,6 +25,7 @@ import {customElement, property, state} from 'lit/decorators.js';
 import '@material/web/switch/switch.js';
 import {
   createOpenclawConversation,
+  deleteFile,
   deleteOpenclawConversation,
   firebaseAuthState,
   openclawActiveConversationState,
@@ -40,12 +41,13 @@ import {
 } from '@df/state';
 import type {FirestoreRequestState} from '@df/types/firebase-firestore.types';
 import type {OpenclawSendStatus} from '@df/types';
+import type {StorageFileMetadata} from '@df/types/firebase-storage.types';
 import './df-upload-link.js';
+import './firebase/df-file-list.js';
 
 const ENTER_KEY = 'Enter';
 const SPACE_KEY = ' ';
 const STATUS_BASE_URL = 'https://hbb-a1.web.app/WR_Status/';
-const VISUAL_UPLOAD_FILES = ['foo.md', 'bar.jpg', 'yada.pdf'] as const;
 
 interface OpenclawConversation {
   id: string;
@@ -421,17 +423,6 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       color: rgba(15, 23, 42, 0.56);
     }
 
-    .upload-shell {
-      pointer-events: none;
-      opacity: 0.82;
-      filter: saturate(0.94);
-    }
-
-    .upload-caption {
-      font-size: 0.82rem;
-      color: rgba(71, 85, 105, 0.82);
-    }
-
     .uploaded-file-list {
       display: grid;
       gap: 10px;
@@ -605,6 +596,9 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   @state() private activeAgentName = '';
   @state() private recurringVisualState: Record<string, boolean> = {};
   @state() private deleteConfirmationConversationId: string | null = null;
+  @state() private fileDeleteConfirmationPath: string | null = null;
+  @state() private isDeletingFile = false;
+  private pendingDeleteFile: StorageFileMetadata | null = null;
 
   private previousMessageCount = 0;
   private previousConversationId: string | null = null;
@@ -911,32 +905,29 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
         </div>
 
         <div class="panel-upload-grid">
-          <section class="panel-card" aria-label="Upload widget placement">
-            <p class="panel-card-title">Upload Widget</p>
-            <div class="upload-shell" aria-disabled="true">
-              <df-upload-link resourcePageType="storage" resourceLinkType="image"></df-upload-link>
-            </div>
-            <div class="upload-caption">Visual placement only in this ticket.</div>
+          <section class="panel-card" aria-label="Upload files">
+            <p class="panel-card-title">Upload Files</p>
+            <df-upload-link
+              id="openclaw-upload-link"
+              resourcePageType="openclaw"
+              resourceLinkType="file"
+              .uploadSubpath=${'openclaw/' + conversation.id}
+              label="Upload Files"
+              @upload-link-gather-url=${this.handleFileUploaded}
+            ></df-upload-link>
           </section>
 
-          <section class="panel-card" aria-label="Uploaded documents">
-            <p class="panel-card-title">Uploaded Docs</p>
-            <div class="uploaded-file-list">
-              ${VISUAL_UPLOAD_FILES.map((fileName) => html`
-                <div class="uploaded-file-item">
-                    <span class="uploaded-file-name">${fileName}</span>
-                    <span
-                    class="meta-chip meta-chip--danger"
-                    role="button"
-                    tabindex="0"
-                    @click=${this.handleMetaActionClick}
-                    @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => undefined)}
-                  >
-                    Delete
-                  </span>
-                </div>
-              `)}
-            </div>
+          <section class="panel-card" aria-label="Uploaded files">
+            <p class="panel-card-title">Uploaded Files</p>
+            ${this.fileDeleteConfirmationPath !== null
+              ? this.renderFileDeleteConfirmation()
+              : nothing}
+            <df-file-list
+              id="openclaw-file-list"
+              .directory=${'uploads/openclaw/' + conversation.id}
+              showDelete
+              @file-delete=${this.handleFileDeleteRequest}
+            ></df-file-list>
           </section>
         </div>
       </section>
@@ -1113,6 +1104,91 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     event?.stopPropagation();
     this.deleteConfirmationConversationId = null;
   };
+
+  private handleFileDeleteRequest(event: CustomEvent): void {
+    event.stopPropagation();
+    const file = event.detail?.file as StorageFileMetadata | undefined;
+    if (!file) return;
+    this.pendingDeleteFile = file;
+    this.fileDeleteConfirmationPath = file.path;
+  }
+
+  private closeFileDeleteConfirmation(event?: Event): void {
+    event?.stopPropagation();
+    this.fileDeleteConfirmationPath = null;
+    this.pendingDeleteFile = null;
+  }
+
+  private async confirmFileDelete(event: Event): Promise<void> {
+    event.stopPropagation();
+    if (this.isDeletingFile || !this.pendingDeleteFile) return;
+
+    this.isDeletingFile = true;
+    try {
+      await deleteFile(this.pendingDeleteFile.path);
+      this.fileDeleteConfirmationPath = null;
+      this.pendingDeleteFile = null;
+      await this.refreshFileList();
+    } catch (error) {
+      this.dispatchEvent(
+        new CustomEvent('df-openclaw-chat-widget-error', {
+          detail: {error},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    } finally {
+      this.isDeletingFile = false;
+    }
+  }
+
+  private async refreshFileList(): Promise<void> {
+    const fileList = this.shadowRoot?.querySelector('#openclaw-file-list') as HTMLElement & {
+      refresh?: () => Promise<void>;
+    };
+    if (fileList && typeof fileList.refresh === 'function') {
+      await fileList.refresh();
+    }
+  }
+
+  private async handleFileUploaded(_event: CustomEvent): Promise<void> {
+    await this.refreshFileList();
+    const uploadLink = this.shadowRoot?.querySelector('#openclaw-upload-link') as HTMLElement & {
+      reset?: () => void;
+    };
+    if (uploadLink && typeof uploadLink.reset === 'function') {
+      uploadLink.reset();
+    }
+  }
+
+  private renderFileDeleteConfirmation() {
+    return html`
+      <div class="delete-confirmation">
+        <strong>Are you sure?</strong>
+        <span>This is not undoable.</span>
+        <span
+          class="meta-chip meta-chip--danger"
+          role="button"
+          tabindex="0"
+          aria-disabled=${String(this.isDeletingFile)}
+          @click=${(event: Event) => void this.confirmFileDelete(event)}
+          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => void this.confirmFileDelete(event))}
+        >
+          ${this.isDeletingFile ? 'Deleting…' : 'Confirm Delete'}
+        </span>
+        <span
+          class="meta-chip meta-chip--muted"
+          role="button"
+          tabindex="0"
+          aria-disabled=${String(this.isDeletingFile)}
+          @click=${(event: Event) => this.closeFileDeleteConfirmation(event)}
+          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => this.closeFileDeleteConfirmation())}
+        >
+          Cancel
+        </span>
+      </div>
+    `;
+  }
 
   private async confirmDelete(event: Event, conversationId: string): Promise<void> {
     event.stopPropagation();
