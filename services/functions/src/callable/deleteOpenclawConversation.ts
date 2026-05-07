@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions/v2';
 import {FieldPath, getFirestore} from 'firebase-admin/firestore';
+import {getStorage} from 'firebase-admin/storage';
 
 const WORK_REQUESTS_COLLECTION = 'openclawWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
@@ -47,12 +48,14 @@ export const deleteOpenclawConversation = functions.https.onCall<
     }
 
     const deletedMessageCount = await deleteMessagesSubcollection(conversationRef);
+    const deletedFileCount = await deleteConversationStorageFiles(requestId);
     await conversationRef.delete();
 
     functions.logger.info('Deleted OpenClaw conversation', {
       requestId,
       userId: request.auth.uid,
       deletedMessageCount,
+      deletedFileCount,
     });
 
     return {
@@ -62,6 +65,21 @@ export const deleteOpenclawConversation = functions.https.onCall<
     };
   }
 );
+
+async function deleteConversationStorageFiles(requestId: string): Promise<number> {
+  try {
+    const bucket = getStorage().bucket();
+    const prefix = `uploads/openclaw/${requestId}/`;
+    const [files] = await bucket.getFiles({prefix});
+    if (files.length === 0) return 0;
+    await Promise.all(files.map((file) => file.delete()));
+    return files.length;
+  } catch (error) {
+    // Log but don't fail the delete — orphaned files are recoverable, a failed delete is confusing
+    functions.logger.warn('Failed to delete storage files for conversation', {requestId, error});
+    return 0;
+  }
+}
 
 async function deleteMessagesSubcollection(
   conversationRef: FirebaseFirestore.DocumentReference
