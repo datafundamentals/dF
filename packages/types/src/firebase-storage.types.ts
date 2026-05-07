@@ -8,6 +8,21 @@
 export type StorageUploadStatus = 'idle' | 'uploading' | 'complete' | 'error';
 
 /**
+ * Status of a storage delete operation
+ */
+export type StorageDeleteStatus = 'idle' | 'deleting' | 'error';
+
+/**
+ * Complete state of a storage delete operation
+ */
+export interface StorageDeleteState {
+  /** Current delete status */
+  status: StorageDeleteStatus;
+  /** Error message if delete failed */
+  error: string | null;
+}
+
+/**
  * Complete state of a storage upload operation
  */
 export interface StorageUploadState {

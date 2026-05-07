@@ -21,7 +21,8 @@
 
 import {css, html, LitElement} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {deleteFile} from '@df/state';
+import {SignalWatcher} from '@lit-labs/signals';
+import {deleteFileWithStatus, storageDeleteState} from '@df/state';
 import type {StorageFileMetadata} from '@df/types';
 
 /**
@@ -43,7 +44,7 @@ import type {StorageFileMetadata} from '@df/types';
  * ```
  */
 @customElement('df-file-delete')
-export class DfFileDelete extends LitElement {
+export class DfFileDelete extends SignalWatcher(LitElement) {
   /**
    * File metadata to delete
    */
@@ -65,20 +66,12 @@ export class DfFileDelete extends LitElement {
   @state()
   private declare dialogOpen: boolean;
 
-  @state()
-  private declare deleting: boolean;
-
-  @state()
-  private declare error: string | null;
-
   constructor() {
     super();
     this.file = null;
     this.showButton = true;
     this.buttonLabel = 'Delete';
     this.dialogOpen = false;
-    this.deleting = false;
-    this.error = null;
   }
 
   static override styles = css`
@@ -191,7 +184,6 @@ export class DfFileDelete extends LitElement {
    */
   public open(): void {
     this.dialogOpen = true;
-    this.error = null;
   }
 
   /**
@@ -199,7 +191,6 @@ export class DfFileDelete extends LitElement {
    */
   public close(): void {
     this.dialogOpen = false;
-    this.error = null;
   }
 
   private handleButtonClick() {
@@ -217,7 +208,7 @@ export class DfFileDelete extends LitElement {
   }
 
   private async handleConfirm() {
-    if (!this.file) return;
+    if (!this.file || storageDeleteState.get().status === 'deleting') return;
 
     this.dispatchEvent(
       new CustomEvent('delete-confirm', {
@@ -227,11 +218,8 @@ export class DfFileDelete extends LitElement {
       })
     );
 
-    this.deleting = true;
-    this.error = null;
-
     try {
-      await deleteFile(this.file.path);
+      await deleteFileWithStatus(this.file.path);
 
       this.dispatchEvent(
         new CustomEvent('delete-complete', {
@@ -243,19 +231,14 @@ export class DfFileDelete extends LitElement {
 
       this.close();
     } catch (error) {
-      this.error = error instanceof Error ? error.message : 'Failed to delete file';
+      const message = error instanceof Error ? error.message : 'Failed to delete file';
       this.dispatchEvent(
         new CustomEvent('delete-error', {
-          detail: {
-            file: this.file,
-            error: this.error,
-          },
+          detail: {file: this.file, error: message},
           bubbles: true,
           composed: true,
         })
       );
-    } finally {
-      this.deleting = false;
     }
   }
 
@@ -316,21 +299,21 @@ export class DfFileDelete extends LitElement {
           deleted from storage.
         </div>
 
-        ${this.error
-          ? html` <div class="error-message"><strong>Error:</strong> ${this.error}</div> `
+        ${storageDeleteState.get().error
+          ? html` <div class="error-message"><strong>Error:</strong> ${storageDeleteState.get().error}</div> `
           : ''}
 
         <div class="dialog-actions">
-          <md-text-button @click=${this.handleCancel} ?disabled=${this.deleting}>
+          <md-text-button @click=${this.handleCancel} ?disabled=${storageDeleteState.get().status === 'deleting'}>
             Cancel
           </md-text-button>
           <md-filled-button
             class="delete-action"
             @click=${this.handleConfirm}
-            ?disabled=${this.deleting}
+            ?disabled=${storageDeleteState.get().status === 'deleting'}
           >
-            <md-icon slot="icon">${this.deleting ? 'hourglass_empty' : 'delete'}</md-icon>
-            ${this.deleting ? 'Deleting...' : 'Delete'}
+            <md-icon slot="icon">${storageDeleteState.get().status === 'deleting' ? 'hourglass_empty' : 'delete'}</md-icon>
+            ${storageDeleteState.get().status === 'deleting' ? 'Deleting...' : 'Delete'}
           </md-filled-button>
         </div>
       </div>

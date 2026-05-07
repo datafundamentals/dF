@@ -25,8 +25,9 @@ import {customElement, property, state} from 'lit/decorators.js';
 import '@material/web/switch/switch.js';
 import {
   createOpenclawConversation,
-  deleteFile,
+  deleteFileWithStatus,
   deleteOpenclawConversation,
+  storageDeleteState,
   firebaseAuthState,
   openclawActiveConversationState,
   openclawChatDeleteState,
@@ -597,7 +598,6 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   @state() private recurringVisualState: Record<string, boolean> = {};
   @state() private deleteConfirmationConversationId: string | null = null;
   @state() private fileDeleteConfirmationPath: string | null = null;
-  @state() private isDeletingFile = false;
   private pendingDeleteFile: StorageFileMetadata | null = null;
 
   private previousMessageCount = 0;
@@ -1121,11 +1121,11 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
   private async confirmFileDelete(event: Event): Promise<void> {
     event.stopPropagation();
-    if (this.isDeletingFile || !this.pendingDeleteFile) return;
+    const deleteState = storageDeleteState.get();
+    if (deleteState.status === 'deleting' || !this.pendingDeleteFile) return;
 
-    this.isDeletingFile = true;
     try {
-      await deleteFile(this.pendingDeleteFile.path);
+      await deleteFileWithStatus(this.pendingDeleteFile.path);
       this.fileDeleteConfirmationPath = null;
       this.pendingDeleteFile = null;
       await this.refreshFileList();
@@ -1137,8 +1137,6 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
           composed: true,
         })
       );
-    } finally {
-      this.isDeletingFile = false;
     }
   }
 
@@ -1166,6 +1164,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   }
 
   private renderFileDeleteConfirmation() {
+    const deleting = storageDeleteState.get().status === 'deleting';
     return html`
       <div class="delete-confirmation">
         <strong>Are you sure?</strong>
@@ -1174,17 +1173,17 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
           class="meta-chip meta-chip--danger"
           role="button"
           tabindex="0"
-          aria-disabled=${String(this.isDeletingFile)}
+          aria-disabled=${String(deleting)}
           @click=${(event: Event) => void this.confirmFileDelete(event)}
           @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => void this.confirmFileDelete(event))}
         >
-          ${this.isDeletingFile ? 'Deleting…' : 'Confirm Delete'}
+          ${deleting ? 'Deleting…' : 'Confirm Delete'}
         </span>
         <span
           class="meta-chip meta-chip--muted"
           role="button"
           tabindex="0"
-          aria-disabled=${String(this.isDeletingFile)}
+          aria-disabled=${String(deleting)}
           @click=${(event: Event) => this.closeFileDeleteConfirmation(event)}
           @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => this.closeFileDeleteConfirmation())}
         >

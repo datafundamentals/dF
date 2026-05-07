@@ -50,6 +50,7 @@ import {
   type UploadTaskSnapshot,
 } from 'firebase/storage';
 import type {
+  StorageDeleteState,
   StorageFileMetadata,
   StorageUploadState,
   StorageUploadStatus,
@@ -88,6 +89,18 @@ const uploadErrorSignal = signal<string | null>(null);
  * @internal
  */
 const uploadedFileSignal = signal<StorageFileMetadata | null>(null);
+
+/**
+ * Internal signal tracking delete status.
+ * @internal
+ */
+const deleteStatusSignal = signal<StorageDeleteState['status']>('idle');
+
+/**
+ * Internal signal holding delete error message.
+ * @internal
+ */
+const deleteErrorSignal = signal<string | null>(null);
 
 /** Singleton storage instance */
 let storageInstance: FirebaseStorage | null = null;
@@ -380,6 +393,44 @@ export async function deleteFile(path: string): Promise<void> {
   const storage = getStorageInstance();
   const storageRef = ref(storage, path);
   await deleteObject(storageRef);
+}
+
+/**
+ * Reactive state for the current file delete operation.
+ * Components using SignalWatcher re-render automatically when this changes.
+ *
+ * @example
+ * ```typescript
+ * const {status, error} = storageDeleteState.get();
+ * if (status === 'deleting') return html`<md-circular-progress indeterminate></md-circular-progress>`;
+ * if (status === 'error') return html`<span class="error">${error}</span>`;
+ * ```
+ */
+export const storageDeleteState = computed<StorageDeleteState>(() => ({
+  status: deleteStatusSignal.get(),
+  error: deleteErrorSignal.get(),
+}));
+
+/**
+ * Delete a file from Firebase Storage with signal-managed status.
+ *
+ * Prefer this over `deleteFile` in UI components — it updates `storageDeleteState`
+ * so widgets can react without managing their own loading/error state.
+ *
+ * @param path - Full storage path (e.g. 'uploads/openclaw/abc123/file.pdf')
+ */
+export async function deleteFileWithStatus(path: string): Promise<void> {
+  deleteStatusSignal.set('deleting');
+  deleteErrorSignal.set(null);
+  try {
+    await deleteFile(path);
+    deleteStatusSignal.set('idle');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to delete file.';
+    deleteErrorSignal.set(message);
+    deleteStatusSignal.set('error');
+    throw error;
+  }
 }
 
 /**
