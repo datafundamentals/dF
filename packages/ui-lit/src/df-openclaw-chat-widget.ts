@@ -1152,7 +1152,11 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   }
 
   private async handleFileUploaded(_event: CustomEvent): Promise<void> {
-    await this.refreshFileList();
+    try {
+      await this.refreshFileList();
+    } catch (error) {
+      console.error('[df-openclaw-chat-widget] refreshFileList failed after upload:', error);
+    }
     const uploadLink = this.shadowRoot?.querySelector('#openclaw-upload-link') as HTMLElement & {
       reset?: () => void;
     };

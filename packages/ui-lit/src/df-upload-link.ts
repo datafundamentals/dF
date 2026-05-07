@@ -99,12 +99,7 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
     }
 
     .file-input {
-      position: absolute;
-      width: 0;
-      height: 0;
-      opacity: 0;
-      overflow: hidden;
-      pointer-events: none;
+      display: none;
     }
 
     .input-container {
@@ -150,29 +145,6 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
     this.generatedLink = '';
     this.disabledOptions = ['Add', '0'];
     clearUploadObservables();
-  }
-
-  private async _openFilePicker(_e: Event): Promise<void> {
-    if (!isLoggedIn.get()) {
-      this.uploadError = 'Sign in required to upload files.';
-      return;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const picker = (window as any).showOpenFilePicker;
-    if (picker) {
-      try {
-        const [fileHandle] = await picker({ multiple: false });
-        const file: File = await fileHandle.getFile();
-        await this._processFileUpload(file);
-      } catch (err) {
-        if ((err as {name?: string}).name !== 'AbortError') {
-          this.uploadError = this.resolveUploadErrorMessage(err);
-        }
-      }
-    } else {
-      const input = this.shadowRoot?.querySelector('.file-input') as HTMLInputElement | null;
-      input?.click();
-    }
   }
 
   private resolveUploadErrorMessage(error: unknown): string {
@@ -307,12 +279,11 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
         ></df-segmented-button>
         <div style="display: ${this.showContent ? 'flex' : 'none'};">
           <div style="display: ${this.showUploader ? 'block' : 'none'};">
-            <!-- md3-gap: native file input required to invoke OS file picker per MD3 upload guidelines -->
-            <!-- shadow DOM workaround: label-wrapping-input doesn't reliably open file picker in shadow DOM -->
-            <label class="file-label" @click=${this._openFilePicker}>
+            <label class="file-label">
               <span>${this.fileName}</span>
+              <!-- md3-gap: native file input required to invoke OS file picker per MD3 upload guidelines -->
+              <input type="file" class="file-input" @change="${this.uploadFile}"/>
             </label>
-            <input type="file" class="file-input" @change="${this.uploadFile}"/>
           </div>
           <a href="${this.generatedLink.valueOf()}" style="display: ${this.showUrlContainer ? 'block' : 'none'};"
              target="_blank"><img
