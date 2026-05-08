@@ -3,9 +3,12 @@
   "firestore": {
     "rules": "firestore.rules"
   },
-  "storage": {
-    "rules": "storage.rules"
-  },
+  "storage": [
+    {
+      "bucket": "melody-r2-d4.firebasestorage.app",
+      "rules": "storage.rules"
+    }
+  ],
   "functions": {
     "source": "services/functions",
     "runtime": "nodejs22",
