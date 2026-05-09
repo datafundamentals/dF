@@ -66,6 +66,7 @@ describe('firebase-auth.store', () => {
       emailVerified: true,
       metadata: {},
       providerData: [],
+      getIdToken: vi.fn().mockResolvedValue('test-id-token'),
     } as unknown as FirebaseSDKUser;
 
     // Clear all mocks before each test
