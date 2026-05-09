@@ -73,29 +73,24 @@ If your component is visible *immediately* when the page loads (e.g., a header e
 
 ## WCPGW: Images Inside Bundled iframe Components
 
-**Problem:** A web component bundled as a JS file and deployed inside an `<iframe>` uses image paths like `/my-image.png`. In dev (Vite), these paths resolve against the dev server root and work fine. But in production, the iframe loads from a different origin or path — so `/my-image.png` 404s because the host 11ty site stores images at `/static/images/my-image.png` or some other location.
+**Problem:** A web component bundled as a JS file and deployed inside an `<iframe>` uses image paths like `/my-image.png`. In dev (Vite), these paths resolve against the dev server root and work fine. But in production, the iframe loads from a different origin or path — so `/my-image.png` might 404 if the host 11ty site stores images at a different location.
 
-**Rule: Component-specific images must be embedded as base64 data URIs in the TypeScript source — never referenced by path.**
+**Recommendation: Prefer path-based references for maintainability and DevTools performance. Management of asset paths at the deployment target is preferred over inlining "blobs".**
 
 ```typescript
-// ✅ Correct — image travels with the bundle
+// ✅ Preferred — Clean, performant, and easy to maintain
+const CHATTY_CATHY_IMG = '/images/chatty-cathy.jpg';
+
+// ❌ Discouraged — Bloats JS bundles and makes DevTools difficult to use
 const MY_IMG = 'data:image/png;base64,iVBORw0KGgo...';
-
-// ❌ Wrong — path only resolves in dev, 404s when deployed as iframe
-header-img-left="/my-image.png"
 ```
 
-**How to embed an image as a data URI:**
+**How to manage assets for iframes:**
+1. Keep images in a shared `/images/` directory at the site root.
+2. Ensure the host 11ty site (or whichever server is hosting the site) has those images at the expected paths.
+3. If using Vite, these will resolve naturally in dev.
 
-```bash
-# macOS
-base64 -i public/my-image.png | tr -d '\n'
-# Then prefix with: data:image/png;base64,
-```
-
-**When this applies:** Any image that is part of a bundled web component's own UI (not user-supplied content) — especially when the component is deployed as an iframe. Images in the `public/` directory work in Vite dev but are NOT bundled into the JS file.
-
-**Size consideration:** Images up to ~50KB are appropriate to embed. Larger images should be served from a CDN and the component should accept a URL as a configurable property (with the URL documented in the 11ty template that hosts the iframe).
+**When to reconsider:** If you are building a component for a third-party environment where you have *zero* control over the hosting server's file system, you might use a CDN-hosted URL. Avoid Base64 inlining unless the image is truly iconic/microscopic (under 2KB) and critical for initial render.
 
 ---
 

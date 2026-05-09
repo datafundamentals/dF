@@ -229,7 +229,8 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
     .chat-panel {
       display: grid;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto auto auto;
+      align-content: start;
       gap: 16px;
       min-height: 0;
     }
@@ -246,6 +247,10 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       width: auto;
       flex-shrink: 0;
       object-fit: contain;
+      background: var(--md-sys-color-surface-container-high, #f1f5f9);
+      border-radius: 8px;
+      min-width: 4.5rem;
+      min-height: 4.5rem;
     }
 
     .header-img--clickable {
