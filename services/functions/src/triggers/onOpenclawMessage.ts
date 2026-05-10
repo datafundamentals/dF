@@ -99,11 +99,17 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       .filter((m) => m.status === 'complete')
       .map((m) => ({role: m.role as string, content: m.content as string}));
     const sessionKey = `openclaw-work-request-v2:${agentId}:${requestId}`;
+    const statusUrl = `https://hbb-a1.web.app/WR_Status/${requestId}/`;
+    const systemContext = {
+      role: 'system',
+      content: `CONTEXT: The unique ID for this work request is ${requestId}. Status URL: ${statusUrl}`,
+    };
+
     const requestBody = {
       agentId,
       sessionKey,
       model: `openclaw/${agentId}`,
-      messages: [...historyMessages, {role: 'user', content}],
+      messages: [systemContext, ...historyMessages, {role: 'user', content}],
     };
 
     const endpoint = `${OPENCLAW_BASE_URL}/v1/chat/completions`;
