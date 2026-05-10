@@ -298,6 +298,40 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       display: grid;
       gap: 6px;
       min-width: 0;
+    }
+
+    /* Modal Delete Confirmation Styles */
+    .delete-dialog {
+      --md-dialog-container-color: var(--md-sys-color-surface-container-high);
+      max-width: 400px;
+    }
+
+    .delete-dialog-content {
+      display: grid;
+      gap: 12px;
+    }
+
+    .delete-dialog-icon {
+      justify-self: center;
+      color: var(--md-sys-color-error);
+      --md-icon-size: 48px;
+    }
+
+    .delete-dialog-message {
+      text-align: center;
+      margin: 0;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+    
+    .delete-dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .delete-confirmation {
+      display: none;
+    }
       flex: 1;
     }
 
@@ -730,6 +764,50 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
           </section>
         </section>
       </div>
+
+      <md-dialog
+        class="delete-dialog"
+        ?open=${!!this.deleteConfirmationConversationId}
+        @closed=${this.closeDeleteConfirmation}
+      >
+        <div slot="headline">Delete Conversation?</div>
+        <div slot="content" class="delete-dialog-content">
+          <p class="delete-dialog-message">
+            Are you sure you want to delete this conversation? This action cannot be undone.
+          </p>
+        </div>
+        <div slot="actions" class="delete-dialog-actions">
+          <md-text-button @click=${this.closeDeleteConfirmation}>Cancel</md-text-button>
+          <md-filled-button
+            class="delete-button"
+            @click=${(event: Event) => this.deleteConfirmationConversationId && this.confirmDelete(event, this.deleteConfirmationConversationId)}
+          >
+            Delete
+          </md-filled-button>
+        </div>
+      </md-dialog>
+
+      <md-dialog
+        class="delete-dialog"
+        ?open=${!!this.fileDeleteConfirmationPath}
+        @closed=${this.closeFileDeleteConfirmation}
+      >
+        <div slot="headline">Delete File?</div>
+        <div slot="content" class="delete-dialog-content">
+          <p class="delete-dialog-message">
+            Are you sure you want to delete this file? This action cannot be undone.
+          </p>
+        </div>
+        <div slot="actions" class="delete-dialog-actions">
+          <md-text-button @click=${this.closeFileDeleteConfirmation}>Cancel</md-text-button>
+          <md-filled-button
+            class="delete-button"
+            @click=${(event: Event) => void this.confirmFileDelete(event)}
+          >
+            Delete
+          </md-filled-button>
+        </div>
+      </md-dialog>
     `;
   }
 
@@ -939,36 +1017,8 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     `;
   }
 
-  private renderDeleteConfirmation(conversationId: string) {
-    const deleteState = openclawChatDeleteState.get();
-    const deleting = deleteState.status === 'deleting' && deleteState.deletingConversationId === conversationId;
-
-    return html`
-      <div class="delete-confirmation">
-        <strong>Are you sure?</strong>
-        <span>This is not undoable.</span>
-        <span
-          class="meta-chip meta-chip--danger"
-          role="button"
-          tabindex="0"
-          aria-disabled=${String(deleting)}
-          @click=${(event: Event) => this.confirmDelete(event, conversationId)}
-          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => void this.confirmDelete(event, conversationId))}
-        >
-          ${deleting ? 'Deleting…' : 'Confirm Delete'}
-        </span>
-        <span
-          class="meta-chip meta-chip--muted"
-          role="button"
-          tabindex="0"
-          aria-disabled=${String(deleting)}
-          @click=${this.closeDeleteConfirmation}
-          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, this.closeDeleteConfirmation)}
-        >
-          Cancel
-        </span>
-      </div>
-    `;
+  private renderDeleteConfirmation(_conversationId: string) {
+    return nothing;
   }
 
   private handleLobsterClick(): void {
@@ -1106,8 +1156,15 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   }
 
   private closeDeleteConfirmation = (event?: Event): void => {
-    event?.stopPropagation();
+    if (event && 'detail' in event && (event as any).detail?.action === 'cancel') {
+      // Handled by @closed
+    }
     this.deleteConfirmationConversationId = null;
+  };
+
+  private closeFileDeleteConfirmation = (): void => {
+    this.fileDeleteConfirmationPath = null;
+    this.pendingDeleteFile = null;
   };
 
   private handleFileDeleteRequest(event: CustomEvent): void {
@@ -1116,12 +1173,6 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     if (!file) return;
     this.pendingDeleteFile = file;
     this.fileDeleteConfirmationPath = file.path;
-  }
-
-  private closeFileDeleteConfirmation(event?: Event): void {
-    event?.stopPropagation();
-    this.fileDeleteConfirmationPath = null;
-    this.pendingDeleteFile = null;
   }
 
   private async confirmFileDelete(event: Event): Promise<void> {
@@ -1169,33 +1220,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   }
 
   private renderFileDeleteConfirmation() {
-    const deleting = storageDeleteState.get().status === 'deleting';
-    return html`
-      <div class="delete-confirmation">
-        <strong>Are you sure?</strong>
-        <span>This is not undoable.</span>
-        <span
-          class="meta-chip meta-chip--danger"
-          role="button"
-          tabindex="0"
-          aria-disabled=${String(deleting)}
-          @click=${(event: Event) => void this.confirmFileDelete(event)}
-          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => void this.confirmFileDelete(event))}
-        >
-          ${deleting ? 'Deleting…' : 'Confirm Delete'}
-        </span>
-        <span
-          class="meta-chip meta-chip--muted"
-          role="button"
-          tabindex="0"
-          aria-disabled=${String(deleting)}
-          @click=${(event: Event) => this.closeFileDeleteConfirmation(event)}
-          @keydown=${(event: KeyboardEvent) => this.handleActionKeydown(event, () => this.closeFileDeleteConfirmation())}
-        >
-          Cancel
-        </span>
-      </div>
-    `;
+    return nothing;
   }
 
   private async confirmDelete(event: Event, conversationId: string): Promise<void> {
