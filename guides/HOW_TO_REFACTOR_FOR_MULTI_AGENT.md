@@ -46,7 +46,17 @@ The core logic remains largely identical, swapping static constants for dynamic 
 | **Ollama** | Local REST | Point to `http://localhost:11434/v1`. |
 | **Google Gemini** | OAuth + REST | Supports OpenAI-compatible endpoint. Requires OAuth scopes for Workspace access. |
 
-## 5. Potential for MCP (Model Context Protocol)
+## 5. Constraint Handling: Context Window Management
+
+One major difference between agents is their **Context Window** (token capacity). Sending the same history to a 128k-token cloud agent and an 8k-token local agent will cause failures.
+
+### Recommended Safeguards:
+1.  **Metadata Tracking**: Store a `maxContext` field in your Firestore agent configuration.
+2.  **Sliding Window Trimming**: Implement a utility (e.g., `trimHistory()`) to drop the oldest conversation messages if the total count exceeds the target agent's limit.
+3.  **System Priority**: Ensure the `systemContext` (instructions) is always preserved and never trimmed.
+4.  **Graceful Degradation**: If a request exceeds capacity, your logic should log the truncation rather than allowing the provider to return a 400 error.
+
+## 6. Potential for MCP (Model Context Protocol)
 
 Google and other providers are increasingly using **MCP** to allow agents to interact with tools (Gmail, Drive, Chrome). 
 - If using an MCP-compatible gateway, the function code stays the same.
