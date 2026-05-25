@@ -100,4 +100,5 @@ probably going to have to dedicate a ton of time disambiguating domain
 ## [DCI https://venturebeat.com/orchestration/your-ai-agents-need-a-terminal-not-just-a-vector-database]
 ## [offered by frontier vendors or not offered yet]
 
+really helps if each domain has it's own "set"
 

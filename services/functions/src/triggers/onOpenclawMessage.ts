@@ -56,6 +56,11 @@ interface ChatCompletionResponse {
   }>;
 }
 
+interface OpenclawAttachmentContext {
+  url: string;
+  name: string;
+}
+
 export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   document: 'openclawWorkRequests/{requestId}/messages/{messageId}',
   region: 'us-central1',
@@ -80,6 +85,8 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   const messageRef = conversationRef.collection(MESSAGES_SUBCOLLECTION).doc(messageId);
   const conversationSnap = await conversationRef.get();
   const agentId = (conversationSnap.get('agentId') as string | undefined) ?? OPENCLAW_WORK_REQUEST_AGENT_ID;
+  const rawAttachments = conversationSnap.get('attachments') as OpenclawAttachmentContext[] | undefined;
+  const attachments = Array.isArray(rawAttachments) ? rawAttachments : [];
 
   await messageRef.update({status: 'processing'});
   functions.logger.info('OpenClaw message processing started', {
@@ -100,9 +107,15 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       .map((m) => ({role: m.role as string, content: m.content as string}));
     const sessionKey = `openclaw-work-request-v2:${agentId}:${requestId}`;
     const statusUrl = `https://hbb-a1.web.app/WR_Status/${requestId}/`;
+    const baseSystemContent = `CONTEXT: The unique ID for this work request is ${requestId}. Status URL: ${statusUrl}`;
+    const attachmentContext = attachments.length > 0
+      ? `.\nUploaded files available in this session:\n${attachments
+        .map((attachment) => `- ${attachment.name}: ${attachment.url}`)
+        .join('\n')}`
+      : '';
     const systemContext = {
       role: 'system',
-      content: `CONTEXT: The unique ID for this work request is ${requestId}. Status URL: ${statusUrl}`,
+      content: `${baseSystemContent}${attachmentContext}`,
     };
 
     const requestBody = {
