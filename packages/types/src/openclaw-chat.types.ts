@@ -1,5 +1,13 @@
 import type {FirestoreDocument} from './firebase-firestore.types.js';
 
+export interface Attachment {
+  url: string;
+  name: string;
+  /** Firebase storage path for deletion tracking */
+  path: string;
+  uploadedAt: Date;
+}
+
 /**
  * Normalized OpenClaw message used by UI components. Timestamps are converted
  * to native `Date` instances for ergonomic rendering and comparisons.
@@ -32,4 +40,5 @@ export interface OpenclawConversation extends FirestoreDocument {
   status: OpenclawConversationStatus;
   createdAt: Date | null;
   lastMessageAt: Date | null;
+  attachments?: Attachment[];
 }

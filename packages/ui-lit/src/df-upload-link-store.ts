@@ -10,19 +10,18 @@ import {getStorageInstance} from '@df/state';
 export const fileToUpload = signal<File | null>(null);
 export const fileUploadProgress = signal<number>(0);
 
+export interface UploadResult {
+  downloadUrl: string;
+  storagePath: string;
+}
+
 /**
- * Upload a file to Firebase Storage with real-time progress tracking
+ * Upload a file to Firebase Storage with real-time progress tracking.
  *
- * @param uploadIdentifier - Identifier for organizing uploads (e.g., "page|type")
- * @returns Promise that resolves to the download URL of the uploaded file
- *
- * @example
- * ```typescript
- * fileToUpload.set(selectedFile);
- * const downloadUrl = await uploadFileTask('gallery|image');
- * ```
+ * @param uploadIdentifier - Identifier for organizing uploads (e.g., "page|type" or a subpath)
+ * @returns Promise resolving to `{ downloadUrl, storagePath }`
  */
-export async function uploadFileTask(uploadIdentifier: string): Promise<string> {
+export async function uploadFileTask(uploadIdentifier: string): Promise<UploadResult> {
   const file = fileToUpload.get();
   if (!file) {
     throw new Error('No file to upload');
@@ -32,21 +31,17 @@ export async function uploadFileTask(uploadIdentifier: string): Promise<string> 
     try {
       const storage = getStorageInstance();
 
-      // Generate storage path: uploads/{uploadIdentifier}/{timestamp}_{filename}
       const timestamp = Date.now();
       const sanitizedIdentifier = uploadIdentifier.replace(/\|/g, '/');
       const storagePath = `uploads/${sanitizedIdentifier}/${timestamp}_${file.name}`;
       const storageRef = ref(storage, storagePath);
 
-      // Start upload with resumable task for progress tracking
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on(
         'state_changed',
         (snapshot: UploadTaskSnapshot) => {
-          // Track progress: 0 to 1 (0% to 100%)
           const progress = snapshot.bytesTransferred / snapshot.totalBytes;
-          // Show progress slightly ahead (legacy behavior: always 10% high vs never showing)
           fileUploadProgress.set(progress === 1 ? 0 : Math.min(progress + 0.1, 1));
         },
         (error: Error) => {
@@ -56,10 +51,9 @@ export async function uploadFileTask(uploadIdentifier: string): Promise<string> 
         },
         async () => {
           try {
-            // Upload complete - get download URL
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            fileUploadProgress.set(0); // Reset progress
-            resolve(downloadURL);
+            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            fileUploadProgress.set(0);
+            resolve({downloadUrl, storagePath});
           } catch (error) {
             console.error('[df-upload-link-store] Failed to get download URL:', error);
             fileUploadProgress.set(0);

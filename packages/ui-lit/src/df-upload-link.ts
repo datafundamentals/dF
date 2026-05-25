@@ -167,12 +167,20 @@ export class DfUploadLink extends SignalWatcher(LitElement) {
     this.fileName = file.name;
     fileToUpload.set(file);
     try {
-      this.generatedLink = await uploadFileTask(uploadIdentifier);
-      this.linkUrl = this.generatedLink;
+      const {downloadUrl, storagePath} = await uploadFileTask(uploadIdentifier);
+      this.generatedLink = downloadUrl;
+      this.linkUrl = downloadUrl;
       this.showUrlContainer = true;
       this.imageValid = true;
       this.disabledOptions = ['Site', 'Upload'];
-      this.dispatchEvent(new CustomEvent('upload-link-gather-url', { detail: { linkUrl: this.linkUrl } }));
+      this.dispatchEvent(new CustomEvent('upload-link-gather-url', {
+        detail: {
+          linkUrl: downloadUrl,
+          storagePath,
+          fileName: file.name,
+          uploadedAt: new Date(),
+        },
+      }));
     } catch (error) {
       console.error('[df-upload-link] Upload failed:', error);
       this.uploadError = this.resolveUploadErrorMessage(error);

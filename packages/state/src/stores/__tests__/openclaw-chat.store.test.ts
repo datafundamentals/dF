@@ -59,6 +59,7 @@ describe('openclaw-chat.store delete flow', () => {
           status: 'active',
           createdAt: new Date('2026-05-05T12:00:00Z'),
           lastMessageAt: new Date('2026-05-05T12:01:00Z'),
+          attachments: [],
         },
         {
           id: 'request-2',
@@ -68,6 +69,7 @@ describe('openclaw-chat.store delete flow', () => {
           status: 'accepted',
           createdAt: new Date('2026-05-04T12:00:00Z'),
           lastMessageAt: new Date('2026-05-04T12:01:00Z'),
+          attachments: [],
         },
       ],
       messages: [

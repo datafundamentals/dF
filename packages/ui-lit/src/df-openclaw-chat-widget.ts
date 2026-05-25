@@ -24,9 +24,11 @@ import {css, html, LitElement, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import '@material/web/switch/switch.js';
 import {
+  addAttachmentToOpenclawConversation,
   createOpenclawConversation,
   deleteFileWithStatus,
   deleteOpenclawConversation,
+  removeAttachmentFromOpenclawConversation,
   storageDeleteState,
   firebaseAuthState,
   openclawActiveConversationState,
@@ -41,7 +43,7 @@ import {
   switchOpenclawConversation,
 } from '@df/state';
 import type {FirestoreRequestState} from '@df/types/firebase-firestore.types';
-import type {OpenclawSendStatus} from '@df/types';
+import type {Attachment, OpenclawSendStatus} from '@df/types';
 import type {StorageFileMetadata} from '@df/types/firebase-storage.types';
 import './df-upload-link.js';
 import './firebase/df-file-list.js';
@@ -1180,10 +1182,18 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     const deleteState = storageDeleteState.get();
     if (deleteState.status === 'deleting' || !this.pendingDeleteFile) return;
 
+    const filePath = this.pendingDeleteFile.path;
+    const activeConversationId = openclawActiveConversationState.get().activeConversationId;
+
     try {
-      await deleteFileWithStatus(this.pendingDeleteFile.path);
+      await deleteFileWithStatus(filePath);
       this.fileDeleteConfirmationPath = null;
       this.pendingDeleteFile = null;
+
+      if (activeConversationId) {
+        await removeAttachmentFromOpenclawConversation(activeConversationId, filePath);
+      }
+
       await this.refreshFileList();
     } catch (error) {
       this.dispatchEvent(
@@ -1205,7 +1215,30 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     }
   }
 
-  private async handleFileUploaded(_event: CustomEvent): Promise<void> {
+  private async handleFileUploaded(event: CustomEvent): Promise<void> {
+    const {linkUrl, storagePath, fileName, uploadedAt} = event.detail as {
+      linkUrl: string;
+      storagePath: string;
+      fileName: string;
+      uploadedAt: Date;
+    };
+
+    const activeConversationId = openclawActiveConversationState.get().activeConversationId;
+    if (activeConversationId && linkUrl && storagePath) {
+      const attachment: Attachment = {url: linkUrl, name: fileName, path: storagePath, uploadedAt};
+      try {
+        await addAttachmentToOpenclawConversation(activeConversationId, attachment);
+      } catch (error) {
+        this.dispatchEvent(
+          new CustomEvent('df-openclaw-chat-widget-error', {
+            detail: {error},
+            bubbles: true,
+            composed: true,
+          })
+        );
+      }
+    }
+
     try {
       await this.refreshFileList();
     } catch (error) {

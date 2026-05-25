@@ -11,13 +11,15 @@ import {
 } from '@df/firebase/functions';
 import type {FirestoreCollectionState} from '@df/types/firebase-firestore.types';
 import type {FirestoreDocument} from '@df/types/firebase-firestore.types';
-import type {OpenclawDeleteStatus} from '@df/types/openclaw-chat.types';
+import type {Attachment, OpenclawDeleteStatus} from '@df/types/openclaw-chat.types';
 import type {OpenclawSendStatus} from '@df/types';
 import {
   Timestamp,
   addDoc,
+  arrayUnion,
   collection,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -52,6 +54,7 @@ interface OpenclawConversation extends FirestoreDocument {
   status: 'active' | 'accepted';
   createdAt: Date | null;
   lastMessageAt: Date | null;
+  attachments: Attachment[];
 }
 
 const messagesSignal = signal<readonly OpenclawMessage[]>([]);
@@ -321,6 +324,36 @@ export async function renameOpenclawConversation(requestId: string, title: strin
   });
 }
 
+export async function addAttachmentToOpenclawConversation(
+  conversationId: string,
+  attachment: Attachment
+): Promise<void> {
+  if (!initializedDb) {
+    throw new Error('OpenClaw chat store is not initialized.');
+  }
+
+  await updateDoc(doc(initializedDb, WORK_REQUESTS_COLLECTION, conversationId), {
+    attachments: arrayUnion(attachment),
+  });
+}
+
+export async function removeAttachmentFromOpenclawConversation(
+  conversationId: string,
+  path: string
+): Promise<void> {
+  if (!initializedDb) {
+    throw new Error('OpenClaw chat store is not initialized.');
+  }
+
+  const ref = doc(initializedDb, WORK_REQUESTS_COLLECTION, conversationId);
+  const snapshot = await getDoc(ref);
+  const data = snapshot.data();
+  const current = normalizeAttachments(data?.attachments);
+  const filtered = current.filter((a) => a.path !== path);
+
+  await updateDoc(ref, {attachments: filtered});
+}
+
 interface DeleteOpenclawConversationResponse {
   success: true;
   requestId: string;
@@ -507,7 +540,20 @@ function normalizeConversationDoc(
     status: data.status === 'accepted' ? 'accepted' : 'active',
     createdAt: normalizeTimestamp(data.createdAt),
     lastMessageAt: normalizeTimestamp(data.lastMessageAt),
+    attachments: normalizeAttachments(data.attachments),
   };
+}
+
+function normalizeAttachments(raw: unknown): Attachment[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => item !== null && typeof item === 'object')
+    .map((item) => ({
+      url: String(item.url ?? ''),
+      name: String(item.name ?? ''),
+      path: String(item.path ?? ''),
+      uploadedAt: normalizeTimestamp(item.uploadedAt) ?? new Date(0),
+    }));
 }
 
 function normalizeMessage(message: OpenclawMessage): OpenclawMessage {
