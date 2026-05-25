@@ -1,0 +1,103 @@
+# Agentic Design Study
+
+I have been working on my internal design for using AI for a year - which means it predates any notion in my own brain about using ai agents.
+
+For this entire year - I have been thrashing and re-designing, as I learned each new aspect of AI, starting with basic concepts such as LLM and embedding, RAG design, and how to organize work for this type of looping and processing.
+
+The design thrashing shows no sign of relief. Hardly a week, or even a day goes by without learning something that challenges the design of my emerging system. None of this is negative in the sense that I wish it had not happened. Positive change is still churn, though, and the churn seems to happen fast enough to prevent me from getting much accomplished.
+
+This document attempts to catalog all of the identifiable tugs and pulls in different directions. It is hoped that by putting them all in one doc, and then getting help iterating through this from LLM models, I can come up with a design that works with my time, cost, and compute budgets - and still allow for more weekly integration as I keep learning about more advances as other people are both creating, and providing teaching for me to implement.
+
+## Time Budgets
+
+I can only work on this maybe 20 hours a week, on a typical week. This is as opposed to having a large staff. And I would prefer spending this time on the work that the system was designed to execute - not just designing and modifying the system itself.
+
+## Cash Expenditure Budgets
+
+There is only $200 a month available for ai budgets, firebase and hosting, github subscriptions and the like. So I have to be very careful how i allocate these expenditures, and sometimes this gets time consuming as well.
+
+## Computing Budgets
+
+I am currently restricted to using my personal mac studio with m1 ultra chip and 128g unified memory. My openclaw runs on a 12g vm within this computer. I use cloudflare to host the agents to the web so i and others on my team can also access the openclaw.
+
+This is a powerful computer but it is also quite easy to stretch it to it's extreme limits.
+
+## Matching Budgets to Design Preferences
+
+Each of the design preferences below can be impacted by available budgets, as noted above.
+
+But the bigger impact that design preferences have is on each other. In the largest sense, this is a combinatorial puzzle - choosing to execute those preferences that do not restrict other, perhaps more important preferences.
+
+Thus the work of the LLM model helping to solve this puzzle - will be to research options that allow me to do as many of these preferences as is reasonably possible - and especially those that end up more important to the workflows that this system is designed to process.
+
+
+## A Proposition and a Recurrent Theme
+
+AI is new in our history - and it comes with a proposition "Just issue this command and/or provide this context, and a desired state will be achieved." And it fulfills this promise.
+
+But this success begets new issues. There is always a repetitive workflow that wants to be engaged later. And contexts that want to build on each other. And and and. I will identify 3 aspects of a recurrent theme, as this repetitive workflow begins to evolve.
+
+### Cascades of 2nd, 3rd, 4th order consequences.
+
+Contexts begin to fill up with junk, and remnants of one time issues that won't have to be dealt with again. Or nth iterations which have been subsequently revised. And and and.
+
+This cascade of consequences is obviously too great to be enumerated here. Which is the point. It's always at least some degree of a problem, and it rarely has easy solutions. It's messy. Every solution can in turn have it's own cascade ...
+
+### External Events
+
+From version or API changes to new tooling or even bran new design structures, iterative workflows are often upended by external dependencies or requirements.
+
+This is always an issue with any digital tech. It's more of an issue now, just because tech itself is moving so fast.
+
+### Benefits of Focus
+
+My own work has proved to me that the more targeted and well prescribed certain tasks are, the better the result, when executed by AI models or agents. In this respect - less is more. Open ended YOLO prompts and contexts with everything but the kitchen sink can be easier to construct, but testing and fixing the output can be a problem after the work is "done".
+
+A famous musician once described great performance as "... not the notes you play, it's the notes you don't play." Taking this analogy to it's logical conclusion in AI prompts and contexts is similar to art in that it can take a lot more effort to prune down a context or a prompt to a bullet-proof minimum.
+
+### Cascades, External, and Focus Changes - Where the magic happens.
+
+If we look at our brief history with AI in the enterprise, we can see a recurrent theme. Doing something once can be easier than creating the bullet-proof repetive, iterative workflow we all would wish to see in the enterprise. 
+
+Looking at each of these 3 types of problems as specific types to generalize from, we can find recurrent themes, and solutions that others have already experimented with.
+
+It is up to us to have the patience and willingness to loop through each condition, research the options, and consider how to sort them. It makes for a lot of work - but it can be done systematically.
+
+## Persistence - Embedding Sources
+
+## Persistence - Files/Blobs/Artifacts
+
+## Persistence - Embeddings
+
+probably going to have to dedicate a ton of time disambiguating domain
+## file
+## moment
+## title
+
+## [cannot contextualize while doing but it is a contextualized notation]
+## persistence mechanism
+## string search
+## [who owns what]
+## input source
+## impedance mismatch on [phyics/biochem/social/economic/intrastructure/ai]
+## combinatorial mis from external context
+## funnel task at hand
+## which task i am focusing on
+## what is profitable
+## [group or individual effort]
+## [any or my canonical]
+## [last person i talked to versus actual priority]
+## [experimental agents, models, tool or favorite best]
+## [future or current]
+## [perfection/imperfection]
+## model toggling for various reasons
+## machine setup
+## agent testing
+## preventing access to my stuff
+## browser dev tools testing
+## multiple business domains
+## pure source doc vs today's guess at progressive contextualization
+## [DCI https://venturebeat.com/orchestration/your-ai-agents-need-a-terminal-not-just-a-vector-database]
+## [offered by frontier vendors or not offered yet]
+
+
