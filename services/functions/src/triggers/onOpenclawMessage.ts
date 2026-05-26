@@ -107,7 +107,12 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       .map((m) => ({role: m.role as string, content: m.content as string}));
     const sessionKey = `openclaw-work-request-v2:${agentId}:${requestId}`;
     const statusUrl = `https://hbb-a1.web.app/WR_Status/${requestId}/`;
-    const baseSystemContent = `CONTEXT: The unique ID for this work request is ${requestId}. Status URL: ${statusUrl}`;
+    const currentTitle = conversationSnap.get('title') as string | undefined;
+    const currentStatus = conversationSnap.get('status') as string | undefined;
+    const baseSystemContent = [
+      `TITLE: ${currentTitle || 'Untitled'}`,
+      `CONTEXT: The unique ID for this work request is ${requestId}. Status URL: ${statusUrl}. If you identify a concise and descriptive title for this session, or if the session is currently 'Untitled', please include [SET_TITLE: Concise Title] in your response. You may update this title at any time if the conversation context shifts.`,
+    ].join('\n');
     const attachmentContext = attachments.length > 0
       ? `.\nUploaded files available in this session:\n${attachments
         .map((attachment) => `- ${attachment.name}: ${attachment.url}`)
@@ -141,33 +146,43 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     }
 
     const result = await response.json() as ChatCompletionResponse;
-    const assistantContent = result.choices?.[0]?.message?.content ?? '';
+    const rawAssistantContent = result.choices?.[0]?.message?.content ?? '';
 
-    if (!assistantContent) {
+    if (!rawAssistantContent) {
       throw new Error('Empty assistant reply from OpenClaw');
     }
 
     functions.logger.info('Got assistant reply', {requestId, messageId});
 
+    let finalAssistantContent = rawAssistantContent;
+    let agentProvidedTitle: string | undefined;
+    const titleMatch = rawAssistantContent.match(/\[SET_TITLE:\s*(.*?)\]/);
+    if (titleMatch) {
+      agentProvidedTitle = titleMatch[1].trim() || undefined;
+      finalAssistantContent = rawAssistantContent.replace(/\[SET_TITLE:.*?\]/g, '').trim();
+    }
+
     await conversationRef.collection(MESSAGES_SUBCOLLECTION).add({
       role: 'assistant',
-      content: assistantContent,
+      content: finalAssistantContent,
       sessionId: requestId,
       status: 'complete',
       createdAt: FieldValue.serverTimestamp(),
     });
 
-    const accepted = assistantContent.includes(ACCEPTANCE_SIGNAL);
-    const currentTitle = conversationSnap.get('title');
-    const currentStatus = conversationSnap.get('status');
+    const accepted = rawAssistantContent.includes(ACCEPTANCE_SIGNAL);
 
     const conversationUpdate: Record<string, unknown> = {
       lastMessageAt: FieldValue.serverTimestamp(),
     };
 
+    if (agentProvidedTitle) {
+      conversationUpdate.title = agentProvidedTitle;
+    }
+
     if (accepted && currentStatus !== 'accepted') {
       conversationUpdate.status = 'accepted';
-      if (typeof currentTitle !== 'string' || !currentTitle.trim()) {
+      if (!agentProvidedTitle && (typeof currentTitle !== 'string' || !currentTitle.trim())) {
         conversationUpdate.title = buildConversationTitle(historyMessages, content);
       }
     }
