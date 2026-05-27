@@ -29,6 +29,7 @@ import type {DocumentSnapshot} from 'firebase-admin/firestore';
 
 const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
 const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
+const OPENCLAW_ROOT_AGENT_ID = process.env.OPENCLAW_ROOT_AGENT_ID ?? 'john';
 const WORK_REQUESTS_COLLECTION = 'openclawWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
 const OPENCLAW_WORK_REQUEST_AGENT_ID = 'cathy';
@@ -84,7 +85,10 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   const conversationRef = db.collection(WORK_REQUESTS_COLLECTION).doc(requestId);
   const messageRef = conversationRef.collection(MESSAGES_SUBCOLLECTION).doc(messageId);
   const conversationSnap = await conversationRef.get();
+  
   const agentId = (conversationSnap.get('agentId') as string | undefined) ?? OPENCLAW_WORK_REQUEST_AGENT_ID;
+  const isRoot = agentId === OPENCLAW_ROOT_AGENT_ID;
+  
   const rawAttachments = conversationSnap.get('attachments') as OpenclawAttachmentContext[] | undefined;
   const attachments = Array.isArray(rawAttachments) ? rawAttachments : [];
 
@@ -92,7 +96,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   functions.logger.info('OpenClaw message processing started', {
     requestId,
     messageId,
-    agentId,
+    agentId: isRoot ? `${agentId} (root)` : agentId,
   });
 
   try {
@@ -105,7 +109,11 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       .map((d) => d.data())
       .filter((m) => m.status === 'complete')
       .map((m) => ({role: m.role as string, content: m.content as string}));
-    const sessionKey = `openclaw-work-request-v2:${agentId}:${requestId}`;
+      
+    // The root agent uses 'root' in the session key, others use their agentId
+    const sessionSegment = isRoot ? 'root' : agentId;
+    const sessionKey = `openclaw-work-request-v2:${sessionSegment}:${requestId}`;
+    
     const statusUrl = `https://hbb-a1.web.app/WR_Status/${requestId}/`;
     const currentTitle = conversationSnap.get('title') as string | undefined;
     const currentStatus = conversationSnap.get('status') as string | undefined;
@@ -124,9 +132,9 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     };
 
     const requestBody = {
-      agentId,
+      agentId: isRoot ? '' : agentId,
       sessionKey,
-      model: `openclaw/${agentId}`,
+      model: isRoot ? 'openclaw' : `openclaw/${agentId}`,
       messages: [systemContext, ...historyMessages, {role: 'user', content}],
     };
 
@@ -208,7 +216,13 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
 
     functions.logger.info('OpenClaw message processed successfully', {requestId, messageId, accepted});
   } catch (error) {
-    functions.logger.error('Failed to process OpenClaw message', {error, requestId, messageId});
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    functions.logger.error('Failed to process OpenClaw message', {
+      error: errorMsg,
+      detail: error,
+      requestId,
+      messageId,
+    });
     await Promise.all([
       messageRef.update({status: 'error'}),
       conversationRef.set({lastMessageAt: FieldValue.serverTimestamp()}, {merge: true}),
