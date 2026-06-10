@@ -8,6 +8,7 @@ import {
   shouldUseEmulatorForService,
 } from '@df/state';
 import '@df/ui-lit/df-openclaw-chat-widget';
+import statusMarkdownContent from './tmp.md?raw';
 
 // Images embedded as data URIs so they travel with the JS bundle when deployed
 // as an iframe. Do not replace with path references — see guides/WC_APP_DEPLOYMENT.md.
@@ -51,6 +52,7 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
           header-img-right=${LOBSTER_IMG}
           superuser-email=${import.meta.env.VITE_SUPERUSER_EMAIL ?? ''}
           openclaw-agents=${import.meta.env.VITE_OPENCLAW_AGENTS ?? ''}
+          .statusMarkdownContent=${statusMarkdownContent}
           @df-openclaw-chat-widget-error=${this.handleWidgetError}
         ></df-openclaw-chat-widget>
       </div>

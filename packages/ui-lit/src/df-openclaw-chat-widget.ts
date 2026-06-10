@@ -45,6 +45,7 @@ import {
 import type {FirestoreRequestState} from '@df/types/firebase-firestore.types';
 import type {Attachment, OpenclawSendStatus} from '@df/types';
 import type {StorageFileMetadata} from '@df/types/firebase-storage.types';
+import './df-markdown-codemirror.js';
 import './df-upload-link.js';
 import './firebase/df-file-list.js';
 
@@ -594,6 +595,12 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       color: rgba(220, 38, 38, 0.88);
     }
 
+    .status-markdown {
+      display: block;
+      margin-top: 12px;
+      min-width: 0;
+    }
+
     md-circular-progress {
       --md-circular-progress-size: 18px;
     }
@@ -629,6 +636,9 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   /** Comma-separated list of agent names shown in the super user agent selector. */
   @property({type: String, attribute: 'openclaw-agents'}) declare openclawAgents: string;
 
+  /** Temporary markdown content displayed below the chat submit button. */
+  @property({type: String, attribute: 'status-markdown-content'}) declare statusMarkdownContent: string;
+
   private readonly isSuperUser = signal(false);
 
   @state() private messageText = '';
@@ -656,6 +666,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     this.submitOnEnter = true;
     this.superuserEmail = '';
     this.openclawAgents = '';
+    this.statusMarkdownContent = '';
   }
 
   override connectedCallback(): void {
@@ -762,6 +773,14 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
             </div>
             ${deleteState.status === 'error' && deleteState.error
               ? html`<span class="composer-status composer-status--error" role="status">${deleteState.error}</span>`
+              : nothing}
+            ${this.statusMarkdownContent.trim()
+              ? html`
+                  <df-markdown-codemirror
+                    class="status-markdown"
+                    .markdownContent=${this.statusMarkdownContent}
+                  ></df-markdown-codemirror>
+                `
               : nothing}
           </section>
         </section>
