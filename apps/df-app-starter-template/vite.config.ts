@@ -3,7 +3,7 @@ import {resolve} from 'node:path';
 
 const distEntry = './dist/main.js';
 const sourceEntry = '/src/main.ts';
-const PORT = 4183;
+const PORT = 4177;
 
 export default defineConfig({
   build: {

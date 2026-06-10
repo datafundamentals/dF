@@ -1177,7 +1177,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   }
 
   private closeDeleteConfirmation = (event?: Event): void => {
-    if (event && 'detail' in event && (event as any).detail?.action === 'cancel') {
+    if (event instanceof CustomEvent && event.detail?.action === 'cancel') {
       // Handled by @closed
     }
     this.deleteConfirmationConversationId = null;

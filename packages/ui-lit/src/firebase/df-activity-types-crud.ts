@@ -607,7 +607,7 @@ export class DfActivityTypesCrud extends SignalWatcher(LitElement) {
     try {
       await deleteActivityType(id);
       this.formMessage = {variant: 'success', text: 'Activity type deleted.'};
-    } catch (error) {
+    } catch {
       this.formMessage = {variant: 'error', text: 'Unable to delete activity type.'};
     }
   }
@@ -619,7 +619,7 @@ export class DfActivityTypesCrud extends SignalWatcher(LitElement) {
     }
     try {
       await refreshActivityTypes();
-    } catch (error) {
+    } catch {
       this.formMessage = {variant: 'error', text: 'Unable to refresh activity types.'};
     }
   }

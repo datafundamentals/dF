@@ -15,9 +15,12 @@ const TEST_PORTS = [
   4174, // df-teaching-app
   4175, // df-lit-starter
   4176, // df-firebase-teaching-app
+  4177, // df-app-starter-template
   4180, // df-activity-log
   4181, // df-chat-app
-  4183, // df-firebase-teaching-app3
+  4182, // df-openclaw-chat
+  4183, // df-goldilocks-host
+  4184, // df-user-admin-app
   4186, // df-auth-trigd-func-tool
 ];
 
@@ -29,9 +32,10 @@ for (const port of TEST_PORTS) {
     const output = execSync(`lsof -ti :${port} 2>/dev/null`, {encoding: 'utf8'}).trim();
 
     if (output) {
-      const pid = output.split('\n')[0]; // Get first PID if multiple
-      console.log(`  Killing process ${pid} on port ${port}`);
-      execSync(`kill -9 ${pid} 2>/dev/null`, {stdio: 'ignore'});
+      for (const pid of output.split('\n')) {
+        console.log(`  Killing process ${pid} on port ${port}`);
+        execSync(`kill -9 ${pid} 2>/dev/null`, {stdio: 'ignore'});
+      }
     }
   } catch (error) {
     // Port is likely not in use, which is fine

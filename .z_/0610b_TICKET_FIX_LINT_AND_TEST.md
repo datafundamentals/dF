@@ -10,8 +10,6 @@ This ticket gets us back to the point where the codebase would be if these post-
 
 ## Pre and Post Requirements (boilerplate)
 
-This ticket is **VM-side infrastructure only.** No monorepo code changes.
-
 0. Please avoid worktrees. I have provided a dedicated branch for you to follow as local. It should be clean.
 1. Before loading this ticket, read and follow `guides/1_TICKET_BEFORE_LOADING.md`
 2. Then read this file.
