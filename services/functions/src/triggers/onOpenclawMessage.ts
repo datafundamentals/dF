@@ -26,6 +26,7 @@ import * as functions from 'firebase-functions/v2';
 import {getFirestore, FieldValue} from 'firebase-admin/firestore';
 import type {FirestoreEvent, Change} from 'firebase-functions/v2/firestore';
 import type {DocumentSnapshot} from 'firebase-admin/firestore';
+import {createHash} from 'node:crypto';
 
 const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
 const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
@@ -33,7 +34,7 @@ const OPENCLAW_ROOT_AGENT_ID = process.env.OPENCLAW_ROOT_AGENT_ID ?? 'john';
 const WORK_REQUESTS_COLLECTION = 'openclawWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
 const OPENCLAW_WORK_REQUEST_AGENT_ID = 'cathy';
-const OPENCLAW_WORK_REQUEST_SESSION_PREFIX = 'openclaw-work-request-v2:cathy:';
+const OPENCLAW_WORK_REQUEST_SESSION_PREFIX = 'openclaw-work-request-v2:';
 const ACCEPTANCE_SIGNAL = 'This all sounds good to me';
 const ACCEPTANCE_NOTICE = [
   'This work request has been accepted and submitted.',
@@ -80,6 +81,13 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
 
   const {requestId, messageId} = event.params;
   const {content} = data;
+  const correlationId = `${requestId}:${messageId}`;
+  const logContext = {
+    requestId,
+    messageId,
+    correlationId,
+    eventId: event.id ?? null,
+  };
 
   const db = getFirestore();
   const conversationRef = db.collection(WORK_REQUESTS_COLLECTION).doc(requestId);
@@ -94,8 +102,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
 
   await messageRef.update({status: 'processing'});
   functions.logger.info('OpenClaw message processing started', {
-    requestId,
-    messageId,
+    ...logContext,
     agentId: isRoot ? `${agentId} (root)` : agentId,
   });
 
@@ -112,7 +119,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       
     // The root agent uses 'root' in the session key, others use their agentId
     const sessionSegment = isRoot ? 'root' : agentId;
-    const sessionKey = `openclaw-work-request-v2:${sessionSegment}:${requestId}`;
+    const sessionKey = `${OPENCLAW_WORK_REQUEST_SESSION_PREFIX}${sessionSegment}:${requestId}`;
     
     const statusUrl = `https://hbb-a1.web.app/WR_Status/${requestId}/`;
     const currentTitle = conversationSnap.get('title') as string | undefined;
@@ -130,6 +137,18 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       role: 'system',
       content: `${baseSystemContent}${attachmentContext}`,
     };
+
+    const promptFingerprint = createHash('sha256')
+      .update(baseSystemContent)
+      .digest('hex')
+      .slice(0, 16);
+
+    functions.logger.info('OpenClaw prompt prepared', {
+      ...logContext,
+      hasTitleLabel: baseSystemContent.includes('TITLE:'),
+      hasSetTitleDirective: baseSystemContent.includes('[SET_TITLE:'),
+      promptFingerprint,
+    });
 
     const requestBody = {
       agentId: isRoot ? '' : agentId,
@@ -160,20 +179,40 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       throw new Error('Empty assistant reply from OpenClaw');
     }
 
-    functions.logger.info('Got assistant reply', {requestId, messageId});
+    const titleMatch = rawAssistantContent.match(/\[SET_TITLE:\s*(.*?)\]/);
+    const extractedSetTitle = titleMatch?.[1]?.trim() || null;
+    functions.logger.info('OpenClaw assistant reply metadata', {
+      ...logContext,
+      hasSetTitleTag: Boolean(titleMatch),
+      extractedSetTitle,
+      rawAssistantLength: rawAssistantContent.length,
+      rawAssistantPreview: rawAssistantContent.slice(0, 280),
+    });
+
+    functions.logger.info('Got assistant reply', {...logContext});
 
     let finalAssistantContent = rawAssistantContent;
     let agentProvidedTitle: string | undefined;
-    const titleMatch = rawAssistantContent.match(/\[SET_TITLE:\s*(.*?)\]/);
     if (titleMatch) {
       agentProvidedTitle = titleMatch[1].trim() || undefined;
       finalAssistantContent = rawAssistantContent.replace(/\[SET_TITLE:.*?\]/g, '').trim();
     }
 
+    functions.logger.info('OpenClaw assistant content transform', {
+      ...logContext,
+      hadSetTitleTag: Boolean(titleMatch),
+      transformed: finalAssistantContent !== rawAssistantContent,
+      beforeLength: rawAssistantContent.length,
+      afterLength: finalAssistantContent.length,
+      extractedSetTitle: agentProvidedTitle ?? null,
+      transformedPreview: finalAssistantContent.slice(0, 280),
+    });
+
     await conversationRef.collection(MESSAGES_SUBCOLLECTION).add({
       role: 'assistant',
       content: finalAssistantContent,
       sessionId: requestId,
+      correlationId,
       status: 'complete',
       createdAt: FieldValue.serverTimestamp(),
     });
@@ -195,6 +234,16 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       }
     }
 
+    functions.logger.info('OpenClaw title decision', {
+      ...logContext,
+      accepted,
+      hasSetTitleTag: Boolean(titleMatch),
+      agentProvidedTitle: agentProvidedTitle ?? null,
+      currentTitle: typeof currentTitle === 'string' ? currentTitle : null,
+      nextTitle: typeof conversationUpdate.title === 'string' ? conversationUpdate.title : null,
+      statusTransition: accepted && currentStatus !== 'accepted' ? 'active->accepted' : 'no-change',
+    });
+
     const writes: Array<Promise<unknown>> = [
       messageRef.update({status: 'complete'}),
       conversationRef.set(conversationUpdate, {merge: true}),
@@ -206,6 +255,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
           role: 'assistant',
           content: ACCEPTANCE_NOTICE,
           sessionId: requestId,
+          correlationId,
           status: 'complete',
           createdAt: FieldValue.serverTimestamp(),
         })
@@ -214,14 +264,16 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
 
     await Promise.all(writes);
 
-    functions.logger.info('OpenClaw message processed successfully', {requestId, messageId, accepted});
+    functions.logger.info('OpenClaw message processed successfully', {
+      ...logContext,
+      accepted,
+    });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     functions.logger.error('Failed to process OpenClaw message', {
+      ...logContext,
       error: errorMsg,
       detail: error,
-      requestId,
-      messageId,
     });
     await Promise.all([
       messageRef.update({status: 'error'}),
