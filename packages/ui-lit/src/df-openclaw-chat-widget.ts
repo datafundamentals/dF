@@ -651,12 +651,17 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   @state() private fileDeleteConfirmationPath: string | null = null;
   private pendingDeleteFile: StorageFileMetadata | null = null;
 
-  private previousMessageCount = 0;
   private previousConversationId: string | null = null;
   private previousConversationStatus: 'active' | 'accepted' | null = null;
   private isCreatingAcceptedFollowup = false;
   private _clickCount = 0;
   private _clickTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // HACK: Turn-based event loop iteration (ticket 0610c).
+  // Appended turn markdown is ephemeral — not persisted.
+  // A future ticket will replace this with git-based persistence.
+  @state() private appendedTurnMarkdown = '';
+  private turnCount = 0;
 
   constructor() {
     super();
@@ -774,11 +779,11 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
             ${deleteState.status === 'error' && deleteState.error
               ? html`<span class="composer-status composer-status--error" role="status">${deleteState.error}</span>`
               : nothing}
-            ${this.statusMarkdownContent.trim()
+            ${this.effectiveMarkdownContent.trim()
               ? html`
                   <df-markdown-codemirror
                     class="status-markdown"
-                    .markdownContent=${this.statusMarkdownContent}
+                    .markdownContent=${this.effectiveMarkdownContent}
                   ></df-markdown-codemirror>
                 `
               : nothing}
@@ -845,6 +850,9 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       this.isRenamingTitle = false;
       this.titleDraft = this.resolveConversationTitle(activeConversation);
       this.previousConversationStatus = activeConversationStatus;
+      // Reset turn accumulation when switching conversations
+      this.appendedTurnMarkdown = '';
+      this.turnCount = 0;
     } else if (
       activeConversationId &&
       this.previousConversationStatus === 'active' &&
@@ -855,10 +863,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       void this.createFollowupConversationAfterAcceptance();
     }
 
-    if (messageCount > this.previousMessageCount) {
-      this.scrollToLatest();
-    }
-    this.previousMessageCount = messageCount;
+    void messageCount;
     this.previousConversationStatus = activeConversationStatus;
   }
 
@@ -1104,7 +1109,13 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       return html`<div class="empty-state">Send your first message to start composing a work request.</div>`;
     }
 
-    return chatState.documents.map((message) => this.renderMessage(message));
+    // Show only the last Cathy reply (turn-based UI — see ticket 0610c)
+    const messages = chatState.documents as unknown as OpenclawMessage[];
+    const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+    if (!lastAssistant) {
+      return html`<div class="empty-state">Waiting for a reply…</div>`;
+    }
+    return this.renderMessage(lastAssistant);
   }
 
   private renderMessage(message: OpenclawMessage) {
@@ -1388,6 +1399,10 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       return;
     }
 
+    const messages = openclawChatMessagesState.get().documents as unknown as OpenclawMessage[];
+    const lastCathy = [...messages].reverse().find((m) => m.role === 'assistant');
+    this.appendTurn(trimmed, lastCathy?.content ?? null);
+
     try {
       await sendOpenclawMessage(trimmed);
       this.messageText = '';
@@ -1459,11 +1474,14 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     return null;
   }
 
-  private scrollToLatest(): void {
-    const container = this.renderRoot.querySelector('.messages');
-    if (container instanceof HTMLElement) {
-      container.scrollTop = container.scrollHeight;
-    }
+  private appendTurn(userText: string, previousCathyText: string | null): void {
+    this.turnCount++;
+    const cathyLine = previousCathyText ? `\n\n**Cathy:** ${previousCathyText}` : '';
+    this.appendedTurnMarkdown += `\n\n---\n\n**Turn ${this.turnCount}**${cathyLine}\n\n**You:** ${userText}`;
+  }
+
+  private get effectiveMarkdownContent(): string {
+    return this.statusMarkdownContent + this.appendedTurnMarkdown;
   }
 
   private formatRelativeTimestamp(value: Date | null): string {
