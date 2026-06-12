@@ -265,8 +265,8 @@ service cloud.firestore {
 
       allow create: if isAuthenticated()
         && request.auth.uid == request.resource.data.userId
-        && hasRequiredFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt'])
-        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt'])
+        && hasRequiredFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber'])
+        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber'])
         && request.resource.data.agentId is string
         && request.resource.data.agentId.size() > 0
         && (request.resource.data.title is string || request.resource.data.title == null)

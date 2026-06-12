@@ -45,6 +45,7 @@ interface OpenclawMessage extends FirestoreDocument {
   createdAt: Date | null;
   sessionId: string;
   status: 'pending' | 'processing' | 'complete' | 'error';
+  turnNumber?: number;
 }
 
 interface OpenclawConversation extends FirestoreDocument {
@@ -55,6 +56,7 @@ interface OpenclawConversation extends FirestoreDocument {
   createdAt: Date | null;
   lastMessageAt: Date | null;
   attachments: Attachment[];
+  currentTurnNumber: number;
 }
 
 const messagesSignal = signal<readonly OpenclawMessage[]>([]);
@@ -68,6 +70,8 @@ const conversationsErrorSignal = signal<string | null>(null);
 
 const isMessagesListeningSignal = signal(false);
 const isConversationsListeningSignal = signal(false);
+
+let turnCountSignal = signal(0);
 
 const sendStatusSignal = signal<OpenclawSendStatus>('idle');
 const sendErrorSignal = signal<string | null>(null);
@@ -220,6 +224,7 @@ export function __resetOpenclawStoreForTests(): void {
   initializedFunctions = null;
   initializedUserId = null;
   ensureConversationPromise = null;
+  turnCountSignal.set(0);
   demoMode = false;
 }
 
@@ -297,6 +302,7 @@ export async function createOpenclawConversation(agentId?: string): Promise<stri
     status: 'active',
     createdAt: serverTimestamp(),
     lastMessageAt: serverTimestamp(),
+    currentTurnNumber: 0,
   });
 
   switchOpenclawConversation(requestId);
@@ -404,7 +410,7 @@ export async function deleteOpenclawConversation(requestId: string): Promise<voi
 
 export async function sendOpenclawMessage(content: string): Promise<void> {
   const requestId = activeConversationIdSignal.get();
-  if (!requestId || !messagesCollectionRef) {
+  if (!requestId || !messagesCollectionRef || !initializedDb) {
     throw new Error('No active conversation.');
   }
 
@@ -416,14 +422,24 @@ export async function sendOpenclawMessage(content: string): Promise<void> {
   sendStatusSignal.set('sending');
   sendErrorSignal.set(null);
 
+  const nextTurnNumber = turnCountSignal.get() + 1;
+  turnCountSignal.set(nextTurnNumber);
+
   try {
-    await addDoc(messagesCollectionRef, {
-      role: 'user',
-      content: trimmed,
-      createdAt: serverTimestamp(),
-      sessionId: requestId,
-      status: 'pending',
-    });
+    await Promise.all([
+      addDoc(messagesCollectionRef, {
+        role: 'user',
+        content: trimmed,
+        createdAt: serverTimestamp(),
+        sessionId: requestId,
+        status: 'pending',
+        turnNumber: nextTurnNumber,
+      }),
+      updateDoc(doc(initializedDb, WORK_REQUESTS_COLLECTION, requestId), {
+        currentTurnNumber: nextTurnNumber,
+        lastMessageAt: serverTimestamp(),
+      }),
+    ]);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to send message.';
     sendStatusSignal.set('error');
@@ -499,6 +515,9 @@ function startMessagesListener(db: Firestore, requestId: string): void {
   messagesStatusSignal.set('loading');
   messagesErrorSignal.set(null);
 
+  const conversation = conversationsSignal.get().find((c) => c.id === requestId);
+  turnCountSignal.set(conversation?.currentTurnNumber ?? 0);
+
   messagesCollectionRef = collection(db, WORK_REQUESTS_COLLECTION, requestId, MESSAGES_SUBCOLLECTION);
   const q = query(messagesCollectionRef, orderBy('createdAt', 'asc'));
 
@@ -541,6 +560,7 @@ function normalizeConversationDoc(
     createdAt: normalizeTimestamp(data.createdAt),
     lastMessageAt: normalizeTimestamp(data.lastMessageAt),
     attachments: normalizeAttachments(data.attachments),
+    currentTurnNumber: typeof data.currentTurnNumber === 'number' ? data.currentTurnNumber : 0,
   };
 }
 
