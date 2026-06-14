@@ -1,8 +1,8 @@
 # OpenClaw Work Request Workflow
 
-> **Tier:** 2 (Load when working on df-openclaw-chat or any agent/gate/turn related ticket)
+> **Tier:** 2 (Load when working on df-agent-work-request or any agent/gate/turn related ticket)
 >
-> **Status:** Authoritative design — supersedes speculative sections of `apps/df-openclaw-chat/src/tmp.md`
+> **Status:** Authoritative design — supersedes speculative sections of `apps/df-agent-work-request/src/tmp.md`
 
 ---
 
@@ -92,7 +92,7 @@ openclawWorkRequests/{requestId}/messages/{messageId}
 
 ## Relationship to tmp.md
 
-`apps/df-openclaw-chat/src/tmp.md` is a speculative design document written before implementation began. Some of its concepts (gate definitions, loop control, templates) remain useful as inspiration for future tickets. However, this guide takes precedence on any point where the two conflict. Specifically:
+`apps/df-agent-work-request/src/tmp.md` is a speculative design document written before implementation began. Some of its concepts (gate definitions, loop control, templates) remain useful as inspiration for future tickets. However, this guide takes precedence on any point where the two conflict. Specifically:
 
 - tmp.md proposes a separate `turns` subcollection with text duplication — **not adopted**
 - tmp.md's `meta.turnState = USER_TURN | PROCESSING` may still be useful for UI locking in a future ticket, but is out of scope until then

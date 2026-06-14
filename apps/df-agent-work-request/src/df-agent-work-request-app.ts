@@ -7,7 +7,7 @@ import {
   getInitializedFirebaseApp,
   shouldUseEmulatorForService,
 } from '@df/state';
-import '@df/ui-lit/df-openclaw-chat-widget';
+import '@df/ui-lit/df-agent-work-request-widget';
 import statusMarkdownContent from './workRequestTemplate.md?raw';
 
 // Images embedded as data URIs so they travel with the JS bundle when deployed
@@ -15,8 +15,8 @@ import statusMarkdownContent from './workRequestTemplate.md?raw';
 const CHATTY_CATHY_IMG = '/images/chatty-cathy.jpg';
 const LOBSTER_IMG = '/images/lobster.png';
 
-@customElement('df-openclaw-chat-app')
-export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
+@customElement('df-agent-work-request-app')
+export class DfAgentWorkRequestApp extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -36,7 +36,7 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
       display: flex;
     }
 
-    df-openclaw-chat-widget {
+    df-agent-work-request-widget {
       width: 100%;
     }
   `;
@@ -47,14 +47,14 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
   override render() {
     return html`
       <div class="shell">
-        <df-openclaw-chat-widget
+        <df-agent-work-request-widget
           header-img-left=${CHATTY_CATHY_IMG}
           header-img-right=${LOBSTER_IMG}
           superuser-email=${import.meta.env.VITE_SUPERUSER_EMAIL ?? ''}
           openclaw-agents=${import.meta.env.VITE_OPENCLAW_AGENTS ?? ''}
           .statusMarkdownContent=${statusMarkdownContent}
-          @df-openclaw-chat-widget-error=${this.handleWidgetError}
-        ></df-openclaw-chat-widget>
+          @df-agent-work-request-widget-error=${this.handleWidgetError}
+        ></df-agent-work-request-widget>
       </div>
     `;
   }
@@ -77,18 +77,18 @@ export class DfOpenclawChatApp extends SignalWatcher(LitElement) {
       );
       this.isStoreReady = true;
     } catch (error) {
-      console.error('[df-openclaw-chat-app] Failed to initialize store', error);
+      console.error('[df-agent-work-request-app] Failed to initialize store', error);
       this.isStoreInitializing = false;
     }
   }
 
   private handleWidgetError(event: CustomEvent<{error: unknown}>): void {
-    console.error('[df-openclaw-chat-app] Widget error', event.detail?.error);
+    console.error('[df-agent-work-request-app] Widget error', event.detail?.error);
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'df-openclaw-chat-app': DfOpenclawChatApp;
+    'df-agent-work-request-app': DfAgentWorkRequestApp;
   }
 }

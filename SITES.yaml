@@ -200,7 +200,7 @@ sites:
     url: https://hbb-a1.web.app/
     host: firebase
     firebaseProject: melody-r2-d4
-    apps: [ df-openclaw-chat ]
+    apps: [ df-agent-work-request ]
     status:
     - hand copied from couldbe
     - the theme automation does not work

@@ -59,7 +59,7 @@ function rawMarkdown() {
 export default {
   input: 'dist/main.js',
   output: {
-    file: 'dist/bundle/df-openclaw-chat.js',
+    file: 'dist/bundle/df-agent-work-request.js',
     format: 'esm',
     sourcemap: true,
   },

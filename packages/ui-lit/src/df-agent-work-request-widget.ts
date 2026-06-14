@@ -73,8 +73,8 @@ interface OpenclawMessage {
   status: 'pending' | 'processing' | 'complete' | 'error';
 }
 
-@customElement('df-openclaw-chat-widget')
-export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
+@customElement('df-agent-work-request-widget')
+export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
@@ -1081,7 +1081,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       this.activeAgentName = agent;
     } catch (error) {
       this.dispatchEvent(
-        new CustomEvent('df-openclaw-chat-widget-error', {
+        new CustomEvent('df-agent-work-request-widget-error', {
           detail: {error},
           bubbles: true,
           composed: true,
@@ -1142,7 +1142,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       await createOpenclawConversation(undefined, this.statusMarkdownContent);
     } catch (error) {
       this.dispatchEvent(
-        new CustomEvent('df-openclaw-chat-widget-error', {
+        new CustomEvent('df-agent-work-request-widget-error', {
           detail: {error},
           bubbles: true,
           composed: true,
@@ -1156,7 +1156,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       await createOpenclawConversation(undefined, this.statusMarkdownContent);
     } catch (error) {
       this.dispatchEvent(
-        new CustomEvent('df-openclaw-chat-widget-error', {
+        new CustomEvent('df-agent-work-request-widget-error', {
           detail: {error},
           bubbles: true,
           composed: true,
@@ -1228,7 +1228,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       await this.refreshFileList();
     } catch (error) {
       this.dispatchEvent(
-        new CustomEvent('df-openclaw-chat-widget-error', {
+        new CustomEvent('df-agent-work-request-widget-error', {
           detail: {error},
           bubbles: true,
           composed: true,
@@ -1261,7 +1261,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
         await addAttachmentToOpenclawConversation(activeConversationId, attachment);
       } catch (error) {
         this.dispatchEvent(
-          new CustomEvent('df-openclaw-chat-widget-error', {
+          new CustomEvent('df-agent-work-request-widget-error', {
             detail: {error},
             bubbles: true,
             composed: true,
@@ -1273,7 +1273,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
     try {
       await this.refreshFileList();
     } catch (error) {
-      console.error('[df-openclaw-chat-widget] refreshFileList failed after upload:', error);
+      console.error('[df-agent-work-request-widget] refreshFileList failed after upload:', error);
     }
     const uploadLink = this.shadowRoot?.querySelector('#openclaw-upload-link') as HTMLElement & {
       reset?: () => void;
@@ -1300,7 +1300,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       this.isRenamingTitle = false;
     } catch (error) {
       this.dispatchEvent(
-        new CustomEvent('df-openclaw-chat-widget-error', {
+        new CustomEvent('df-agent-work-request-widget-error', {
           detail: {error},
           bubbles: true,
           composed: true,
@@ -1366,7 +1366,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       this.isRenamingTitle = false;
     } catch (error) {
       this.dispatchEvent(
-        new CustomEvent('df-openclaw-chat-widget-error', {
+        new CustomEvent('df-agent-work-request-widget-error', {
           detail: {error},
           bubbles: true,
           composed: true,
@@ -1408,7 +1408,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       await sendOpenclawMessage(trimmed);
       this.messageText = '';
       this.dispatchEvent(
-        new CustomEvent('df-openclaw-chat-widget-message-sent', {
+        new CustomEvent('df-agent-work-request-widget-message-sent', {
           detail: {content: trimmed},
           bubbles: true,
           composed: true,
@@ -1416,7 +1416,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
       );
     } catch (error) {
       this.dispatchEvent(
-        new CustomEvent('df-openclaw-chat-widget-error', {
+        new CustomEvent('df-agent-work-request-widget-error', {
           detail: {error},
           bubbles: true,
           composed: true,
@@ -1587,6 +1587,6 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'df-openclaw-chat-widget': DfOpenclawChatWidget;
+    'df-agent-work-request-widget': DfAgentWorkRequestWidget;
   }
 }

@@ -18,7 +18,7 @@ const TEST_PORTS = [
   4177, // df-app-starter-template
   4180, // df-activity-log
   4181, // df-chat-app
-  4182, // df-openclaw-chat
+  4182, // df-agent-work-request
   4183, // df-goldilocks-host
   4184, // df-user-admin-app
   4186, // df-auth-trigd-func-tool

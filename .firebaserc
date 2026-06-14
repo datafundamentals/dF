@@ -24,8 +24,8 @@
     },
     "melody-r2-d4": {
       "hosting": {
-        "df-openclaw-chat": [
-          "df-openclaw-chat"
+        "df-agent-work-request": [
+          "df-agent-work-request"
         ]
       }
     }

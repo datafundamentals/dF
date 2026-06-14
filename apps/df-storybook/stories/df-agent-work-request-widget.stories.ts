@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/web-components';
 import {html} from 'lit';
 
-import '@df/ui-lit/df-openclaw-chat-widget';
+import '@df/ui-lit/df-agent-work-request-widget';
 import {
   __resetAuthDemoState,
   __resetOpenclawDemoState,
@@ -110,7 +110,7 @@ const demoSignedOutState: FirebaseAuthState = {
 
 const meta: Meta<OpenclawStoryArgs> = {
   title: 'Firebase/OpenClaw Chat Widget',
-  component: 'df-openclaw-chat-widget',
+  component: 'df-agent-work-request-widget',
   args: {
     heading: 'Chatty Cathy Work Request System',
     authenticated: true,
@@ -168,7 +168,7 @@ const renderWidget = (args: OpenclawStoryArgs) => {
 
   return html`
     <div style="padding: 24px; background: #eef2ff; min-height: 100vh; box-sizing: border-box;">
-      <df-openclaw-chat-widget .heading=${args.heading}></df-openclaw-chat-widget>
+      <df-agent-work-request-widget .heading=${args.heading}></df-agent-work-request-widget>
     </div>
   `;
 };

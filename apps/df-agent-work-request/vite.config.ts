@@ -14,8 +14,8 @@ export default defineConfig({
     },
     lib: {
       entry: resolve(__dirname, 'src/main.ts'),
-      name: 'DfOpenclawChat',
-      fileName: 'df-openclaw-chat.bundled',
+      name: 'DfAgentWorkRequest',
+      fileName: 'df-agent-work-request.bundled',
       formats: ['es'],
     },
     outDir: 'dist',
@@ -50,7 +50,7 @@ export default defineConfig({
   },
   plugins: [
     {
-      name: 'df-openclaw-chat-entry',
+      name: 'df-agent-work-request-entry',
       apply: 'serve',
       transformIndexHtml(html) {
         return html.replace(distEntry, sourceEntry);

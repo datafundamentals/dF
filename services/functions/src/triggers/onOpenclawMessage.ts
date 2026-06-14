@@ -1,7 +1,7 @@
 /**
  * Firestore Trigger: onOpenclawMessage
  *
- * Bridges the df-openclaw-chat app to the OpenClaw agent API.
+ * Bridges the df-agent-work-request app to the OpenClaw agent API.
  *
  * Trigger: onWrite on openclawWorkRequests/{requestId}/messages/{messageId}
  * Condition: role === 'user' and status === 'pending' (idempotency guard)
