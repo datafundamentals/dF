@@ -32,7 +32,7 @@
     "dotenv": "^16.4.5",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.2",
-    "vite": "^5.4.10"
+    "vite": "^6.4.2"
   },
   "customElements": "custom-elements.json"
 }
