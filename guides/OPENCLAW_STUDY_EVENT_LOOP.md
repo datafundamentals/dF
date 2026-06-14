@@ -1,4 +1,3 @@
-```markdown
 # Architectural Design: Deterministic Agentic Workflow System
 
 ## 1. System Overview
@@ -174,9 +173,3 @@ Work is scoped into isolated, independently testable increments.
 * **Epic 5: Discovery & Navigation**
 * Implement the two-column Command Center layout.
 * Build the Template selector and "Spawn-on-Copy" instantiation logic.
-
-
-
-```
-
-```

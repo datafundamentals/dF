@@ -41,6 +41,37 @@ cd services/functions
 firebase deploy --only functions
 ```
 
+## OpenClaw Work Request Git Persistence
+
+`onOpenclawMessage` can persist each Work Request turn into a GitHub-backed markdown file. The feature is disabled unless `OPENCLAW_WORK_REQUEST_GIT_REPO` is configured.
+
+Required secret when enabled:
+
+```bash
+firebase functions:secrets:set GITHUB_PAT
+```
+
+Runtime configuration:
+
+- `OPENCLAW_WORK_REQUEST_GIT_REPO` - GitHub repo as `owner/repo` or an HTTPS repo URL.
+- `OPENCLAW_WORK_REQUEST_GIT_BRANCH` - target branch, defaults to `main`.
+- `OPENCLAW_WORK_REQUEST_GIT_DOCS_DIR` - directory for `[requestId].md`, defaults to `openclaw-work-requests`.
+- `OPENCLAW_WORK_REQUEST_GIT_AUTHOR_NAME` - commit author name, defaults to `OpenClaw Work Request Bot`.
+- `OPENCLAW_WORK_REQUEST_GIT_AUTHOR_EMAIL` - commit author email, defaults to `openclaw-work-requests@datafundamentals.com`.
+
+The above were hard-coded into openclawWorkRequestGit.ts by Pete as follows. This might not have been the right approach but the repository is private so not sure that it hurts anything?
+
+```
+const DEFAULT_BRANCH = 'main';
+const DEFAULT_DOCS_DIR = 'wr';
+const DEFAULT_AUTHOR_NAME = 'R2D4agent';
+const DEFAULT_AUTHOR_EMAIL = 'pete@couldbe.net';
+---
+  const DEFAULT_REPO = 'R2D4agent/workRequest';
+```
+
+The function writes the current Work Request markdown document to `[requestId].md`, appends a deterministic turn fragment, commits it, rebases against the target branch, and pushes. After a successful push, it stores the exact committed markdown and git commit metadata back on the Firestore Work Request. No LLM is involved in this persistence step.
+
 ## State Management
 
 Function call state is managed in `packages/state/src/stores/functions-demo.store.ts` using signals-based architecture. Components consume this state reactively.

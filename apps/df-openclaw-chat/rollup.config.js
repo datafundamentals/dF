@@ -4,6 +4,8 @@ import {visualizer} from 'rollup-plugin-visualizer';
 import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import dotenv from 'dotenv';
+import {readFileSync} from 'node:fs';
+import {resolve as resolvePath} from 'node:path';
 
 dotenv.config({path: '.env.production'});
 dotenv.config();
@@ -21,6 +23,7 @@ const firebaseEnvKeys = [
 ];
 
 const mode = process.env.MODE ?? process.env.NODE_ENV ?? 'production';
+const rawMarkdownSuffix = '.md?raw';
 
 const envObject = {
   MODE: mode,
@@ -31,6 +34,28 @@ const envObject = {
   ...Object.fromEntries(firebaseEnvKeys.map((key) => [key, process.env[key]])),
 };
 
+function rawMarkdown() {
+  return {
+    name: 'raw-markdown',
+    resolveId(source) {
+      if (!source.endsWith(rawMarkdownSuffix)) {
+        return null;
+      }
+
+      return source;
+    },
+    load(id) {
+      if (!id.endsWith(rawMarkdownSuffix)) {
+        return null;
+      }
+
+      const markdownPath = resolvePath('src', id.slice(0, -'?raw'.length));
+      const markdown = readFileSync(markdownPath, 'utf8');
+      return `export default ${JSON.stringify(markdown)};`;
+    },
+  };
+}
+
 export default {
   input: 'dist/main.js',
   output: {
@@ -39,6 +64,7 @@ export default {
     sourcemap: true,
   },
   plugins: [
+    rawMarkdown(),
     resolve(),
     replace({
       preventAssignment: true,

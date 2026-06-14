@@ -23,10 +23,15 @@
  */
 
 import * as functions from 'firebase-functions/v2';
+import {defineSecret} from 'firebase-functions/params';
 import {getFirestore, FieldValue} from 'firebase-admin/firestore';
 import type {FirestoreEvent, Change} from 'firebase-functions/v2/firestore';
 import type {DocumentSnapshot} from 'firebase-admin/firestore';
 import {createHash} from 'node:crypto';
+import {
+  loadOpenclawWorkRequestGitConfig,
+  persistOpenclawWorkRequestTurnToGit,
+} from '../shared/openclawWorkRequestGit.js';
 
 const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
 const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
@@ -41,12 +46,14 @@ const ACCEPTANCE_NOTICE = [
   'Any further messages in this conversation will not change that submission.',
   'A new conversation should be used for anything additional.',
 ].join(' ');
+const githubPat = defineSecret('GITHUB_PAT');
 
 interface OpenclawMessageData {
   role: string;
   content: string;
   sessionId: string;
   status: 'pending' | 'processing' | 'complete' | 'error';
+  turnNumber?: number;
 }
 
 interface ChatCompletionResponse {
@@ -67,6 +74,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   document: 'openclawWorkRequests/{requestId}/messages/{messageId}',
   region: 'us-central1',
   timeoutSeconds: 540,
+  secrets: [githubPat],
 }, async (event: FirestoreEvent<Change<DocumentSnapshot> | undefined, {requestId: string; messageId: string}>) => {
   const afterSnap = event.data?.after;
   if (!afterSnap || !afterSnap.exists) {
@@ -116,6 +124,20 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       .map((d) => d.data())
       .filter((m) => m.status === 'complete')
       .map((m) => ({role: m.role as string, content: m.content as string}));
+
+    const previousAssistantContent = [...historyMessages]
+      .reverse()
+      .find((message) => message.role === 'assistant')?.content ?? null;
+    await persistWorkRequestTurn({
+      requestId,
+      messageId,
+      userContent: content,
+      previousAssistantContent,
+      turnNumber: data.turnNumber ?? countPriorUserTurns(historyMessages) + 1,
+      baseMarkdownContent: readStringField(conversationSnap, 'workRequestMarkdown'),
+      logContext,
+      conversationRef,
+    });
       
     // The root agent uses 'root' in the session key, others use their agentId
     const sessionSegment = isRoot ? 'root' : agentId;
@@ -282,6 +304,70 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     throw error;
   }
 });
+
+async function persistWorkRequestTurn(input: {
+  requestId: string;
+  messageId: string;
+  userContent: string;
+  previousAssistantContent: string | null;
+  turnNumber: number;
+  baseMarkdownContent: string;
+  logContext: Record<string, unknown>;
+  conversationRef: FirebaseFirestore.DocumentReference;
+}): Promise<void> {
+  const gitConfig = loadOpenclawWorkRequestGitConfig();
+  if (!gitConfig) {
+    functions.logger.info('OpenClaw work request git persistence skipped: repo config not set', input.logContext);
+    return;
+  }
+
+  const token = githubPat.value();
+  if (!token) {
+    throw new Error('GITHUB_PAT secret is required when OPENCLAW_WORK_REQUEST_GIT_REPO is configured');
+  }
+
+  const gitResult = await persistOpenclawWorkRequestTurnToGit({
+    requestId: input.requestId,
+    messageId: input.messageId,
+    userContent: input.userContent,
+    previousAssistantContent: input.previousAssistantContent,
+    turnNumber: input.turnNumber,
+    token,
+    baseMarkdownContent: input.baseMarkdownContent,
+    config: gitConfig,
+  });
+
+  if (gitResult) {
+    await input.conversationRef.set({
+      workRequestMarkdown: gitResult.markdownContent,
+      workRequestGit: {
+        repo: gitResult.repo,
+        branch: gitResult.branch,
+        docPath: gitResult.docPath,
+        commitSha: gitResult.commitSha,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+    }, {merge: true});
+  }
+
+  functions.logger.info('OpenClaw work request turn persisted to git', {
+    ...input.logContext,
+    turnNumber: input.turnNumber,
+    gitRepo: gitResult?.repo ?? gitConfig.repo,
+    gitBranch: gitResult?.branch ?? gitConfig.branch,
+    gitDocPath: gitResult?.docPath ?? null,
+    gitCommitSha: gitResult?.commitSha ?? null,
+  });
+}
+
+function countPriorUserTurns(historyMessages: Array<{role: string; content: string}>): number {
+  return historyMessages.filter((message) => message.role === 'user').length;
+}
+
+function readStringField(snapshot: DocumentSnapshot, field: string): string {
+  const value = snapshot.get(field);
+  return typeof value === 'string' ? value : '';
+}
 
 function buildConversationTitle(
   historyMessages: Array<{role: string; content: string}>,

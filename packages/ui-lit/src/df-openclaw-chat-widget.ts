@@ -61,6 +61,7 @@ interface OpenclawConversation {
   status: 'active' | 'accepted';
   createdAt: Date | null;
   lastMessageAt: Date | null;
+  workRequestMarkdown?: string;
 }
 
 interface OpenclawMessage {
@@ -1076,7 +1077,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
   private async handleAgentClick(agent: string): Promise<void> {
     try {
-      await createOpenclawConversation(agent);
+      await createOpenclawConversation(agent, this.statusMarkdownContent);
       this.activeAgentName = agent;
     } catch (error) {
       this.dispatchEvent(
@@ -1138,7 +1139,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
   private async handleCreateConversation(): Promise<void> {
     try {
-      await createOpenclawConversation();
+      await createOpenclawConversation(undefined, this.statusMarkdownContent);
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent('df-openclaw-chat-widget-error', {
@@ -1152,7 +1153,7 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
 
   private async createFollowupConversationAfterAcceptance(): Promise<void> {
     try {
-      await createOpenclawConversation();
+      await createOpenclawConversation(undefined, this.statusMarkdownContent);
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent('df-openclaw-chat-widget-error', {
@@ -1481,7 +1482,8 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
   }
 
   private get effectiveMarkdownContent(): string {
-    return this.statusMarkdownContent + this.appendedTurnMarkdown;
+    const activeMarkdown = openclawActiveConversationState.get().conversation?.workRequestMarkdown;
+    return activeMarkdown || this.statusMarkdownContent + this.appendedTurnMarkdown;
   }
 
   private formatRelativeTimestamp(value: Date | null): string {

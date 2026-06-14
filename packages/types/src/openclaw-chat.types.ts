@@ -40,5 +40,6 @@ export interface OpenclawConversation extends FirestoreDocument {
   status: OpenclawConversationStatus;
   createdAt: Date | null;
   lastMessageAt: Date | null;
+  workRequestMarkdown?: string;
   attachments?: Attachment[];
 }

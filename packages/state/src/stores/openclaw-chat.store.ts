@@ -55,6 +55,7 @@ interface OpenclawConversation extends FirestoreDocument {
   status: 'active' | 'accepted';
   createdAt: Date | null;
   lastMessageAt: Date | null;
+  workRequestMarkdown?: string;
   attachments: Attachment[];
   currentTurnNumber: number;
 }
@@ -86,6 +87,7 @@ let messagesCollectionRef: CollectionReference<DocumentData> | null = null;
 let initializedDb: Firestore | null = null;
 let initializedFunctions: Functions | null = null;
 let initializedUserId: string | null = null;
+let defaultWorkRequestMarkdown = '';
 let ensureConversationPromise: Promise<string | null> | null = null;
 let demoMode = false;
 
@@ -223,6 +225,7 @@ export function __resetOpenclawStoreForTests(): void {
   initializedDb = null;
   initializedFunctions = null;
   initializedUserId = null;
+  defaultWorkRequestMarkdown = '';
   ensureConversationPromise = null;
   turnCountSignal.set(0);
   demoMode = false;
@@ -231,7 +234,8 @@ export function __resetOpenclawStoreForTests(): void {
 export async function initializeOpenclawChatStore(
   app: FirebaseApp,
   useEmulator: boolean,
-  userId: string
+  userId: string,
+  initialWorkRequestMarkdown = ''
 ): Promise<void> {
   if (initializedDb && initializedUserId === userId) {
     startOpenclawRealtime();
@@ -240,6 +244,7 @@ export async function initializeOpenclawChatStore(
 
   stopOpenclawRealtime();
   initializedUserId = userId;
+  defaultWorkRequestMarkdown = initialWorkRequestMarkdown;
 
   const db = getFirestoreDb(app);
   if (useEmulator) {
@@ -287,7 +292,10 @@ export function stopOpenclawRealtime(): void {
   isMessagesListeningSignal.set(false);
 }
 
-export async function createOpenclawConversation(agentId?: string): Promise<string> {
+export async function createOpenclawConversation(
+  agentId?: string,
+  workRequestMarkdown = defaultWorkRequestMarkdown
+): Promise<string> {
   if (!initializedDb || !initializedUserId) {
     throw new Error('OpenClaw chat store is not initialized.');
   }
@@ -300,6 +308,7 @@ export async function createOpenclawConversation(agentId?: string): Promise<stri
     agentId: agentId ?? DEFAULT_AGENT_ID,
     title: null,
     status: 'active',
+    workRequestMarkdown,
     createdAt: serverTimestamp(),
     lastMessageAt: serverTimestamp(),
     currentTurnNumber: 0,
@@ -559,6 +568,7 @@ function normalizeConversationDoc(
     status: data.status === 'accepted' ? 'accepted' : 'active',
     createdAt: normalizeTimestamp(data.createdAt),
     lastMessageAt: normalizeTimestamp(data.lastMessageAt),
+    workRequestMarkdown: typeof data.workRequestMarkdown === 'string' ? data.workRequestMarkdown : '',
     attachments: normalizeAttachments(data.attachments),
     currentTurnNumber: typeof data.currentTurnNumber === 'number' ? data.currentTurnNumber : 0,
   };

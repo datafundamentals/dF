@@ -266,13 +266,16 @@ service cloud.firestore {
       allow create: if isAuthenticated()
         && request.auth.uid == request.resource.data.userId
         && hasRequiredFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber'])
-        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber'])
+        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber', 'workRequestMarkdown'])
         && request.resource.data.agentId is string
         && request.resource.data.agentId.size() > 0
         && (request.resource.data.title is string || request.resource.data.title == null)
         && request.resource.data.status == 'active'
         && (request.resource.data.createdAt is timestamp || request.resource.data.createdAt == null)
-        && (request.resource.data.lastMessageAt is timestamp || request.resource.data.lastMessageAt == null);
+        && (request.resource.data.lastMessageAt is timestamp || request.resource.data.lastMessageAt == null)
+        && (!request.resource.data.keys().hasAny(['workRequestMarkdown'])
+          || (request.resource.data.workRequestMarkdown is string
+            && request.resource.data.workRequestMarkdown.size() <= 900000));
 
       allow update: if isAuthenticated()
         && isOwner(resource.data.userId)
