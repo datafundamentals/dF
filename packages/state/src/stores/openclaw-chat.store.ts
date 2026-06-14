@@ -35,7 +35,7 @@ import {
 
 const FIRESTORE_HOST = '127.0.0.1';
 const FIRESTORE_PORT = 8280;
-const WORK_REQUESTS_COLLECTION = 'openclawWorkRequests';
+const WORK_REQUESTS_COLLECTION = 'agentWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
 const DEFAULT_AGENT_ID = 'cathy';
 

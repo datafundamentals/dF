@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions/v2';
 import {FieldPath, getFirestore} from 'firebase-admin/firestore';
 import {getStorage} from 'firebase-admin/storage';
 
-const WORK_REQUESTS_COLLECTION = 'openclawWorkRequests';
+const WORK_REQUESTS_COLLECTION = 'agentWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
 const DELETE_BATCH_SIZE = 200;
 

@@ -3,7 +3,7 @@
  *
  * Bridges the df-agent-work-request app to the OpenClaw agent API.
  *
- * Trigger: onWrite on openclawWorkRequests/{requestId}/messages/{messageId}
+ * Trigger: onWrite on agentWorkRequests/{requestId}/messages/{messageId}
  * Condition: role === 'user' and status === 'pending' (idempotency guard)
  *
  * Request ids are stable from conversation creation through acceptance and are
@@ -36,7 +36,7 @@ import {
 const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
 const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
 const OPENCLAW_ROOT_AGENT_ID = process.env.OPENCLAW_ROOT_AGENT_ID ?? 'john';
-const WORK_REQUESTS_COLLECTION = 'openclawWorkRequests';
+const WORK_REQUESTS_COLLECTION = 'agentWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
 const OPENCLAW_WORK_REQUEST_AGENT_ID = 'cathy';
 const OPENCLAW_WORK_REQUEST_SESSION_PREFIX = 'openclaw-work-request-v2:';
@@ -71,7 +71,7 @@ interface OpenclawAttachmentContext {
 }
 
 export const onOpenclawMessage = functions.firestore.onDocumentWritten({
-  document: 'openclawWorkRequests/{requestId}/messages/{messageId}',
+  document: 'agentWorkRequests/{requestId}/messages/{messageId}',
   region: 'us-central1',
   timeoutSeconds: 540,
   secrets: [githubPat],

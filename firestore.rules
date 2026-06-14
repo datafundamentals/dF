@@ -260,7 +260,7 @@ service cloud.firestore {
      * Work request metadata documents for OpenClaw chat.
      * Users can only access their own conversations.
      */
-    match /openclawWorkRequests/{requestId} {
+    match /agentWorkRequests/{requestId} {
       allow read: if isAuthenticated() && isOwner(resource.data.userId);
 
       allow create: if isAuthenticated()
@@ -294,10 +294,10 @@ service cloud.firestore {
      * Users can read/create within conversations they own; Cloud Functions
      * handle assistant messages and status transitions.
      */
-    match /openclawWorkRequests/{requestId}/messages/{messageId} {
+    match /agentWorkRequests/{requestId}/messages/{messageId} {
       function isOwnWorkRequest() {
         return isAuthenticated()
-          && get(/databases/$(database)/documents/openclawWorkRequests/$(requestId)).data.userId == request.auth.uid;
+          && get(/databases/$(database)/documents/agentWorkRequests/$(requestId)).data.userId == request.auth.uid;
       }
 
       allow read: if isOwnWorkRequest();

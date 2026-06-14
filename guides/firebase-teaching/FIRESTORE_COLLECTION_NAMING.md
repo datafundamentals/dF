@@ -49,7 +49,7 @@ systemMetrics/
 
 **Good** — self-documenting:
 ```
-openclawWorkRequests/
+agentWorkRequests/
 monWedChat/
 goldilocksActivity/
 todoSystemMetrics/
@@ -60,8 +60,8 @@ todoSystemMetrics/
 They are already scoped under a named parent. The parent carries the ownership signal.
 
 ```
-openclawWorkRequests/{requestId}/messages/{msgId}    ✅
-openclawWorkRequests/{requestId}/attachments/{fileId} ✅
+agentWorkRequests/{requestId}/messages/{msgId}    ✅
+agentWorkRequests/{requestId}/attachments/{fileId} ✅
 ```
 
 ### Rule 3: Register every new collection in this document
@@ -80,8 +80,8 @@ This is the living inventory of all Firestore collections in this project. Updat
 
 | Collection Path | Owner / App | Status | Notes |
 |---|---|---|---|
-| `openclawWorkRequests/` | `df-agent-work-request` | ✅ Active | Root collection for OpenClaw work request conversations. |
-| `openclawWorkRequests/{id}/messages/` | `df-agent-work-request` | ✅ Active | Messages subcollection under the OpenClaw work request root. |
+| `agentWorkRequests/` | `df-agent-work-request` | ✅ Active | Root collection for OpenClaw work request conversations. |
+| `agentWorkRequests/{id}/messages/` | `df-agent-work-request` | ✅ Active | Messages subcollection under the OpenClaw work request root. |
 | `chatMessage/` | `df-teaching-app` (Mon/Wed chat widget) | ⚠️ Ambiguous name | Generic chat messages for the teaching app chat widget. Should be renamed `monWedChatMessages/` or similar. |
 | `todos/` | `df-teaching-app` | ✅ Acceptable | Sufficiently scoped by context; low collision risk in this project. |
 | `todoAnalytics/` | `df-teaching-app` | ✅ Good | Prefixed with feature name. |
@@ -97,7 +97,7 @@ This is the living inventory of all Firestore collections in this project. Updat
 
 | Collection Path | Owner / App | Notes |
 |---|---|---|
-| `openclawWorkRequests/{id}/attachments/` | `df-agent-work-request` | File attachment references (future). |
+| `agentWorkRequests/{id}/attachments/` | `df-agent-work-request` | File attachment references (future). |
 
 ---
 
