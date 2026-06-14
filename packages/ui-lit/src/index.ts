@@ -19,6 +19,7 @@ export * from './df-npm-info-widget.js';
 export * from './df-chat-widget.js';
 export * from './df-openclaw-chat-widget.js';
 export * from './df-markdown-codemirror.js';
+export * from './df-work-request-preview.js';
 export * from './df-dashboard.js';
 export * from './df-dashboard-df-card.js';
 export * from './df-dashboard-app-card.js';

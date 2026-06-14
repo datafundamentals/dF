@@ -45,7 +45,7 @@ import {
 import type {FirestoreRequestState} from '@df/types/firebase-firestore.types';
 import type {Attachment, OpenclawSendStatus} from '@df/types';
 import type {StorageFileMetadata} from '@df/types/firebase-storage.types';
-import './df-markdown-codemirror.js';
+import './df-work-request-preview.js';
 import './df-upload-link.js';
 import './firebase/df-file-list.js';
 
@@ -782,10 +782,10 @@ export class DfOpenclawChatWidget extends SignalWatcher(LitElement) {
               : nothing}
             ${this.effectiveMarkdownContent.trim()
               ? html`
-                  <df-markdown-codemirror
+                  <df-work-request-preview
                     class="status-markdown"
                     .markdownContent=${this.effectiveMarkdownContent}
-                  ></df-markdown-codemirror>
+                  ></df-work-request-preview>
                 `
               : nothing}
           </section>
