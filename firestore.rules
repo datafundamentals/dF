@@ -266,11 +266,13 @@ service cloud.firestore {
       allow create: if isAuthenticated()
         && request.auth.uid == request.resource.data.userId
         && hasRequiredFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber'])
-        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber', 'workRequestMarkdown'])
+        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber', 'workRequestMarkdown', 'userEmail', 'userFirstName'])
         && request.resource.data.agentId is string
         && request.resource.data.agentId.size() > 0
         && (request.resource.data.title is string || request.resource.data.title == null)
         && request.resource.data.status == 'active'
+        && (!request.resource.data.keys().hasAny(['userEmail']) || request.resource.data.userEmail is string)
+        && (!request.resource.data.keys().hasAny(['userFirstName']) || request.resource.data.userFirstName is string)
         && (request.resource.data.createdAt is timestamp || request.resource.data.createdAt == null)
         && (request.resource.data.lastMessageAt is timestamp || request.resource.data.lastMessageAt == null)
         && (!request.resource.data.keys().hasAny(['workRequestMarkdown'])
@@ -313,6 +315,21 @@ service cloud.firestore {
 
       allow update: if false;
       allow delete: if false;
+    }
+
+    /**
+     * Prompt context debug documents for OpenClaw work request turns.
+     * Cloud Functions writes these documents; owners can read them while the
+     * temporary prompt refinement panel is active.
+     */
+    match /promptContextDebug/{requestId}/messages/{messageId} {
+      function isOwnWorkRequest() {
+        return isAuthenticated()
+          && get(/databases/$(database)/documents/agentWorkRequests/$(requestId)).data.userId == request.auth.uid;
+      }
+
+      allow read: if isOwnWorkRequest();
+      allow write: if false;
     }
 
     // =============================================================================

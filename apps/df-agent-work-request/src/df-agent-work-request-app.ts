@@ -62,24 +62,33 @@ export class DfAgentWorkRequestApp extends SignalWatcher(LitElement) {
   override updated(): void {
     const {authUser} = firebaseAuthState.get();
     if (authUser && !this.isStoreReady && !this.isStoreInitializing) {
-      void this.initializeStore(authUser.uid);
+      void this.initializeStore(
+        authUser.uid,
+        authUser.email ?? '',
+        this.extractFirstName(authUser.displayName)
+      );
     }
   }
 
-  private async initializeStore(userId: string): Promise<void> {
+  private async initializeStore(userId: string, userEmail: string, userFirstName: string): Promise<void> {
     this.isStoreInitializing = true;
     try {
       await initializeOpenclawChatStore(
         getInitializedFirebaseApp(),
         shouldUseEmulatorForService('firestore'),
         userId,
-        statusMarkdownContent
+        statusMarkdownContent,
+        {userEmail, userFirstName}
       );
       this.isStoreReady = true;
     } catch (error) {
       console.error('[df-agent-work-request-app] Failed to initialize store', error);
       this.isStoreInitializing = false;
     }
+  }
+
+  private extractFirstName(displayName?: string | null): string {
+    return displayName?.trim().split(/\s+/)[0] ?? '';
   }
 
   private handleWidgetError(event: CustomEvent<{error: unknown}>): void {

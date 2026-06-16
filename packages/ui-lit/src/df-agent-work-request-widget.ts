@@ -36,6 +36,7 @@ import {
   openclawChatMessagesState,
   openclawChatSendState,
   openclawConversationsState,
+  openclawDebugPromptState,
   renameOpenclawConversation,
   sendOpenclawMessage,
   startOpenclawRealtime,
@@ -596,6 +597,32 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       color: rgba(220, 38, 38, 0.88);
     }
 
+    .debug-panel {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 200, 0, 0.08);
+      border: 1px solid rgba(202, 138, 4, 0.34);
+    }
+
+    .debug-textarea {
+      width: 100%;
+      --md-outlined-text-field-container-color: rgba(255, 251, 235, 0.92);
+      --md-outlined-text-field-focus-outline-color: rgba(202, 138, 4, 0.78);
+      --md-outlined-text-field-label-text-color: rgba(113, 63, 18, 0.92);
+      --md-outlined-text-field-input-text-font: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+      --md-outlined-text-field-input-text-size: 0.82rem;
+    }
+
+    .debug-textarea::part(input) {
+      min-height: 300px;
+      overflow: auto;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+      line-height: 1.45;
+      white-space: pre;
+    }
+
     .status-markdown {
       display: block;
       margin-top: 12px;
@@ -650,6 +677,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   @state() private recurringVisualState: Record<string, boolean> = {};
   @state() private deleteConfirmationConversationId: string | null = null;
   @state() private fileDeleteConfirmationPath: string | null = null;
+  @state() private showPromptDebugPanel = false;
   private pendingDeleteFile: StorageFileMetadata | null = null;
 
   private previousConversationId: string | null = null;
@@ -780,6 +808,16 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
             ${deleteState.status === 'error' && deleteState.error
               ? html`<span class="composer-status composer-status--error" role="status">${deleteState.error}</span>`
               : nothing}
+            ${activeConversationId
+              ? html`
+                  <md-outlined-button @click=${this.togglePromptDebugPanel}>
+                    ${this.showPromptDebugPanel ? 'Hide Prompt Context' : 'Toggle Prompt Context'}
+                  </md-outlined-button>
+                `
+              : nothing}
+            ${this.showPromptDebugPanel && activeConversationId
+              ? this.renderPromptDebugPanel()
+              : nothing}
             ${this.effectiveMarkdownContent.trim()
               ? html`
                   <df-work-request-preview
@@ -854,6 +892,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       // Reset turn accumulation when switching conversations
       this.appendedTurnMarkdown = '';
       this.turnCount = 0;
+      this.showPromptDebugPanel = false;
     } else if (
       activeConversationId &&
       this.previousConversationStatus === 'active' &&
@@ -1077,7 +1116,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async handleAgentClick(agent: string): Promise<void> {
     try {
-      await createOpenclawConversation(agent, this.statusMarkdownContent);
+      await createOpenclawConversation(agent, this.statusMarkdownContent, this.resolveUserContext());
       this.activeAgentName = agent;
     } catch (error) {
       this.dispatchEvent(
@@ -1137,9 +1176,32 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     `;
   }
 
+  private renderPromptDebugPanel() {
+    const debugState = openclawDebugPromptState.get();
+    const promptContext = debugState.status === 'loading'
+      ? 'Loading prompt context debug document...'
+      : debugState.status === 'error'
+        ? `Failed to load prompt context debug document: ${debugState.error ?? 'Unknown error'}`
+        : debugState.fullPromptContext;
+
+    return html`
+      <section class="debug-panel" aria-label="Prompt context debug panel">
+        <md-outlined-text-field
+          class="debug-textarea"
+          label="Full Prompt Context (Debug)"
+          type="textarea"
+          rows="12"
+          .value=${promptContext}
+          .readOnly=${true}
+        >
+        </md-outlined-text-field>
+      </section>
+    `;
+  }
+
   private async handleCreateConversation(): Promise<void> {
     try {
-      await createOpenclawConversation(undefined, this.statusMarkdownContent);
+      await createOpenclawConversation(undefined, this.statusMarkdownContent, this.resolveUserContext());
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent('df-agent-work-request-widget-error', {
@@ -1153,7 +1215,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async createFollowupConversationAfterAcceptance(): Promise<void> {
     try {
-      await createOpenclawConversation(undefined, this.statusMarkdownContent);
+      await createOpenclawConversation(undefined, this.statusMarkdownContent, this.resolveUserContext());
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent('df-agent-work-request-widget-error', {
@@ -1169,6 +1231,10 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private toggleSidebar(): void {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
+
+  private togglePromptDebugPanel(): void {
+    this.showPromptDebugPanel = !this.showPromptDebugPanel;
   }
 
   private handleMetaActionClick(event: Event): void {
@@ -1405,7 +1471,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     this.appendTurn(trimmed, lastCathy?.content ?? null);
 
     try {
-      await sendOpenclawMessage(trimmed);
+      await sendOpenclawMessage(trimmed, this.resolveUserContext());
       this.messageText = '';
       this.dispatchEvent(
         new CustomEvent('df-agent-work-request-widget-message-sent', {
@@ -1550,6 +1616,18 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     }
 
     return 'User';
+  }
+
+  private resolveUserContext(): {userEmail: string; userFirstName: string} {
+    const {authUser} = firebaseAuthState.get();
+    return {
+      userEmail: authUser?.email?.trim() ?? '',
+      userFirstName: this.extractFirstName(authUser?.displayName),
+    };
+  }
+
+  private extractFirstName(displayName?: string | null): string {
+    return displayName?.trim().split(/\s+/)[0] ?? '';
   }
 
   private resolveAssistantName(conversation: OpenclawConversation | null): string {

@@ -37,6 +37,8 @@ const FIRESTORE_HOST = '127.0.0.1';
 const FIRESTORE_PORT = 8280;
 const WORK_REQUESTS_COLLECTION = 'agentWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
+const PROMPT_CONTEXT_DEBUG_COLLECTION = 'promptContextDebug';
+const PROMPT_CONTEXT_DEBUG_MESSAGES_SUBCOLLECTION = 'messages';
 const DEFAULT_AGENT_ID = 'cathy';
 
 interface OpenclawMessage extends FirestoreDocument {
@@ -60,14 +62,42 @@ interface OpenclawConversation extends FirestoreDocument {
   currentTurnNumber: number;
 }
 
+interface OpenclawPromptDebugMessage {
+  role: string;
+  content: string;
+}
+
+interface OpenclawPromptDebugAttachment {
+  name: string;
+  url: string;
+}
+
+interface OpenclawPromptDebugData {
+  systemContent: string;
+  historyMessages: OpenclawPromptDebugMessage[];
+  attachmentContext: string;
+  requestBody: Record<string, unknown> | null;
+  userEmail: string;
+  userFirstName: string;
+  turnNumber: number;
+  attachmentsIncluded: boolean;
+  attachmentDetails: OpenclawPromptDebugAttachment[];
+  constructedAt: Date | null;
+  openclawResponsePreview: string;
+  metadata: Record<string, unknown>;
+}
+
 const messagesSignal = signal<readonly OpenclawMessage[]>([]);
 const conversationsSignal = signal<readonly OpenclawConversation[]>([]);
+const promptDebugSignal = signal<OpenclawPromptDebugData | null>(null);
 
 const messagesStatusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
 const conversationsStatusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
+const promptDebugStatusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
 const messagesErrorSignal = signal<string | null>(null);
 const conversationsErrorSignal = signal<string | null>(null);
+const promptDebugErrorSignal = signal<string | null>(null);
 
 const isMessagesListeningSignal = signal(false);
 const isConversationsListeningSignal = signal(false);
@@ -83,13 +113,20 @@ const activeConversationIdSignal = signal<string | null>(null);
 
 let unsubscribeMessages: Unsubscribe | null = null;
 let unsubscribeConversations: Unsubscribe | null = null;
+let unsubscribePromptDebug: Unsubscribe | null = null;
 let messagesCollectionRef: CollectionReference<DocumentData> | null = null;
 let initializedDb: Firestore | null = null;
 let initializedFunctions: Functions | null = null;
 let initializedUserId: string | null = null;
+let initializedUserContext: OpenclawUserContext = {};
 let defaultWorkRequestMarkdown = '';
 let ensureConversationPromise: Promise<string | null> | null = null;
 let demoMode = false;
+
+interface OpenclawUserContext {
+  userEmail?: string;
+  userFirstName?: string;
+}
 
 export const openclawChatMessagesState = computed<FirestoreCollectionState<OpenclawMessage>>(() => ({
   status: messagesStatusSignal.get(),
@@ -138,6 +175,17 @@ export const openclawChatDeleteState = computed(() => ({
   deletingConversationId: deletingConversationIdSignal.get(),
 }));
 
+export const openclawDebugPromptState = computed(() => {
+  const data = promptDebugSignal.get();
+
+  return {
+    status: promptDebugStatusSignal.get(),
+    data,
+    error: promptDebugErrorSignal.get(),
+    fullPromptContext: formatPromptDebugContext(data),
+  };
+});
+
 interface OpenclawDemoState {
   conversations: readonly OpenclawConversation[];
   messages: readonly OpenclawMessage[];
@@ -153,6 +201,9 @@ interface OpenclawDemoState {
   deletingConversationId?: string | null;
   isConversationsListening?: boolean;
   isMessagesListening?: boolean;
+  promptDebug?: OpenclawPromptDebugData | null;
+  promptDebugStatus?: 'idle' | 'loading' | 'ready' | 'error';
+  promptDebugError?: string | null;
 }
 
 export function __setOpenclawDemoState(state: OpenclawDemoState): void {
@@ -177,6 +228,9 @@ export function __setOpenclawDemoState(state: OpenclawDemoState): void {
   deleteStatusSignal.set(state.deleteStatus ?? 'idle');
   deleteErrorSignal.set(state.deleteError ?? null);
   deletingConversationIdSignal.set(state.deletingConversationId ?? null);
+  promptDebugSignal.set(state.promptDebug ?? null);
+  promptDebugStatusSignal.set(state.promptDebugStatus ?? (state.promptDebug ? 'ready' : 'idle'));
+  promptDebugErrorSignal.set(state.promptDebugError ?? null);
   isConversationsListeningSignal.set(state.isConversationsListening ?? false);
   isMessagesListeningSignal.set(state.isMessagesListening ?? false);
 }
@@ -199,6 +253,9 @@ export function __resetOpenclawDemoState(): void {
   deleteStatusSignal.set('idle');
   deleteErrorSignal.set(null);
   deletingConversationIdSignal.set(null);
+  promptDebugSignal.set(null);
+  promptDebugStatusSignal.set('idle');
+  promptDebugErrorSignal.set(null);
   isConversationsListeningSignal.set(false);
   isMessagesListeningSignal.set(false);
 }
@@ -221,10 +278,14 @@ export function __resetOpenclawStoreForTests(): void {
   deleteErrorSignal.set(null);
   deletingConversationIdSignal.set(null);
   activeConversationIdSignal.set(null);
+  promptDebugSignal.set(null);
+  promptDebugStatusSignal.set('idle');
+  promptDebugErrorSignal.set(null);
   messagesCollectionRef = null;
   initializedDb = null;
   initializedFunctions = null;
   initializedUserId = null;
+  initializedUserContext = {};
   defaultWorkRequestMarkdown = '';
   ensureConversationPromise = null;
   turnCountSignal.set(0);
@@ -235,7 +296,8 @@ export async function initializeOpenclawChatStore(
   app: FirebaseApp,
   useEmulator: boolean,
   userId: string,
-  initialWorkRequestMarkdown = ''
+  initialWorkRequestMarkdown = '',
+  userContext: OpenclawUserContext = {}
 ): Promise<void> {
   if (initializedDb && initializedUserId === userId) {
     startOpenclawRealtime();
@@ -244,6 +306,7 @@ export async function initializeOpenclawChatStore(
 
   stopOpenclawRealtime();
   initializedUserId = userId;
+  initializedUserContext = normalizeUserContext(userContext);
   defaultWorkRequestMarkdown = initialWorkRequestMarkdown;
 
   const db = getFirestoreDb(app);
@@ -288,13 +351,15 @@ export function stopOpenclawRealtime(): void {
     unsubscribeMessages = null;
   }
 
+  stopPromptDebugListener();
   isConversationsListeningSignal.set(false);
   isMessagesListeningSignal.set(false);
 }
 
 export async function createOpenclawConversation(
   agentId?: string,
-  workRequestMarkdown = defaultWorkRequestMarkdown
+  workRequestMarkdown = defaultWorkRequestMarkdown,
+  userContext: OpenclawUserContext = initializedUserContext
 ): Promise<string> {
   if (!initializedDb || !initializedUserId) {
     throw new Error('OpenClaw chat store is not initialized.');
@@ -302,6 +367,7 @@ export async function createOpenclawConversation(
 
   const conversationRef = doc(collection(initializedDb, WORK_REQUESTS_COLLECTION));
   const requestId = conversationRef.id;
+  const normalizedUserContext = normalizeUserContext(userContext);
 
   await setDoc(conversationRef, {
     userId: initializedUserId,
@@ -309,6 +375,8 @@ export async function createOpenclawConversation(
     title: null,
     status: 'active',
     workRequestMarkdown,
+    userEmail: normalizedUserContext.userEmail ?? '',
+    userFirstName: normalizedUserContext.userFirstName ?? '',
     createdAt: serverTimestamp(),
     lastMessageAt: serverTimestamp(),
     currentTurnNumber: 0,
@@ -417,7 +485,7 @@ export async function deleteOpenclawConversation(requestId: string): Promise<voi
   }
 }
 
-export async function sendOpenclawMessage(content: string): Promise<void> {
+export async function sendOpenclawMessage(content: string, userContext: OpenclawUserContext = {}): Promise<void> {
   const requestId = activeConversationIdSignal.get();
   if (!requestId || !messagesCollectionRef || !initializedDb) {
     throw new Error('No active conversation.');
@@ -433,6 +501,7 @@ export async function sendOpenclawMessage(content: string): Promise<void> {
 
   const nextTurnNumber = turnCountSignal.get() + 1;
   turnCountSignal.set(nextTurnNumber);
+  const normalizedUserContext = normalizeUserContext(userContext);
 
   try {
     await Promise.all([
@@ -443,6 +512,8 @@ export async function sendOpenclawMessage(content: string): Promise<void> {
         sessionId: requestId,
         status: 'pending',
         turnNumber: nextTurnNumber,
+        userEmail: normalizedUserContext.userEmail ?? '',
+        userFirstName: normalizedUserContext.userFirstName ?? '',
       }),
       updateDoc(doc(initializedDb, WORK_REQUESTS_COLLECTION, requestId), {
         currentTurnNumber: nextTurnNumber,
@@ -523,6 +594,7 @@ function startMessagesListener(db: Firestore, requestId: string): void {
   messagesSignal.set([]);
   messagesStatusSignal.set('loading');
   messagesErrorSignal.set(null);
+  resetPromptDebugState();
 
   const conversation = conversationsSignal.get().find((c) => c.id === requestId);
   turnCountSignal.set(conversation?.currentTurnNumber ?? 0);
@@ -537,6 +609,7 @@ function startMessagesListener(db: Firestore, requestId: string): void {
       const docs = snapshot.docs.map((item) => normalizeMessage({id: item.id, ...item.data()} as OpenclawMessage));
       messagesSignal.set(docs);
       messagesStatusSignal.set('ready');
+      updatePromptDebugListener(db, requestId, docs);
 
       if (sendStatusSignal.get() === 'sending') {
         const lastUserMessage = [...docs].reverse().find((item) => item.role === 'user');
@@ -553,6 +626,75 @@ function startMessagesListener(db: Firestore, requestId: string): void {
       messagesStatusSignal.set('error');
     }
   );
+}
+
+function updatePromptDebugListener(db: Firestore, requestId: string, messages: readonly OpenclawMessage[]): void {
+  const latestAssistantMessage = [...messages].reverse().find((message) => message.role === 'assistant');
+  if (!latestAssistantMessage) {
+    resetPromptDebugState();
+    return;
+  }
+
+  startPromptDebugListener(db, requestId, latestAssistantMessage.id);
+}
+
+function startPromptDebugListener(db: Firestore, requestId: string, messageId: string): void {
+  const activeDebugKey = `${requestId}/${messageId}`;
+  const currentDebugKey = promptDebugSignal.get()?.metadata?.debugKey;
+  if (currentDebugKey === activeDebugKey && unsubscribePromptDebug) {
+    return;
+  }
+
+  stopPromptDebugListener();
+  promptDebugStatusSignal.set('loading');
+  promptDebugErrorSignal.set(null);
+
+  const debugRef = doc(
+    db,
+    PROMPT_CONTEXT_DEBUG_COLLECTION,
+    requestId,
+    PROMPT_CONTEXT_DEBUG_MESSAGES_SUBCOLLECTION,
+    messageId
+  );
+
+  unsubscribePromptDebug = onSnapshot(
+    debugRef,
+    (snapshot) => {
+      if (!snapshot.exists()) {
+        promptDebugSignal.set(null);
+        promptDebugStatusSignal.set('ready');
+        return;
+      }
+
+      const normalized = normalizePromptDebugData(snapshot.data());
+      promptDebugSignal.set({
+        ...normalized,
+        metadata: {
+          ...normalized.metadata,
+          debugKey: activeDebugKey,
+        },
+      });
+      promptDebugStatusSignal.set('ready');
+    },
+    (error) => {
+      promptDebugErrorSignal.set(error.message);
+      promptDebugStatusSignal.set('error');
+    }
+  );
+}
+
+function stopPromptDebugListener(): void {
+  if (unsubscribePromptDebug) {
+    unsubscribePromptDebug();
+    unsubscribePromptDebug = null;
+  }
+}
+
+function resetPromptDebugState(): void {
+  stopPromptDebugListener();
+  promptDebugSignal.set(null);
+  promptDebugStatusSignal.set('idle');
+  promptDebugErrorSignal.set(null);
 }
 
 function normalizeConversationDoc(
@@ -590,6 +732,103 @@ function normalizeMessage(message: OpenclawMessage): OpenclawMessage {
   return {
     ...message,
     createdAt: normalizeTimestamp(message.createdAt),
+  };
+}
+
+function normalizePromptDebugData(raw: DocumentData): OpenclawPromptDebugData {
+  return {
+    systemContent: String(raw.systemContent ?? ''),
+    historyMessages: normalizePromptDebugMessages(raw.historyMessages),
+    attachmentContext: String(raw.attachmentContext ?? ''),
+    requestBody: isRecord(raw.requestBody) ? raw.requestBody : null,
+    userEmail: String(raw.userEmail ?? ''),
+    userFirstName: String(raw.userFirstName ?? ''),
+    turnNumber: typeof raw.turnNumber === 'number' ? raw.turnNumber : 0,
+    attachmentsIncluded: raw.attachmentsIncluded === true,
+    attachmentDetails: normalizePromptDebugAttachments(raw.attachmentDetails),
+    constructedAt: normalizeTimestamp(raw.constructedAt),
+    openclawResponsePreview: String(raw.openclawResponsePreview ?? ''),
+    metadata: isRecord(raw.metadata) ? raw.metadata : {},
+  };
+}
+
+function normalizePromptDebugMessages(raw: unknown): OpenclawPromptDebugMessage[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => isRecord(item))
+    .map((item) => ({
+      role: String(item.role ?? ''),
+      content: String(item.content ?? ''),
+    }));
+}
+
+function normalizePromptDebugAttachments(raw: unknown): OpenclawPromptDebugAttachment[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => isRecord(item))
+    .map((item) => ({
+      name: String(item.name ?? ''),
+      url: String(item.url ?? ''),
+    }));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function formatPromptDebugContext(data: OpenclawPromptDebugData | null): string {
+  if (!data) {
+    return 'No prompt context debug document is available for the latest assistant message.';
+  }
+
+  const history = data.historyMessages.length
+    ? data.historyMessages
+      .map((message, index) => `Turn ${index + 1}: ${formatRoleLabel(message.role)} - ${message.content}`)
+      .join('\n\n')
+    : '(No prior complete message history)';
+  const attachments = data.attachmentDetails.length
+    ? data.attachmentDetails.map((attachment) => `- ${attachment.name}: ${attachment.url}`).join('\n')
+    : '(No attachments)';
+  const constructedAt = data.constructedAt?.toISOString() ?? '(pending server timestamp)';
+
+  return [
+    '[System Context]',
+    data.systemContent || '(empty)',
+    '',
+    '[Attachment Context]',
+    data.attachmentContext || attachments,
+    '',
+    '[Message History]',
+    history,
+    '',
+    '[Request Body Sent to OpenClaw]',
+    JSON.stringify(data.requestBody ?? {}, null, 2),
+    '',
+    '[Metadata]',
+    `- User: ${data.userEmail || '(unknown)'}`,
+    `- User First Name: ${data.userFirstName || '(unknown)'}`,
+    `- Turn: ${data.turnNumber}`,
+    `- Attachments: ${data.attachmentDetails.length}`,
+    `- Attachments Included: ${String(data.attachmentsIncluded)}`,
+    `- Constructed: ${constructedAt}`,
+    `- Agent: ${String(data.metadata.agentId ?? '(unknown)')}`,
+    `- Request ID: ${String(data.metadata.requestId ?? '(unknown)')}`,
+    `- User Message ID: ${String(data.metadata.userMessageId ?? '(unknown)')}`,
+    `- Assistant Message ID: ${String(data.metadata.assistantMessageId ?? '(unknown)')}`,
+    '',
+    '[OpenClaw Response Preview]',
+    data.openclawResponsePreview || '(empty)',
+  ].join('\n');
+}
+
+function formatRoleLabel(role: string): string {
+  return role === 'assistant' ? 'Assistant' : role === 'user' ? 'User' : role || 'Unknown';
+}
+
+function normalizeUserContext(userContext: OpenclawUserContext): OpenclawUserContext {
+  return {
+    userEmail: userContext.userEmail?.trim() || '',
+    userFirstName: userContext.userFirstName?.trim() || '',
   };
 }
 

@@ -24,6 +24,7 @@ import {
   openclawActiveConversationState,
   openclawChatDeleteState,
   openclawConversationsState,
+  openclawDebugPromptState,
 } from '../openclaw-chat.store';
 
 function setCallableHandler<TArgs extends object = object, TResult = unknown>(
@@ -142,5 +143,50 @@ describe('openclaw-chat.store delete flow', () => {
       error: 'delete failure',
       deletingConversationId: null,
     });
+  });
+
+  it('formats prompt context debug data for display', () => {
+    __setOpenclawDemoState({
+      conversations: [],
+      messages: [],
+      promptDebug: {
+        systemContent: 'TITLE: Example\nCONTEXT: Debug this request',
+        historyMessages: [
+          {role: 'user', content: 'Initial request'},
+          {role: 'assistant', content: 'Initial response'},
+        ],
+        attachmentContext: '.\nUploaded files available in this session:\n- spec.pdf: https://example.test/spec.pdf',
+        requestBody: {
+          agentId: 'cathy',
+          sessionKey: 'openclaw-work-request-v2:cathy:request-1',
+          model: 'openclaw/cathy',
+          messages: [{role: 'system', content: 'TITLE: Example'}],
+        },
+        userEmail: 'pete@example.test',
+        userFirstName: 'Pete',
+        turnNumber: 2,
+        attachmentsIncluded: true,
+        attachmentDetails: [{name: 'spec.pdf', url: 'https://example.test/spec.pdf'}],
+        constructedAt: new Date('2026-06-16T12:00:00Z'),
+        openclawResponsePreview: 'Updated the request.',
+        metadata: {
+          agentId: 'cathy',
+          requestId: 'request-1',
+          userMessageId: 'user-message-1',
+          assistantMessageId: 'assistant-message-1',
+        },
+      },
+    });
+
+    const formatted = openclawDebugPromptState.get().fullPromptContext;
+
+    expect(formatted).toContain('[System Context]');
+    expect(formatted).toContain('TITLE: Example');
+    expect(formatted).toContain('Turn 1: User - Initial request');
+    expect(formatted).toContain('"model": "openclaw/cathy"');
+    expect(formatted).toContain('- User: pete@example.test');
+    expect(formatted).toContain('- User First Name: Pete');
+    expect(formatted).toContain('- Attachments: 1');
+    expect(formatted).toContain('Updated the request.');
   });
 });

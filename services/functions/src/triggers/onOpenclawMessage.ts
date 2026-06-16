@@ -38,6 +38,8 @@ const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
 const OPENCLAW_ROOT_AGENT_ID = process.env.OPENCLAW_ROOT_AGENT_ID ?? 'john';
 const WORK_REQUESTS_COLLECTION = 'agentWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
+const PROMPT_CONTEXT_DEBUG_COLLECTION = 'promptContextDebug';
+const PROMPT_CONTEXT_DEBUG_MESSAGES_SUBCOLLECTION = 'messages';
 const OPENCLAW_WORK_REQUEST_AGENT_ID = 'cathy';
 const OPENCLAW_WORK_REQUEST_SESSION_PREFIX = 'openclaw-work-request-v2:';
 const ACCEPTANCE_SIGNAL = 'This all sounds good to me';
@@ -54,6 +56,8 @@ interface OpenclawMessageData {
   sessionId: string;
   status: 'pending' | 'processing' | 'complete' | 'error';
   turnNumber?: number;
+  userEmail?: string;
+  userFirstName?: string;
 }
 
 interface ChatCompletionResponse {
@@ -68,6 +72,19 @@ interface ChatCompletionResponse {
 interface OpenclawAttachmentContext {
   url: string;
   name: string;
+}
+
+interface PromptContextDebugMetadata {
+  requestId: string;
+  userMessageId: string;
+  assistantMessageId: string;
+  correlationId: string;
+  eventId: string | null;
+  agentId: string;
+  sessionKey: string;
+  model: string;
+  turnNumber: number;
+  timestampIso: string;
 }
 
 export const onOpenclawMessage = functions.firestore.onDocumentWritten({
@@ -124,6 +141,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       .map((d) => d.data())
       .filter((m) => m.status === 'complete')
       .map((m) => ({role: m.role as string, content: m.content as string}));
+    const turnNumber = data.turnNumber ?? countPriorUserTurns(historyMessages) + 1;
 
     const previousAssistantContent = [...historyMessages]
       .reverse()
@@ -133,7 +151,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       messageId,
       userContent: content,
       previousAssistantContent,
-      turnNumber: data.turnNumber ?? countPriorUserTurns(historyMessages) + 1,
+      turnNumber,
       baseMarkdownContent: readStringField(conversationSnap, 'workRequestMarkdown'),
       logContext,
       conversationRef,
@@ -146,8 +164,10 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     const statusUrl = `https://hbb-a1.web.app/WR_Status/${requestId}/`;
     const currentTitle = conversationSnap.get('title') as string | undefined;
     const currentStatus = conversationSnap.get('status') as string | undefined;
+    const userFirstName = resolveUserFirstName(data, conversationSnap);
     const baseSystemContent = [
       `TITLE: ${currentTitle || 'Untitled'}`,
+      `USER_FIRST_NAME: ${userFirstName || 'Unknown'}`,
       `CONTEXT: The unique ID for this work request is ${requestId}. Status URL: ${statusUrl}. If you identify a concise and descriptive title for this session, or if the session is currently 'Untitled', please include [SET_TITLE: Concise Title] in your response. You may update this title at any time if the conversation context shifts.`,
     ].join('\n');
     const attachmentContext = attachments.length > 0
@@ -178,6 +198,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       model: isRoot ? 'openclaw' : `openclaw/${agentId}`,
       messages: [systemContext, ...historyMessages, {role: 'user', content}],
     };
+    const model = requestBody.model;
 
     const endpoint = `${OPENCLAW_BASE_URL}/v1/chat/completions`;
     const response = await fetch(endpoint, {
@@ -230,13 +251,43 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       transformedPreview: finalAssistantContent.slice(0, 280),
     });
 
-    await conversationRef.collection(MESSAGES_SUBCOLLECTION).add({
+    const assistantMessageRef = conversationRef.collection(MESSAGES_SUBCOLLECTION).doc();
+    await assistantMessageRef.set({
       role: 'assistant',
       content: finalAssistantContent,
       sessionId: requestId,
       correlationId,
       status: 'complete',
+      turnNumber,
       createdAt: FieldValue.serverTimestamp(),
+    });
+
+    await writePromptContextDebug({
+      db,
+      requestId,
+      userMessageId: messageId,
+      assistantMessageId: assistantMessageRef.id,
+      systemContent: systemContext.content,
+      historyMessages,
+      attachmentContext,
+      requestBody,
+      userEmail: typeof data.userEmail === 'string' ? data.userEmail : readStringField(conversationSnap, 'userEmail'),
+      userFirstName,
+      turnNumber,
+      attachments,
+      metadata: {
+        requestId,
+        userMessageId: messageId,
+        assistantMessageId: assistantMessageRef.id,
+        correlationId,
+        eventId: event.id ?? null,
+        agentId: isRoot ? OPENCLAW_ROOT_AGENT_ID : agentId,
+        sessionKey,
+        model,
+        turnNumber,
+        timestampIso: new Date().toISOString(),
+      },
+      openclawResponsePreview: finalAssistantContent.slice(0, 500),
     });
 
     const accepted = rawAssistantContent.includes(ACCEPTANCE_SIGNAL);
@@ -305,6 +356,46 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   }
 });
 
+async function writePromptContextDebug(input: {
+  db: FirebaseFirestore.Firestore;
+  requestId: string;
+  userMessageId: string;
+  assistantMessageId: string;
+  systemContent: string;
+  historyMessages: Array<{role: string; content: string}>;
+  attachmentContext: string;
+  requestBody: Record<string, unknown>;
+  userEmail: string;
+  userFirstName: string;
+  turnNumber: number;
+  attachments: OpenclawAttachmentContext[];
+  metadata: PromptContextDebugMetadata;
+  openclawResponsePreview: string;
+}): Promise<void> {
+  await input.db
+    .collection(PROMPT_CONTEXT_DEBUG_COLLECTION)
+    .doc(input.requestId)
+    .collection(PROMPT_CONTEXT_DEBUG_MESSAGES_SUBCOLLECTION)
+    .doc(input.assistantMessageId)
+    .set({
+      systemContent: input.systemContent,
+      historyMessages: input.historyMessages,
+      attachmentContext: input.attachmentContext,
+      requestBody: input.requestBody,
+      userEmail: input.userEmail,
+      userFirstName: input.userFirstName,
+      turnNumber: input.turnNumber,
+      attachmentsIncluded: input.attachments.length > 0,
+      attachmentDetails: input.attachments.map((attachment) => ({
+        name: attachment.name,
+        url: attachment.url,
+      })),
+      constructedAt: FieldValue.serverTimestamp(),
+      openclawResponsePreview: input.openclawResponsePreview,
+      metadata: input.metadata,
+    });
+}
+
 async function persistWorkRequestTurn(input: {
   requestId: string;
   messageId: string;
@@ -362,6 +453,15 @@ async function persistWorkRequestTurn(input: {
 
 function countPriorUserTurns(historyMessages: Array<{role: string; content: string}>): number {
   return historyMessages.filter((message) => message.role === 'user').length;
+}
+
+function resolveUserFirstName(data: OpenclawMessageData, conversationSnap: DocumentSnapshot): string {
+  const fromMessage = typeof data.userFirstName === 'string' ? data.userFirstName.trim() : '';
+  if (fromMessage) {
+    return fromMessage;
+  }
+
+  return readStringField(conversationSnap, 'userFirstName').trim();
 }
 
 function readStringField(snapshot: DocumentSnapshot, field: string): string {
