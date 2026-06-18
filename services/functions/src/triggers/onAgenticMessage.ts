@@ -1,5 +1,5 @@
 /**
- * Firestore Trigger: onOpenclawMessage
+ * Firestore Trigger: onAgenticMessage
  *
  * Bridges the df-agent-work-request app to the OpenClaw agent API.
  *
@@ -29,9 +29,9 @@ import type {FirestoreEvent, Change} from 'firebase-functions/v2/firestore';
 import type {DocumentSnapshot} from 'firebase-admin/firestore';
 import {createHash} from 'node:crypto';
 import {
-  loadOpenclawWorkRequestGitConfig,
-  persistOpenclawWorkRequestTurnToGit,
-} from '../shared/openclawWorkRequestGit.js';
+  loadAgenticWorkRequestGitConfig,
+  persistAgenticWorkRequestTurnToGit,
+} from '../shared/agenticWorkRequestGit.js';
 
 const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
 const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
@@ -50,7 +50,7 @@ const ACCEPTANCE_NOTICE = [
 ].join(' ');
 const githubPat = defineSecret('GITHUB_PAT');
 
-interface OpenclawMessageData {
+interface AgenticMessageData {
   role: string;
   content: string;
   sessionId: string;
@@ -69,7 +69,7 @@ interface ChatCompletionResponse {
   }>;
 }
 
-interface OpenclawAttachmentContext {
+interface AgenticAttachmentContext {
   url: string;
   name: string;
 }
@@ -87,7 +87,7 @@ interface PromptContextDebugMetadata {
   timestampIso: string;
 }
 
-export const onOpenclawMessage = functions.firestore.onDocumentWritten({
+export const onAgenticMessage = functions.firestore.onDocumentWritten({
   document: 'agentWorkRequests/{requestId}/messages/{messageId}',
   region: 'us-central1',
   timeoutSeconds: 540,
@@ -98,7 +98,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     return;
   }
 
-  const data = afterSnap.data() as OpenclawMessageData;
+  const data = afterSnap.data() as AgenticMessageData;
 
   if (data.role !== 'user' || data.status !== 'pending') {
     return;
@@ -122,7 +122,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
   const agentId = (conversationSnap.get('agentId') as string | undefined) ?? OPENCLAW_WORK_REQUEST_AGENT_ID;
   const isRoot = agentId === OPENCLAW_ROOT_AGENT_ID;
   
-  const rawAttachments = conversationSnap.get('attachments') as OpenclawAttachmentContext[] | undefined;
+  const rawAttachments = conversationSnap.get('attachments') as AgenticAttachmentContext[] | undefined;
   const attachments = Array.isArray(rawAttachments) ? rawAttachments : [];
 
   await messageRef.update({status: 'processing'});
@@ -372,7 +372,7 @@ async function writePromptContextDebug(input: {
   userEmail: string;
   userFirstName: string;
   turnNumber: number;
-  attachments: OpenclawAttachmentContext[];
+  attachments: AgenticAttachmentContext[];
   metadata: PromptContextDebugMetadata;
   openclawResponsePreview: string;
 }): Promise<void> {
@@ -410,7 +410,7 @@ async function persistWorkRequestTurn(input: {
   logContext: Record<string, unknown>;
   conversationRef: FirebaseFirestore.DocumentReference;
 }): Promise<void> {
-  const gitConfig = loadOpenclawWorkRequestGitConfig();
+  const gitConfig = loadAgenticWorkRequestGitConfig();
   if (!gitConfig) {
     functions.logger.info('OpenClaw work request git persistence skipped: repo config not set', input.logContext);
     return;
@@ -421,7 +421,7 @@ async function persistWorkRequestTurn(input: {
     throw new Error('GITHUB_PAT secret is required when OPENCLAW_WORK_REQUEST_GIT_REPO is configured');
   }
 
-  const gitResult = await persistOpenclawWorkRequestTurnToGit({
+  const gitResult = await persistAgenticWorkRequestTurnToGit({
     requestId: input.requestId,
     messageId: input.messageId,
     userContent: input.userContent,
@@ -459,7 +459,7 @@ function countPriorUserTurns(historyMessages: Array<{role: string; content: stri
   return historyMessages.filter((message) => message.role === 'user').length;
 }
 
-function resolveUserFirstName(data: OpenclawMessageData, conversationSnap: DocumentSnapshot): string {
+function resolveUserFirstName(data: AgenticMessageData, conversationSnap: DocumentSnapshot): string {
   const fromMessage = typeof data.userFirstName === 'string' ? data.userFirstName.trim() : '';
   if (fromMessage) {
     return fromMessage;

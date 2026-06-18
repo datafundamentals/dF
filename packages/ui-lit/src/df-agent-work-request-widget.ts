@@ -24,27 +24,27 @@ import {css, html, LitElement, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import '@material/web/switch/switch.js';
 import {
-  addAttachmentToOpenclawConversation,
-  createOpenclawConversation,
+  addAttachmentToAgenticConversation,
+  createAgenticConversation,
   deleteFileWithStatus,
-  deleteOpenclawConversation,
-  removeAttachmentFromOpenclawConversation,
+  deleteAgenticConversation,
+  removeAttachmentFromAgenticConversation,
   storageDeleteState,
   firebaseAuthState,
-  openclawActiveConversationState,
-  openclawChatDeleteState,
-  openclawChatMessagesState,
-  openclawChatSendState,
-  openclawConversationsState,
-  openclawDebugPromptState,
-  renameOpenclawConversation,
-  sendOpenclawMessage,
-  startOpenclawRealtime,
-  stopOpenclawRealtime,
-  switchOpenclawConversation,
+  agenticActiveConversationState,
+  agenticChatDeleteState,
+  agenticChatMessagesState,
+  agenticChatSendState,
+  agenticConversationsState,
+  agenticDebugPromptState,
+  renameAgenticConversation,
+  sendAgenticMessage,
+  startAgenticRealtime,
+  stopAgenticRealtime,
+  switchAgenticConversation,
 } from '@df/state';
 import type {FirestoreRequestState} from '@df/types/firebase-firestore.types';
-import type {Attachment, OpenclawSendStatus} from '@df/types';
+import type {Attachment, AgenticSendStatus} from '@df/types';
 import type {StorageFileMetadata} from '@df/types/firebase-storage.types';
 import './df-work-request-preview.js';
 import './df-upload-link.js';
@@ -54,7 +54,7 @@ const ENTER_KEY = 'Enter';
 const SPACE_KEY = ' ';
 const STATUS_BASE_URL = 'https://hbb-a1.web.app/WR_Status/';
 
-interface OpenclawConversation {
+interface AgenticConversation {
   id: string;
   userId: string;
   agentId: string;
@@ -65,7 +65,7 @@ interface OpenclawConversation {
   workRequestMarkdown?: string;
 }
 
-interface OpenclawMessage {
+interface AgenticMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -706,23 +706,23 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     try {
-      startOpenclawRealtime();
+      startAgenticRealtime();
     } catch {
       /* noop */
     }
   }
 
   override disconnectedCallback(): void {
-    stopOpenclawRealtime();
+    stopAgenticRealtime();
     super.disconnectedCallback();
   }
 
   override render() {
-    const conversationsState = openclawConversationsState.get();
-    const activeState = openclawActiveConversationState.get();
-    const chatState = openclawChatMessagesState.get();
-    const sendState = openclawChatSendState.get();
-    const deleteState = openclawChatDeleteState.get();
+    const conversationsState = agenticConversationsState.get();
+    const activeState = agenticActiveConversationState.get();
+    const chatState = agenticChatMessagesState.get();
+    const sendState = agenticChatSendState.get();
+    const deleteState = agenticChatDeleteState.get();
     const activeConversationId = activeState.activeConversationId;
     const activeConversation = activeState.conversation;
     const disabled = sendState.status === 'sending' || deleteState.status === 'deleting';
@@ -877,8 +877,8 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   override updated(): void {
-    const chatState = openclawChatMessagesState.get();
-    const activeState = openclawActiveConversationState.get();
+    const chatState = agenticChatMessagesState.get();
+    const activeState = agenticActiveConversationState.get();
     const activeConversation = activeState.conversation;
     const messageCount = chatState.documents.length;
     const activeConversationId = activeState.activeConversationId;
@@ -908,7 +908,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private renderConversationList(
-    conversationsState: ReturnType<typeof openclawConversationsState.get>,
+    conversationsState: ReturnType<typeof agenticConversationsState.get>,
     activeConversationId: string | null
   ) {
     if (conversationsState.status === 'loading' && !conversationsState.documents.length) {
@@ -923,7 +923,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       return html`<div class="empty-state">No conversations yet.</div>`;
     }
 
-    return conversationsState.documents.map((conversation: OpenclawConversation) => html`
+    return conversationsState.documents.map((conversation: AgenticConversation) => html`
       <article
         class="conversation-item"
         data-active=${String(conversation.id === activeConversationId)}
@@ -968,7 +968,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     `);
   }
 
-  private renderRenameForm(conversation: OpenclawConversation) {
+  private renderRenameForm(conversation: AgenticConversation) {
     return html`
       <div class="rename-form">
         <md-outlined-text-field
@@ -1008,7 +1008,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     `;
   }
 
-  private renderPanelMeta(conversation: OpenclawConversation) {
+  private renderPanelMeta(conversation: AgenticConversation) {
     const recurring = this.isRecurringVisual(conversation.id);
 
     return html`
@@ -1116,7 +1116,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async handleAgentClick(agent: string): Promise<void> {
     try {
-      await createOpenclawConversation(agent, this.statusMarkdownContent, this.resolveUserContext());
+      await createAgenticConversation(agent, this.statusMarkdownContent, this.resolveUserContext());
       this.activeAgentName = agent;
     } catch (error) {
       this.dispatchEvent(
@@ -1130,8 +1130,8 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private renderMessages(
-    chatState: ReturnType<typeof openclawChatMessagesState.get>,
-    activeConversation: OpenclawConversation | null
+    chatState: ReturnType<typeof agenticChatMessagesState.get>,
+    activeConversation: AgenticConversation | null
   ) {
     if (!activeConversation) {
       return html`<div class="empty-state">Preparing your first conversation…</div>`;
@@ -1150,7 +1150,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     }
 
     // Show only the last Cathy reply (turn-based UI — see ticket 0610c)
-    const messages = chatState.documents as unknown as OpenclawMessage[];
+    const messages = chatState.documents as unknown as AgenticMessage[];
     const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
     if (!lastAssistant) {
       return html`<div class="empty-state">Waiting for a reply…</div>`;
@@ -1158,9 +1158,9 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     return this.renderMessage(lastAssistant);
   }
 
-  private renderMessage(message: OpenclawMessage) {
+  private renderMessage(message: AgenticMessage) {
     const isPending = message.role === 'user' && (message.status === 'pending' || message.status === 'processing');
-    const activeConversation = openclawActiveConversationState.get().conversation;
+    const activeConversation = agenticActiveConversationState.get().conversation;
 
     return html`
       <article class="message" data-role=${message.role}>
@@ -1177,7 +1177,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private renderPromptDebugPanel() {
-    const debugState = openclawDebugPromptState.get();
+    const debugState = agenticDebugPromptState.get();
     const promptContext = debugState.status === 'loading'
       ? 'Loading prompt context debug document...'
       : debugState.status === 'error'
@@ -1201,7 +1201,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async handleCreateConversation(): Promise<void> {
     try {
-      await createOpenclawConversation(undefined, this.statusMarkdownContent, this.resolveUserContext());
+      await createAgenticConversation(undefined, this.statusMarkdownContent, this.resolveUserContext());
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent('df-agent-work-request-widget-error', {
@@ -1215,7 +1215,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async createFollowupConversationAfterAcceptance(): Promise<void> {
     try {
-      await createOpenclawConversation(undefined, this.statusMarkdownContent, this.resolveUserContext());
+      await createAgenticConversation(undefined, this.statusMarkdownContent, this.resolveUserContext());
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent('df-agent-work-request-widget-error', {
@@ -1280,7 +1280,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     if (deleteState.status === 'deleting' || !this.pendingDeleteFile) return;
 
     const filePath = this.pendingDeleteFile.path;
-    const activeConversationId = openclawActiveConversationState.get().activeConversationId;
+    const activeConversationId = agenticActiveConversationState.get().activeConversationId;
 
     try {
       await deleteFileWithStatus(filePath);
@@ -1288,7 +1288,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       this.pendingDeleteFile = null;
 
       if (activeConversationId) {
-        await removeAttachmentFromOpenclawConversation(activeConversationId, filePath);
+        await removeAttachmentFromAgenticConversation(activeConversationId, filePath);
       }
 
       await this.refreshFileList();
@@ -1320,11 +1320,11 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       uploadedAt: Date;
     };
 
-    const activeConversationId = openclawActiveConversationState.get().activeConversationId;
+    const activeConversationId = agenticActiveConversationState.get().activeConversationId;
     if (activeConversationId && linkUrl && storagePath) {
       const attachment: Attachment = {url: linkUrl, name: fileName, path: storagePath, uploadedAt};
       try {
-        await addAttachmentToOpenclawConversation(activeConversationId, attachment);
+        await addAttachmentToAgenticConversation(activeConversationId, attachment);
       } catch (error) {
         this.dispatchEvent(
           new CustomEvent('df-agent-work-request-widget-error', {
@@ -1355,13 +1355,13 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async confirmDelete(event: Event, conversationId: string): Promise<void> {
     event.stopPropagation();
-    const deleteState = openclawChatDeleteState.get();
+    const deleteState = agenticChatDeleteState.get();
     if (deleteState.status === 'deleting') {
       return;
     }
 
     try {
-      await deleteOpenclawConversation(conversationId);
+      await deleteAgenticConversation(conversationId);
       this.deleteConfirmationConversationId = null;
       this.isRenamingTitle = false;
     } catch (error) {
@@ -1387,7 +1387,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private handleConversationSelect(requestId: string): void {
-    switchOpenclawConversation(requestId);
+    switchAgenticConversation(requestId);
   }
 
   private handleConversationKeydown(event: KeyboardEvent, requestId: string): void {
@@ -1398,7 +1398,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private startRename(): void {
-    const activeConversation = openclawActiveConversationState.get().conversation;
+    const activeConversation = agenticActiveConversationState.get().conversation;
     if (!activeConversation) {
       return;
     }
@@ -1419,7 +1419,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   private handleRenameKeydown(event: KeyboardEvent): void {
     if (event.key === ENTER_KEY && !event.shiftKey) {
       event.preventDefault();
-      const activeConversation = openclawActiveConversationState.get().conversation;
+      const activeConversation = agenticActiveConversationState.get().conversation;
       if (activeConversation) {
         void this.saveRename(activeConversation.id);
       }
@@ -1428,7 +1428,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async saveRename(requestId: string): Promise<void> {
     try {
-      await renameOpenclawConversation(requestId, this.titleDraft);
+      await renameAgenticConversation(requestId, this.titleDraft);
       this.isRenamingTitle = false;
     } catch (error) {
       this.dispatchEvent(
@@ -1459,19 +1459,19 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async submitMessage(): Promise<void> {
     const trimmed = this.messageText.trim();
-    const sending = openclawChatSendState.get().status === 'sending';
-    const activeConversationId = openclawActiveConversationState.get().activeConversationId;
+    const sending = agenticChatSendState.get().status === 'sending';
+    const activeConversationId = agenticActiveConversationState.get().activeConversationId;
 
     if (!trimmed || sending || !activeConversationId) {
       return;
     }
 
-    const messages = openclawChatMessagesState.get().documents as unknown as OpenclawMessage[];
+    const messages = agenticChatMessagesState.get().documents as unknown as AgenticMessage[];
     const lastCathy = [...messages].reverse().find((m) => m.role === 'assistant');
     this.appendTurn(trimmed, lastCathy?.content ?? null);
 
     try {
-      await sendOpenclawMessage(trimmed, this.resolveUserContext());
+      await sendAgenticMessage(trimmed, this.resolveUserContext());
       this.messageText = '';
       this.dispatchEvent(
         new CustomEvent('df-agent-work-request-widget-message-sent', {
@@ -1499,11 +1499,11 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     return Boolean(this.messageText.trim().length);
   }
 
-  private resolveConversationTitle(conversation: OpenclawConversation | null): string {
+  private resolveConversationTitle(conversation: AgenticConversation | null): string {
     return conversation?.title?.trim() || 'Untitled';
   }
 
-  private resolveConversationSubtitle(conversation: OpenclawConversation | null): string {
+  private resolveConversationSubtitle(conversation: AgenticConversation | null): string {
     if (!conversation) {
       return 'I am here to help you compose an OpenClaw system request.';
     }
@@ -1519,11 +1519,11 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private resolveStatusLabel(
     collectionStatus: FirestoreRequestState,
-    sendStatus: OpenclawSendStatus,
+    sendStatus: AgenticSendStatus,
     error: string | null
   ): string | null {
     if (sendStatus === 'sending') {
-      return `Waiting for ${this.resolveAssistantName(openclawActiveConversationState.get().conversation)}…`;
+      return `Waiting for ${this.resolveAssistantName(agenticActiveConversationState.get().conversation)}…`;
     }
 
     if (sendStatus === 'error') {
@@ -1548,7 +1548,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private get effectiveMarkdownContent(): string {
-    const activeMarkdown = openclawActiveConversationState.get().conversation?.workRequestMarkdown;
+    const activeMarkdown = agenticActiveConversationState.get().conversation?.workRequestMarkdown;
     return activeMarkdown || this.statusMarkdownContent + this.appendedTurnMarkdown;
   }
 
@@ -1593,8 +1593,8 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private resolveMessageAuthorLabel(
-    message: OpenclawMessage,
-    activeConversation: OpenclawConversation | null
+    message: AgenticMessage,
+    activeConversation: AgenticConversation | null
   ): string {
     if (message.role === 'user') {
       return this.resolveUserDisplayName();
@@ -1630,7 +1630,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     return displayName?.trim().split(/\s+/)[0] ?? '';
   }
 
-  private resolveAssistantName(conversation: OpenclawConversation | null): string {
+  private resolveAssistantName(conversation: AgenticConversation | null): string {
     const preferredAgent = this.activeAgentName.trim() || conversation?.agentId?.trim() || 'cathy';
     const normalized = preferredAgent
       .replace(/[-_]+/g, ' ')
@@ -1640,7 +1640,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     return token.charAt(0).toUpperCase() + token.slice(1);
   }
 
-  private resolveConversationStatusText(conversation: OpenclawConversation): string {
+  private resolveConversationStatusText(conversation: AgenticConversation): string {
     const status = conversation.status === 'accepted' ? 'Accepted' : 'Active';
     if (!this.isSuperuserAccount()) {
       return status;

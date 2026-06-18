@@ -4,23 +4,23 @@ import {html} from 'lit';
 import '@df/ui-lit/df-agent-work-request-widget';
 import {
   __resetAuthDemoState,
-  __resetOpenclawDemoState,
+  __resetAgenticDemoState,
   __setAuthDemoState,
-  __setOpenclawDemoState,
+  __setAgenticDemoState,
 } from '@df/state';
 import type {
   FirebaseAuthState,
-  OpenclawConversation,
-  OpenclawMessage,
+  AgenticConversation,
+  AgenticMessage,
 } from '@df/types';
 
-type OpenclawStoryArgs = {
+type AgenticStoryArgs = {
   heading: string;
   authenticated: boolean;
   acceptedConversation: boolean;
 };
 
-const baseConversations: OpenclawConversation[] = [
+const baseConversations: AgenticConversation[] = [
   {
     id: '9R53Bj9qEux4tloGfvKV',
     userId: 'demo-user-1',
@@ -41,7 +41,7 @@ const baseConversations: OpenclawConversation[] = [
   },
 ];
 
-const baseMessages: OpenclawMessage[] = [
+const baseMessages: AgenticMessage[] = [
   {
     id: 'message-1',
     role: 'user',
@@ -108,7 +108,7 @@ const demoSignedOutState: FirebaseAuthState = {
   initialized: true,
 };
 
-const meta: Meta<OpenclawStoryArgs> = {
+const meta: Meta<AgenticStoryArgs> = {
   title: 'Firebase/OpenClaw Chat Widget',
   component: 'df-agent-work-request-widget',
   args: {
@@ -138,16 +138,16 @@ These stories use auth and OpenClaw demo-state helpers so the widget can be revi
 
 export default meta;
 
-type Story = StoryObj<OpenclawStoryArgs>;
+type Story = StoryObj<AgenticStoryArgs>;
 
 function prepareAuth(authenticated: boolean): void {
   __resetAuthDemoState();
   __setAuthDemoState(authenticated ? demoAuthenticatedState : demoSignedOutState);
 }
 
-function prepareOpenclawState(acceptedConversation: boolean): void {
-  __resetOpenclawDemoState();
-  __setOpenclawDemoState({
+function prepareAgenticState(acceptedConversation: boolean): void {
+  __resetAgenticDemoState();
+  __setAgenticDemoState({
     conversations: baseConversations.map((conversation, index) => index === 0
       ? {
           ...conversation,
@@ -162,9 +162,9 @@ function prepareOpenclawState(acceptedConversation: boolean): void {
   });
 }
 
-const renderWidget = (args: OpenclawStoryArgs) => {
+const renderWidget = (args: AgenticStoryArgs) => {
   prepareAuth(args.authenticated);
-  prepareOpenclawState(args.acceptedConversation);
+  prepareAgenticState(args.acceptedConversation);
 
   return html`
     <div style="padding: 24px; background: #eef2ff; min-height: 100vh; box-sizing: border-box;">

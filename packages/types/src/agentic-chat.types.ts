@@ -12,7 +12,7 @@ export interface Attachment {
  * Normalized OpenClaw message used by UI components. Timestamps are converted
  * to native `Date` instances for ergonomic rendering and comparisons.
  */
-export interface OpenclawMessage extends FirestoreDocument {
+export interface AgenticMessage extends FirestoreDocument {
   /** Identifies the author of the message. */
   role: 'user' | 'assistant';
   /** Message content as plain text. */
@@ -28,16 +28,16 @@ export interface OpenclawMessage extends FirestoreDocument {
 /**
  * Lifecycle status for OpenClaw message submissions from the client perspective.
  */
-export type OpenclawSendStatus = 'idle' | 'sending' | 'error';
-export type OpenclawDeleteStatus = 'idle' | 'deleting' | 'error';
+export type AgenticSendStatus = 'idle' | 'sending' | 'error';
+export type AgenticDeleteStatus = 'idle' | 'deleting' | 'error';
 
-export type OpenclawConversationStatus = 'active' | 'accepted';
+export type AgenticConversationStatus = 'active' | 'accepted';
 
-export interface OpenclawConversation extends FirestoreDocument {
+export interface AgenticConversation extends FirestoreDocument {
   userId: string;
   agentId: string;
   title: string | null;
-  status: OpenclawConversationStatus;
+  status: AgenticConversationStatus;
   createdAt: Date | null;
   lastMessageAt: Date | null;
   workRequestMarkdown?: string;

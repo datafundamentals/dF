@@ -16,16 +16,16 @@ vi.mock('@df/firebase/functions', () => ({
 }));
 
 import {
-  __resetOpenclawDemoState,
-  __resetOpenclawStoreForTests,
-  __setOpenclawFunctionsForTests,
-  __setOpenclawDemoState,
-  deleteOpenclawConversation,
-  openclawActiveConversationState,
-  openclawChatDeleteState,
-  openclawConversationsState,
-  openclawDebugPromptState,
-} from '../openclaw-chat.store';
+  __resetAgenticDemoState,
+  __resetAgenticStoreForTests,
+  __setAgenticFunctionsForTests,
+  __setAgenticDemoState,
+  deleteAgenticConversation,
+  agenticActiveConversationState,
+  agenticChatDeleteState,
+  agenticConversationsState,
+  agenticDebugPromptState,
+} from '../agentic-chat.store';
 
 function setCallableHandler<TArgs extends object = object, TResult = unknown>(
   name: string,
@@ -41,16 +41,16 @@ function resetCallableHandlers(): void {
   }
 }
 
-describe('openclaw-chat.store delete flow', () => {
+describe('agentic-chat.store delete flow', () => {
   beforeEach(() => {
-    __resetOpenclawDemoState();
-    __resetOpenclawStoreForTests();
+    __resetAgenticDemoState();
+    __resetAgenticStoreForTests();
     resetCallableHandlers();
     vi.clearAllMocks();
   });
 
   it('removes a demo conversation and switches active conversation', async () => {
-    __setOpenclawDemoState({
+    __setAgenticDemoState({
       conversations: [
         {
           id: 'request-1',
@@ -96,11 +96,11 @@ describe('openclaw-chat.store delete flow', () => {
       activeConversationId: 'request-1',
     });
 
-    await deleteOpenclawConversation('request-1');
+    await deleteAgenticConversation('request-1');
 
-    expect(openclawConversationsState.get().documents.map((item) => item.id)).toEqual(['request-2']);
-    expect(openclawActiveConversationState.get().activeConversationId).toBe('request-2');
-    expect(openclawChatDeleteState.get()).toEqual({
+    expect(agenticConversationsState.get().documents.map((item) => item.id)).toEqual(['request-2']);
+    expect(agenticActiveConversationState.get().activeConversationId).toBe('request-2');
+    expect(agenticChatDeleteState.get()).toEqual({
       status: 'idle',
       error: null,
       deletingConversationId: null,
@@ -109,7 +109,7 @@ describe('openclaw-chat.store delete flow', () => {
 
   it('calls the backend delete function for initialized store usage', async () => {
     const handler = setCallableHandler<{requestId: string}, {data: {success: true; requestId: string; deletedMessageCount: number}}>(
-      'deleteOpenclawConversation',
+      'deleteAgenticConversation',
       async (payload) => ({
         data: {
           success: true,
@@ -119,11 +119,11 @@ describe('openclaw-chat.store delete flow', () => {
       })
     );
 
-    __setOpenclawFunctionsForTests({} as never);
-    await deleteOpenclawConversation('request-9');
+    __setAgenticFunctionsForTests({} as never);
+    await deleteAgenticConversation('request-9');
 
     expect(handler).toHaveBeenCalledWith({requestId: 'request-9'});
-    expect(openclawChatDeleteState.get()).toEqual({
+    expect(agenticChatDeleteState.get()).toEqual({
       status: 'idle',
       error: null,
       deletingConversationId: null,
@@ -131,14 +131,14 @@ describe('openclaw-chat.store delete flow', () => {
   });
 
   it('stores an error when backend deletion fails', async () => {
-    setCallableHandler('deleteOpenclawConversation', async () => {
+    setCallableHandler('deleteAgenticConversation', async () => {
       throw new Error('delete failure');
     });
 
-    __setOpenclawFunctionsForTests({} as never);
-    await expect(deleteOpenclawConversation('request-9')).rejects.toThrow('delete failure');
+    __setAgenticFunctionsForTests({} as never);
+    await expect(deleteAgenticConversation('request-9')).rejects.toThrow('delete failure');
 
-    expect(openclawChatDeleteState.get()).toEqual({
+    expect(agenticChatDeleteState.get()).toEqual({
       status: 'error',
       error: 'delete failure',
       deletingConversationId: null,
@@ -146,7 +146,7 @@ describe('openclaw-chat.store delete flow', () => {
   });
 
   it('formats prompt context debug data for display', () => {
-    __setOpenclawDemoState({
+    __setAgenticDemoState({
       conversations: [],
       messages: [],
       promptDebug: {
@@ -178,10 +178,10 @@ describe('openclaw-chat.store delete flow', () => {
       },
     });
 
-    const formatted = openclawDebugPromptState.get().fullPromptContext;
+    const formatted = agenticDebugPromptState.get().fullPromptContext;
 
-    expect(formatted).toContain('"agentId":"cathy"');
-    expect(formatted).toContain('"model":"openclaw/cathy"');
+    expect(formatted).toContain('"agentId": "cathy"');
+    expect(formatted).toContain('"model": "openclaw/cathy"');
     expect(formatted).toContain('"messages"');
   });
 });

@@ -11,8 +11,8 @@ import {
 } from '@df/firebase/functions';
 import type {FirestoreCollectionState} from '@df/types/firebase-firestore.types';
 import type {FirestoreDocument} from '@df/types/firebase-firestore.types';
-import type {Attachment, OpenclawDeleteStatus} from '@df/types/openclaw-chat.types';
-import type {OpenclawSendStatus} from '@df/types';
+import type {Attachment, AgenticDeleteStatus} from '@df/types/agentic-chat.types';
+import type {AgenticSendStatus} from '@df/types';
 import {
   Timestamp,
   addDoc,
@@ -41,7 +41,7 @@ const PROMPT_CONTEXT_DEBUG_COLLECTION = 'promptContextDebug';
 const PROMPT_CONTEXT_DEBUG_MESSAGES_SUBCOLLECTION = 'messages';
 const DEFAULT_AGENT_ID = 'cathy';
 
-interface OpenclawMessage extends FirestoreDocument {
+interface AgenticMessage extends FirestoreDocument {
   role: 'user' | 'assistant';
   content: string;
   createdAt: Date | null;
@@ -50,7 +50,7 @@ interface OpenclawMessage extends FirestoreDocument {
   turnNumber?: number;
 }
 
-interface OpenclawConversation extends FirestoreDocument {
+interface AgenticConversation extends FirestoreDocument {
   userId: string;
   agentId: string;
   title: string | null;
@@ -62,34 +62,34 @@ interface OpenclawConversation extends FirestoreDocument {
   currentTurnNumber: number;
 }
 
-interface OpenclawPromptDebugMessage {
+interface AgenticPromptDebugMessage {
   role: string;
   content: string;
 }
 
-interface OpenclawPromptDebugAttachment {
+interface AgenticPromptDebugAttachment {
   name: string;
   url: string;
 }
 
-interface OpenclawPromptDebugData {
+interface AgenticPromptDebugData {
   systemContent: string;
-  historyMessages: OpenclawPromptDebugMessage[];
+  historyMessages: AgenticPromptDebugMessage[];
   attachmentContext: string;
   requestBodyJson: string;
   userEmail: string;
   userFirstName: string;
   turnNumber: number;
   attachmentsIncluded: boolean;
-  attachmentDetails: OpenclawPromptDebugAttachment[];
+  attachmentDetails: AgenticPromptDebugAttachment[];
   constructedAt: Date | null;
   openclawResponsePreview: string;
   metadata: Record<string, unknown>;
 }
 
-const messagesSignal = signal<readonly OpenclawMessage[]>([]);
-const conversationsSignal = signal<readonly OpenclawConversation[]>([]);
-const promptDebugSignal = signal<OpenclawPromptDebugData | null>(null);
+const messagesSignal = signal<readonly AgenticMessage[]>([]);
+const conversationsSignal = signal<readonly AgenticConversation[]>([]);
+const promptDebugSignal = signal<AgenticPromptDebugData | null>(null);
 
 const messagesStatusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
 const conversationsStatusSignal = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
@@ -104,9 +104,9 @@ const isConversationsListeningSignal = signal(false);
 
 let turnCountSignal = signal(0);
 
-const sendStatusSignal = signal<OpenclawSendStatus>('idle');
+const sendStatusSignal = signal<AgenticSendStatus>('idle');
 const sendErrorSignal = signal<string | null>(null);
-const deleteStatusSignal = signal<OpenclawDeleteStatus>('idle');
+const deleteStatusSignal = signal<AgenticDeleteStatus>('idle');
 const deleteErrorSignal = signal<string | null>(null);
 const deletingConversationIdSignal = signal<string | null>(null);
 const activeConversationIdSignal = signal<string | null>(null);
@@ -118,17 +118,17 @@ let messagesCollectionRef: CollectionReference<DocumentData> | null = null;
 let initializedDb: Firestore | null = null;
 let initializedFunctions: Functions | null = null;
 let initializedUserId: string | null = null;
-let initializedUserContext: OpenclawUserContext = {};
+let initializedUserContext: AgenticUserContext = {};
 let defaultWorkRequestMarkdown = '';
 let ensureConversationPromise: Promise<string | null> | null = null;
 let demoMode = false;
 
-interface OpenclawUserContext {
+interface AgenticUserContext {
   userEmail?: string;
   userFirstName?: string;
 }
 
-export const openclawChatMessagesState = computed<FirestoreCollectionState<OpenclawMessage>>(() => ({
+export const agenticChatMessagesState = computed<FirestoreCollectionState<AgenticMessage>>(() => ({
   status: messagesStatusSignal.get(),
   documents: messagesSignal.get(),
   error: messagesErrorSignal.get(),
@@ -141,7 +141,7 @@ export const openclawChatMessagesState = computed<FirestoreCollectionState<Openc
   queryDescription: 'Conversation messages (oldest first)',
 }));
 
-export const openclawConversationsState = computed<FirestoreCollectionState<OpenclawConversation>>(() => ({
+export const agenticConversationsState = computed<FirestoreCollectionState<AgenticConversation>>(() => ({
   status: conversationsStatusSignal.get(),
   documents: conversationsSignal.get(),
   error: conversationsErrorSignal.get(),
@@ -154,7 +154,7 @@ export const openclawConversationsState = computed<FirestoreCollectionState<Open
   queryDescription: 'OpenClaw work requests for current user',
 }));
 
-export const openclawActiveConversationState = computed(() => {
+export const agenticActiveConversationState = computed(() => {
   const activeConversationId = activeConversationIdSignal.get();
   const conversation = conversationsSignal.get().find((item) => item.id === activeConversationId) ?? null;
 
@@ -164,18 +164,18 @@ export const openclawActiveConversationState = computed(() => {
   };
 });
 
-export const openclawChatSendState = computed(() => ({
+export const agenticChatSendState = computed(() => ({
   status: sendStatusSignal.get(),
   error: sendErrorSignal.get(),
 }));
 
-export const openclawChatDeleteState = computed(() => ({
+export const agenticChatDeleteState = computed(() => ({
   status: deleteStatusSignal.get(),
   error: deleteErrorSignal.get(),
   deletingConversationId: deletingConversationIdSignal.get(),
 }));
 
-export const openclawDebugPromptState = computed(() => {
+export const agenticDebugPromptState = computed(() => {
   const data = promptDebugSignal.get();
 
   return {
@@ -186,27 +186,27 @@ export const openclawDebugPromptState = computed(() => {
   };
 });
 
-interface OpenclawDemoState {
-  conversations: readonly OpenclawConversation[];
-  messages: readonly OpenclawMessage[];
+interface AgenticDemoState {
+  conversations: readonly AgenticConversation[];
+  messages: readonly AgenticMessage[];
   activeConversationId?: string | null;
   conversationsStatus?: 'idle' | 'loading' | 'ready' | 'error';
   messagesStatus?: 'idle' | 'loading' | 'ready' | 'error';
   conversationsError?: string | null;
   messagesError?: string | null;
-  sendStatus?: OpenclawSendStatus;
+  sendStatus?: AgenticSendStatus;
   sendError?: string | null;
-  deleteStatus?: OpenclawDeleteStatus;
+  deleteStatus?: AgenticDeleteStatus;
   deleteError?: string | null;
   deletingConversationId?: string | null;
   isConversationsListening?: boolean;
   isMessagesListening?: boolean;
-  promptDebug?: OpenclawPromptDebugData | null;
+  promptDebug?: AgenticPromptDebugData | null;
   promptDebugStatus?: 'idle' | 'loading' | 'ready' | 'error';
   promptDebugError?: string | null;
 }
 
-export function __setOpenclawDemoState(state: OpenclawDemoState): void {
+export function __setAgenticDemoState(state: AgenticDemoState): void {
   if (initializedDb || initializedUserId || unsubscribeConversations || unsubscribeMessages) {
     throw new Error('Cannot set OpenClaw demo state after the store has been initialized.');
   }
@@ -235,7 +235,7 @@ export function __setOpenclawDemoState(state: OpenclawDemoState): void {
   isMessagesListeningSignal.set(state.isMessagesListening ?? false);
 }
 
-export function __resetOpenclawDemoState(): void {
+export function __resetAgenticDemoState(): void {
   if (!demoMode) {
     return;
   }
@@ -260,12 +260,12 @@ export function __resetOpenclawDemoState(): void {
   isMessagesListeningSignal.set(false);
 }
 
-export function __setOpenclawFunctionsForTests(functions: Functions): void {
+export function __setAgenticFunctionsForTests(functions: Functions): void {
   initializedFunctions = functions;
 }
 
-export function __resetOpenclawStoreForTests(): void {
-  stopOpenclawRealtime();
+export function __resetAgenticStoreForTests(): void {
+  stopAgenticRealtime();
   messagesSignal.set([]);
   conversationsSignal.set([]);
   messagesStatusSignal.set('idle');
@@ -292,19 +292,19 @@ export function __resetOpenclawStoreForTests(): void {
   demoMode = false;
 }
 
-export async function initializeOpenclawChatStore(
+export async function initializeAgenticChatStore(
   app: FirebaseApp,
   useEmulator: boolean,
   userId: string,
   initialWorkRequestMarkdown = '',
-  userContext: OpenclawUserContext = {}
+  userContext: AgenticUserContext = {}
 ): Promise<void> {
   if (initializedDb && initializedUserId === userId) {
-    startOpenclawRealtime();
+    startAgenticRealtime();
     return;
   }
 
-  stopOpenclawRealtime();
+  stopAgenticRealtime();
   initializedUserId = userId;
   initializedUserContext = normalizeUserContext(userContext);
   defaultWorkRequestMarkdown = initialWorkRequestMarkdown;
@@ -324,7 +324,7 @@ export async function initializeOpenclawChatStore(
   startConversationsListener(db, userId);
 }
 
-export function startOpenclawRealtime(): void {
+export function startAgenticRealtime(): void {
   if (!initializedDb || !initializedUserId) {
     return;
   }
@@ -340,7 +340,7 @@ export function startOpenclawRealtime(): void {
   }
 }
 
-export function stopOpenclawRealtime(): void {
+export function stopAgenticRealtime(): void {
   if (unsubscribeConversations) {
     unsubscribeConversations();
     unsubscribeConversations = null;
@@ -356,10 +356,10 @@ export function stopOpenclawRealtime(): void {
   isMessagesListeningSignal.set(false);
 }
 
-export async function createOpenclawConversation(
+export async function createAgenticConversation(
   agentId?: string,
   workRequestMarkdown = defaultWorkRequestMarkdown,
-  userContext: OpenclawUserContext = initializedUserContext
+  userContext: AgenticUserContext = initializedUserContext
 ): Promise<string> {
   if (!initializedDb || !initializedUserId) {
     throw new Error('OpenClaw chat store is not initialized.');
@@ -382,11 +382,11 @@ export async function createOpenclawConversation(
     currentTurnNumber: 0,
   });
 
-  switchOpenclawConversation(requestId);
+  switchAgenticConversation(requestId);
   return requestId;
 }
 
-export function switchOpenclawConversation(requestId: string): void {
+export function switchAgenticConversation(requestId: string): void {
   if (!initializedDb) {
     return;
   }
@@ -396,7 +396,7 @@ export function switchOpenclawConversation(requestId: string): void {
   startMessagesListener(initializedDb, requestId);
 }
 
-export async function renameOpenclawConversation(requestId: string, title: string): Promise<void> {
+export async function renameAgenticConversation(requestId: string, title: string): Promise<void> {
   if (!initializedDb) {
     throw new Error('OpenClaw chat store is not initialized.');
   }
@@ -407,7 +407,7 @@ export async function renameOpenclawConversation(requestId: string, title: strin
   });
 }
 
-export async function addAttachmentToOpenclawConversation(
+export async function addAttachmentToAgenticConversation(
   conversationId: string,
   attachment: Attachment
 ): Promise<void> {
@@ -420,7 +420,7 @@ export async function addAttachmentToOpenclawConversation(
   });
 }
 
-export async function removeAttachmentFromOpenclawConversation(
+export async function removeAttachmentFromAgenticConversation(
   conversationId: string,
   path: string
 ): Promise<void> {
@@ -437,13 +437,13 @@ export async function removeAttachmentFromOpenclawConversation(
   await updateDoc(ref, {attachments: filtered});
 }
 
-interface DeleteOpenclawConversationResponse {
+interface DeleteAgenticConversationResponse {
   success: true;
   requestId: string;
   deletedMessageCount: number;
 }
 
-export async function deleteOpenclawConversation(requestId: string): Promise<void> {
+export async function deleteAgenticConversation(requestId: string): Promise<void> {
   if (demoMode) {
     const nextConversations = conversationsSignal.get().filter((item) => item.id !== requestId);
     conversationsSignal.set(nextConversations);
@@ -469,9 +469,9 @@ export async function deleteOpenclawConversation(requestId: string): Promise<voi
   deletingConversationIdSignal.set(requestId);
 
   try {
-    const fn = callable<{requestId: string}, DeleteOpenclawConversationResponse>(
+    const fn = callable<{requestId: string}, DeleteAgenticConversationResponse>(
       initializedFunctions,
-      'deleteOpenclawConversation'
+      'deleteAgenticConversation'
     );
     await fn({requestId});
     deleteStatusSignal.set('idle');
@@ -485,7 +485,7 @@ export async function deleteOpenclawConversation(requestId: string): Promise<voi
   }
 }
 
-export async function sendOpenclawMessage(content: string, userContext: OpenclawUserContext = {}): Promise<void> {
+export async function sendAgenticMessage(content: string, userContext: AgenticUserContext = {}): Promise<void> {
   const requestId = activeConversationIdSignal.get();
   if (!requestId || !messagesCollectionRef || !initializedDb) {
     throw new Error('No active conversation.');
@@ -554,7 +554,7 @@ function startConversationsListener(db: Firestore, userId: string): void {
       const activeConversationId = activeConversationIdSignal.get();
       if (!docs.length) {
         if (!ensureConversationPromise) {
-          ensureConversationPromise = createOpenclawConversation()
+          ensureConversationPromise = createAgenticConversation()
             .then((requestId) => requestId)
             .catch((error) => {
               const message = error instanceof Error ? error.message : 'Failed to create conversation.';
@@ -606,7 +606,7 @@ function startMessagesListener(db: Firestore, requestId: string): void {
   unsubscribeMessages = onSnapshot(
     q,
     (snapshot) => {
-      const docs = snapshot.docs.map((item) => normalizeMessage({id: item.id, ...item.data()} as OpenclawMessage));
+      const docs = snapshot.docs.map((item) => normalizeMessage({id: item.id, ...item.data()} as AgenticMessage));
       messagesSignal.set(docs);
       messagesStatusSignal.set('ready');
       updatePromptDebugListener(db, requestId, docs);
@@ -628,7 +628,7 @@ function startMessagesListener(db: Firestore, requestId: string): void {
   );
 }
 
-function updatePromptDebugListener(db: Firestore, requestId: string, messages: readonly OpenclawMessage[]): void {
+function updatePromptDebugListener(db: Firestore, requestId: string, messages: readonly AgenticMessage[]): void {
   const latestAssistantMessage = [...messages].reverse().find((message) => message.role === 'assistant');
   if (!latestAssistantMessage) {
     resetPromptDebugState();
@@ -699,7 +699,7 @@ function resetPromptDebugState(): void {
 
 function normalizeConversationDoc(
   snapshot: QueryDocumentSnapshot<DocumentData, DocumentData>
-): OpenclawConversation {
+): AgenticConversation {
   const data = snapshot.data();
 
   return {
@@ -728,14 +728,14 @@ function normalizeAttachments(raw: unknown): Attachment[] {
     }));
 }
 
-function normalizeMessage(message: OpenclawMessage): OpenclawMessage {
+function normalizeMessage(message: AgenticMessage): AgenticMessage {
   return {
     ...message,
     createdAt: normalizeTimestamp(message.createdAt),
   };
 }
 
-function normalizePromptDebugData(raw: DocumentData): OpenclawPromptDebugData {
+function normalizePromptDebugData(raw: DocumentData): AgenticPromptDebugData {
   return {
     systemContent: String(raw.systemContent ?? ''),
     historyMessages: normalizePromptDebugMessages(raw.historyMessages),
@@ -752,7 +752,7 @@ function normalizePromptDebugData(raw: DocumentData): OpenclawPromptDebugData {
   };
 }
 
-function normalizePromptDebugMessages(raw: unknown): OpenclawPromptDebugMessage[] {
+function normalizePromptDebugMessages(raw: unknown): AgenticPromptDebugMessage[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((item): item is Record<string, unknown> => isRecord(item))
@@ -762,7 +762,7 @@ function normalizePromptDebugMessages(raw: unknown): OpenclawPromptDebugMessage[
     }));
 }
 
-function normalizePromptDebugAttachments(raw: unknown): OpenclawPromptDebugAttachment[] {
+function normalizePromptDebugAttachments(raw: unknown): AgenticPromptDebugAttachment[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((item): item is Record<string, unknown> => isRecord(item))
@@ -776,7 +776,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-function formatPromptDebugContext(data: OpenclawPromptDebugData | null): string {
+function formatPromptDebugContext(data: AgenticPromptDebugData | null): string {
   if (!data) {
     return 'No prompt context debug document is available for the latest assistant message.';
   }
@@ -792,7 +792,7 @@ function formatPromptDebugContext(data: OpenclawPromptDebugData | null): string 
   }
 }
 
-function normalizeUserContext(userContext: OpenclawUserContext): OpenclawUserContext {
+function normalizeUserContext(userContext: AgenticUserContext): AgenticUserContext {
   return {
     userEmail: userContext.userEmail?.trim() || '',
     userFirstName: userContext.userFirstName?.trim() || '',
@@ -811,7 +811,7 @@ function normalizeTimestamp(value: unknown): Date | null {
   return null;
 }
 
-function compareConversations(a: OpenclawConversation, b: OpenclawConversation): number {
+function compareConversations(a: AgenticConversation, b: AgenticConversation): number {
   const lastMessageDelta = toSortableTime(b.lastMessageAt) - toSortableTime(a.lastMessageAt);
   if (lastMessageDelta !== 0) {
     return lastMessageDelta;

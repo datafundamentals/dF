@@ -30,7 +30,7 @@ initializeApp();
 export {helloWorld} from './callable/helloWorld.js';
 export {createTodoAdvanced} from './callable/createTodoAdvanced.js';
 export {getUserList} from './callable/getUserList.js';
-export {deleteOpenclawConversation} from './callable/deleteOpenclawConversation.js';
+export {deleteAgenticConversation} from './callable/deleteAgenticConversation.js';
 export {updateUserRole, setUserRoles} from './callable/updateUserRole.js';
 
 /**
@@ -53,7 +53,7 @@ export {
   onTodoUpdated,
   onTodoDeleted,
 } from './triggers/onTodoCreated.js';
-export {onOpenclawMessage} from './triggers/onOpenclawMessage.js';
+export {onAgenticMessage} from './triggers/onAgenticMessage.js';
 
 /**
  * Scheduled Functions

@@ -3,7 +3,7 @@ import {customElement, state} from 'lit/decorators.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {
   firebaseAuthState,
-  initializeOpenclawChatStore,
+  initializeAgenticChatStore,
   getInitializedFirebaseApp,
   shouldUseEmulatorForService,
 } from '@df/state';
@@ -73,7 +73,7 @@ export class DfAgentWorkRequestApp extends SignalWatcher(LitElement) {
   private async initializeStore(userId: string, userEmail: string, userFirstName: string): Promise<void> {
     this.isStoreInitializing = true;
     try {
-      await initializeOpenclawChatStore(
+      await initializeAgenticChatStore(
         getInitializedFirebaseApp(),
         shouldUseEmulatorForService('firestore'),
         userId,

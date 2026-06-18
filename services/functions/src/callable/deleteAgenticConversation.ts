@@ -6,19 +6,19 @@ const WORK_REQUESTS_COLLECTION = 'agentWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
 const DELETE_BATCH_SIZE = 200;
 
-export interface DeleteOpenclawConversationRequest {
+export interface DeleteAgenticConversationRequest {
   requestId: string;
 }
 
-export interface DeleteOpenclawConversationResponse {
+export interface DeleteAgenticConversationResponse {
   success: true;
   requestId: string;
   deletedMessageCount: number;
 }
 
-export const deleteOpenclawConversation = functions.https.onCall<
-  DeleteOpenclawConversationRequest,
-  Promise<DeleteOpenclawConversationResponse>
+export const deleteAgenticConversation = functions.https.onCall<
+  DeleteAgenticConversationRequest,
+  Promise<DeleteAgenticConversationResponse>
 >(
   {
     region: 'us-central1',

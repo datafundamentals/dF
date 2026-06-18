@@ -43,7 +43,7 @@ firebase deploy --only functions
 
 ## OpenClaw Work Request Git Persistence
 
-`onOpenclawMessage` can persist each Work Request turn into a GitHub-backed markdown file. The feature is disabled unless `OPENCLAW_WORK_REQUEST_GIT_REPO` is configured.
+`onAgenticMessage` can persist each Work Request turn into a GitHub-backed markdown file. The feature is disabled unless `OPENCLAW_WORK_REQUEST_GIT_REPO` is configured.
 
 Required secret when enabled:
 
@@ -59,7 +59,7 @@ Runtime configuration:
 - `OPENCLAW_WORK_REQUEST_GIT_AUTHOR_NAME` - commit author name, defaults to `OpenClaw Work Request Bot`.
 - `OPENCLAW_WORK_REQUEST_GIT_AUTHOR_EMAIL` - commit author email, defaults to `openclaw-work-requests@datafundamentals.com`.
 
-The above were hard-coded into openclawWorkRequestGit.ts by Pete as follows. This might not have been the right approach but the repository is private so not sure that it hurts anything?
+The above were hard-coded into agenticWorkRequestGit.ts by Pete as follows. This might not have been the right approach but the repository is private so not sure that it hurts anything?
 
 ```
 const DEFAULT_BRANCH = 'main';

@@ -1,8 +1,10 @@
-# Ticket 0614d Work Request Title
+# Ticket 0619a Work Request Pre-requirements
 
 ## Executive Summary
 
+This ticket sets up the event-loop a bit more completely by defining 4 field as pre-requirements even before the more detailed chat proceeds.
 
+Title, intent, summary and metrics are the 4 fields added.
 
 ---
 
@@ -20,5 +22,9 @@
 ---
 
 ## Functional Requirements
+
+`interface OpenclawConversation extends FirestoreDocument` is expanded to add 3 additional fields below title - `intent, summary, and metrics`
+
+When the df-openclaw
 
 - 

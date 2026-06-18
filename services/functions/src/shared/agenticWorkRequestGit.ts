@@ -11,7 +11,7 @@ const DEFAULT_AUTHOR_NAME = 'R2D4agent';
 const DEFAULT_AUTHOR_EMAIL = 'pete@couldbe.net';
 const PUSH_RETRY_COUNT = 3;
 
-export interface OpenclawWorkRequestGitConfig {
+export interface AgenticWorkRequestGitConfig {
   repo: string;
   branch: string;
   docsDir: string;
@@ -19,7 +19,7 @@ export interface OpenclawWorkRequestGitConfig {
   authorEmail: string;
 }
 
-export interface PersistOpenclawTurnInput {
+export interface PersistAgenticTurnInput {
   requestId: string;
   messageId: string;
   userContent: string;
@@ -27,10 +27,10 @@ export interface PersistOpenclawTurnInput {
   turnNumber: number;
   token: string;
   baseMarkdownContent?: string;
-  config?: OpenclawWorkRequestGitConfig;
+  config?: AgenticWorkRequestGitConfig;
 }
 
-export interface PersistOpenclawTurnResult {
+export interface PersistAgenticTurnResult {
   repo: string;
   branch: string;
   docPath: string;
@@ -43,9 +43,9 @@ interface GitCommandOptions {
   authToken?: string;
 }
 
-export function loadOpenclawWorkRequestGitConfig(
+export function loadAgenticWorkRequestGitConfig(
   env: NodeJS.ProcessEnv = process.env
-): OpenclawWorkRequestGitConfig | null {
+): AgenticWorkRequestGitConfig | null {
   const DEFAULT_REPO = 'R2D4agent/workRequest';
   const repo = env.OPENCLAW_WORK_REQUEST_GIT_REPO?.trim() || DEFAULT_REPO;
   if (!repo) {
@@ -61,7 +61,7 @@ export function loadOpenclawWorkRequestGitConfig(
   };
 }
 
-export function buildOpenclawTurnMarkdown(input: {
+export function buildAgenticTurnMarkdown(input: {
   turnNumber: number;
   userContent: string;
   previousAssistantContent: string | null;
@@ -70,17 +70,17 @@ export function buildOpenclawTurnMarkdown(input: {
   return `\n\n---\n\n**Turn ${input.turnNumber}**${cathyLine}\n\n**You:** ${input.userContent}`;
 }
 
-export async function persistOpenclawWorkRequestTurnToGit(
-  input: PersistOpenclawTurnInput
-): Promise<PersistOpenclawTurnResult | null> {
-  const config = input.config ?? loadOpenclawWorkRequestGitConfig();
+export async function persistAgenticWorkRequestTurnToGit(
+  input: PersistAgenticTurnInput
+): Promise<PersistAgenticTurnResult | null> {
+  const config = input.config ?? loadAgenticWorkRequestGitConfig();
   if (!config) {
     return null;
   }
 
   const repoUrl = normalizeGitHubRepoUrl(config.repo);
   const relativeDocPath = buildWorkRequestDocPath(config.docsDir, input.requestId);
-  const turnMarkdown = buildOpenclawTurnMarkdown(input);
+  const turnMarkdown = buildAgenticTurnMarkdown(input);
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= PUSH_RETRY_COUNT; attempt++) {
