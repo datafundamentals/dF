@@ -10,6 +10,7 @@
 import './material-design-init.js';
 
 export * from './remove-replace-me.js';
+export * from './file-processing.js';
 export * from './my-element.js';
 export * from './df-segmented-button.js';
 export * from './df-yaml-nav.js';

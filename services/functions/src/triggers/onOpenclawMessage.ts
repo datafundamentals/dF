@@ -161,17 +161,20 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
     const sessionSegment = isRoot ? 'root' : agentId;
     const sessionKey = `${OPENCLAW_WORK_REQUEST_SESSION_PREFIX}${sessionSegment}:${requestId}`;
     
-    const statusUrl = `https://hbb-a1.web.app/WR_Status/${requestId}/`;
     const currentTitle = conversationSnap.get('title') as string | undefined;
     const currentStatus = conversationSnap.get('status') as string | undefined;
     const userFirstName = resolveUserFirstName(data, conversationSnap);
+    const userEmail = typeof data.userEmail === 'string' ? data.userEmail : readStringField(conversationSnap, 'userEmail');
     const baseSystemContent = [
-      `TITLE: ${currentTitle || 'Untitled'}`,
-      `USER_FIRST_NAME: ${userFirstName || 'Unknown'}`,
-      `CONTEXT: The unique ID for this work request is ${requestId}. Status URL: ${statusUrl}. If you identify a concise and descriptive title for this session, or if the session is currently 'Untitled', please include [SET_TITLE: Concise Title] in your response. You may update this title at any time if the conversation context shifts.`,
+      `User: ${userFirstName || '(unknown)'}`,
+      `Email: ${userEmail || '(unknown)'}`,
+      `Turn: ${turnNumber}`,
+      `Attachments: ${attachments.length}`,
+      `Agent: ${agentId}`,
+      `Request ID: ${requestId}`,
     ].join('\n');
     const attachmentContext = attachments.length > 0
-      ? `.\nUploaded files available in this session:\n${attachments
+      ? `\n\nUploaded files available in this session:\n${attachments
         .map((attachment) => `- ${attachment.name}: ${attachment.url}`)
         .join('\n')}`
       : '';
@@ -199,6 +202,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       messages: [systemContext, ...historyMessages, {role: 'user', content}],
     };
     const model = requestBody.model;
+    const requestBodyJson = JSON.stringify(requestBody);
 
     const endpoint = `${OPENCLAW_BASE_URL}/v1/chat/completions`;
     const response = await fetch(endpoint, {
@@ -207,7 +211,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENCLAW_GATEWAY_TOKEN}`,
       },
-      body: JSON.stringify(requestBody),
+      body: requestBodyJson,
     });
 
     if (!response.ok) {
@@ -270,7 +274,7 @@ export const onOpenclawMessage = functions.firestore.onDocumentWritten({
       systemContent: systemContext.content,
       historyMessages,
       attachmentContext,
-      requestBody,
+      requestBodyJson,
       userEmail: typeof data.userEmail === 'string' ? data.userEmail : readStringField(conversationSnap, 'userEmail'),
       userFirstName,
       turnNumber,
@@ -364,7 +368,7 @@ async function writePromptContextDebug(input: {
   systemContent: string;
   historyMessages: Array<{role: string; content: string}>;
   attachmentContext: string;
-  requestBody: Record<string, unknown>;
+  requestBodyJson: string;
   userEmail: string;
   userFirstName: string;
   turnNumber: number;
@@ -381,7 +385,7 @@ async function writePromptContextDebug(input: {
       systemContent: input.systemContent,
       historyMessages: input.historyMessages,
       attachmentContext: input.attachmentContext,
-      requestBody: input.requestBody,
+      requestBodyJson: input.requestBodyJson,
       userEmail: input.userEmail,
       userFirstName: input.userFirstName,
       turnNumber: input.turnNumber,

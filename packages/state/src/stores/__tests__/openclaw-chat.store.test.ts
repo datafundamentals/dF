@@ -156,12 +156,12 @@ describe('openclaw-chat.store delete flow', () => {
           {role: 'assistant', content: 'Initial response'},
         ],
         attachmentContext: '.\nUploaded files available in this session:\n- spec.pdf: https://example.test/spec.pdf',
-        requestBody: {
+        requestBodyJson: JSON.stringify({
           agentId: 'cathy',
           sessionKey: 'openclaw-work-request-v2:cathy:request-1',
           model: 'openclaw/cathy',
           messages: [{role: 'system', content: 'TITLE: Example'}],
-        },
+        }),
         userEmail: 'pete@example.test',
         userFirstName: 'Pete',
         turnNumber: 2,
@@ -180,13 +180,8 @@ describe('openclaw-chat.store delete flow', () => {
 
     const formatted = openclawDebugPromptState.get().fullPromptContext;
 
-    expect(formatted).toContain('[System Context]');
-    expect(formatted).toContain('TITLE: Example');
-    expect(formatted).toContain('Turn 1: User - Initial request');
-    expect(formatted).toContain('"model": "openclaw/cathy"');
-    expect(formatted).toContain('- User: pete@example.test');
-    expect(formatted).toContain('- User First Name: Pete');
-    expect(formatted).toContain('- Attachments: 1');
-    expect(formatted).toContain('Updated the request.');
+    expect(formatted).toContain('"agentId":"cathy"');
+    expect(formatted).toContain('"model":"openclaw/cathy"');
+    expect(formatted).toContain('"messages"');
   });
 });

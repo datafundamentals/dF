@@ -76,7 +76,7 @@ interface OpenclawPromptDebugData {
   systemContent: string;
   historyMessages: OpenclawPromptDebugMessage[];
   attachmentContext: string;
-  requestBody: Record<string, unknown> | null;
+  requestBodyJson: string;
   userEmail: string;
   userFirstName: string;
   turnNumber: number;
@@ -740,7 +740,7 @@ function normalizePromptDebugData(raw: DocumentData): OpenclawPromptDebugData {
     systemContent: String(raw.systemContent ?? ''),
     historyMessages: normalizePromptDebugMessages(raw.historyMessages),
     attachmentContext: String(raw.attachmentContext ?? ''),
-    requestBody: isRecord(raw.requestBody) ? raw.requestBody : null,
+    requestBodyJson: String(raw.requestBodyJson ?? ''),
     userEmail: String(raw.userEmail ?? ''),
     userFirstName: String(raw.userFirstName ?? ''),
     turnNumber: typeof raw.turnNumber === 'number' ? raw.turnNumber : 0,
@@ -781,48 +781,15 @@ function formatPromptDebugContext(data: OpenclawPromptDebugData | null): string 
     return 'No prompt context debug document is available for the latest assistant message.';
   }
 
-  const history = data.historyMessages.length
-    ? data.historyMessages
-      .map((message, index) => `Turn ${index + 1}: ${formatRoleLabel(message.role)} - ${message.content}`)
-      .join('\n\n')
-    : '(No prior complete message history)';
-  const attachments = data.attachmentDetails.length
-    ? data.attachmentDetails.map((attachment) => `- ${attachment.name}: ${attachment.url}`).join('\n')
-    : '(No attachments)';
-  const constructedAt = data.constructedAt?.toISOString() ?? '(pending server timestamp)';
-
-  return [
-    '[System Context]',
-    data.systemContent || '(empty)',
-    '',
-    '[Attachment Context]',
-    data.attachmentContext || attachments,
-    '',
-    '[Message History]',
-    history,
-    '',
-    '[Request Body Sent to OpenClaw]',
-    JSON.stringify(data.requestBody ?? {}, null, 2),
-    '',
-    '[Metadata]',
-    `- User: ${data.userEmail || '(unknown)'}`,
-    `- User First Name: ${data.userFirstName || '(unknown)'}`,
-    `- Turn: ${data.turnNumber}`,
-    `- Attachments: ${data.attachmentDetails.length}`,
-    `- Attachments Included: ${String(data.attachmentsIncluded)}`,
-    `- Constructed: ${constructedAt}`,
-    `- Agent: ${String(data.metadata.agentId ?? '(unknown)')}`,
-    `- Request ID: ${String(data.metadata.requestId ?? '(unknown)')}`,
-    `- User Message ID: ${String(data.metadata.userMessageId ?? '(unknown)')}`,
-    `- Assistant Message ID: ${String(data.metadata.assistantMessageId ?? '(unknown)')}`,
-    '',
-    '[OpenClaw Response Preview]',
-    data.openclawResponsePreview || '(empty)',
-  ].join('\n');
-}
-
-function formatRoleLabel(role: string): string {
-  return role === 'assistant' ? 'Assistant' : role === 'user' ? 'User' : role || 'Unknown';
+  try {
+    const parsed = JSON.parse(data.requestBodyJson || '{}');
+    const prettyJson = JSON.stringify(parsed, null, 2);
+    const unescaped = prettyJson.replace(/\\n/g, '\n');
+    const tokenCount = Math.ceil(data.requestBodyJson.length / 4);
+    return `[Token Count: ${tokenCount} tokens]\n\n${unescaped}`;
+  } catch {
+    return data.requestBodyJson || '{}';
+  }
 }
 
 function normalizeUserContext(userContext: OpenclawUserContext): OpenclawUserContext {
