@@ -158,7 +158,7 @@ describe('agentic-chat.store delete flow', () => {
         attachmentContext: '.\nUploaded files available in this session:\n- spec.pdf: https://example.test/spec.pdf',
         requestBodyJson: JSON.stringify({
           agentId: 'cathy',
-          sessionKey: 'openclaw-work-request-v2:cathy:request-1',
+          sessionKey: 'agentic-work-request-v2:cathy:request-1',
           model: 'openclaw/cathy',
           messages: [{role: 'system', content: 'TITLE: Example'}],
         }),
@@ -168,7 +168,7 @@ describe('agentic-chat.store delete flow', () => {
         attachmentsIncluded: true,
         attachmentDetails: [{name: 'spec.pdf', url: 'https://example.test/spec.pdf'}],
         constructedAt: new Date('2026-06-16T12:00:00Z'),
-        openclawResponsePreview: 'Updated the request.',
+        agenticResponsePreview: 'Updated the request.',
         metadata: {
           agentId: 'cathy',
           requestId: 'request-1',

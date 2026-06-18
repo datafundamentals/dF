@@ -153,7 +153,20 @@ service firebase.storage {
     }
 
     /**
-     * OpenClaw chat file uploads — one folder per conversation
+     * Agentic chat file uploads — one folder per conversation
+     * Path: uploads/agentic/{conversationId}/{fileId}
+     */
+    match /uploads/agentic/{conversationId}/{fileId} {
+      allow read: if isAuthenticated();
+
+      allow write: if isAuthenticated()
+                   && isWithinSizeLimit(200 * 1024 * 1024); // 200MB
+
+      allow delete: if isAuthenticated();
+    }
+
+    /**
+     * Legacy OpenClaw chat file uploads kept for backward compatibility
      * Path: uploads/openclaw/{conversationId}/{fileId}
      */
     match /uploads/openclaw/{conversationId}/{fileId} {

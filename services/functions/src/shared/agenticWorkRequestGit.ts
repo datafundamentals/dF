@@ -47,17 +47,17 @@ export function loadAgenticWorkRequestGitConfig(
   env: NodeJS.ProcessEnv = process.env
 ): AgenticWorkRequestGitConfig | null {
   const DEFAULT_REPO = 'R2D4agent/workRequest';
-  const repo = env.OPENCLAW_WORK_REQUEST_GIT_REPO?.trim() || DEFAULT_REPO;
+  const repo = env.AGENTIC_WORK_REQUEST_GIT_REPO?.trim() || DEFAULT_REPO;
   if (!repo) {
     return null;
   }
 
   return {
     repo,
-    branch: env.OPENCLAW_WORK_REQUEST_GIT_BRANCH?.trim() || DEFAULT_BRANCH,
-    docsDir: trimSlashes(env.OPENCLAW_WORK_REQUEST_GIT_DOCS_DIR?.trim() || DEFAULT_DOCS_DIR),
-    authorName: env.OPENCLAW_WORK_REQUEST_GIT_AUTHOR_NAME?.trim() || DEFAULT_AUTHOR_NAME,
-    authorEmail: env.OPENCLAW_WORK_REQUEST_GIT_AUTHOR_EMAIL?.trim() || DEFAULT_AUTHOR_EMAIL,
+    branch: env.AGENTIC_WORK_REQUEST_GIT_BRANCH?.trim() || DEFAULT_BRANCH,
+    docsDir: trimSlashes(env.AGENTIC_WORK_REQUEST_GIT_DOCS_DIR?.trim() || DEFAULT_DOCS_DIR),
+    authorName: env.AGENTIC_WORK_REQUEST_GIT_AUTHOR_NAME?.trim() || DEFAULT_AUTHOR_NAME,
+    authorEmail: env.AGENTIC_WORK_REQUEST_GIT_AUTHOR_EMAIL?.trim() || DEFAULT_AUTHOR_EMAIL,
   };
 }
 
@@ -84,7 +84,7 @@ export async function persistAgenticWorkRequestTurnToGit(
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= PUSH_RETRY_COUNT; attempt++) {
-    const workspaceDir = await mkdtemp(join(tmpdir(), 'openclaw-wr-git-'));
+    const workspaceDir = await mkdtemp(join(tmpdir(), 'agentic-wr-git-'));
     try {
       await git(['clone', '--depth', '1', '--branch', config.branch, repoUrl, workspaceDir], {
         authToken: input.token,
@@ -188,7 +188,7 @@ function buildWorkRequestDocPath(docsDir: string, requestId: string): string {
 }
 
 function buildCommitMessage(requestId: string, messageId: string, turnNumber: number): string {
-  return `Persist OpenClaw work request ${requestId} turn ${turnNumber} (${messageId})`;
+  return `Persist Agentic work request ${requestId} turn ${turnNumber} (${messageId})`;
 }
 
 function trimSlashes(value: string): string {

@@ -51,7 +51,7 @@ export const deleteAgenticConversation = functions.https.onCall<
     const deletedFileCount = await deleteConversationStorageFiles(requestId);
     await conversationRef.delete();
 
-    functions.logger.info('Deleted OpenClaw conversation', {
+    functions.logger.info('Deleted Agentic conversation', {
       requestId,
       userId: request.auth.uid,
       deletedMessageCount,
@@ -69,7 +69,7 @@ export const deleteAgenticConversation = functions.https.onCall<
 async function deleteConversationStorageFiles(requestId: string): Promise<number> {
   try {
     const bucket = getStorage().bucket();
-    const prefix = `uploads/openclaw/${requestId}/`;
+    const prefix = `uploads/agentic/${requestId}/`;
     const [files] = await bucket.getFiles({prefix});
     if (files.length === 0) return 0;
     await Promise.all(files.map((file) => file.delete()));

@@ -1,21 +1,21 @@
 /**
  * Firestore Trigger: onAgenticMessage
  *
- * Bridges the df-agent-work-request app to the OpenClaw agent API.
+ * Bridges the df-agent-work-request app to the Agentic agent API.
  *
  * Trigger: onWrite on agentWorkRequests/{requestId}/messages/{messageId}
  * Condition: role === 'user' and status === 'pending' (idempotency guard)
  *
  * Request ids are stable from conversation creation through acceptance and are
- * reused as the OpenClaw session key in the request body. This path is
+ * reused as the Agentic session key in the request body. This path is
  * Cathy-only, so the session key is namespaced accordingly. We also send the
- * agent id in the request body because OpenClaw routing on this endpoint is
+ * agent id in the request body because Agentic routing on this endpoint is
  * body-driven, and the session-key header has been observed to override
  * routing incorrectly.
  *
  * Operation sequence:
  * 1. Update triggered document: status → 'processing'
- * 2. POST to OpenClaw /v1/chat/completions (synchronous — blocks until reply)
+ * 2. POST to Agentic /v1/chat/completions (synchronous — blocks until reply)
  * 3. Write new assistant message doc (status: 'complete')
  * 4. Update original user doc: status → 'complete'
  *
@@ -33,15 +33,15 @@ import {
   persistAgenticWorkRequestTurnToGit,
 } from '../shared/agenticWorkRequestGit.js';
 
-const OPENCLAW_BASE_URL = process.env.OPENCLAW_BASE_URL ?? '';
-const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? '';
-const OPENCLAW_ROOT_AGENT_ID = process.env.OPENCLAW_ROOT_AGENT_ID ?? 'john';
+const AGENTIC_BASE_URL = process.env.AGENTIC_BASE_URL ?? '';
+const AGENTIC_GATEWAY_TOKEN = process.env.AGENTIC_GATEWAY_TOKEN ?? '';
+const AGENTIC_ROOT_AGENT_ID = process.env.AGENTIC_ROOT_AGENT_ID ?? 'john';
 const WORK_REQUESTS_COLLECTION = 'agentWorkRequests';
 const MESSAGES_SUBCOLLECTION = 'messages';
 const PROMPT_CONTEXT_DEBUG_COLLECTION = 'promptContextDebug';
 const PROMPT_CONTEXT_DEBUG_MESSAGES_SUBCOLLECTION = 'messages';
-const OPENCLAW_WORK_REQUEST_AGENT_ID = 'cathy';
-const OPENCLAW_WORK_REQUEST_SESSION_PREFIX = 'openclaw-work-request-v2:';
+const AGENTIC_WORK_REQUEST_AGENT_ID = 'cathy';
+const AGENTIC_WORK_REQUEST_SESSION_PREFIX = 'agentic-work-request-v2:';
 const ACCEPTANCE_SIGNAL = 'This all sounds good to me';
 const ACCEPTANCE_NOTICE = [
   'This work request has been accepted and submitted.',
@@ -119,14 +119,14 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
   const messageRef = conversationRef.collection(MESSAGES_SUBCOLLECTION).doc(messageId);
   const conversationSnap = await conversationRef.get();
   
-  const agentId = (conversationSnap.get('agentId') as string | undefined) ?? OPENCLAW_WORK_REQUEST_AGENT_ID;
-  const isRoot = agentId === OPENCLAW_ROOT_AGENT_ID;
+  const agentId = (conversationSnap.get('agentId') as string | undefined) ?? AGENTIC_WORK_REQUEST_AGENT_ID;
+  const isRoot = agentId === AGENTIC_ROOT_AGENT_ID;
   
   const rawAttachments = conversationSnap.get('attachments') as AgenticAttachmentContext[] | undefined;
   const attachments = Array.isArray(rawAttachments) ? rawAttachments : [];
 
   await messageRef.update({status: 'processing'});
-  functions.logger.info('OpenClaw message processing started', {
+  functions.logger.info('Agentic message processing started', {
     ...logContext,
     agentId: isRoot ? `${agentId} (root)` : agentId,
   });
@@ -159,7 +159,7 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
       
     // The root agent uses 'root' in the session key, others use their agentId
     const sessionSegment = isRoot ? 'root' : agentId;
-    const sessionKey = `${OPENCLAW_WORK_REQUEST_SESSION_PREFIX}${sessionSegment}:${requestId}`;
+    const sessionKey = `${AGENTIC_WORK_REQUEST_SESSION_PREFIX}${sessionSegment}:${requestId}`;
     
     const currentTitle = conversationSnap.get('title') as string | undefined;
     const currentStatus = conversationSnap.get('status') as string | undefined;
@@ -188,7 +188,7 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
       .digest('hex')
       .slice(0, 16);
 
-    functions.logger.info('OpenClaw prompt prepared', {
+    functions.logger.info('Agentic prompt prepared', {
       ...logContext,
       hasTitleLabel: baseSystemContent.includes('TITLE:'),
       hasSetTitleDirective: baseSystemContent.includes('[SET_TITLE:'),
@@ -198,37 +198,38 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
     const requestBody = {
       agentId: isRoot ? '' : agentId,
       sessionKey,
+      // External API contract still requires openclaw model identifiers.
       model: isRoot ? 'openclaw' : `openclaw/${agentId}`,
       messages: [systemContext, ...historyMessages, {role: 'user', content}],
     };
     const model = requestBody.model;
     const requestBodyJson = JSON.stringify(requestBody);
 
-    const endpoint = `${OPENCLAW_BASE_URL}/v1/chat/completions`;
+    const endpoint = `${AGENTIC_BASE_URL}/v1/chat/completions`;
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENCLAW_GATEWAY_TOKEN}`,
+        'Authorization': `Bearer ${AGENTIC_GATEWAY_TOKEN}`,
       },
       body: requestBodyJson,
     });
 
     if (!response.ok) {
       const body = await response.text();
-      throw new Error(`OpenClaw chat completions error: ${response.status} ${body}`);
+      throw new Error(`Agentic chat completions error: ${response.status} ${body}`);
     }
 
     const result = await response.json() as ChatCompletionResponse;
     const rawAssistantContent = result.choices?.[0]?.message?.content ?? '';
 
     if (!rawAssistantContent) {
-      throw new Error('Empty assistant reply from OpenClaw');
+      throw new Error('Empty assistant reply from Agentic');
     }
 
     const titleMatch = rawAssistantContent.match(/\[SET_TITLE:\s*(.*?)\]/);
     const extractedSetTitle = titleMatch?.[1]?.trim() || null;
-    functions.logger.info('OpenClaw assistant reply metadata', {
+    functions.logger.info('Agentic assistant reply metadata', {
       ...logContext,
       hasSetTitleTag: Boolean(titleMatch),
       extractedSetTitle,
@@ -245,7 +246,7 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
       finalAssistantContent = rawAssistantContent.replace(/\[SET_TITLE:.*?\]/g, '').trim();
     }
 
-    functions.logger.info('OpenClaw assistant content transform', {
+    functions.logger.info('Agentic assistant content transform', {
       ...logContext,
       hadSetTitleTag: Boolean(titleMatch),
       transformed: finalAssistantContent !== rawAssistantContent,
@@ -285,13 +286,13 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
         assistantMessageId: assistantMessageRef.id,
         correlationId,
         eventId: event.id ?? null,
-        agentId: isRoot ? OPENCLAW_ROOT_AGENT_ID : agentId,
+        agentId: isRoot ? AGENTIC_ROOT_AGENT_ID : agentId,
         sessionKey,
         model,
         turnNumber,
         timestampIso: new Date().toISOString(),
       },
-      openclawResponsePreview: finalAssistantContent.slice(0, 500),
+      agenticResponsePreview: finalAssistantContent.slice(0, 500),
     });
 
     const accepted = rawAssistantContent.includes(ACCEPTANCE_SIGNAL);
@@ -311,7 +312,7 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
       }
     }
 
-    functions.logger.info('OpenClaw title decision', {
+    functions.logger.info('Agentic title decision', {
       ...logContext,
       accepted,
       hasSetTitleTag: Boolean(titleMatch),
@@ -341,13 +342,13 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
 
     await Promise.all(writes);
 
-    functions.logger.info('OpenClaw message processed successfully', {
+    functions.logger.info('Agentic message processed successfully', {
       ...logContext,
       accepted,
     });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    functions.logger.error('Failed to process OpenClaw message', {
+    functions.logger.error('Failed to process Agentic message', {
       ...logContext,
       error: errorMsg,
       detail: error,
@@ -374,7 +375,7 @@ async function writePromptContextDebug(input: {
   turnNumber: number;
   attachments: AgenticAttachmentContext[];
   metadata: PromptContextDebugMetadata;
-  openclawResponsePreview: string;
+  agenticResponsePreview: string;
 }): Promise<void> {
   await input.db
     .collection(PROMPT_CONTEXT_DEBUG_COLLECTION)
@@ -395,7 +396,7 @@ async function writePromptContextDebug(input: {
         url: attachment.url,
       })),
       constructedAt: FieldValue.serverTimestamp(),
-      openclawResponsePreview: input.openclawResponsePreview,
+      agenticResponsePreview: input.agenticResponsePreview,
       metadata: input.metadata,
     });
 }
@@ -412,13 +413,13 @@ async function persistWorkRequestTurn(input: {
 }): Promise<void> {
   const gitConfig = loadAgenticWorkRequestGitConfig();
   if (!gitConfig) {
-    functions.logger.info('OpenClaw work request git persistence skipped: repo config not set', input.logContext);
+    functions.logger.info('Agentic work request git persistence skipped: repo config not set', input.logContext);
     return;
   }
 
   const token = githubPat.value();
   if (!token) {
-    throw new Error('GITHUB_PAT secret is required when OPENCLAW_WORK_REQUEST_GIT_REPO is configured');
+    throw new Error('GITHUB_PAT secret is required when AGENTIC_WORK_REQUEST_GIT_REPO is configured');
   }
 
   const gitResult = await persistAgenticWorkRequestTurnToGit({
@@ -445,7 +446,7 @@ async function persistWorkRequestTurn(input: {
     }, {merge: true});
   }
 
-  functions.logger.info('OpenClaw work request turn persisted to git', {
+  functions.logger.info('Agentic work request turn persisted to git', {
     ...input.logContext,
     turnNumber: input.turnNumber,
     gitRepo: gitResult?.repo ?? gitConfig.repo,

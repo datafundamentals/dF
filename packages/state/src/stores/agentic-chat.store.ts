@@ -83,7 +83,7 @@ interface AgenticPromptDebugData {
   attachmentsIncluded: boolean;
   attachmentDetails: AgenticPromptDebugAttachment[];
   constructedAt: Date | null;
-  openclawResponsePreview: string;
+  agenticResponsePreview: string;
   metadata: Record<string, unknown>;
 }
 
@@ -151,7 +151,7 @@ export const agenticConversationsState = computed<FirestoreCollectionState<Agent
   pageSize: 100,
   hasNextPage: false,
   hasPreviousPage: false,
-  queryDescription: 'OpenClaw work requests for current user',
+  queryDescription: 'Agentic work requests for current user',
 }));
 
 export const agenticActiveConversationState = computed(() => {
@@ -208,7 +208,7 @@ interface AgenticDemoState {
 
 export function __setAgenticDemoState(state: AgenticDemoState): void {
   if (initializedDb || initializedUserId || unsubscribeConversations || unsubscribeMessages) {
-    throw new Error('Cannot set OpenClaw demo state after the store has been initialized.');
+    throw new Error('Cannot set Agentic demo state after the store has been initialized.');
   }
 
   demoMode = true;
@@ -362,7 +362,7 @@ export async function createAgenticConversation(
   userContext: AgenticUserContext = initializedUserContext
 ): Promise<string> {
   if (!initializedDb || !initializedUserId) {
-    throw new Error('OpenClaw chat store is not initialized.');
+    throw new Error('Agentic chat store is not initialized.');
   }
 
   const conversationRef = doc(collection(initializedDb, WORK_REQUESTS_COLLECTION));
@@ -398,7 +398,7 @@ export function switchAgenticConversation(requestId: string): void {
 
 export async function renameAgenticConversation(requestId: string, title: string): Promise<void> {
   if (!initializedDb) {
-    throw new Error('OpenClaw chat store is not initialized.');
+    throw new Error('Agentic chat store is not initialized.');
   }
 
   const normalizedTitle = title.trim();
@@ -412,7 +412,7 @@ export async function addAttachmentToAgenticConversation(
   attachment: Attachment
 ): Promise<void> {
   if (!initializedDb) {
-    throw new Error('OpenClaw chat store is not initialized.');
+    throw new Error('Agentic chat store is not initialized.');
   }
 
   await updateDoc(doc(initializedDb, WORK_REQUESTS_COLLECTION, conversationId), {
@@ -425,7 +425,7 @@ export async function removeAttachmentFromAgenticConversation(
   path: string
 ): Promise<void> {
   if (!initializedDb) {
-    throw new Error('OpenClaw chat store is not initialized.');
+    throw new Error('Agentic chat store is not initialized.');
   }
 
   const ref = doc(initializedDb, WORK_REQUESTS_COLLECTION, conversationId);
@@ -461,7 +461,7 @@ export async function deleteAgenticConversation(requestId: string): Promise<void
   }
 
   if (!initializedFunctions) {
-    throw new Error('OpenClaw chat store is not initialized.');
+    throw new Error('Agentic chat store is not initialized.');
   }
 
   deleteStatusSignal.set('deleting');
@@ -747,7 +747,7 @@ function normalizePromptDebugData(raw: DocumentData): AgenticPromptDebugData {
     attachmentsIncluded: raw.attachmentsIncluded === true,
     attachmentDetails: normalizePromptDebugAttachments(raw.attachmentDetails),
     constructedAt: normalizeTimestamp(raw.constructedAt),
-    openclawResponsePreview: String(raw.openclawResponsePreview ?? ''),
+    agenticResponsePreview: String(raw.agenticResponsePreview ?? ''),
     metadata: isRecord(raw.metadata) ? raw.metadata : {},
   };
 }

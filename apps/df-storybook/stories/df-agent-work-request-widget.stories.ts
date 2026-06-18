@@ -109,7 +109,7 @@ const demoSignedOutState: FirebaseAuthState = {
 };
 
 const meta: Meta<AgenticStoryArgs> = {
-  title: 'Firebase/OpenClaw Chat Widget',
+  title: 'Firebase/Agentic Chat Widget',
   component: 'df-agent-work-request-widget',
   args: {
     heading: 'Chatty Cathy Work Request System',
@@ -126,9 +126,9 @@ const meta: Meta<AgenticStoryArgs> = {
     docs: {
       description: {
         component: `
-Shared OpenClaw work-request widget.
+Shared Agentic work-request widget.
 
-These stories use auth and OpenClaw demo-state helpers so the widget can be reviewed visually without connecting to Firebase or the OpenClaw backend.
+These stories use auth and Agentic demo-state helpers so the widget can be reviewed visually without connecting to Firebase or the Agentic backend.
         `,
       },
     },

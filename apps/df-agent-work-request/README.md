@@ -1,6 +1,6 @@
 # @df/df-agent-work-request
 
-OpenClaw work-request app shell for local development of the shared `df-agent-work-request-widget`.
+Agentic work-request app shell for local development of the shared `df-agent-work-request-widget`.
 
 ## Scripts
 

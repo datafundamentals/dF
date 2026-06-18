@@ -9,7 +9,7 @@ export interface Attachment {
 }
 
 /**
- * Normalized OpenClaw message used by UI components. Timestamps are converted
+ * Normalized Agentic message used by UI components. Timestamps are converted
  * to native `Date` instances for ergonomic rendering and comparisons.
  */
 export interface AgenticMessage extends FirestoreDocument {
@@ -26,7 +26,7 @@ export interface AgenticMessage extends FirestoreDocument {
 }
 
 /**
- * Lifecycle status for OpenClaw message submissions from the client perspective.
+ * Lifecycle status for Agentic message submissions from the client perspective.
  */
 export type AgenticSendStatus = 'idle' | 'sending' | 'error';
 export type AgenticDeleteStatus = 'idle' | 'deleting' | 'error';

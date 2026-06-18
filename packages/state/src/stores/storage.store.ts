@@ -417,7 +417,7 @@ export const storageDeleteState = computed<StorageDeleteState>(() => ({
  * Prefer this over `deleteFile` in UI components — it updates `storageDeleteState`
  * so widgets can react without managing their own loading/error state.
  *
- * @param path - Full storage path (e.g. 'uploads/openclaw/abc123/file.pdf')
+ * @param path - Full storage path (e.g. 'uploads/agentic/abc123/file.pdf')
  */
 export async function deleteFileWithStatus(path: string): Promise<void> {
   deleteStatusSignal.set('deleting');

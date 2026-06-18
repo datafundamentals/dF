@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_SUPERUSER_EMAIL: string;
-  readonly VITE_OPENCLAW_AGENTS: string;
+  readonly VITE_AGENTIC_AGENTS: string;
   readonly VITE_USE_EMULATOR: string;
   readonly VITE_FIREBASE_API_KEY: string;
   readonly VITE_FIREBASE_AUTH_DOMAIN: string;

@@ -662,7 +662,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   @property({type: String, attribute: 'superuser-email'}) declare superuserEmail: string;
 
   /** Comma-separated list of agent names shown in the super user agent selector. */
-  @property({type: String, attribute: 'openclaw-agents'}) declare openclawAgents: string;
+  @property({type: String, attribute: 'agentic-agents'}) declare agenticAgents: string;
 
   /** Temporary markdown content displayed below the chat submit button. */
   @property({type: String, attribute: 'status-markdown-content'}) declare statusMarkdownContent: string;
@@ -699,7 +699,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     this.headerImgRight = '';
     this.submitOnEnter = true;
     this.superuserEmail = '';
-    this.openclawAgents = '';
+    this.agenticAgents = '';
     this.statusMarkdownContent = '';
   }
 
@@ -985,8 +985,8 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private renderSuperUserPanel() {
-    const agents = this.openclawAgents
-      ? this.openclawAgents.split(',').map((a) => a.trim()).filter(Boolean)
+    const agents = this.agenticAgents
+      ? this.agenticAgents.split(',').map((a) => a.trim()).filter(Boolean)
       : [];
 
     return html`
@@ -1057,10 +1057,10 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
           <section class="panel-card" aria-label="Upload files">
             <p class="panel-card-title">Upload Files</p>
             <df-upload-link
-              id="openclaw-upload-link"
-              resourcePageType="openclaw"
+              id="agentic-upload-link"
+              resourcePageType="agentic"
               resourceLinkType="file"
-              .uploadSubpath=${'openclaw/' + conversation.id}
+              .uploadSubpath=${'agentic/' + conversation.id}
               label="Upload Files"
               @upload-link-gather-url=${this.handleFileUploaded}
             ></df-upload-link>
@@ -1072,8 +1072,8 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
               ? this.renderFileDeleteConfirmation()
               : nothing}
             <df-file-list
-              id="openclaw-file-list"
-              .directory=${'uploads/openclaw/' + conversation.id}
+              id="agentic-file-list"
+              .directory=${'uploads/agentic/' + conversation.id}
               showDelete
               @file-delete=${this.handleFileDeleteRequest}
             ></df-file-list>
@@ -1304,7 +1304,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private async refreshFileList(): Promise<void> {
-    const fileList = this.shadowRoot?.querySelector('#openclaw-file-list') as HTMLElement & {
+    const fileList = this.shadowRoot?.querySelector('#agentic-file-list') as HTMLElement & {
       refresh?: () => Promise<void>;
     };
     if (fileList && typeof fileList.refresh === 'function') {
@@ -1341,7 +1341,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     } catch (error) {
       console.error('[df-agent-work-request-widget] refreshFileList failed after upload:', error);
     }
-    const uploadLink = this.shadowRoot?.querySelector('#openclaw-upload-link') as HTMLElement & {
+    const uploadLink = this.shadowRoot?.querySelector('#agentic-upload-link') as HTMLElement & {
       reset?: () => void;
     };
     if (uploadLink && typeof uploadLink.reset === 'function') {
@@ -1505,7 +1505,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private resolveConversationSubtitle(conversation: AgenticConversation | null): string {
     if (!conversation) {
-      return 'I am here to help you compose an OpenClaw system request.';
+      return 'I am here to help you compose an Agentic system request.';
     }
 
     const prefix = conversation.status === 'accepted'

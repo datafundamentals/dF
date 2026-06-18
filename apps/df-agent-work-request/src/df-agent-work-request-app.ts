@@ -51,7 +51,7 @@ export class DfAgentWorkRequestApp extends SignalWatcher(LitElement) {
           header-img-left=${CHATTY_CATHY_IMG}
           header-img-right=${LOBSTER_IMG}
           superuser-email=${import.meta.env.VITE_SUPERUSER_EMAIL ?? ''}
-          openclaw-agents=${import.meta.env.VITE_OPENCLAW_AGENTS ?? ''}
+          agentic-agents=${import.meta.env.VITE_AGENTIC_AGENTS ?? ''}
           .statusMarkdownContent=${statusMarkdownContent}
           @df-agent-work-request-widget-error=${this.handleWidgetError}
         ></df-agent-work-request-widget>
