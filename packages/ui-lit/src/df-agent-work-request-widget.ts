@@ -345,6 +345,17 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       color: rgba(51, 65, 85, 0.78);
     }
 
+    .header-subtitle-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 12px;
+    }
+
+    .header-subtitle-row md-outlined-button {
+      --md-outlined-button-container-height: 36px;
+    }
+
     .panel-meta {
       display: grid;
       gap: 14px;
@@ -491,6 +502,76 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       display: grid;
       gap: 12px;
       align-content: start;
+    }
+
+    .conversation-details {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(241, 245, 249, 0.82), rgba(255, 255, 255, 0.92)),
+        var(--md-sys-color-surface-container-lowest, #ffffff);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .conversation-details-editor {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(241, 245, 249, 0.82), rgba(255, 255, 255, 0.92)),
+        var(--md-sys-color-surface-container-lowest, #ffffff);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .conversation-details-editor md-outlined-text-field {
+      width: 100%;
+    }
+
+    .conversation-details-editor-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .conversation-details-title {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(15, 23, 42, 0.56);
+    }
+
+    .conversation-details-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px 16px;
+    }
+
+    .conversation-details-item {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .conversation-details-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(79, 70, 229, 0.9);
+    }
+
+    .conversation-details-value {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: rgba(15, 23, 42, 0.88);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .message {
@@ -689,6 +770,11 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   @state() private preReqIntent = '';
   @state() private preReqSummary = '';
   @state() private preReqMetrics = '';
+  @state() private isEditingConversationDetails = false;
+  @state() private detailsTitleDraft = '';
+  @state() private detailsIntentDraft = '';
+  @state() private detailsSummaryDraft = '';
+  @state() private detailsMetricsDraft = '';
   private pendingDeleteFile: StorageFileMetadata | null = null;
 
   private previousConversationId: string | null = null;
@@ -774,8 +860,17 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
                       ${this.resolveConversationTitle(activeConversation)}
                     </h1>
                   `}
-              <div class="header-subtitle">
-                ${this.resolveConversationSubtitle(activeConversation)}
+              <div class="header-subtitle-row">
+                <div class="header-subtitle">
+                  ${this.resolveConversationSubtitle(activeConversation)}
+                </div>
+                ${activeConversation
+                  ? html`
+                      <md-outlined-button @click=${this.toggleConversationDetailsEdit}>
+                        ${this.isEditingConversationDetails ? 'Cancel Editing' : 'Edit Conversation Details'}
+                      </md-outlined-button>
+                    `
+                  : nothing}
               </div>
             </div>
 
@@ -791,7 +886,11 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
           ${showPreReqs ? this.renderPreReqsForm() : nothing}
 
           <div class="chat-content" ?hidden=${showPreReqs}>
-            ${activeConversation ? this.renderPanelMeta(activeConversation) : nothing}
+            ${activeConversation
+              ? this.isEditingConversationDetails
+                ? this.renderConversationDetailsEditor(activeConversation)
+                : this.renderConversationDetails(activeConversation)
+              : nothing}
 
             <section class="messages" aria-label="Chat messages">
               ${this.renderMessages(chatState, activeConversation)}
@@ -843,6 +942,8 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
                   `
                 : nothing}
             </section>
+
+            ${activeConversation ? this.renderPanelMeta(activeConversation) : nothing}
           </div>
         </section>
       </div>
@@ -893,6 +994,93 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     `;
   }
 
+  private renderConversationDetails(conversation: AgenticConversation) {
+    const title = this.resolveConversationTitle(conversation);
+    const intent = conversation.intent?.trim() || 'Not provided.';
+    const summary = conversation.summary?.trim() || 'Not provided.';
+    const metrics = conversation.metrics?.trim() || 'Not provided.';
+
+    return html`
+      <section class="conversation-details" aria-label="Conversation details">
+        <h2 class="conversation-details-title">Conversation Details</h2>
+        <div class="conversation-details-grid">
+          <div class="conversation-details-item">
+            <span class="conversation-details-label">Title</span>
+            <p class="conversation-details-value">${title}</p>
+          </div>
+
+          <div class="conversation-details-item">
+            <span class="conversation-details-label">Intent</span>
+            <p class="conversation-details-value">${intent}</p>
+          </div>
+
+          <div class="conversation-details-item conversation-details-item--full">
+            <span class="conversation-details-label">Summary</span>
+            <p class="conversation-details-value">${summary}</p>
+          </div>
+
+          <div class="conversation-details-item conversation-details-item--full">
+            <span class="conversation-details-label">Metrics</span>
+            <p class="conversation-details-value">${metrics}</p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  private renderConversationDetailsEditor(conversation: AgenticConversation) {
+    const canSave = this.detailsTitleDraft.trim().length > 0
+      && this.detailsIntentDraft.trim().length > 0
+      && this.detailsSummaryDraft.trim().length > 0
+      && this.detailsMetricsDraft.trim().length > 0;
+
+    return html`
+      <section class="conversation-details-editor" aria-label="Edit conversation details">
+        <h2 class="conversation-details-title">Edit Conversation Details</h2>
+
+        <md-outlined-text-field
+          label="Title"
+          .value=${this.detailsTitleDraft}
+          @input=${(event: Event) => { this.detailsTitleDraft = (event.target as HTMLInputElement).value; }}
+        ></md-outlined-text-field>
+
+        <md-outlined-text-field
+          label="Intent"
+          type="textarea"
+          rows="3"
+          .value=${this.detailsIntentDraft}
+          @input=${(event: Event) => { this.detailsIntentDraft = (event.target as HTMLInputElement).value; }}
+        ></md-outlined-text-field>
+
+        <md-outlined-text-field
+          label="Summary"
+          type="textarea"
+          rows="3"
+          .value=${this.detailsSummaryDraft}
+          @input=${(event: Event) => { this.detailsSummaryDraft = (event.target as HTMLInputElement).value; }}
+        ></md-outlined-text-field>
+
+        <md-outlined-text-field
+          label="Metrics"
+          type="textarea"
+          rows="3"
+          .value=${this.detailsMetricsDraft}
+          @input=${(event: Event) => { this.detailsMetricsDraft = (event.target as HTMLInputElement).value; }}
+        ></md-outlined-text-field>
+
+        <div class="conversation-details-editor-actions">
+          <md-text-button @click=${this.cancelConversationDetailsEdit}>Cancel</md-text-button>
+          <md-filled-button
+            ?disabled=${!canSave}
+            @click=${() => this.saveConversationDetails(conversation.id)}
+          >
+            Save Details
+          </md-filled-button>
+        </div>
+      </section>
+    `;
+  }
+
   override updated(): void {
     const chatState = agenticChatMessagesState.get();
     const activeState = agenticActiveConversationState.get();
@@ -904,6 +1092,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     if (activeConversationId !== this.previousConversationId) {
       this.previousConversationId = activeConversationId;
       this.isRenamingTitle = false;
+      this.isEditingConversationDetails = false;
       this.titleDraft = this.resolveConversationTitle(activeConversation);
       this.previousConversationStatus = activeConversationStatus;
       // Reset turn accumulation when switching conversations
@@ -1501,6 +1690,49 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     this.isRenamingTitle = true;
   }
 
+  private toggleConversationDetailsEdit = (): void => {
+    if (this.isEditingConversationDetails) {
+      this.cancelConversationDetailsEdit();
+      return;
+    }
+
+    const activeConversation = agenticActiveConversationState.get().conversation;
+    if (!activeConversation) {
+      return;
+    }
+
+    this.detailsTitleDraft = this.resolveConversationTitle(activeConversation);
+    this.detailsIntentDraft = activeConversation.intent ?? '';
+    this.detailsSummaryDraft = activeConversation.summary ?? '';
+    this.detailsMetricsDraft = activeConversation.metrics ?? '';
+    this.isRenamingTitle = false;
+    this.isEditingConversationDetails = true;
+  };
+
+  private cancelConversationDetailsEdit = (): void => {
+    this.isEditingConversationDetails = false;
+  };
+
+  private async saveConversationDetails(requestId: string): Promise<void> {
+    try {
+      await updateAgenticConversationPreReqs(requestId, {
+        title: this.detailsTitleDraft,
+        intent: this.detailsIntentDraft,
+        summary: this.detailsSummaryDraft,
+        metrics: this.detailsMetricsDraft,
+      });
+      this.isEditingConversationDetails = false;
+    } catch (error) {
+      this.dispatchEvent(
+        new CustomEvent('df-agent-work-request-widget-error', {
+          detail: {error},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
+  }
+
   private cancelRename(): void {
     this.isRenamingTitle = false;
   }
@@ -1602,13 +1834,11 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       return 'I am here to help you compose an Agentic system request.';
     }
 
-    const prefix = conversation.status === 'accepted'
+    return conversation.status === 'accepted'
       ? 'Accepted work request.'
       : this.isSuperUser.get()
         ? `${this.resolveAssistantName(conversation)} is helping you compose a work request.`
         : 'An agent is helping you compose a work request.';
-
-    return `${prefix} Click the title to rename this conversation.`;
   }
 
   private resolveStatusLabel(
