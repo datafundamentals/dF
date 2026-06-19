@@ -2,9 +2,9 @@
 
 ## Executive Summary
 
-This ticket sets up the event-loop a bit more completely by defining 4 field as pre-requirements even before the more detailed chat proceeds.
+This ticket sets up the event-loop of df-agent-work-request a bit more completely by defining 4 field as pre-requirements even before the more detailed aspects of the chat proceeds.
 
-Title, intent, summary and metrics are the 4 fields added.
+Title, intent, summary and metrics are the 4 fields added. The user must fill in these fields before any of the rest of the page is visible.
 
 ---
 
@@ -23,8 +23,9 @@ Title, intent, summary and metrics are the 4 fields added.
 
 ## Functional Requirements
 
-`interface OpenclawConversation extends FirestoreDocument` is expanded to add 3 additional fields below title - `intent, summary, and metrics`
+`interface AgenticConversation extends FirestoreDocument` is expanded to add 3 additional fields below title - `intent, summary, and metrics` As a side note - interface OpenclawConversation extends FirestoreDocument is defined in 4 separate files which seems to break all norms of DRY software but that is a separate issue? Is this legit?
 
-When the df-openclaw
+When the df-agent-work-request app creates a new conversation - everything below the title field should be in it's own div and hidden, until all four fields are filled out and submitted.
 
-- 
+The title field should remain a text, intent, summary and metrics should be textarea types. The submit button should be disabled until all four fields are filled out to some reasonable degree.
+
