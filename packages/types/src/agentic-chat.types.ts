@@ -37,6 +37,9 @@ export interface AgenticConversation extends FirestoreDocument {
   userId: string;
   agentId: string;
   title: string | null;
+  intent: string | null;
+  summary: string | null;
+  metrics: string | null;
   status: AgenticConversationStatus;
   createdAt: Date | null;
   lastMessageAt: Date | null;

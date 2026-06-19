@@ -10,8 +10,12 @@ import {
   type Functions,
 } from '@df/firebase/functions';
 import type {FirestoreCollectionState} from '@df/types/firebase-firestore.types';
-import type {FirestoreDocument} from '@df/types/firebase-firestore.types';
-import type {Attachment, AgenticDeleteStatus} from '@df/types/agentic-chat.types';
+import type {
+  Attachment,
+  AgenticDeleteStatus,
+  AgenticConversation as AgenticConversationBase,
+  AgenticMessage as AgenticMessageBase,
+} from '@df/types/agentic-chat.types';
 import type {AgenticSendStatus} from '@df/types';
 import {
   Timestamp,
@@ -41,23 +45,22 @@ const PROMPT_CONTEXT_DEBUG_COLLECTION = 'promptContextDebug';
 const PROMPT_CONTEXT_DEBUG_MESSAGES_SUBCOLLECTION = 'messages';
 const DEFAULT_AGENT_ID = 'cathy';
 
-interface AgenticMessage extends FirestoreDocument {
-  role: 'user' | 'assistant';
-  content: string;
-  createdAt: Date | null;
-  sessionId: string;
-  status: 'pending' | 'processing' | 'complete' | 'error';
+/**
+ * Store-local view of a message. Extends the canonical `AgenticMessage` from
+ * `@df/types` with `turnNumber`, an internal bookkeeping field the store tracks
+ * but does not expose to consumers.
+ */
+interface AgenticMessage extends AgenticMessageBase {
   turnNumber?: number;
 }
 
-interface AgenticConversation extends FirestoreDocument {
-  userId: string;
-  agentId: string;
-  title: string | null;
-  status: 'active' | 'accepted';
-  createdAt: Date | null;
-  lastMessageAt: Date | null;
-  workRequestMarkdown?: string;
+/**
+ * Store-local view of a conversation. Extends the canonical `AgenticConversation`
+ * from `@df/types` with fields only the store needs:
+ * - `attachments` is required here (the store always normalizes to an array)
+ * - `currentTurnNumber` is internal bookkeeping, not part of the shared contract
+ */
+interface AgenticConversation extends AgenticConversationBase {
   attachments: Attachment[];
   currentTurnNumber: number;
 }
@@ -373,6 +376,9 @@ export async function createAgenticConversation(
     userId: initializedUserId,
     agentId: agentId ?? DEFAULT_AGENT_ID,
     title: null,
+    intent: null,
+    summary: null,
+    metrics: null,
     status: 'active',
     workRequestMarkdown,
     userEmail: normalizedUserContext.userEmail ?? '',
@@ -404,6 +410,22 @@ export async function renameAgenticConversation(requestId: string, title: string
   const normalizedTitle = title.trim();
   await updateDoc(doc(initializedDb, WORK_REQUESTS_COLLECTION, requestId), {
     title: normalizedTitle.length ? normalizedTitle : null,
+  });
+}
+
+export async function updateAgenticConversationPreReqs(
+  requestId: string,
+  preReqs: {title: string; intent: string; summary: string; metrics: string}
+): Promise<void> {
+  if (!initializedDb) {
+    throw new Error('Agentic chat store is not initialized.');
+  }
+
+  await updateDoc(doc(initializedDb, WORK_REQUESTS_COLLECTION, requestId), {
+    title: preReqs.title.trim() || null,
+    intent: preReqs.intent.trim(),
+    summary: preReqs.summary.trim(),
+    metrics: preReqs.metrics.trim(),
   });
 }
 
@@ -707,6 +729,9 @@ function normalizeConversationDoc(
     userId: String(data.userId ?? ''),
     agentId: String(data.agentId ?? DEFAULT_AGENT_ID),
     title: typeof data.title === 'string' ? data.title : null,
+    intent: typeof data.intent === 'string' ? data.intent : null,
+    summary: typeof data.summary === 'string' ? data.summary : null,
+    metrics: typeof data.metrics === 'string' ? data.metrics : null,
     status: data.status === 'accepted' ? 'accepted' : 'active',
     createdAt: normalizeTimestamp(data.createdAt),
     lastMessageAt: normalizeTimestamp(data.lastMessageAt),

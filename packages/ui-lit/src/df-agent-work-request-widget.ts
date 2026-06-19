@@ -42,9 +42,10 @@ import {
   startAgenticRealtime,
   stopAgenticRealtime,
   switchAgenticConversation,
+  updateAgenticConversationPreReqs,
 } from '@df/state';
 import type {FirestoreRequestState} from '@df/types/firebase-firestore.types';
-import type {Attachment, AgenticSendStatus} from '@df/types';
+import type {Attachment, AgenticSendStatus, AgenticConversation, AgenticMessage} from '@df/types';
 import type {StorageFileMetadata} from '@df/types/firebase-storage.types';
 import './df-work-request-preview.js';
 import './df-upload-link.js';
@@ -53,26 +54,6 @@ import './firebase/df-file-list.js';
 const ENTER_KEY = 'Enter';
 const SPACE_KEY = ' ';
 const STATUS_BASE_URL = 'https://hbb-a1.web.app/WR_Status/';
-
-interface AgenticConversation {
-  id: string;
-  userId: string;
-  agentId: string;
-  title: string | null;
-  status: 'active' | 'accepted';
-  createdAt: Date | null;
-  lastMessageAt: Date | null;
-  workRequestMarkdown?: string;
-}
-
-interface AgenticMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  createdAt: Date | null;
-  sessionId: string;
-  status: 'pending' | 'processing' | 'complete' | 'error';
-}
 
 @customElement('df-agent-work-request-widget')
 export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
@@ -642,6 +623,32 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       text-align: center;
     }
 
+    .pre-reqs-form {
+      display: grid;
+      gap: 16px;
+      padding: 24px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .pre-reqs-form md-outlined-text-field {
+      width: 100%;
+    }
+
+    .pre-reqs-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .chat-content {
+      display: contents;
+    }
+
+    .chat-content[hidden] {
+      display: none;
+    }
+
     @media (max-width: 980px) {
       .layout {
         grid-template-columns: 1fr;
@@ -678,6 +685,10 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   @state() private deleteConfirmationConversationId: string | null = null;
   @state() private fileDeleteConfirmationPath: string | null = null;
   @state() private showPromptDebugPanel = false;
+  @state() private preReqTitle = '';
+  @state() private preReqIntent = '';
+  @state() private preReqSummary = '';
+  @state() private preReqMetrics = '';
   private pendingDeleteFile: StorageFileMetadata | null = null;
 
   private previousConversationId: string | null = null;
@@ -775,58 +786,64 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
             />` : nothing}
           </header>
           ${this.isSuperUser.get() ? this.renderSuperUserPanel() : nothing}
-          ${activeConversation ? this.renderPanelMeta(activeConversation) : nothing}
+          ${activeConversation && this.needsPreReqs(activeConversation)
+            ? this.renderPreReqsForm()
+            : nothing}
 
-          <section class="messages" aria-label="Chat messages">
-            ${this.renderMessages(chatState, activeConversation)}
-          </section>
+          <div class="chat-content" ?hidden=${!!activeConversation && this.needsPreReqs(activeConversation)}>
+            ${activeConversation ? this.renderPanelMeta(activeConversation) : nothing}
 
-          <section class="composer" aria-label="Send a message">
-            <md-outlined-text-field
-              label="Message"
-              type="textarea"
-              .value=${this.messageText}
-              @input=${this.handleInput}
-              @keydown=${this.handleKeydown}
-              ?disabled=${disabled}
-              .maxLength=${2000}
-              .charCounter=${true}>
-            </md-outlined-text-field>
+            <section class="messages" aria-label="Chat messages">
+              ${this.renderMessages(chatState, activeConversation)}
+            </section>
 
-            <div class="composer-actions">
-              <span class="composer-status" ?hidden=${!statusLabel} role="status">
-                ${sendState.status === 'sending'
-                  ? html`<md-circular-progress indeterminate></md-circular-progress>`
-                  : nothing}
-                <span class=${sendState.status === 'error' ? 'composer-status--error' : ''}>${statusLabel}</span>
-              </span>
+            <section class="composer" aria-label="Send a message">
+              <md-outlined-text-field
+                label="Message"
+                type="textarea"
+                .value=${this.messageText}
+                @input=${this.handleInput}
+                @keydown=${this.handleKeydown}
+                ?disabled=${disabled}
+                .maxLength=${2000}
+                .charCounter=${true}>
+              </md-outlined-text-field>
 
-              <md-filled-button ?disabled=${!this.canSubmit(disabled, activeConversationId)} @click=${this.submitMessage}>
-                Send
-              </md-filled-button>
-            </div>
-            ${deleteState.status === 'error' && deleteState.error
-              ? html`<span class="composer-status composer-status--error" role="status">${deleteState.error}</span>`
-              : nothing}
-            ${activeConversationId
-              ? html`
-                  <md-outlined-button @click=${this.togglePromptDebugPanel}>
-                    ${this.showPromptDebugPanel ? 'Hide Prompt Context' : 'Toggle Prompt Context'}
-                  </md-outlined-button>
-                `
-              : nothing}
-            ${this.showPromptDebugPanel && activeConversationId
-              ? this.renderPromptDebugPanel()
-              : nothing}
-            ${this.effectiveMarkdownContent.trim()
-              ? html`
-                  <df-work-request-preview
-                    class="status-markdown"
-                    .markdownContent=${this.effectiveMarkdownContent}
-                  ></df-work-request-preview>
-                `
-              : nothing}
-          </section>
+              <div class="composer-actions">
+                <span class="composer-status" ?hidden=${!statusLabel} role="status">
+                  ${sendState.status === 'sending'
+                    ? html`<md-circular-progress indeterminate></md-circular-progress>`
+                    : nothing}
+                  <span class=${sendState.status === 'error' ? 'composer-status--error' : ''}>${statusLabel}</span>
+                </span>
+
+                <md-filled-button ?disabled=${!this.canSubmit(disabled, activeConversationId)} @click=${this.submitMessage}>
+                  Send
+                </md-filled-button>
+              </div>
+              ${deleteState.status === 'error' && deleteState.error
+                ? html`<span class="composer-status composer-status--error" role="status">${deleteState.error}</span>`
+                : nothing}
+              ${activeConversationId
+                ? html`
+                    <md-outlined-button @click=${this.togglePromptDebugPanel}>
+                      ${this.showPromptDebugPanel ? 'Hide Prompt Context' : 'Toggle Prompt Context'}
+                    </md-outlined-button>
+                  `
+                : nothing}
+              ${this.showPromptDebugPanel && activeConversationId
+                ? this.renderPromptDebugPanel()
+                : nothing}
+              ${this.effectiveMarkdownContent.trim()
+                ? html`
+                    <df-work-request-preview
+                      class="status-markdown"
+                      .markdownContent=${this.effectiveMarkdownContent}
+                    ></df-work-request-preview>
+                  `
+                : nothing}
+            </section>
+          </div>
         </section>
       </div>
 
@@ -1150,7 +1167,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     }
 
     // Show only the last Cathy reply (turn-based UI — see ticket 0610c)
-    const messages = chatState.documents as unknown as AgenticMessage[];
+    const messages: readonly AgenticMessage[] = chatState.documents;
     const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
     if (!lastAssistant) {
       return html`<div class="empty-state">Waiting for a reply…</div>`;
@@ -1197,6 +1214,79 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
         </md-outlined-text-field>
       </section>
     `;
+  }
+
+  private needsPreReqs(conversation: AgenticConversation): boolean {
+    return conversation.intent === null;
+  }
+
+  private renderPreReqsForm() {
+    const canSubmit = this.preReqTitle.trim().length > 0
+      && this.preReqIntent.trim().length > 0
+      && this.preReqSummary.trim().length > 0
+      && this.preReqMetrics.trim().length > 0;
+
+    return html`
+      <section class="pre-reqs-form" aria-label="Work request pre-requirements">
+        <md-outlined-text-field
+          label="Title"
+          .value=${this.preReqTitle}
+          @input=${(e: Event) => { this.preReqTitle = (e.target as HTMLInputElement).value; }}
+        ></md-outlined-text-field>
+        <md-outlined-text-field
+          label="Intent"
+          type="textarea"
+          rows="3"
+          .value=${this.preReqIntent}
+          @input=${(e: Event) => { this.preReqIntent = (e.target as HTMLInputElement).value; }}
+        ></md-outlined-text-field>
+        <md-outlined-text-field
+          label="Summary"
+          type="textarea"
+          rows="3"
+          .value=${this.preReqSummary}
+          @input=${(e: Event) => { this.preReqSummary = (e.target as HTMLInputElement).value; }}
+        ></md-outlined-text-field>
+        <md-outlined-text-field
+          label="Metrics"
+          type="textarea"
+          rows="3"
+          .value=${this.preReqMetrics}
+          @input=${(e: Event) => { this.preReqMetrics = (e.target as HTMLInputElement).value; }}
+        ></md-outlined-text-field>
+        <div class="pre-reqs-actions">
+          <md-filled-button ?disabled=${!canSubmit} @click=${this.submitPreReqs}>
+            Start Conversation
+          </md-filled-button>
+        </div>
+      </section>
+    `;
+  }
+
+  private async submitPreReqs(): Promise<void> {
+    const activeConversationId = agenticActiveConversationState.get().activeConversationId;
+    if (!activeConversationId) return;
+
+    try {
+      await updateAgenticConversationPreReqs(activeConversationId, {
+        title: this.preReqTitle,
+        intent: this.preReqIntent,
+        summary: this.preReqSummary,
+        metrics: this.preReqMetrics,
+      });
+      this.preReqTitle = '';
+      this.preReqIntent = '';
+      this.preReqSummary = '';
+      this.preReqMetrics = '';
+    } catch (error) {
+      this.dispatchEvent(
+        new CustomEvent('df-agent-work-request-widget-error', {
+          detail: {error},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
   }
 
   private async handleCreateConversation(): Promise<void> {
@@ -1466,7 +1556,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       return;
     }
 
-    const messages = agenticChatMessagesState.get().documents as unknown as AgenticMessage[];
+    const messages: readonly AgenticMessage[] = agenticChatMessagesState.get().documents;
     const lastCathy = [...messages].reverse().find((m) => m.role === 'assistant');
     this.appendTurn(trimmed, lastCathy?.content ?? null);
 
