@@ -123,7 +123,6 @@ let initializedFunctions: Functions | null = null;
 let initializedUserId: string | null = null;
 let initializedUserContext: AgenticUserContext = {};
 let defaultWorkRequestMarkdown = '';
-let ensureConversationPromise: Promise<string | null> | null = null;
 let demoMode = false;
 
 interface AgenticUserContext {
@@ -290,7 +289,6 @@ export function __resetAgenticStoreForTests(): void {
   initializedUserId = null;
   initializedUserContext = {};
   defaultWorkRequestMarkdown = '';
-  ensureConversationPromise = null;
   turnCountSignal.set(0);
   demoMode = false;
 }
@@ -359,10 +357,18 @@ export function stopAgenticRealtime(): void {
   isMessagesListeningSignal.set(false);
 }
 
+interface AgenticPreReqs {
+  title: string;
+  intent: string;
+  summary: string;
+  metrics: string;
+}
+
 export async function createAgenticConversation(
   agentId?: string,
   workRequestMarkdown = defaultWorkRequestMarkdown,
-  userContext: AgenticUserContext = initializedUserContext
+  userContext: AgenticUserContext = initializedUserContext,
+  preReqs?: AgenticPreReqs
 ): Promise<string> {
   if (!initializedDb || !initializedUserId) {
     throw new Error('Agentic chat store is not initialized.');
@@ -375,10 +381,10 @@ export async function createAgenticConversation(
   await setDoc(conversationRef, {
     userId: initializedUserId,
     agentId: agentId ?? DEFAULT_AGENT_ID,
-    title: null,
-    intent: null,
-    summary: null,
-    metrics: null,
+    title: preReqs?.title.trim() || null,
+    intent: preReqs?.intent.trim() ?? null,
+    summary: preReqs?.summary.trim() ?? null,
+    metrics: preReqs?.metrics.trim() ?? null,
     status: 'active',
     workRequestMarkdown,
     userEmail: normalizedUserContext.userEmail ?? '',
@@ -575,19 +581,7 @@ function startConversationsListener(db: Firestore, userId: string): void {
 
       const activeConversationId = activeConversationIdSignal.get();
       if (!docs.length) {
-        if (!ensureConversationPromise) {
-          ensureConversationPromise = createAgenticConversation()
-            .then((requestId) => requestId)
-            .catch((error) => {
-              const message = error instanceof Error ? error.message : 'Failed to create conversation.';
-              conversationsErrorSignal.set(message);
-              conversationsStatusSignal.set('error');
-              return null;
-            })
-            .finally(() => {
-              ensureConversationPromise = null;
-            });
-        }
+        activeConversationIdSignal.set(null);
         return;
       }
 

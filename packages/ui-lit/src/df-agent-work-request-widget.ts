@@ -738,6 +738,8 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     const activeConversation = activeState.conversation;
     const disabled = sendState.status === 'sending' || deleteState.status === 'deleting';
     const statusLabel = this.resolveStatusLabel(chatState.status, sendState.status, sendState.error);
+    const showPreReqs = conversationsState.status === 'ready' && conversationsState.documents.length === 0
+      || (!!activeConversation && this.needsPreReqs(activeConversation));
 
     return html`
       <div class=${this.isSidebarCollapsed ? 'layout layout--collapsed' : 'layout'} role="region" aria-live="polite">
@@ -786,11 +788,9 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
             />` : nothing}
           </header>
           ${this.isSuperUser.get() ? this.renderSuperUserPanel() : nothing}
-          ${activeConversation && this.needsPreReqs(activeConversation)
-            ? this.renderPreReqsForm()
-            : nothing}
+          ${showPreReqs ? this.renderPreReqsForm() : nothing}
 
-          <div class="chat-content" ?hidden=${!!activeConversation && this.needsPreReqs(activeConversation)}>
+          <div class="chat-content" ?hidden=${showPreReqs}>
             ${activeConversation ? this.renderPanelMeta(activeConversation) : nothing}
 
             <section class="messages" aria-label="Chat messages">
@@ -1264,16 +1264,20 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private async submitPreReqs(): Promise<void> {
+    const preReqs = {
+      title: this.preReqTitle,
+      intent: this.preReqIntent,
+      summary: this.preReqSummary,
+      metrics: this.preReqMetrics,
+    };
     const activeConversationId = agenticActiveConversationState.get().activeConversationId;
-    if (!activeConversationId) return;
 
     try {
-      await updateAgenticConversationPreReqs(activeConversationId, {
-        title: this.preReqTitle,
-        intent: this.preReqIntent,
-        summary: this.preReqSummary,
-        metrics: this.preReqMetrics,
-      });
+      if (activeConversationId) {
+        await updateAgenticConversationPreReqs(activeConversationId, preReqs);
+      } else {
+        await createAgenticConversation(undefined, this.statusMarkdownContent, this.resolveUserContext(), preReqs);
+      }
       this.preReqTitle = '';
       this.preReqIntent = '';
       this.preReqSummary = '';

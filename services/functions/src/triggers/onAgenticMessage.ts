@@ -161,10 +161,13 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
     const sessionSegment = isRoot ? 'root' : agentId;
     const sessionKey = `${AGENTIC_WORK_REQUEST_SESSION_PREFIX}${sessionSegment}:${requestId}`;
     
-    const currentTitle = conversationSnap.get('title') as string | undefined;
     const currentStatus = conversationSnap.get('status') as string | undefined;
     const userFirstName = resolveUserFirstName(data, conversationSnap);
     const userEmail = typeof data.userEmail === 'string' ? data.userEmail : readStringField(conversationSnap, 'userEmail');
+    const conversationTitle = readStringField(conversationSnap, 'title') || '(none)';
+    const conversationIntent = readStringField(conversationSnap, 'intent') || '(none)';
+    const conversationSummary = readStringField(conversationSnap, 'summary') || '(none)';
+    const conversationMetrics = readStringField(conversationSnap, 'metrics') || '(none)';
     const baseSystemContent = [
       `User: ${userFirstName || '(unknown)'}`,
       `Email: ${userEmail || '(unknown)'}`,
@@ -172,6 +175,10 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
       `Attachments: ${attachments.length}`,
       `Agent: ${agentId}`,
       `Request ID: ${requestId}`,
+      `Title: ${conversationTitle}`,
+      `Intent: ${conversationIntent}`,
+      `Summary: ${conversationSummary}`,
+      `Metrics: ${conversationMetrics}`,
     ].join('\n');
     const attachmentContext = attachments.length > 0
       ? `\n\nUploaded files available in this session:\n${attachments
@@ -190,8 +197,6 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
 
     functions.logger.info('Agentic prompt prepared', {
       ...logContext,
-      hasTitleLabel: baseSystemContent.includes('TITLE:'),
-      hasSetTitleDirective: baseSystemContent.includes('[SET_TITLE:'),
       promptFingerprint,
     });
 
@@ -227,34 +232,13 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
       throw new Error('Empty assistant reply from Agentic');
     }
 
-    const titleMatch = rawAssistantContent.match(/\[SET_TITLE:\s*(.*?)\]/);
-    const extractedSetTitle = titleMatch?.[1]?.trim() || null;
     functions.logger.info('Agentic assistant reply metadata', {
       ...logContext,
-      hasSetTitleTag: Boolean(titleMatch),
-      extractedSetTitle,
       rawAssistantLength: rawAssistantContent.length,
       rawAssistantPreview: rawAssistantContent.slice(0, 280),
     });
 
-    functions.logger.info('Got assistant reply', {...logContext});
-
-    let finalAssistantContent = rawAssistantContent;
-    let agentProvidedTitle: string | undefined;
-    if (titleMatch) {
-      agentProvidedTitle = titleMatch[1].trim() || undefined;
-      finalAssistantContent = rawAssistantContent.replace(/\[SET_TITLE:.*?\]/g, '').trim();
-    }
-
-    functions.logger.info('Agentic assistant content transform', {
-      ...logContext,
-      hadSetTitleTag: Boolean(titleMatch),
-      transformed: finalAssistantContent !== rawAssistantContent,
-      beforeLength: rawAssistantContent.length,
-      afterLength: finalAssistantContent.length,
-      extractedSetTitle: agentProvidedTitle ?? null,
-      transformedPreview: finalAssistantContent.slice(0, 280),
-    });
+    const finalAssistantContent = rawAssistantContent;
 
     const assistantMessageRef = conversationRef.collection(MESSAGES_SUBCOLLECTION).doc();
     await assistantMessageRef.set({
@@ -301,24 +285,13 @@ export const onAgenticMessage = functions.firestore.onDocumentWritten({
       lastMessageAt: FieldValue.serverTimestamp(),
     };
 
-    if (agentProvidedTitle) {
-      conversationUpdate.title = agentProvidedTitle;
-    }
-
     if (accepted && currentStatus !== 'accepted') {
       conversationUpdate.status = 'accepted';
-      if (!agentProvidedTitle && (typeof currentTitle !== 'string' || !currentTitle.trim())) {
-        conversationUpdate.title = buildConversationTitle(historyMessages, content);
-      }
     }
 
-    functions.logger.info('Agentic title decision', {
+    functions.logger.info('Agentic acceptance decision', {
       ...logContext,
       accepted,
-      hasSetTitleTag: Boolean(titleMatch),
-      agentProvidedTitle: agentProvidedTitle ?? null,
-      currentTitle: typeof currentTitle === 'string' ? currentTitle : null,
-      nextTitle: typeof conversationUpdate.title === 'string' ? conversationUpdate.title : null,
       statusTransition: accepted && currentStatus !== 'accepted' ? 'active->accepted' : 'no-change',
     });
 
@@ -474,27 +447,3 @@ function readStringField(snapshot: DocumentSnapshot, field: string): string {
   return typeof value === 'string' ? value : '';
 }
 
-function buildConversationTitle(
-  historyMessages: Array<{role: string; content: string}>,
-  latestUserContent: string
-): string {
-  const combined = [...historyMessages, {role: 'user', content: latestUserContent}]
-    .filter((message) => message.role === 'user')
-    .map((message) => message.content.trim())
-    .filter(Boolean)
-    .join(' ');
-
-  const normalized = combined
-    .replace(/\s+/g, ' ')
-    .replace(/[^\p{L}\p{N}\s-]/gu, '')
-    .trim();
-
-  if (!normalized) {
-    return 'Untitled';
-  }
-
-  const words = normalized.split(' ').slice(0, 8);
-  const title = words.join(' ');
-
-  return title.length > 72 ? `${title.slice(0, 69).trimEnd()}...` : title;
-}

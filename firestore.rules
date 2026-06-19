@@ -265,11 +265,14 @@ service cloud.firestore {
 
       allow create: if isAuthenticated()
         && request.auth.uid == request.resource.data.userId
-        && hasRequiredFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber'])
-        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber', 'workRequestMarkdown', 'userEmail', 'userFirstName'])
+        && hasRequiredFields(['userId', 'agentId', 'title', 'intent', 'summary', 'metrics', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber'])
+        && hasOnlyAllowedFields(['userId', 'agentId', 'title', 'intent', 'summary', 'metrics', 'status', 'createdAt', 'lastMessageAt', 'currentTurnNumber', 'workRequestMarkdown', 'userEmail', 'userFirstName'])
         && request.resource.data.agentId is string
         && request.resource.data.agentId.size() > 0
         && (request.resource.data.title is string || request.resource.data.title == null)
+        && (request.resource.data.intent is string || request.resource.data.intent == null)
+        && (request.resource.data.summary is string || request.resource.data.summary == null)
+        && (request.resource.data.metrics is string || request.resource.data.metrics == null)
         && request.resource.data.status == 'active'
         && (!request.resource.data.keys().hasAny(['userEmail']) || request.resource.data.userEmail is string)
         && (!request.resource.data.keys().hasAny(['userFirstName']) || request.resource.data.userFirstName is string)
@@ -286,6 +289,9 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.status in ['active', 'accepted']
         && (request.resource.data.title is string || request.resource.data.title == null)
+        && (request.resource.data.intent is string || request.resource.data.intent == null)
+        && (request.resource.data.summary is string || request.resource.data.summary == null)
+        && (request.resource.data.metrics is string || request.resource.data.metrics == null)
         && (request.resource.data.lastMessageAt is timestamp || request.resource.data.lastMessageAt == null);
 
       allow delete: if false;
