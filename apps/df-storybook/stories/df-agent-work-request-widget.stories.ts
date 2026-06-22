@@ -151,7 +151,7 @@ function prepareAuth(authenticated: boolean): void {
   __setAuthDemoState(authenticated ? demoAuthenticatedState : demoSignedOutState);
 }
 
-function prepareAgenticState(acceptedConversation: boolean): void {
+function prepareAgenticState(acceptedConversation: boolean, reviewFeedback: string | null = null): void {
   __resetAgenticDemoState();
   __setAgenticDemoState({
     conversations: baseConversations.map((conversation, index) => index === 0
@@ -165,6 +165,24 @@ function prepareAgenticState(acceptedConversation: boolean): void {
     conversationsStatus: 'ready',
     messagesStatus: 'ready',
     sendStatus: 'idle',
+    preReqReview: {
+      status: reviewFeedback ? 'rejected' : 'idle',
+      feedback: reviewFeedback,
+    },
+  });
+}
+
+function preparePreReqReviewState(feedback: string | null = null): void {
+  __resetAgenticDemoState();
+  __setAgenticDemoState({
+    conversations: [],
+    messages: [],
+    conversationsStatus: 'ready',
+    messagesStatus: 'idle',
+    preReqReview: {
+      status: feedback ? 'rejected' : 'idle',
+      feedback,
+    },
   });
 }
 
@@ -188,4 +206,41 @@ export const AcceptedRequest: Story = {
     acceptedConversation: true,
   },
   render: renderWidget,
+};
+
+export const PrerequisiteReview: Story = {
+  render: (args) => {
+    prepareAuth(args.authenticated);
+    preparePreReqReviewState();
+    return html`<df-agent-work-request-widget .heading=${args.heading}></df-agent-work-request-widget>`;
+  },
+};
+
+export const PrerequisiteReviewRejected: Story = {
+  render: (args) => {
+    prepareAuth(args.authenticated);
+    preparePreReqReviewState('Summary contains “bicycle”. Remove it and submit the fields again.');
+    return html`<df-agent-work-request-widget .heading=${args.heading}></df-agent-work-request-widget>`;
+  },
+};
+
+export const EditReviewRejected: Story = {
+  render: renderWidget,
+  play: async ({canvasElement}) => {
+    const widget = canvasElement.querySelector('df-agent-work-request-widget');
+    if (!widget) {
+      throw new Error('Work request widget was not rendered');
+    }
+
+    await widget.updateComplete;
+    const editButton = [...(widget.shadowRoot?.querySelectorAll('md-outlined-button') ?? [])]
+      .find((button) => button.textContent?.includes('Edit Conversation Details'));
+    if (!(editButton instanceof HTMLElement)) {
+      throw new Error('Edit Conversation Details button was not rendered');
+    }
+
+    editButton.click();
+    prepareAgenticState(false, 'Summary contains “bicycle”. Remove it and submit the edits again.');
+    await widget.updateComplete;
+  },
 };

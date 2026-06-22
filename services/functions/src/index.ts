@@ -31,6 +31,7 @@ export {helloWorld} from './callable/helloWorld.js';
 export {createTodoAdvanced} from './callable/createTodoAdvanced.js';
 export {getUserList} from './callable/getUserList.js';
 export {deleteAgenticConversation} from './callable/deleteAgenticConversation.js';
+export {reviewAgenticWorkRequestPreReqs} from './callable/reviewAgenticWorkRequestPreReqs.js';
 export {updateUserRole, setUserRoles} from './callable/updateUserRole.js';
 
 /**

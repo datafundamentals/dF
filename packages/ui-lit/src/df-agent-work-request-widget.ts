@@ -25,6 +25,7 @@ import {customElement, property, state} from 'lit/decorators.js';
 import '@material/web/switch/switch.js';
 import {
   addAttachmentToAgenticConversation,
+  clearAgenticPreReqReview,
   createAgenticConversation,
   deleteFileWithStatus,
   deleteAgenticConversation,
@@ -37,7 +38,8 @@ import {
   agenticChatSendState,
   agenticConversationsState,
   agenticDebugPromptState,
-  renameAgenticConversation,
+  agenticPreReqReviewState,
+  reviewAgenticPreReqs,
   sendAgenticMessage,
   startAgenticRealtime,
   stopAgenticRealtime,
@@ -722,6 +724,14 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       justify-content: flex-end;
     }
 
+    .pre-reqs-feedback {
+      margin: 0;
+      color: var(--md-sys-color-error, #ba1a1a);
+      font: var(--md-sys-typescale-body-medium, 400 0.875rem/1.25rem system-ui);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
     .chat-content {
       display: contents;
     }
@@ -1029,18 +1039,23 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private renderConversationDetailsEditor(conversation: AgenticConversation) {
+    const reviewState = agenticPreReqReviewState.get();
+    const isReviewing = reviewState.status === 'reviewing';
     const canSave = this.detailsTitleDraft.trim().length > 0
       && this.detailsIntentDraft.trim().length > 0
       && this.detailsSummaryDraft.trim().length > 0
-      && this.detailsMetricsDraft.trim().length > 0;
+      && this.detailsMetricsDraft.trim().length > 0
+      && !isReviewing;
 
     return html`
       <section class="conversation-details-editor" aria-label="Edit conversation details">
         <h2 class="conversation-details-title">Edit Conversation Details</h2>
+        ${this.renderPreReqReviewFeedback()}
 
         <md-outlined-text-field
           label="Title"
           .value=${this.detailsTitleDraft}
+          ?disabled=${isReviewing}
           @input=${(event: Event) => { this.detailsTitleDraft = (event.target as HTMLInputElement).value; }}
         ></md-outlined-text-field>
 
@@ -1049,6 +1064,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
           type="textarea"
           rows="3"
           .value=${this.detailsIntentDraft}
+          ?disabled=${isReviewing}
           @input=${(event: Event) => { this.detailsIntentDraft = (event.target as HTMLInputElement).value; }}
         ></md-outlined-text-field>
 
@@ -1057,6 +1073,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
           type="textarea"
           rows="3"
           .value=${this.detailsSummaryDraft}
+          ?disabled=${isReviewing}
           @input=${(event: Event) => { this.detailsSummaryDraft = (event.target as HTMLInputElement).value; }}
         ></md-outlined-text-field>
 
@@ -1065,6 +1082,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
           type="textarea"
           rows="3"
           .value=${this.detailsMetricsDraft}
+          ?disabled=${isReviewing}
           @input=${(event: Event) => { this.detailsMetricsDraft = (event.target as HTMLInputElement).value; }}
         ></md-outlined-text-field>
 
@@ -1074,7 +1092,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
             ?disabled=${!canSave}
             @click=${() => this.saveConversationDetails(conversation.id)}
           >
-            Save Details
+            ${isReviewing ? 'Waiting for John…' : 'Submit Edits for Review'}
           </md-filled-button>
         </div>
       </section>
@@ -1175,16 +1193,24 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private renderRenameForm(conversation: AgenticConversation) {
+    const reviewState = agenticPreReqReviewState.get();
+    const isReviewing = reviewState.status === 'reviewing';
+    const canSave = this.titleDraft.trim().length > 0 && !isReviewing;
+
     return html`
       <div class="rename-form">
+        ${this.renderPreReqReviewFeedback()}
         <md-outlined-text-field
           label="Conversation title"
           .value=${this.titleDraft}
+          ?disabled=${isReviewing}
           @input=${this.handleRenameInput}
           @keydown=${this.handleRenameKeydown}
         >
         </md-outlined-text-field>
-        <md-filled-button @click=${() => this.saveRename(conversation.id)}>Save</md-filled-button>
+        <md-filled-button ?disabled=${!canSave} @click=${() => this.saveRename(conversation.id)}>
+          ${isReviewing ? 'Waiting for John…' : 'Submit Title for Review'}
+        </md-filled-button>
         <md-text-button @click=${this.cancelRename}>Cancel</md-text-button>
       </div>
     `;
@@ -1410,16 +1436,21 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private renderPreReqsForm() {
+    const reviewState = agenticPreReqReviewState.get();
+    const isReviewing = reviewState.status === 'reviewing';
     const canSubmit = this.preReqTitle.trim().length > 0
       && this.preReqIntent.trim().length > 0
       && this.preReqSummary.trim().length > 0
-      && this.preReqMetrics.trim().length > 0;
+      && this.preReqMetrics.trim().length > 0
+      && !isReviewing;
 
     return html`
       <section class="pre-reqs-form" aria-label="Work request pre-requirements">
+        ${this.renderPreReqReviewFeedback()}
         <md-outlined-text-field
           label="Title"
           .value=${this.preReqTitle}
+          ?disabled=${isReviewing}
           @input=${(e: Event) => { this.preReqTitle = (e.target as HTMLInputElement).value; }}
         ></md-outlined-text-field>
         <md-outlined-text-field
@@ -1427,6 +1458,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
           type="textarea"
           rows="3"
           .value=${this.preReqIntent}
+          ?disabled=${isReviewing}
           @input=${(e: Event) => { this.preReqIntent = (e.target as HTMLInputElement).value; }}
         ></md-outlined-text-field>
         <md-outlined-text-field
@@ -1434,6 +1466,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
           type="textarea"
           rows="3"
           .value=${this.preReqSummary}
+          ?disabled=${isReviewing}
           @input=${(e: Event) => { this.preReqSummary = (e.target as HTMLInputElement).value; }}
         ></md-outlined-text-field>
         <md-outlined-text-field
@@ -1441,15 +1474,23 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
           type="textarea"
           rows="3"
           .value=${this.preReqMetrics}
+          ?disabled=${isReviewing}
           @input=${(e: Event) => { this.preReqMetrics = (e.target as HTMLInputElement).value; }}
         ></md-outlined-text-field>
         <div class="pre-reqs-actions">
           <md-filled-button ?disabled=${!canSubmit} @click=${this.submitPreReqs}>
-            Start Conversation
+            ${isReviewing ? 'Waiting for John…' : 'Submit for Review'}
           </md-filled-button>
         </div>
       </section>
     `;
+  }
+
+  private renderPreReqReviewFeedback() {
+    const feedback = agenticPreReqReviewState.get().feedback;
+    return feedback
+      ? html`<p class="pre-reqs-feedback" role="alert">${feedback}</p>`
+      : nothing;
   }
 
   private async submitPreReqs(): Promise<void> {
@@ -1462,6 +1503,11 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     const activeConversationId = agenticActiveConversationState.get().activeConversationId;
 
     try {
+      const approved = await reviewAgenticPreReqs(preReqs);
+      if (!approved) {
+        return;
+      }
+
       if (activeConversationId) {
         await updateAgenticConversationPreReqs(activeConversationId, preReqs);
       } else {
@@ -1484,6 +1530,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async handleCreateConversation(): Promise<void> {
     try {
+      clearAgenticPreReqReview();
       await createAgenticConversation(undefined, this.statusMarkdownContent, this.resolveUserContext());
     } catch (error) {
       this.dispatchEvent(
@@ -1498,6 +1545,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
 
   private async createFollowupConversationAfterAcceptance(): Promise<void> {
     try {
+      clearAgenticPreReqReview();
       await createAgenticConversation(undefined, this.statusMarkdownContent, this.resolveUserContext());
     } catch (error) {
       this.dispatchEvent(
@@ -1670,6 +1718,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private handleConversationSelect(requestId: string): void {
+    clearAgenticPreReqReview();
     switchAgenticConversation(requestId);
   }
 
@@ -1686,6 +1735,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
       return;
     }
 
+    clearAgenticPreReqReview();
     this.titleDraft = this.resolveConversationTitle(activeConversation);
     this.isRenamingTitle = true;
   }
@@ -1705,22 +1755,31 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
     this.detailsIntentDraft = activeConversation.intent ?? '';
     this.detailsSummaryDraft = activeConversation.summary ?? '';
     this.detailsMetricsDraft = activeConversation.metrics ?? '';
+    clearAgenticPreReqReview();
     this.isRenamingTitle = false;
     this.isEditingConversationDetails = true;
   };
 
   private cancelConversationDetailsEdit = (): void => {
+    clearAgenticPreReqReview();
     this.isEditingConversationDetails = false;
   };
 
   private async saveConversationDetails(requestId: string): Promise<void> {
+    const preReqs = {
+      title: this.detailsTitleDraft,
+      intent: this.detailsIntentDraft,
+      summary: this.detailsSummaryDraft,
+      metrics: this.detailsMetricsDraft,
+    };
+
     try {
-      await updateAgenticConversationPreReqs(requestId, {
-        title: this.detailsTitleDraft,
-        intent: this.detailsIntentDraft,
-        summary: this.detailsSummaryDraft,
-        metrics: this.detailsMetricsDraft,
-      });
+      const approved = await reviewAgenticPreReqs(preReqs);
+      if (!approved) {
+        return;
+      }
+
+      await updateAgenticConversationPreReqs(requestId, preReqs);
       this.isEditingConversationDetails = false;
     } catch (error) {
       this.dispatchEvent(
@@ -1734,6 +1793,7 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private cancelRename(): void {
+    clearAgenticPreReqReview();
     this.isRenamingTitle = false;
   }
 
@@ -1753,8 +1813,29 @@ export class DfAgentWorkRequestWidget extends SignalWatcher(LitElement) {
   }
 
   private async saveRename(requestId: string): Promise<void> {
+    const activeConversation = agenticActiveConversationState.get().conversation;
+    if (
+      !activeConversation
+      || !this.titleDraft.trim()
+      || agenticPreReqReviewState.get().status === 'reviewing'
+    ) {
+      return;
+    }
+
+    const preReqs = {
+      title: this.titleDraft,
+      intent: activeConversation.intent ?? '',
+      summary: activeConversation.summary ?? '',
+      metrics: activeConversation.metrics ?? '',
+    };
+
     try {
-      await renameAgenticConversation(requestId, this.titleDraft);
+      const approved = await reviewAgenticPreReqs(preReqs);
+      if (!approved) {
+        return;
+      }
+
+      await updateAgenticConversationPreReqs(requestId, preReqs);
       this.isRenamingTitle = false;
     } catch (error) {
       this.dispatchEvent(

@@ -15,6 +15,11 @@ import type {
   AgenticDeleteStatus,
   AgenticConversation as AgenticConversationBase,
   AgenticMessage as AgenticMessageBase,
+  AgenticPreReqReviewErrorDetails,
+  AgenticPreReqs,
+  AgenticPreReqReviewResponse,
+  AgenticPreReqReviewState as AgenticPreReqReviewStateConfig,
+  AgenticPreReqReviewStatus,
 } from '@df/types/agentic-chat.types';
 import type {AgenticSendStatus} from '@df/types';
 import {
@@ -105,12 +110,14 @@ const promptDebugErrorSignal = signal<string | null>(null);
 const isMessagesListeningSignal = signal(false);
 const isConversationsListeningSignal = signal(false);
 
-let turnCountSignal = signal(0);
+const turnCountSignal = signal(0);
 
 const sendStatusSignal = signal<AgenticSendStatus>('idle');
 const sendErrorSignal = signal<string | null>(null);
 const deleteStatusSignal = signal<AgenticDeleteStatus>('idle');
 const deleteErrorSignal = signal<string | null>(null);
+const preReqReviewStatusSignal = signal<AgenticPreReqReviewStatus>('idle');
+const preReqReviewFeedbackSignal = signal<string | null>(null);
 const deletingConversationIdSignal = signal<string | null>(null);
 const activeConversationIdSignal = signal<string | null>(null);
 
@@ -177,6 +184,17 @@ export const agenticChatDeleteState = computed(() => ({
   deletingConversationId: deletingConversationIdSignal.get(),
 }));
 
+export const agenticPreReqReviewState = computed<AgenticPreReqReviewStateConfig>(() => ({
+  status: preReqReviewStatusSignal.get(),
+  feedback: preReqReviewFeedbackSignal.get(),
+}));
+
+/** Clears review feedback when the user abandons one review form for another. */
+export function clearAgenticPreReqReview(): void {
+  preReqReviewStatusSignal.set('idle');
+  preReqReviewFeedbackSignal.set(null);
+}
+
 export const agenticDebugPromptState = computed(() => {
   const data = promptDebugSignal.get();
 
@@ -206,6 +224,7 @@ interface AgenticDemoState {
   promptDebug?: AgenticPromptDebugData | null;
   promptDebugStatus?: 'idle' | 'loading' | 'ready' | 'error';
   promptDebugError?: string | null;
+  preReqReview?: AgenticPreReqReviewStateConfig;
 }
 
 export function __setAgenticDemoState(state: AgenticDemoState): void {
@@ -230,6 +249,8 @@ export function __setAgenticDemoState(state: AgenticDemoState): void {
   deleteStatusSignal.set(state.deleteStatus ?? 'idle');
   deleteErrorSignal.set(state.deleteError ?? null);
   deletingConversationIdSignal.set(state.deletingConversationId ?? null);
+  preReqReviewStatusSignal.set(state.preReqReview?.status ?? 'idle');
+  preReqReviewFeedbackSignal.set(state.preReqReview?.feedback ?? null);
   promptDebugSignal.set(state.promptDebug ?? null);
   promptDebugStatusSignal.set(state.promptDebugStatus ?? (state.promptDebug ? 'ready' : 'idle'));
   promptDebugErrorSignal.set(state.promptDebugError ?? null);
@@ -254,6 +275,8 @@ export function __resetAgenticDemoState(): void {
   sendErrorSignal.set(null);
   deleteStatusSignal.set('idle');
   deleteErrorSignal.set(null);
+  preReqReviewStatusSignal.set('idle');
+  preReqReviewFeedbackSignal.set(null);
   deletingConversationIdSignal.set(null);
   promptDebugSignal.set(null);
   promptDebugStatusSignal.set('idle');
@@ -278,6 +301,8 @@ export function __resetAgenticStoreForTests(): void {
   sendErrorSignal.set(null);
   deleteStatusSignal.set('idle');
   deleteErrorSignal.set(null);
+  preReqReviewStatusSignal.set('idle');
+  preReqReviewFeedbackSignal.set(null);
   deletingConversationIdSignal.set(null);
   activeConversationIdSignal.set(null);
   promptDebugSignal.set(null);
@@ -357,13 +382,6 @@ export function stopAgenticRealtime(): void {
   isMessagesListeningSignal.set(false);
 }
 
-interface AgenticPreReqs {
-  title: string;
-  intent: string;
-  summary: string;
-  metrics: string;
-}
-
 export async function createAgenticConversation(
   agentId?: string,
   workRequestMarkdown = defaultWorkRequestMarkdown,
@@ -421,7 +439,7 @@ export async function renameAgenticConversation(requestId: string, title: string
 
 export async function updateAgenticConversationPreReqs(
   requestId: string,
-  preReqs: {title: string; intent: string; summary: string; metrics: string}
+  preReqs: AgenticPreReqs
 ): Promise<void> {
   if (!initializedDb) {
     throw new Error('Agentic chat store is not initialized.');
@@ -433,6 +451,52 @@ export async function updateAgenticConversationPreReqs(
     summary: preReqs.summary.trim(),
     metrics: preReqs.metrics.trim(),
   });
+}
+
+/** Requests main-agent approval before prerequisite fields are persisted. */
+export async function reviewAgenticPreReqs(preReqs: AgenticPreReqs): Promise<boolean> {
+  if (!initializedFunctions) {
+    throw new Error('Agentic chat store is not initialized.');
+  }
+
+  preReqReviewStatusSignal.set('reviewing');
+  preReqReviewFeedbackSignal.set(null);
+
+  try {
+    const fn = callable<AgenticPreReqs, AgenticPreReqReviewResponse>(
+      initializedFunctions,
+      'reviewAgenticWorkRequestPreReqs'
+    );
+    const result = await fn(preReqs);
+    const feedback = result.data.feedback.trim();
+
+    if (!result.data.approved) {
+      preReqReviewStatusSignal.set('rejected');
+      preReqReviewFeedbackSignal.set(feedback || 'John did not approve these fields. Update them and try again.');
+      return false;
+    }
+
+    preReqReviewStatusSignal.set('idle');
+    preReqReviewFeedbackSignal.set(null);
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'John could not review these fields.';
+    const agentResponse = readAgentResponseFromReviewError(error);
+    preReqReviewStatusSignal.set('error');
+    preReqReviewFeedbackSignal.set(agentResponse === null ? message : `${message}\n\n${agentResponse}`);
+    throw error;
+  }
+}
+
+function readAgentResponseFromReviewError(error: unknown): string | null {
+  if (!error || typeof error !== 'object' || !('details' in error)) {
+    return null;
+  }
+
+  const details = error.details as Partial<AgenticPreReqReviewErrorDetails> | null;
+  return details && typeof details.agentResponse === 'string'
+    ? details.agentResponse
+    : null;
 }
 
 export async function addAttachmentToAgenticConversation(

@@ -31,6 +31,29 @@ export interface AgenticMessage extends FirestoreDocument {
 export type AgenticSendStatus = 'idle' | 'sending' | 'error';
 export type AgenticDeleteStatus = 'idle' | 'deleting' | 'error';
 
+export interface AgenticPreReqs {
+  title: string;
+  intent: string;
+  summary: string;
+  metrics: string;
+}
+
+export interface AgenticPreReqReviewResponse {
+  approved: boolean;
+  feedback: string;
+}
+
+export interface AgenticPreReqReviewErrorDetails {
+  agentResponse: string;
+}
+
+export type AgenticPreReqReviewStatus = 'idle' | 'reviewing' | 'rejected' | 'error';
+
+export interface AgenticPreReqReviewState {
+  status: AgenticPreReqReviewStatus;
+  feedback: string | null;
+}
+
 export type AgenticConversationStatus = 'active' | 'accepted';
 
 export interface AgenticConversation extends FirestoreDocument {

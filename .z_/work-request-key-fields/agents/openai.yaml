@@ -1,0 +1,4 @@
+interface:
+  display_name: "Work Request Key Fields"
+  short_description: "Approve or reject key work-request fields"
+  default_prompt: "Use $work-request-key-fields to evaluate these work-request key fields and return the required JSON decision."

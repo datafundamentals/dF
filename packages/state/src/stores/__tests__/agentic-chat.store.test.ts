@@ -20,12 +20,22 @@ import {
   __resetAgenticStoreForTests,
   __setAgenticFunctionsForTests,
   __setAgenticDemoState,
+  clearAgenticPreReqReview,
   deleteAgenticConversation,
   agenticActiveConversationState,
   agenticChatDeleteState,
   agenticConversationsState,
   agenticDebugPromptState,
+  agenticPreReqReviewState,
+  reviewAgenticPreReqs,
 } from '../agentic-chat.store';
+
+const validPreReqs = {
+  title: 'Review the deployment flow',
+  intent: 'Reduce deployment failures',
+  summary: 'Audit and improve the current deployment workflow',
+  metrics: 'All deployment checks pass',
+};
 
 function setCallableHandler<TArgs extends object = object, TResult = unknown>(
   name: string,
@@ -189,5 +199,88 @@ describe('agentic-chat.store delete flow', () => {
     expect(formatted).toContain('"agentId": "cathy"');
     expect(formatted).toContain('"model": "openclaw/cathy"');
     expect(formatted).toContain('"messages"');
+  });
+});
+
+describe('agentic-chat.store prerequisite review flow', () => {
+  beforeEach(() => {
+    __resetAgenticDemoState();
+    __resetAgenticStoreForTests();
+    resetCallableHandlers();
+    vi.clearAllMocks();
+  });
+
+  it('returns approval and restores idle state', async () => {
+    const handler = setCallableHandler('reviewAgenticWorkRequestPreReqs', async () => ({
+      data: {approved: true, feedback: 'Approved.'},
+    }));
+    __setAgenticFunctionsForTests({} as never);
+
+    await expect(reviewAgenticPreReqs(validPreReqs)).resolves.toBe(true);
+
+    expect(handler).toHaveBeenCalledWith(validPreReqs);
+    expect(agenticPreReqReviewState.get()).toEqual({status: 'idle', feedback: null});
+  });
+
+  it('preserves rejection feedback for the form', async () => {
+    setCallableHandler('reviewAgenticWorkRequestPreReqs', async () => ({
+      data: {approved: false, feedback: 'Remove bicycle from Summary and submit again.'},
+    }));
+    __setAgenticFunctionsForTests({} as never);
+
+    await expect(reviewAgenticPreReqs(validPreReqs)).resolves.toBe(false);
+
+    expect(agenticPreReqReviewState.get()).toEqual({
+      status: 'rejected',
+      feedback: 'Remove bicycle from Summary and submit again.',
+    });
+  });
+
+  it('exposes callable failures and rethrows them', async () => {
+    setCallableHandler('reviewAgenticWorkRequestPreReqs', async () => {
+      throw new Error('review unavailable');
+    });
+    __setAgenticFunctionsForTests({} as never);
+
+    await expect(reviewAgenticPreReqs(validPreReqs)).rejects.toThrow('review unavailable');
+
+    expect(agenticPreReqReviewState.get()).toEqual({
+      status: 'error',
+      feedback: 'review unavailable',
+    });
+  });
+
+  it('appends the complete agent response from callable error details', async () => {
+    const agentResponse = 'I could not load the requested skill.\nSecond line remains intact.';
+    setCallableHandler('reviewAgenticWorkRequestPreReqs', async () => {
+      throw Object.assign(new Error('John returned an invalid review response'), {
+        details: {agentResponse},
+      });
+    });
+    __setAgenticFunctionsForTests({} as never);
+
+    await expect(reviewAgenticPreReqs(validPreReqs)).rejects.toThrow(
+      'John returned an invalid review response'
+    );
+
+    expect(agenticPreReqReviewState.get()).toEqual({
+      status: 'error',
+      feedback: `John returned an invalid review response\n\n${agentResponse}`,
+    });
+  });
+
+  it('clears rejection feedback when a review form is abandoned', () => {
+    __setAgenticDemoState({
+      conversations: [],
+      messages: [],
+      preReqReview: {
+        status: 'rejected',
+        feedback: 'Update the Summary.',
+      },
+    });
+
+    clearAgenticPreReqReview();
+
+    expect(agenticPreReqReviewState.get()).toEqual({status: 'idle', feedback: null});
   });
 });

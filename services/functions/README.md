@@ -13,6 +13,7 @@ These functions were originally app-specific but have been promoted to shared st
 3. **todosExportAPI** (HTTP) - Export todos in CSV or JSON format
 4. **onTodoCreated, onTodoUpdated, onTodoDeleted** (triggers) - Firestore event handlers
 5. **cleanupExpiredTodos** (scheduled) - Automated cleanup cron job
+6. **reviewAgenticWorkRequestPreReqs** (callable) - Sends Work Request fields to the OpenClaw main agent, which applies its installed `work-request-key-fields` skill
 
 ## Usage from Apps
 
@@ -31,6 +32,9 @@ const result = await createTodo({title: 'Example', priority: 'high'});
 ```bash
 # Build functions
 pnpm --filter @df/functions-shared run build
+
+# Run function unit tests
+pnpm --filter @df/functions-shared run test
 
 # Run emulator
 cd services/functions
