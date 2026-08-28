@@ -1,19 +1,20 @@
 # Cloudflare Implementation based on df-auth-wrapper
 
 **Status:** Planning / handoff spec — not yet implemented
-**Target component name:** `standard-pioneer-auth-wrapper`
+**Target component name:** `df-standard-pioneer-auth-wrapper`
 **Target platform:** Cloudflare (Workers + Zero Trust Access), replacing Firebase Authentication
+**Lives in:** the dF monorepo, alongside `df-auth-wrapper` (see §2 — this was originally scoped for a separate repo; that framing is superseded)
 **Source of truth (read-only reference, do not modify):**
-- Component: `https://github.com/datafundamentals/dF/blob/dev/packages/ui-lit/src/df-auth-wrapper.ts`
-- Usage example: `https://github.com/datafundamentals/dF/blob/dev/apps/df-storybook/stories/df-auth-wrapper.stories.ts`
+- Component: [packages/ui-lit/src/df-auth-wrapper.ts](../../packages/ui-lit/src/df-auth-wrapper.ts)
+- Usage example: [apps/df-storybook/stories/df-auth-wrapper.stories.ts](../../apps/df-storybook/stories/df-auth-wrapper.stories.ts)
 
 ---
 
 ## 0. How to use this document
 
-This is a standalone spec. It is written for a developer working in a **different repository/environment** than the dF monorepo, so it does not assume access to that repo's `/guides` folder — the load-bearing conventions from those guides are restated inline in §2. If your target project already follows the dF conventions (Lit + TypeScript + `@lit-labs/signals` + Material Web 3), follow this spec as written. If it doesn't, treat §2 as "the shape to aim for" and adapt package names accordingly.
+This is a self-contained implementation spec for `df-standard-pioneer-auth-wrapper`, the Cloudflare-backed sibling of `df-auth-wrapper`. It assumes **zero prior Cloudflare experience** on the team, per the original brief — every Cloudflare-specific term is explained the first time it's used.
 
-This document assumes **zero prior Cloudflare experience** on the team, per the brief. Every Cloudflare-specific term is explained the first time it's used.
+It also assumes the reader has this repo checked out and can read `guides/STANDARDS_STYLES.md` and `guides/WC_SHARED_DEFAULTS.md` directly — §3 gives a condensed, load-bearing summary of those rules so this document doesn't require a second window open, but those files remain the canonical source if the two ever disagree.
 
 ---
 
@@ -21,24 +22,70 @@ This document assumes **zero prior Cloudflare experience** on the team, per the 
 
 `df-auth-wrapper` is a Lit web component that wraps arbitrary slotted HTML and shows it only after Google Sign-In, using Firebase Authentication as the backend. It is not a full security boundary by itself — it hides content client-side and stashes a bearer token for other code to use; real authorization still has to happen server-side. It works well for its purpose today.
 
-The company is migrating off Firebase and onto Cloudflare wherever reasonable. This is the **first real Cloudflare product test**: rebuild the same wrapper, `standard-pioneer-auth-wrapper`, backed by Cloudflare instead of Firebase, while changing as little else as possible.
+The company is migrating off Firebase and onto Cloudflare wherever reasonable. This is the **first real Cloudflare product test**: build a sibling wrapper, `df-standard-pioneer-auth-wrapper`, backed by Cloudflare instead of Firebase, while changing as little else as possible.
 
 ### Guardrails from the brief (carried through this whole document)
 
-1. **Don't let a Cloudflare/React-flavored ecosystem pull the codebase off Lit + Web Components + signals.** Everything Cloudflare-specific here is backend/infrastructure; the component itself stays a plain Lit element.
-2. **This is iteration 1.** Where a corner must be cut to ship something real, cut it deliberately and write it down (see §8, "Technical Debt Log") rather than silently doing the harder thing or silently doing the worse thing.
+1. **Don't let a Cloudflare/React-flavored ecosystem pull the codebase off Lit + Web Components + signals.** Everything Cloudflare-specific here is backend/infrastructure; the component itself stays a plain Lit element, built and shipped exactly the way every other `packages/ui-lit` component is.
+2. **This is iteration 1.** Where a corner must be cut to ship something real, cut it deliberately and write it down (see §9, "Technical Debt Log") rather than silently doing the harder thing or silently doing the worse thing.
 3. **Google Sign-In must keep working, unchanged in spirit** (any Google account, not just an org's Workspace). GitHub and/or "login with Cloudflare" are welcome *in addition*, not instead.
-4. **The JWT question is open and this document answers it**: don't try to carry Firebase ID tokens into Cloudflare. Cloudflare Access mints its own JWT that is *specifically designed* to be verified by other Cloudflare Workers/apps on the same account — see §7. That is strictly more useful than what Firebase gave you for this purpose.
-5. **The dF `/guides` are outdated but the intent behind them still matters.** This document restates the load-bearing rules directly rather than pointing at files you may not have.
+4. **The JWT question is open and this document answers it**: don't try to carry Firebase ID tokens into Cloudflare. Cloudflare Access mints its own JWT that is *specifically designed* to be verified by other Cloudflare Workers/apps on the same account — see §8. That is strictly more useful than what Firebase gave you for this purpose.
+5. **Follow this repo's existing conventions**, not a green-field Cloudflare-idiomatic layout. §3 restates the load-bearing rules; §2 works out where the new pieces physically go.
 
 ---
 
-## 2. Conventions this component must follow (restated from dF's `/guides`)
+## 2. Where this lives in the dF monorepo
 
-These rules come from `guides/STANDARDS_STYLES.md` and `guides/WC_SHARED_DEFAULTS.md` in the dF monorepo. They are restated here so this document is self-contained.
+This component was originally scoped as a handoff to a separate repository. On review, there's no reason for that: it has to follow this repo's Lit/signals/MD3 conventions regardless of what's behind it, so building it here means it inherits `pnpm scan:compliance`, Storybook, the Turbo build graph, and `@df/types`/`@df/ui-lit` sharing for free instead of duplicating that tooling elsewhere.
 
-- **Lit + TypeScript.** Author in TypeScript, compile to JS via your build tool.
-- **Signals-first, presentation-only components.** The component never owns persisted state or talks to the network directly for business data — it reads signals from a small store module and calls exported functions on that store. All the actual session/auth logic lives in a `*.store.ts` file, not in the component.
+### 2.1 File layout
+
+```
+packages/
+  types/src/
+    cf-auth.types.ts          # CfUser, CfAuthState, CfAuthConfig — canonical types (§10)
+  state/src/stores/
+    cf-auth.store.ts          # signals-first store (§10)
+  ui-lit/src/
+    df-standard-pioneer-auth-wrapper.ts   # the component (§11)
+
+apps/df-storybook/stories/
+  df-standard-pioneer-auth-wrapper.stories.ts   # mirrors df-auth-wrapper.stories.ts
+
+services/workers/                      # NEW — see §2.2
+  df-standard-pioneer-auth/
+    src/worker.ts
+    wrangler.jsonc
+    package.json
+```
+
+This is the same shape as `df-auth-wrapper`'s own split (component in `ui-lit`, signals in `state`, shared types in `types`) — the only genuinely new thing is `services/workers/`, because there's no Cloudflare Worker anywhere in this repo yet.
+
+### 2.2 A new convention: Cloudflare Workers placement (proposed)
+
+`guides/FUNCTIONS_PLACEMENT.md` currently says all backend code goes in `services/functions/` or `services/auth-functions/` — but that rule (and its ESM/`NodeNext` configuration requirements) is written specifically for **Firebase Cloud Functions**. A Cloudflare Worker is a different kind of backend: it's deployed with `wrangler`, not `firebase deploy`, and it doesn't have Firebase's auth-triggered-function event model. It doesn't cleanly fit `packages/` (browser libraries bundled for consumption by apps) or `services/functions/` (Firebase-shaped) either.
+
+**Proposal:** a new `services/workers/` directory, one pnpm workspace per Worker, same pattern as `services/functions/` but for Cloudflare. This document uses that path throughout. **Confirm this with whoever owns `guides/` before treating it as settled** — it's the natural extension of the existing Firebase/non-Firebase split, but it hasn't been formally adopted yet. If it's approved, the follow-up is a short `guides/WORKERS_PLACEMENT.md` sibling to `guides/FUNCTIONS_PLACEMENT.md`; that file is out of scope here.
+
+### 2.3 Config & secrets: Workers vs. the rest of the repo
+
+Every other app in this repo configures Firebase via `.env` files and `VITE_USE_EMULATOR`, read through `import.meta.env.VITE_*` at build time (Vite). **None of that exists inside a Cloudflare Worker** — Workers run in a different JS runtime with no `import.meta.env`. Worker configuration instead uses:
+- `wrangler.jsonc`'s `vars` block for non-secret config (§7.1)
+- `wrangler secret put NAME` for anything sensitive — encrypted, not visible in the dashboard or config file after it's set
+- `.dev.vars` (git-ignored) for local secret values when running `wrangler dev`
+
+No conflict with the existing pattern — just don't reach for the Firebase-app config helpers (`loadFirebaseConfig()`, `shouldUseEmulatorForService()`, etc.) inside `services/workers/*`; they don't apply there and won't resolve.
+
+### 2.4 CI / deploy
+
+Current CI presumably only knows `firebase deploy` (Hosting, Functions, Firestore rules). Shipping this Worker needs a `wrangler deploy` step added wherever that pipeline lives, scoped to `services/workers/df-standard-pioneer-auth/`. Not addressed further here — flagged so it isn't a surprise at ship time.
+
+---
+
+## 3. Conventions this component must follow (from `guides/STANDARDS_STYLES.md` and `guides/WC_SHARED_DEFAULTS.md`)
+
+- **Lit + TypeScript.** Author in TypeScript, compile to JS via the package's normal build step.
+- **Signals-first, presentation-only components.** The component never owns persisted state or talks to the network directly for business data — it reads signals from a small store module and calls exported functions on that store. All the actual session/auth logic lives in `cf-auth.store.ts`, not in the component.
 - **`SignalWatcher(LitElement)`.** Any component that reads signals in `render()` extends `SignalWatcher` from `@lit-labs/signals` so it re-renders automatically when a signal changes.
 - **Property declaration pattern.** Use `declare` with `@property`/`@state` and initialize real values in the constructor — never as a class-field default — to avoid Lit's property-shadowing footgun.
   ```typescript
@@ -48,16 +95,18 @@ These rules come from `guides/STANDARDS_STYLES.md` and `guides/WC_SHARED_DEFAULT
     this.headless = false;
   }
   ```
-- **Material Design 3 components only.** No native `<button>`, `<input>`, `<select>`. Use `@material/web` elements (`<md-filled-button>`, `<md-text-button>`, `<md-circular-progress>`, etc.).
-- **Event naming: `[component-name]-[action]`.** The original component fires `df-auth-wrapper-user-changed`. This component fires `standard-pioneer-auth-wrapper-user-changed`, with the same `{detail: {newValue: User | null}}` shape.
+- **Material Design 3 components only.** No native `<button>`, `<input>`, `<select>`. Use `@material/web` elements (`<md-filled-button>`, `<md-text-button>`, `<md-circular-progress>`, etc.). Where Material Web has no shipped component but a MD3 spec exists, implement the spec manually, keep native accessibility semantics, and log the gap per `guides/STANDARDS_STYLES.md`'s MD3 Gaps process — this component doesn't need any such gap-filling, but the rule applies if that changes.
+- **MD3 registration stays centralized.** Do not add a per-component `material-design-init.ts` or import `@material/web/*` anywhere except through `packages/ui-lit/src/material-design-init.ts`. If this component needs an MD3 element not already registered there, add the import to that file, not to `df-standard-pioneer-auth-wrapper.ts` (see `guides/MATERIAL_DESIGN_INITIALIZATION.md`).
+- **Event naming: `[component-name]-[action]`.** The original component fires `df-auth-wrapper-user-changed`. This one fires `df-standard-pioneer-auth-wrapper-user-changed`, same `{detail: {newValue: User | null}}` shape.
 - **CSS custom properties with fallbacks at the point of use**, not at the point of definition (avoids circular var references).
+- **Canonical types live in `@df/types`.** `CfUser`, `CfAuthState`, `CfAuthConfig` are defined once in `packages/types/src/cf-auth.types.ts` and imported by both the store and the Worker — not hand-copied into each.
 - **No commented-out code, no console.log left behind, no partial features.** Small, complete, reviewable increments.
 
-Nothing about these rules is Cloudflare-specific — they hold regardless of what's behind the wrapper, which is exactly why they survive this migration untouched.
+Nothing here is Cloudflare-specific — these rules hold regardless of what's behind the wrapper, which is why they carry over unchanged.
 
 ---
 
-## 3. Concept mapping: Firebase → Cloudflare
+## 4. Concept mapping: Firebase → Cloudflare
 
 | Firebase concept | Cloudflare equivalent |
 |---|---|
@@ -67,41 +116,41 @@ Nothing about these rules is Cloudflare-specific — they hold regardless of wha
 | `signInWithGoogle()` (popup) | Navigating (full page or popup) to an Access-protected URL; Access itself shows the "Sign in with Google" screen |
 | `signOut()` | Navigating/fetching `https://<your-domain>/cdn-cgi/access/logout` |
 | `firebaseAuthState` signal | `cfAuthState` signal (new store, same shape: `authUser`, `authState`, `error`, `initialized`) |
-| Firebase Auth Emulator + `emailPw` dev panel | `wrangler dev`'s `access.dev` local-identity stub. **No email/password concept exists on the Cloudflare side** — the dev panel is dropped, not ported (see §8). |
-| Firebase Functions `functions.auth.user()` trigger | **No equivalent.** Workers have no "new user created" event. Any such logic has to be written explicitly inside the session Worker (see §8). |
+| Firebase Auth Emulator + `emailPw` dev panel | `wrangler dev`'s `access.dev` local-identity stub. **No email/password concept exists on the Cloudflare side** — the dev panel is dropped, not ported (see §9). |
+| Firebase Functions `functions.auth.user()` trigger | **No equivalent.** Workers have no "new user created" event. Any such logic has to be written explicitly inside the session Worker (see §9). |
 | `localStorage.getItem('User')` / manual token mirroring | Not needed. Access already manages its own `httpOnly` cookie; the component only caches the *non-sensitive* profile fields it reads back from your session endpoint. |
 
 ---
 
-## 4. Architecture
+## 5. Architecture
 
 ```mermaid
 flowchart LR
     subgraph Browser
-        W["standard-pioneer-auth-wrapper\n(Lit component)"]
-        S["cf-auth.store.ts\n(signals)"]
-        W <--> S
+        Wc["df-standard-pioneer-auth-wrapper\n(packages/ui-lit)"]
+        St["cf-auth.store.ts\n(packages/state, signals)"]
+        Wc <--> St
     end
 
-    S -- "fetch /cf-auth/whoami\ncredentials: include, redirect: manual" --> A
-    W -- "click Sign In →\nopen /cf-auth/whoami as popup/redirect" --> A
+    St -- "fetch /cf-auth/whoami\ncredentials: include, redirect: manual" --> A
+    Wc -- "click Sign In →\nopen /cf-auth/whoami as popup/redirect" --> A
 
-    subgraph Cloudflare edge
+    subgraph "Cloudflare edge (zone stays wherever it's hosted today)"
         A["Cloudflare Access\n(path-scoped Access application:\nyourdomain.com/cf-auth/*)"]
     end
 
     A -- "unauthenticated:\n302 to hosted login" --> L["Access login page\n(Sign in with Google / GitHub / Cloudflare)"]
     L -- "OAuth" --> G["Google (or GitHub, or\nCloudflare account) as IdP"]
-    A -- "authenticated:\nCf-Access-Jwt-Assertion header\n+ CF_Authorization cookie" --> Wk["Worker: /cf-auth/whoami\n(returns {email, name, picture})"]
+    A -- "authenticated:\nCf-Access-Jwt-Assertion header\n+ CF_Authorization cookie" --> Wk["services/workers/df-standard-pioneer-auth\n/cf-auth/whoami\n(returns {email, name, picture})"]
 
     Wk -. "same JWT/cookie,\nverifiable independently" .-> Other["Any other Cloudflare Worker\non your account"]
 ```
 
-**Key architectural decision:** Cloudflare Access applications are scoped by **URL path**, not by whole domain. That is what lets this component behave the same way the Firebase version did — protecting *part* of an otherwise-public page — instead of gating an entire site behind a login wall. The Access application in this design only covers `yourdomain.com/cf-auth/*`; your marketing page, nav, and everything else stays public. Only the small session endpoint the component talks to sits behind Access.
+**Key architectural decision:** Cloudflare Access applications are scoped by **URL path**, not by whole domain. That is what lets this component behave the way `df-auth-wrapper` did — protecting *part* of an otherwise-public page — instead of gating an entire site behind a login wall. The Access application only covers `yourdomain.com/cf-auth/*`. Everything else — including the existing 11ty-built pages this repo's apps produce, wherever they're actually hosted today — stays exactly as it is; a Cloudflare **Route** attaches the Worker to that one path pattern on a zone whose DNS is proxied through Cloudflare, without requiring the whole site to move onto Cloudflare hosting. This Worker does **not** serve your static site — see §7.
 
 ---
 
-## 5. One-time Cloudflare setup (do this before writing any code)
+## 6. One-time Cloudflare setup (do this before writing any code)
 
 You'll do this in the Cloudflare dashboard, under **Zero Trust**. This is a one-time, per-project setup, analogous to enabling Google Sign-In in the Firebase console.
 
@@ -124,57 +173,49 @@ You'll do this in the Cloudflare dashboard, under **Zero Trust**. This is a one-
 
 4. **Create a self-hosted Access application scoped to a narrow path** — this is the step that preserves partial-page protection:
    - Zero Trust → **Access → Applications → Add an application → Self-hosted**.
-   - Application domain: `yourdomain.com`, **Path**: `/cf-auth/*` (not the bare domain — the path is what keeps the rest of your site public).
+   - Application domain: `yourdomain.com`, **Path**: `/cf-auth/*` (not the bare domain — the path is what keeps the rest of the site public).
    - Under **Identity providers**, enable Google (and GitHub/Cloudflare if added).
    - Add a policy: **Action: Allow**, **Include: Everyone** (any authenticated account — this matches "any Google account can sign in," the same behavior Firebase gave you). Tighten this later with an email-domain rule if you ever need to restrict it.
    - Save, and copy the application's **Audience (AUD) tag** from its Overview page — you'll need it as `POLICY_AUD`.
 
-That's the entire Cloudflare-side configuration. Everything else below is code in your project.
+That's the entire Cloudflare-side configuration. Everything else below is code in this repo.
 
 ---
 
-## 6. The Worker: session endpoint
+## 7. The Worker: `services/workers/df-standard-pioneer-auth`
 
-This is the Cloudflare equivalent of Firebase's auth state listener — a small server-side route the component asks "am I signed in, and as whom?"
+This is the Cloudflare equivalent of Firebase's auth state listener — a small server-side route the component asks "am I signed in, and as whom?" It is a narrow, standalone auth microservice attached to one path (`/cf-auth/*`) on an existing zone — **it does not serve this repo's static apps**; those keep deploying exactly the way they do today (Rollup bundles into an external 11ty instance, or wherever they currently land). Keeping the Worker's job this small is deliberate for a first Cloudflare test: it has exactly one responsibility.
 
-### 6.1 `wrangler.jsonc`
+### 7.1 `services/workers/df-standard-pioneer-auth/wrangler.jsonc`
 
-`wrangler` is Cloudflare's CLI/config tool for Workers — think of it as the Firebase CLI's equivalent. This assumes your app is deployed as a Worker serving both your static site (via `assets.directory`) and this one API route, which fits the existing MPA/static-widget deployment model.
+`wrangler` is Cloudflare's CLI/config tool for Workers — think of it as the Firebase CLI's equivalent, scoped to this one package.
 
 ```jsonc
 {
-  "name": "standard-pioneer-app",
+  "name": "df-standard-pioneer-auth",
   "main": "./src/worker.ts",
   "compatibility_date": "2026-08-28",
-  "assets": {
-    "directory": "./dist",
-    "not_found_handling": "404-page"
-  },
+  "routes": [
+    {"pattern": "yourdomain.com/cf-auth/*", "zone_name": "yourdomain.com"}
+  ],
   "vars": {
     "TEAM_DOMAIN": "https://<your-team-name>.cloudflareaccess.com",
-    "POLICY_AUD": "<the AUD tag from step 5.4>"
+    "POLICY_AUD": "<the AUD tag from step 6.4>"
   }
 }
 ```
 
-`vars` here are plain, non-secret config — fine for a team domain and an audience tag, both of which are not sensitive. Never put anything actually secret (API keys, client secrets) in `vars`; use `wrangler secret put NAME` instead, which stores it encrypted and keeps it out of the config file and dashboard display.
+`vars` here are plain, non-secret config — fine for a team domain and an audience tag, neither of which is sensitive. Never put anything actually secret (API keys, client secrets) in `vars`; use `wrangler secret put NAME` instead (§2.3).
 
-### 6.2 `src/worker.ts`
+### 7.2 `services/workers/df-standard-pioneer-auth/src/worker.ts`
 
 ```typescript
 import {jwtVerify, createRemoteJWKSet} from 'jose';
+import type {CfUser} from '@df/types';
 
 interface Env {
   TEAM_DOMAIN: string;
   POLICY_AUD: string;
-  ASSETS: Fetcher;
-}
-
-interface CfIdentity {
-  email: string;
-  name?: string;
-  picture?: string;
-  sub: string;
 }
 
 export default {
@@ -185,8 +226,7 @@ export default {
       return handleWhoAmI(request, env);
     }
 
-    // Everything else is your public static site.
-    return env.ASSETS.fetch(request);
+    return new Response('Not found', {status: 404});
   },
 };
 
@@ -210,7 +250,7 @@ async function handleWhoAmI(request: Request, env: Env): Promise<Response> {
       audience: env.POLICY_AUD,
     });
 
-    const identity: CfIdentity = {
+    const identity: CfUser = {
       email: String(payload.email ?? ''),
       name: typeof payload.name === 'string' ? payload.name : undefined,
       picture: typeof payload.picture === 'string' ? payload.picture : undefined,
@@ -227,11 +267,11 @@ async function handleWhoAmI(request: Request, env: Env): Promise<Response> {
 }
 ```
 
-> **Worth trying, verify first:** Cloudflare has recently started exposing authenticated Access identity directly on the Worker's request context — `ctx.access.getIdentity()` — when Access is enabled in front of a Worker, along with a `wrangler dev` stub (`"access": {"dev": {...}}` in config) for local testing without a real login. If that's available and stable for your account/compatibility date, it removes the need for the `jose` verification above entirely. The `jose`/JWKS approach in `handleWhoAmI` above is the well-established, portable fallback — implement it first, and swap in `ctx.access` as a simplification once you've confirmed it behaves the way you expect in a scratch Worker. Don't wire production code to it on the strength of this document alone.
+`services/workers/df-standard-pioneer-auth/package.json` needs `"type": "module"` and `jose` as a dependency, matching this repo's existing ESM-only rule for backend packages (`CLAUDE.md`'s "ESM Configuration (REQUIRED)" section — written for Firebase Functions, but the same rule applies here).
 
-Add `jose` as a dependency: it's the standard, widely-used JWT library for Workers (works on the Workers runtime, unlike most Node JWT libraries).
+> **Worth trying, verify first:** Cloudflare has recently started exposing authenticated Access identity directly on the Worker's request context — `ctx.access.getIdentity()` — when Access is enabled in front of a Worker, along with a `wrangler dev` stub for local testing without a real login. If that's available and stable for this account/compatibility date, it removes the need for the `jose` verification above entirely. The `jose`/JWKS approach above is the well-established, portable fallback — implement it first, and swap in `ctx.access` as a simplification once you've confirmed it behaves the way you expect in a scratch Worker. Don't wire production code to it on the strength of this document alone.
 
-### 6.3 Local development
+### 7.3 Local development
 
 `wrangler dev` (Cloudflare's local dev server) can't reach the real Zero Trust login flow without a public URL. Use the `access.dev` config block to stub an identity for local work:
 
@@ -248,15 +288,15 @@ Add `jose` as a dependency: it's the standard, widely-used JWT library for Worke
 
 With that in place, `wrangler dev` requests behave as if Access already authenticated `dev@example.com` — no popup, no real Google account needed. Remove the block (or comment it out) to test the unauthenticated path locally.
 
-This replaces the Firebase Auth Emulator + `emailPw` panel for local iteration — see §8 for what specifically doesn't carry over.
+This replaces the Firebase Auth Emulator + `emailPw` panel for local iteration — see §9 for what specifically doesn't carry over.
 
 ---
 
-## 7. Cross-app JWT verification — answering the open question
+## 8. Cross-app JWT verification — answering the open question
 
 The brief asked whether the current JWT approach is appropriate for other Cloudflare-based apps to consume, or whether something different is needed. **Answer: don't try to reuse Firebase's JWT for this. Switch entirely to the Access-issued JWT, which is purpose-built for exactly this.**
 
-Any other Worker on the same Cloudflare account — a completely separate project — can independently verify the same `Cf-Access-Jwt-Assertion` header (or `CF_Authorization` cookie) using nothing but your team domain and that app's own audience tag. No shared secret, no calling back into this project:
+Any other Worker on the same Cloudflare account — a completely separate service in this repo, or a future one — can independently verify the same `Cf-Access-Jwt-Assertion` header (or `CF_Authorization` cookie) using nothing but your team domain and that app's own audience tag. No shared secret, no calling back into `df-standard-pioneer-auth`:
 
 ```typescript
 // A different Worker entirely, protecting its own API:
@@ -278,50 +318,35 @@ Practical note: if a user has authenticated to one Access application, visiting 
 
 ---
 
-## 8. Technical debt log — what's deliberately not carried over
+## 9. Technical debt log — what's deliberately not carried over
 
 Per the brief's "loose-tight" instruction: these are conscious cuts for iteration 1, not oversights.
 
-1. **The `emailPw` developer email/password panel is dropped entirely, not ported.** It existed so developers could create throwaway Firebase Auth-Emulator accounts to trigger `functions.auth.user()` Cloud Functions locally. Cloudflare Access has no email/password identity provider and no Firebase-Functions-style auth-triggered events, so there is nothing equivalent to build. Use the `access.dev` stub (§6.3) for local auth bypass instead.
+1. **The `emailPw` developer email/password panel is dropped entirely, not ported.** It existed so developers could create throwaway Firebase Auth-Emulator accounts to trigger `functions.auth.user()` Cloud Functions locally. Cloudflare Access has no email/password identity provider and no Firebase-Functions-style auth-triggered events, so there is nothing equivalent to build. Use the `access.dev` stub (§7.3) for local auth bypass instead.
 2. **No "on new user created" server event.** If the app needs to run logic the first time a given email signs in (seed a profile record, send a welcome email, etc.), that has to be written explicitly as an `if (isFirstSeen)` check inside `handleWhoAmI` (e.g., against a Workers KV or D1 lookup) rather than relying on a framework-level trigger the way Firebase provided. Not built here — flagged for whoever adds that requirement.
-3. **Popup sign-in is a thin custom shim, not a platform feature.** Unlike Firebase's SDK-provided popup flow, Access has no built-in "tell the opener window you're done" handshake. §9.3 below documents a small same-origin callback page to make it work; if that feels like too much for v1, the plain full-page-redirect flow (§9.2, the simpler default) is a perfectly fine place to start and ship, deferring the popup nicety to a later pass.
-4. **No manual token mirroring into `localStorage`/`sessionStorage`/a plain `authToken` cookie.** Access already manages its own `httpOnly` cookie, which is more secure than what the Firebase version did (a script-readable `sessionStorage` bearer token). If some other piece of code in your app still expects to read `sessionStorage.getItem('Authorization')` the old way, that's a separate, not-yet-solved migration — call it out explicitly to whoever owns that code rather than silently reintroducing the old pattern here.
-5. **Restricting who can sign in** (e.g., "only `@yourcompany.com`") is left as an Access **policy** change (§5.4), not application code. Don't add email-domain checks inside the Worker — Access is the correct enforcement point, and changing a policy is a dashboard/Terraform change, not a redeploy.
+3. **Popup sign-in is a thin custom shim, not a platform feature.** Unlike Firebase's SDK-provided popup flow, Access has no built-in "tell the opener window you're done" handshake. §10.1 documents a small same-origin callback page to make it work; if that feels like too much for v1, the plain full-page-redirect flow (§12, the simpler default) is a perfectly fine place to start and ship, deferring the popup nicety to a later pass.
+4. **No manual token mirroring into `localStorage`/`sessionStorage`/a plain `authToken` cookie.** Access already manages its own `httpOnly` cookie, which is more secure than what the Firebase version did (a script-readable `sessionStorage` bearer token). If some other piece of code in this repo still expects to read `sessionStorage.getItem('Authorization')` the old way, that's a separate, not-yet-solved migration — call it out explicitly to whoever owns that code rather than silently reintroducing the old pattern here.
+5. **Restricting who can sign in** (e.g., "only `@yourcompany.com`") is left as an Access **policy** change (§6.4), not application code. Don't add email-domain checks inside the Worker — Access is the correct enforcement point, and changing a policy is a dashboard/Terraform change, not a redeploy.
+6. **`services/workers/` as a placement convention is proposed, not yet formally adopted** (§2.2). If it's rejected in favor of something else, everything in §7 moves, but nothing about the component (§11) or store (§10) changes — the boundary was drawn there on purpose.
 
 ---
 
-## 9. The state store: `cf-auth.store.ts`
+## 10. The state store: `packages/state/src/stores/cf-auth.store.ts`
 
-Same signals-first shape as `firebase-auth.store.ts`, dramatically smaller because there's no SDK to wrap and no email/password branch.
+Same signals-first shape as `firebase-auth.store.ts`, dramatically smaller because there's no SDK to wrap and no email/password branch. `CfUser`, `CfAuthState`, and `CfAuthConfig` come from `packages/types/src/cf-auth.types.ts` (add them there and export via `types/src/index.ts` before writing this file, per the Package Export Checklist in `guides/WC_SHARED_DEFAULTS.md`).
 
 ```typescript
 /**
  * Cloudflare Access authentication store.
  *
  * Signals-first state for a session backed by Cloudflare Access, mirroring
- * the shape of the Firebase auth store it replaces (`authUser`, `authState`,
- * `error`, `initialized`) so consuming components change minimally.
+ * the shape of the Firebase auth store it sits alongside (`authUser`,
+ * `authState`, `error`, `initialized`) so consuming components change
+ * minimally.
  */
 
 import {computed, signal} from '@lit-labs/signals';
-
-export type CfAuthState = 'idle' | 'loading' | 'authenticated' | 'unauthenticated' | 'error';
-
-export interface CfUser {
-  email: string;
-  name?: string;
-  picture?: string;
-  sub: string;
-}
-
-export interface CfAuthConfig {
-  /** Same-origin path Access protects, e.g. '/cf-auth/whoami'. */
-  sessionUrl: string;
-  /** Where to send the browser to sign in — usually the same as sessionUrl. */
-  loginUrl: string;
-  /** Cloudflare's own logout endpoint, e.g. 'https://yourdomain.com/cdn-cgi/access/logout'. */
-  logoutUrl: string;
-}
+import type {CfUser, CfAuthState, CfAuthConfig} from '@df/types';
 
 const cfUserSignal = signal<CfUser | null>(null);
 const cfAuthStateSignal = signal<CfAuthState>('idle');
@@ -389,7 +414,7 @@ export async function refreshCfAuth(): Promise<void> {
   }
 }
 
-/** Full-page redirect sign-in — the simple default (see §9.2). */
+/** Full-page redirect sign-in — the simple default (see §12). */
 export function startCfLoginRedirect(returnTo: string = window.location.href): void {
   if (!config) {
     throw new Error('cf-auth: call initializeCfAuth() first');
@@ -399,7 +424,7 @@ export function startCfLoginRedirect(returnTo: string = window.location.href): v
   window.location.href = url.toString();
 }
 
-/** Popup sign-in — nicer UX, more moving parts (see §9.3). */
+/** Popup sign-in — nicer UX, more moving parts (see §10.1, §12). */
 export function startCfLoginPopup(): Promise<void> {
   if (!config) {
     throw new Error('cf-auth: call initializeCfAuth() first');
@@ -408,13 +433,13 @@ export function startCfLoginPopup(): Promise<void> {
   return new Promise((resolve) => {
     const popup = window.open(
       config!.loginUrl,
-      'standard-pioneer-auth-wrapper-login',
+      'df-standard-pioneer-auth-wrapper-login',
       'width=480,height=640'
     );
 
     function onMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
-      if (event.data?.type !== 'standard-pioneer-auth-wrapper:login-complete') return;
+      if (event.data?.type !== 'df-standard-pioneer-auth-wrapper:login-complete') return;
       window.removeEventListener('message', onMessage);
       popup?.close();
       void refreshCfAuth().then(resolve);
@@ -440,11 +465,11 @@ export function isCfAuthenticated(): boolean {
 }
 ```
 
----
+Remember the build order this repo relies on: **types → state → ui-lit → apps**. Add `cf-auth.types.ts` to `packages/types/src/index.ts` first, then this store to `packages/state/src/index.ts`, before wiring up the component in §11.
 
-## 9.1 The static callback page for popup mode
+### 10.1 The static callback page for popup mode
 
-Referenced by `startCfLoginPopup()` above. This is a tiny static HTML file, deployed under the same `/cf-auth/*` path so it's covered by the Access application — meaning by the time a browser can load it, Access has already authenticated the user. Save it as `dist/cf-auth/callback.html` (adjust to your static asset layout) and point `loginUrl` at it instead of directly at `whoami` when using popup mode.
+Referenced by `startCfLoginPopup()` above. This is a tiny static HTML file, deployed under the same `/cf-auth/*` path so it's covered by the Access application — meaning by the time a browser can load it, Access has already authenticated the user. Where exactly this gets hosted depends on how `services/workers/df-standard-pioneer-auth` ends up serving it (Workers static assets, or a route added to the existing Worker); point `loginUrl` at it instead of directly at `whoami` when using popup mode.
 
 ```html
 <!doctype html>
@@ -453,7 +478,7 @@ Referenced by `startCfLoginPopup()` above. This is a tiny static HTML file, depl
     <script>
       if (window.opener) {
         window.opener.postMessage(
-          {type: 'standard-pioneer-auth-wrapper:login-complete'},
+          {type: 'df-standard-pioneer-auth-wrapper:login-complete'},
           window.location.origin
         );
       }
@@ -465,9 +490,9 @@ Referenced by `startCfLoginPopup()` above. This is a tiny static HTML file, depl
 
 ---
 
-## 10. The component: `standard-pioneer-auth-wrapper.ts`
+## 11. The component: `packages/ui-lit/src/df-standard-pioneer-auth-wrapper.ts`
 
-Adapted from `df-auth-wrapper.ts`. Kept: `headless`, `showHideUser`, `bkgrd`, the header/logout UI, the Alt+click debug toggle, the event-dispatch pattern. Dropped: `emailPw` and everything under it (see §8.1). Changed: the login handler now drives the Cloudflare store instead of Firebase's `signInWithGoogle()`.
+Adapted from `df-auth-wrapper.ts`. Kept: `headless`, `showHideUser`, `bkgrd`, the header/logout UI, the Alt+click debug toggle, the event-dispatch pattern. Dropped: `emailPw` and everything under it (see §9.1). Changed: the login handler now drives the Cloudflare store instead of Firebase's `signInWithGoogle()`.
 
 ```typescript
 /**
@@ -489,7 +514,7 @@ import {
   startCfLoginPopup,
   startCfLoginRedirect,
   cfLogout,
-} from './cf-auth.store.js';
+} from '@df/state';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/text-button.js';
 import '@material/web/progress/circular-progress.js';
@@ -499,11 +524,11 @@ import '@material/web/progress/circular-progress.js';
  *
  * Wraps protected content and shows it only when the visitor has an
  * active Cloudflare Access session for this app. Cloudflare-native
- * successor to `df-auth-wrapper` (Firebase-backed) — see
+ * sibling to `df-auth-wrapper` (Firebase-backed) — see
  * `.z_/future/CLOUDFLARE_AUTH_WRAPPER_IMPLEMENTATION.md` for the full
  * migration rationale.
  *
- * @fires standard-pioneer-auth-wrapper-user-changed - Dispatched when sign-in state changes
+ * @fires df-standard-pioneer-auth-wrapper-user-changed - Dispatched when sign-in state changes
  *
  * @property {boolean} headless - If true, hides the header with user info
  * @property {boolean} showHideUser - If true, shows raw user object JSON (debug mode)
@@ -515,18 +540,18 @@ import '@material/web/progress/circular-progress.js';
  *
  * @example
  * ```html
- * <standard-pioneer-auth-wrapper
+ * <df-standard-pioneer-auth-wrapper
  *   session-url="/cf-auth/whoami"
  *   login-url="/cf-auth/whoami"
  *   logout-url="https://yourdomain.com/cdn-cgi/access/logout"
  * >
  *   <h1>Protected Content</h1>
  *   <p>Only visible after sign-in</p>
- * </standard-pioneer-auth-wrapper>
+ * </df-standard-pioneer-auth-wrapper>
  * ```
  */
-@customElement('standard-pioneer-auth-wrapper')
-export class StandardPioneerAuthWrapper extends SignalWatcher(LitElement) {
+@customElement('df-standard-pioneer-auth-wrapper')
+export class DfStandardPioneerAuthWrapper extends SignalWatcher(LitElement) {
   @property({type: Boolean}) declare headless: boolean;
   @property({type: Boolean}) declare showHideUser: boolean;
   @property({type: String, attribute: 'bkgrd'}) declare bkgrd: string | null;
@@ -557,7 +582,7 @@ export class StandardPioneerAuthWrapper extends SignalWatcher(LitElement) {
         logoutUrl: this.logoutUrl,
       });
     } catch (e) {
-      console.error('StandardPioneerAuthWrapper: Cloudflare auth initialization failed', e);
+      console.error('DfStandardPioneerAuthWrapper: Cloudflare auth initialization failed', e);
       this.initError = (e as Error).message;
     }
   }
@@ -565,7 +590,7 @@ export class StandardPioneerAuthWrapper extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
-      font-family: var(--sp-font-family, 'Roboto', sans-serif);
+      font-family: var(--df-font-family, 'Roboto', sans-serif);
     }
 
     .full-screen {
@@ -718,7 +743,7 @@ export class StandardPioneerAuthWrapper extends SignalWatcher(LitElement) {
 
   private _dispatchUserChanged(user: unknown) {
     this.dispatchEvent(
-      new CustomEvent('standard-pioneer-auth-wrapper-user-changed', {
+      new CustomEvent('df-standard-pioneer-auth-wrapper-user-changed', {
         detail: {newValue: user},
         bubbles: true,
         composed: true,
@@ -734,63 +759,74 @@ export class StandardPioneerAuthWrapper extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'standard-pioneer-auth-wrapper': StandardPioneerAuthWrapper;
+    'df-standard-pioneer-auth-wrapper': DfStandardPioneerAuthWrapper;
   }
 }
 ```
 
-### 10.1 Usage (mirrors the original's storybook example)
+Add the export to `packages/ui-lit/src/index.ts` and `packages/ui-lit/package.json`'s `exports` map before building, per the Package Export Checklist in `guides/WC_SHARED_DEFAULTS.md`.
+
+### 11.1 Usage (mirrors the original's storybook example)
 
 ```html
-<standard-pioneer-auth-wrapper>
+<df-standard-pioneer-auth-wrapper>
   <h1>Protected Content</h1>
   <p>Only visible after sign-in</p>
-</standard-pioneer-auth-wrapper>
+</df-standard-pioneer-auth-wrapper>
 
 <!-- Headless mode: no built-in header, same as before -->
-<standard-pioneer-auth-wrapper headless>
+<df-standard-pioneer-auth-wrapper headless>
   <div>Protected content without header</div>
-</standard-pioneer-auth-wrapper>
+</df-standard-pioneer-auth-wrapper>
 
 <!-- Popup sign-in instead of full-page redirect -->
-<standard-pioneer-auth-wrapper use-popup>
+<df-standard-pioneer-auth-wrapper use-popup>
   <div>Protected content, popup login</div>
-</standard-pioneer-auth-wrapper>
+</df-standard-pioneer-auth-wrapper>
 ```
 
+A corresponding `apps/df-storybook/stories/df-standard-pioneer-auth-wrapper.stories.ts` should follow the same Default / Headless / Debug-mode / Login-background story set as `df-auth-wrapper.stories.ts`, per the Storybook Story Guidelines in `guides/WC_SHARED_DEFAULTS.md` — omit only the `DeveloperEmailPassword` story, since that feature doesn't exist here (§9.1).
+
 ---
 
-## 11. Sign-in UX: pick a starting point
+## 12. Sign-in UX: pick a starting point
 
-Two valid options; §8.3 already flags this as an intentional v1 simplification point.
+Two valid options; §9.3 already flags this as an intentional v1 simplification point.
 
 - **Full-page redirect (`use-popup` unset — the default).** Clicking "Sign in" navigates the whole page to `loginUrl`; Access shows its hosted login screen (Google/GitHub/Cloudflare per your policy); on success it lands back at `loginUrl`, which the store's next `refreshCfAuth()` call (on page load) will see as authenticated. **Start here.** It's less code, has no popup-blocker edge cases, and matches how most Access-protected apps behave by default.
-- **Popup (`use-popup` set).** Preserves the exact "stay on the same page" feel of the old Firebase popup flow, at the cost of the small callback page in §9.1 and a `postMessage` handshake. Worth doing once the redirect flow is proven end-to-end.
+- **Popup (`use-popup` set).** Preserves the exact "stay on the same page" feel of the old Firebase popup flow, at the cost of the small callback page in §10.1 and a `postMessage` handshake. Worth doing once the redirect flow is proven end-to-end.
 
 ---
 
-## 12. Rollout checklist
+## 13. Rollout checklist
 
-- [ ] Zero Trust team domain confirmed (§5.1)
-- [ ] Google identity provider connected and tested (§5.2)
-- [ ] GitHub / Cloudflare identity providers added, if wanted (§5.3)
-- [ ] Self-hosted Access application scoped to `/cf-auth/*` — **not** the whole domain (§5.4)
+- [ ] `guides/WORKERS_PLACEMENT.md` decision made — either adopt `services/workers/` (§2.2) or pick an alternative before creating the package
+- [ ] Zero Trust team domain confirmed (§6.1)
+- [ ] Google identity provider connected and tested (§6.2)
+- [ ] GitHub / Cloudflare identity providers added, if wanted (§6.3)
+- [ ] Self-hosted Access application scoped to `/cf-auth/*` — **not** the whole domain (§6.4)
 - [ ] Access policy allows the intended audience (start with "Everyone")
-- [ ] `TEAM_DOMAIN` / `POLICY_AUD` set as Worker `vars` (§6.1)
-- [ ] `/cf-auth/whoami` Worker route deployed and verified with `jose` (§6.2)
-- [ ] `access.dev` stub confirmed working for local iteration (§6.3)
-- [ ] `cf-auth.store.ts` wired into the app entry point
-- [ ] `standard-pioneer-auth-wrapper` renders login/authenticated states correctly
+- [ ] `TEAM_DOMAIN` / `POLICY_AUD` set as Worker `vars` (§7.1)
+- [ ] `/cf-auth/whoami` Worker route deployed and verified with `jose` (§7.2)
+- [ ] `access.dev` stub confirmed working for local iteration (§7.3)
+- [ ] `cf-auth.types.ts` added to `packages/types/src/index.ts`
+- [ ] `cf-auth.store.ts` added to `packages/state/src/index.ts`
+- [ ] `df-standard-pioneer-auth-wrapper` added to `packages/ui-lit/src/index.ts` and `package.json` exports
+- [ ] Build order respected: types → state → ui-lit → apps
+- [ ] `df-standard-pioneer-auth-wrapper` renders login/authenticated states correctly in Storybook
+- [ ] Storybook stories added (§11.1)
+- [ ] `pnpm scan:compliance` passes
 - [ ] Logout round-trips through `/cdn-cgi/access/logout`
-- [ ] Cross-app JWT verification tested against a second, independent Worker (§7)
-- [ ] Technical debt log (§8) reviewed and any must-fix items ticketed
+- [ ] Cross-app JWT verification tested against a second, independent Worker (§8)
+- [ ] CI extended with a `wrangler deploy` step for `services/workers/df-standard-pioneer-auth` (§2.4)
+- [ ] Technical debt log (§9) reviewed and any must-fix items ticketed
 
 ---
 
-## 13. Summary: answers to the brief's five points
+## 14. Summary: answers to the brief's five points
 
-1. **Non-Firebase conventions untouched** — nothing in this document asks the team to change Lit, signals, MD3, file/event naming, or the presentation-only component boundary. Only the auth backend changes.
-2. **Loose-tight, iteration 1** — §8 names every corner deliberately cut (dev email/password panel, "new user" trigger, token mirroring, popup handshake) instead of silently under- or over-building.
-3. **Google Sign-In preserved, GitHub/Cloudflare additive** — §5.2–5.3; Access supports all three as identity providers on the same application with no code-level difference between them.
-4. **JWT question answered** — don't carry Firebase tokens forward; use the Access-issued JWT instead. It's independently verifiable by any other Cloudflare Worker on the account with nothing but a JWKS URL — see §7.
-5. **Guides looked past, intent preserved** — §2 restates the load-bearing rules from `STANDARDS_STYLES.md` / `WC_SHARED_DEFAULTS.md` inline so this document stands alone in a different repository.
+1. **Non-Firebase conventions untouched** — nothing in this document asks the team to change Lit, signals, MD3, file/event naming, or the presentation-only component boundary. Only the auth backend changes, and it now lives in-repo (§2) rather than a separate handoff codebase.
+2. **Loose-tight, iteration 1** — §9 names every corner deliberately cut (dev email/password panel, "new user" trigger, token mirroring, popup handshake) instead of silently under- or over-building.
+3. **Google Sign-In preserved, GitHub/Cloudflare additive** — §6.2–6.3; Access supports all three as identity providers on the same application with no code-level difference between them.
+4. **JWT question answered** — don't carry Firebase tokens forward; use the Access-issued JWT instead. It's independently verifiable by any other Cloudflare Worker on the account with nothing but a JWKS URL — see §8.
+5. **Guides followed, not bypassed** — §3 restates the load-bearing rules from `STANDARDS_STYLES.md` / `WC_SHARED_DEFAULTS.md`; §2 works out the one genuinely new placement question (`services/workers/`) those guides don't yet answer, and flags it as a proposal rather than asserting it as settled.
