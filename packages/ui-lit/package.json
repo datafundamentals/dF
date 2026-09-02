@@ -39,6 +39,8 @@
     "./df-google-signin.js": "./dist/df-google-signin.js",
     "./df-auth-wrapper": "./dist/df-auth-wrapper.js",
     "./df-auth-wrapper.js": "./dist/df-auth-wrapper.js",
+    "./df-standard-pioneer-auth-wrapper": "./dist/df-standard-pioneer-auth-wrapper.js",
+    "./df-standard-pioneer-auth-wrapper.js": "./dist/df-standard-pioneer-auth-wrapper.js",
     "./df-environment-banner": "./dist/df-environment-banner.js",
     "./df-environment-banner.js": "./dist/df-environment-banner.js",
     "./df-seed-data": "./dist/df-seed-data.js",

@@ -65,6 +65,15 @@ function onwarn(warning) {
 /* global console */
 export default [
   {
+    input: 'dist/df-standard-pioneer-auth-wrapper.js',
+    output: {
+      file: 'dist/df-standard-pioneer-auth-wrapper.bundled.js',
+      format: 'esm',
+    },
+    onwarn,
+    plugins: commonPlugins,
+  },
+  {
     input: 'dist/df-auth-wrapper.js',
     output: {
       file: 'dist/df-auth-wrapper.bundled.js',

@@ -1,0 +1,22 @@
+{
+  "name": "@df/standard-pioneer-auth-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@df/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.0.0"
+  }
+}

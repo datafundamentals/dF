@@ -7,6 +7,7 @@ export * from './stores/markdown-tokens.store.js';
 export * from './stores/dashboard.store.js';
 export * from './stores/elastic.store.js';
 export * from './stores/firebase-auth.store.js';
+export * from './stores/cf-auth.store.js';
 export * from './stores/firestore-base.store.js';
 export * from './stores/todos.store.js';
 export * from './stores/chat.store.js';

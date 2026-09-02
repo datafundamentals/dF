@@ -5,6 +5,7 @@ export * from './npm-info.js';
 export * from './markdown-tokens.js';
 export * from './firebase.types.js';
 export * from './firebase-auth.types.js';
+export * from './cf-auth.types.js';
 export * from './firebase-firestore.types.js';
 export * from './firebase-todos.types.js';
 export * from './firebase-chat.types.js';

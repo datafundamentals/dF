@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "df-standard-pioneer-auth",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-08-28",
+  "workers_dev": true,
+  "observability": {"enabled": true},
+  "access": {
+    "dev": {
+      "aud": "replace-with-your-access-application-aud",
+      "identity": {
+        "email": "dev@example.com",
+        "name": "Local Developer",
+      },
+    },
+  },
+}

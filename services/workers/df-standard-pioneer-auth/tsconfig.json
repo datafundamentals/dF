@@ -1,0 +1,10 @@
+{
+  "extends": "../../../ts.config.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "references": [{"path": "../../../packages/types"}]
+}
