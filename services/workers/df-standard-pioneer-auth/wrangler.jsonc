@@ -3,15 +3,23 @@
   "name": "df-standard-pioneer-auth",
   "main": "src/worker.ts",
   "compatibility_date": "2026-08-28",
-  "workers_dev": true,
-  "observability": {"enabled": true},
+  "workers_dev": false,
+  "observability": {
+    "enabled": true
+  },
+  "routes": [
+    {
+      "pattern": "ayazian.com/cf-auth/*",
+      "zone_name": "ayazian.com"
+    }
+  ],
   "access": {
     "dev": {
-      "aud": "replace-with-your-access-application-aud",
+      "aud": "58054d2267f843cbf9b05e387c305e57cfd52a2a2c31cf518aa637840c1c517e",
       "identity": {
-        "email": "dev@example.com",
-        "name": "Local Developer",
-      },
-    },
-  },
+        "email": "sahar.ayazian@gmail.com",
+        "name": "Sahar"
+      }
+    }
+  }
 }
