@@ -5,9 +5,9 @@ This Worker exposes the Cloudflare Access session used by
 
 ## Routes
 
-- `GET /cf-auth/whoami` returns the authenticated user's non-sensitive profile.
-- `GET /cf-auth/login` returns to the requesting same-origin page after Access login.
-- `GET /cf-auth/login?mode=popup` completes the optional popup flow.
+- `GET /cf-auth/_protected/whoami` returns the authenticated user's non-sensitive profile.
+- `GET /cf-auth/_protected/login` returns to the requesting same-origin page after Access login.
+- `GET /cf-auth/_protected/login?mode=popup` completes the optional popup flow.
 
 ## Local development
 
@@ -20,7 +20,7 @@ This Worker exposes the Cloudflare Access session used by
 ## Production setup
 
 Create a hostname-based Cloudflare Access application for
-`yourdomain.example/cf-auth/*`, attach this Worker to the matching proxied route,
+`yourdomain.example/cf-auth/_protected/*`, attach this Worker to the matching proxied route,
 and configure Google as an identity provider. Do not protect the whole hostname
 unless the whole site is meant to require authentication.
 
@@ -29,7 +29,7 @@ route only after the zone and hostname are known, for example:
 
 ```jsonc
 "routes": [
-  {"pattern": "yourdomain.example/cf-auth/*", "zone_name": "yourdomain.example"}
+  {"pattern": "yourdomain.example/cf-auth/_protected/*", "zone_name": "yourdomain.example"}
 ]
 ```
 

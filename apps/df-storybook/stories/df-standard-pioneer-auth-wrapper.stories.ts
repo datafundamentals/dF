@@ -37,8 +37,8 @@ it is served behind that configured Access route.
     headless: false,
     showHideUser: false,
     usePopup: false,
-    sessionUrl: '/cf-auth/whoami',
-    loginUrl: '/cf-auth/login',
+    sessionUrl: '/cf-auth/_protected/whoami',
+    loginUrl: '/cf-auth/_protected/login',
     logoutUrl: '/cdn-cgi/access/logout',
   },
   argTypes: {

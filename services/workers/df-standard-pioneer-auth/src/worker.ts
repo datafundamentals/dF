@@ -43,8 +43,8 @@ export async function handleRequest(
     });
   }
 
-  if (url.pathname === '/cf-auth/whoami') return handleWhoAmI(context);
-  if (url.pathname === '/cf-auth/login') return handleLogin(url, context);
+  if (url.pathname === '/cf-auth/_protected/whoami') return handleWhoAmI(context);
+  if (url.pathname === '/cf-auth/_protected/login') return handleLogin(url, context);
 
   return jsonResponse({error: 'not-found'}, 404);
 }

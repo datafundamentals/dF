@@ -1,3 +1,4 @@
+import './material-design-init.js';
 import {SignalWatcher} from '@lit-labs/signals';
 import {
   cfAuthState,
@@ -10,6 +11,7 @@ import type {CfUser} from '@df/types';
 import {css, html, LitElement, nothing} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {styleMap} from 'lit/directives/style-map.js';
+import './material-design-init.js';
 
 /** Protects slotted content with a Cloudflare Access session. */
 @customElement('df-standard-pioneer-auth-wrapper')
@@ -32,8 +34,8 @@ export class DfStandardPioneerAuthWrapper extends SignalWatcher(LitElement) {
     this.headless = false;
     this.showHideUser = false;
     this.bkgrd = null;
-    this.sessionUrl = '/cf-auth/whoami';
-    this.loginUrl = '/cf-auth/login';
+    this.sessionUrl = '/cf-auth/_protected/whoami';
+    this.loginUrl = '/cf-auth/_protected/login';
     this.logoutUrl = '/cdn-cgi/access/logout';
     this.usePopup = false;
     this.interactionError = null;

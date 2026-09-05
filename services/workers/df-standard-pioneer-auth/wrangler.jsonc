@@ -9,7 +9,7 @@
   },
   "routes": [
     {
-      "pattern": "ayazian.com/cf-auth/*",
+      "pattern": "ayazian.com/cf-auth/_protected/*",
       "zone_name": "ayazian.com"
     }
   ],

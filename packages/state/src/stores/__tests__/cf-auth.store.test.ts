@@ -9,8 +9,8 @@ import {
 } from '../cf-auth.store';
 
 const config = {
-  sessionUrl: '/cf-auth/whoami',
-  loginUrl: '/cf-auth/login',
+  sessionUrl: '/cf-auth/_protected/whoami',
+  loginUrl: '/cf-auth/_protected/login',
   logoutUrl: '/cdn-cgi/access/logout',
 };
 
@@ -46,7 +46,7 @@ describe('cf-auth.store', () => {
     });
     expect(getCurrentCfUser()?.email).toBe('user@example.com');
     expect(isCfAuthenticated()).toBe(true);
-    expect(fetch).toHaveBeenCalledWith('/cf-auth/whoami', {
+    expect(fetch).toHaveBeenCalledWith('/cf-auth/_protected/whoami', {
       credentials: 'include',
       redirect: 'manual',
       headers: {
