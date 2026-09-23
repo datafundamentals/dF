@@ -173,7 +173,8 @@ def fetch_and_download_for_user(token, user_id, user_email):
                     if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
                         logging.info(f"SKIPPED: {filename} (Already exists)")
                         # Attempt to delete from Zoom since we have it locally
-                        delete_recording_file(m['id'], file['id'], token)
+                        logging.info(f"Did not delete {filename} from Zoom - currently commented out")
+                        # delete_recording_file(m['id'], file['id'], token)
                         continue
                         
                     try:
@@ -181,7 +182,8 @@ def fetch_and_download_for_user(token, user_id, user_email):
                         logging.info(f"SUCCESS: {filename}")
                         # Verify file exists and is not empty before deleting
                         if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
-                             delete_recording_file(m['id'], file['id'], token)
+                             logging.info(f"Did not delete {filename} from Zoom - currently commented out")
+                             # delete_recording_file(m['id'], file['id'], token)
                     except Exception as e:
                         logging.error(f"FAILED: {filename} - Error: {e}")
 
