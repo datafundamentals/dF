@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fetch-mcp-server",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "dev": { "port": 8788 },
+  "durable_objects": {
+    "bindings": [
+      { "name": "FETCH_MCP", "class_name": "FetchMCP" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["FetchMCP"] }
+  ]
+}
