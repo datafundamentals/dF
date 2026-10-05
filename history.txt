@@ -1,0 +1,503 @@
+  500  pnpm --filter @df/df-agent-work-request dev
+  501  pnpm build
+  502  pnpm --filter @df/df-agent-work-request dev
+  503  pnpm build
+  504  pnpm --filter @df/df-agent-work-request dev
+  505  pnpm build
+  506  pnpm lint
+  507  pnpm test
+  508  pnpm --filter @df/df-agent-work-request dev
+  509  pnpm build
+  510  pnpm lint
+  511  pnpm test
+  512  pnpm --filter @df/df-agent-work-request dev
+  513  pnpm build
+  514  pnpm lint
+  515  pnpm test
+  516  pnpm --filter @df/df-agent-work-request dev
+  517  pnpm build
+  518  pnpm lint
+  519  pnpm --filter @df/df-agent-work-request dev
+  520  history 500 | grep deploy
+  521  firebase deploy --only storage
+  522  firebase deploy --only firestore:rules
+  523  firebase deploy --only functions:onAgenticMessage
+  524  firebase deploy --only functions
+  525  pnpm build
+  526  pnpm --filter @df/df-agent-work-request dev
+  527  pnpm build
+  528  pnpm lint
+  529  pnpm test
+  530  firebase deploy --only functions:onAgenticMessage
+  531  firebase deploy --only firestore:rules
+  532  pnpm build
+  533  pnpm lint
+  534  pnpm test
+  535  pnpm --filter @df/df-agent-work-request dev
+  536  pnpm build
+  537  pnpm lint
+  538  pnpm test
+  539  pnpm --filter @df/df-agent-work-request dev
+  540  pnpm build
+  541  pnpm lint
+  542  pnpm test
+  543  pnpm --filter @df/df-agent-work-request dev
+  544  pnpm build
+  545  pnpm --filter @df/df-agent-work-request dev
+  546  pnpm build
+  547  pnpm lint
+  548  pnpm lint
+  549  pnpm test
+  550  pnpm --filter @df/df-agent-work-request dev
+  551  pnpm build
+  552  pnpm lint
+  553  pnpm test
+  554  pnpm --filter @df/df-agent-work-request dev
+  555  pnpm build
+  556  pnpm lint
+  557  pnpm test
+  558  pnpm --filter @df/df-agent-work-request dev
+  559  history 50 
+  560  firebase deploy --only functions:onAgenticMessage
+  561  firebase login --reauth
+  562  firebase login --reauth
+  563  firebase login --reauth
+  564  firebase login --reauth
+  565  firebase login --help
+  566  npm install -g firebase-tools
+  567  firebase deploy --only functions:onAgenticMessage
+  568  firebase login --reauth
+  569  firebase login --no-localhost
+  570  firebase deploy --only functions:onAgenticMessage
+  571  firebase login --reauth
+  572  npm install -g firebase-tools
+  573  firebase deploy --only functions:onAgenticMessage
+  574  firebase login --reauth
+  575  firebase logout
+  576  firebase login --no-localhost
+  577  firebase logout
+  578  firebase login --no-localhost
+  579  rm ~/.config/configstore/firebase-tools.json
+  580  echo $FIREBASE_TOKEN
+  581  echo $GOOGLE_APPLICATION_CREDENTIALS
+  582  firebase login --no-localhost
+  583  history 500
+  584  history 500 | grep "0.0.0"
+  585  pnpm --filter @df/functions-shared run build
+  586  npm install -g firebase-tools
+  587  pnpm --filter @df/df-agent-work-request dev
+  588  rm -rf node_modules
+  589  pnpm build
+  590  pnpm install
+  591  pnpm lint
+  592  pnpm run test
+  593  pnpm --filter @df/df-agent-work-request dev
+  594  history 500 | grep "0.0.0"
+  595  history
+  596  firebase deploy --only functions:onOpenclawMessage
+  597  source ~/.zshrc
+  598  firebase deploy --only functions:onOpenclawMessage
+  599  firebase deploy --only functions:onAgenticMessage
+  600  firebase deploy --only functions:onAgenticMessage
+  601  firebase deploy --only functions:onAgenticMessage
+  602  firebase deploy --only functions:onAgenticMessage
+  603  firebase deploy --only functions:onAgenticMessage
+  604  firebase deploy --only functions:onAgenticMessage
+  605  firebase deploy --only functions:onAgenticMessage
+  606  firebase deploy --only firestore:rules
+  607  firebase deploy --only storage
+  608  firebase deploy --only functions
+  609  firebase deploy --help
+  610  pnpm build:rollup
+  611  cp dist/bundle/df-openclaw-chat.js ../../../sites/hbb/static/wc/df-openclaw-chat
+  612  pnpm build:rollup
+  613  pnpm build
+  614  pnpm build:rollup
+  615  pnpm build:rollup
+  616  pnpm build:rollup
+  617  cp dist/bundle/df-openclaw-chat.js ../../../sites/hbb/static/wc/df-openclaw-chat
+  618  pnpm build:rollup
+  619  cp dist/bundle/df-openclaw-chat.js ../../../sites/hbb/static/wc/df-openclaw-chat
+  620  cd ..
+  621  ls
+  622  cd df-agent-work-request
+  623  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  624  pnpm build:rollup
+  625  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  626  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  627  pnpm build:rollup
+  628  pnpm build:rollup
+  629  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  630  pnpm build:rollup
+  631  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  632  pnpm build:rollup
+  633  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  634  pnpm build:rollup
+  635  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  636  pnpm build:rollup
+  637  pnpm build:rollup
+  638  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  639  pnpm build:rollup
+  640  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  641  pnpm build:rollup
+  642  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  643  pnpm build:rollup
+  644  cp dist/bundle/df-agent-work-request.js ../../../sites/hbb/static/wc/df-agent-work-request
+  645  history 500 | grep "0.0.0"
+  646  top -o mem
+  647  code Documents/pete/COLORS.txt
+  648  top -o mem
+  649  launchctl setenv OLLAMA_HOST 0.0.0.0
+  650  open -a Ollama
+  651  ollama pull nomic-embed-text:latest
+  652  ollama ps
+  653  pkill -f "ollama serve" || true
+  654  OLLAMA_HOST=0.0.0.0 nohup ollama serve >/tmp/ollama-serve.log 2>&1 &
+  655  pkill -f "ollama serve" || true
+  656  OLLAMA_HOST=0.0.0.0 nohup ollama serve >/tmp/ollama-serve.log 2>&1 &
+  657  top -o mem
+  658  mv Downloads/github-recovery-codes.txt .ssv
+  659  top -o mem
+  660  code Documents/pete/COLORS.txt
+  661  top -o mem
+  662  top -o mem
+  663  ollama run glm-5.2:cloud
+  664  top -o mem
+  665  code Documents/pete/COLORS.txt
+  666  history 500 | grep "0.0.0"
+  667  ls
+  668  ls -a
+  669  cat .yo-rc-global.json
+  670  tree .config
+  671  tree .env.keys
+  672  cat pe.sh
+  673  ls -a
+  674  mdfind "type\": \"service_account\""
+  675  mdfind "kns:service-account"
+  676  mdfind "filename:firebase" | grep json
+  677  cd work
+  678  mdfind "filename:firebase" | grep json
+  679  cd ../primary/dF
+  680  cd primary
+  681  ls
+  682  cd dF
+  683  rg '"type": "service_account"' ~ --type json
+  684  mv ~/Downloads/melody-r2-d4-firebase-adminsdk-fbsvc-b9e9796b1e.json ~/.ssv
+  685  cd
+  686  cd .ssv
+  687  ls
+  688  cat melody-r2-d4-firebase-adminsdk-fbsvc-b9e9796b1e.json
+  689  pwd
+  690  code .
+  691  code ~/.zshrc
+  692  source ~/.zshrc
+  693  echo GOOGLE_APPLICATION_CREDENTIALS
+  694  echo $GOOGLE_APPLICATION_CREDENTIALS
+  695  cat $GOOGLE_APPLICATION_CREDENTIALS
+  696  cat melody-r2-d4-firebase-adminsdk-fbsvc-b9e9796b1e.json
+  697  pwd
+  698  echo $GOOGLE_APPLICATION_CREDENTIALS
+  699  cat $GOOGLE_APPLICATION_CREDENTIALS
+  700  cat ~/.ssv/melody-r2-d4-firebase-adminsdk-fbsvc-b9e9796b1e.json
+  701  cat $GOOGLE_APPLICATION_CREDENTIALS
+  702  cat /Users/petecarapetyan/.ssv/melody-r2-d4-firebase-adminsdk-fbsvc-b9e9796b1e.json
+  703  source ~/.zshrc
+  704  cat $GOOGLE_APPLICATION_CREDENTIALS
+  705  code .
+  706  ./nu.sh
+  707  ./stopActivityLog.sh
+  708  ./nu.sh
+  709  ./stopActivityLog.sh
+  710  ./nu.sh
+  711  ./stopActivityLog.sh
+  712  ./nu.sh
+  713  ./stopActivityLog.sh
+  714  ./startActivityLog.sh
+  715  ./stopActivityLog.sh
+  716  ./nu.sh
+  717  ./stopActivityLog.sh
+  718  ./nu.sh
+  719  ./stopActivityLog.sh
+  720  ./startActivityLog.sh
+  721  ./stopActivityLog.sh
+  722  ./nu.sh
+  723  ./stopActivityLog.sh
+  724  ./nu.sh
+  725  ./stopActivityLog.sh
+  726  ./startActivityLog.sh
+  727  ./stopActivityLog.sh
+  728  ./nu.sh
+  729  ./stopActivityLog.sh
+  730  ./nu.sh
+  731  ./stopActivityLog.sh
+  732  ./nu.sh
+  733  ./stopActivityLog.sh
+  734  ./nu.sh
+  735  ./stopActivityLog.sh
+  736  ./nu.sh
+  737  ./stopActivityLog.sh
+  738  ./nu.sh
+  739  ./stopActivityLog.sh
+  740  ./nu.sh
+  741  ./stopActivityLog.sh
+  742  ./nu.sh
+  743  ./stopActivityLog.sh
+  744  ./startActivityLog.sh
+  745  ./stopActivityLog.sh
+  746  ./nu.sh
+  747  mv ../dF/dump_chrome_tabs.sh .
+  748  mv dump_chrome_tabs.sh .sh
+  749  ./stopActivityLog.sh
+  750  ./nu.sh
+  751  ./stopActivityLog.sh
+  752  git status
+  753  git add .
+  754  git commit -am WIP
+  755  git push
+  756  ./nu.sh
+  757  git pull
+  758  ./stopActivityLog.sh
+  759  ./nu.sh
+  760  ./stopActivityLog.sh
+  761  ./nu.sh
+  762  ./stopActivityLog.sh
+  763  ./nu.sh
+  764  history 500 | grep "0.0.0"
+  765  ./stopActivityLog.sh
+  766  ~/work/primary/dF/tools/zoom_meeting_downloader/my_script.py
+  767  source ~/work/primary/dF/tools/zoom_meeting_downloader/my_script.py
+  768  ./nu.sh
+  769  ./stopActivityLog.sh
+  770  cd work/primary/daily
+  771  ./nu.sh
+  772  cd work/primary/daily
+  773  ./stopActivityLog.sh
+  774  cd work/primary/dF
+  775  code .
+  776  cd work/primary/.ssv
+  777  cd work/primary
+  778  ls
+  779  cd
+  780  hermes update
+  781  hermes model
+  782  hermes doctor
+  783  hermes doctor --fix
+  784  top -o mem
+  785  cd work/primary/daily
+  786  ./nu.sh
+  787  ./stopActivityLog.sh
+  788  ./nu.sh
+  789  ./stopActivityLog.sh
+  790  ./nu.sh
+  791  ./stopActivityLog.sh
+  792  ./nu.sh
+  793  ./stopActivityLog.sh
+  794  ./nu.sh
+  795  ./stopActivityLog.sh
+  796  ./nu.sh
+  797  ./stopActivityLog.sh
+  798  code .
+  799  ./nu.sh
+  800  pwd
+  801  ls -a
+  802  ls -a
+  803  ls state
+  804  code ~/Documents/pete/COLORS.txt
+  805  ./stopActivityLog.sh
+  806  ./nu.sh
+  807  code .
+  808  ./nu.sh
+  809  ./stopActivityLog.sh
+  810  cd work/primary
+  811  git clone https://github.com/NateBJones-Projects/ringer.git
+  812  cd ringer
+  813  code .
+  814  codex login
+  815  codex
+  816  codex login
+  817  node --version
+  818  npm install -g @openai/codex
+  819  codex login
+  820  npm uninstall --global @openai/codex\n\ncurl -fsSL https://chatgpt.com/codex/install.sh | sh\n\nexec zsh -l
+  821  which -a codex\ncodex --version\ncodex login
+  822  cd work/primary
+  823  find . -name "ontology.yaml"
+  824  cd content/sortingOntology
+  825  ls
+  826  code .
+  827  cd work/primary
+  828  ls
+  829  git clone git@github.com:mattpocock/skills.git
+  830  mv skills/mattpocockskills
+  831  mv skills mattpocockskills
+  832  cd mattpocockskills
+  833  code .
+  834  cd ..
+  835  ls
+  836  cd ringer
+  837  code .
+  838  cd ../
+  839  git clone git@github.com:cloudflare/cloudflare-os.git
+  840  cd cloudflare-os
+  841  pnpm run-local
+  842  corepack enable
+  843  pnpm self-install
+  844  npm install -g pnpm@latest
+  845  pnpm self-install
+  846  npm install -g pnpm@latest
+  847  pnpm run-local
+  848  nvm install --lts --reinstall-packages-from=current\nnvm use --lts
+  849  npm install -g pnpm@latest
+  850  pnpm run-local
+  851  cd work/primary/daily
+  852  ./nu.sh
+  853  ./stopActivityLog.sh
+  854  ./nu.sh
+  855  ./stopActivityLog.sh
+  856  code .
+  857  ./nu.sh
+  858  ./stopActivityLog.sh
+  859  ./nu.sh
+  860  ./stopActivityLog.sh
+  861  ./startActivityLog.sh
+  862  ./stopActivityLog.sh
+  863  ./nu.sh
+  864  ./stopActivityLog.sh
+  865  ./nu.sh
+  866  ./nu.sh
+  867  git status
+  868  git add .
+  869  git commit -am WIP
+  870  git push
+  871  git add .
+  872  git commit -am WIP
+  873  git push
+  874  ./nu.sh
+  875  ./stopActivityLog.sh
+  876  ./nu.sh
+  877  ./stopActivityLog.sh
+  878  git commit -am WIP
+  879  git push
+  880  git add .
+  881  git commit -am WIP
+  882  git push
+  883  git add .
+  884  git commit -am WIP
+  885  git push
+  886  git pull
+  887  git status
+  888  git add .
+  889  git commit -am WIP
+  890  ./nu.sh
+  891  ./stopActivityLog.sh
+  892  code .
+  893  ./nu.sh
+  894  ./stopActivityLog.sh
+  895  ls
+  896  ./nu.sh
+  897  ./stopActivityLog.sh
+  898  ./nu.sh
+  899  mv ../afsr.yaml .
+  900  ./stopActivityLog.sh
+  901  ./nu.sh
+  902  ./stopActivityLog.sh
+  903  ./nu.sh
+  904  ./stopActivityLog.sh
+  905  ./nu.sh
+  906  ./stopActivityLog.sh
+  907  ./nu.sh
+  908  ./stopActivityLog.sh
+  909  code Documents/pete/COLORS.txt
+  910  cd work/primary/
+  911  ls -a
+  912  cd work/primary
+  913  ls
+  914  cd content
+  915  ls
+  916  cd ..
+  917  find . -name ontology.yaml
+  918  cd content/sortingOntology
+  919  code .
+  920  cd ..
+  921  code .
+  922  cd sortingOntology
+  923  ls -a
+  924  cd ..
+  925  ls -a
+  926  code .
+  927  top -o mem
+  928  top -o mem
+  929  cd work/primary/
+  930  ls
+  931  cd work/primary/content
+  932  code .
+  933  top -o mem
+  934  cd work/primary/daily
+  935  code .
+  936  ./stopActivityLog.sh
+  937  ./nu.sh
+  938  ./stopActivityLog.sh
+  939  ./nu.sh
+  940  git status
+  941  git add .
+  942  git commit -am WIP
+  943  git push
+  944  ./stopActivityLog.sh
+  945  git pull
+  946  ./nu.sh
+  947  ./stopActivityLog.sh
+  948  ./nu.sh
+  949  ./stopActivityLog.sh
+  950  code .
+  951  top -o mem
+  952  cd work/primary/sites/hbb
+  953  code .
+  954  cd ../standardpioneer
+  955  git status
+  956  git add .
+  957  git commit -am initialbuild
+  958  git push
+  959  code .
+  960  git status
+  961  git add .
+  962  git commit -am "added wrangler"
+  963  git push
+  964  npm run build
+  965  npm i
+  966  npm run build
+  967  pm install --save-dev wrangler
+  968  npm install --save-dev wrangler
+  969  git add .
+  970  git status
+  971  git commit -am WIP
+  972  git push
+  973  npm install -g wrangler
+  974  npx wrangler login
+  975  npx wrangler pages deploy _site --project-name=standardpioneer
+  976  npx wrangler pages deploy _site --project-name=standardpioneer
+  977  npx wrangler pages deploy _site --project-name=standardpioneer pages_build_output_dir=_site
+  978  npm run build && npx wrangler pages deploy _site --project-name=standardpioneer
+  979  cd work/primary/sites
+  980  ls
+  981  git clone git@github.com:standardpioneer/site.git
+  982  mv site standardpioneer
+  983  cd themesFor11ty
+  984  code .
+  985  ./theRealOneToDo.sh
+  986  ./theRealOneToDo.sh
+  987  ls ../standardpioneer
+  988  ./theRealOneToDo.sh
+  989  cp base-new/package.json ../standardpioneer
+  990  cp base-new/package.json ../standardpioneer
+  991  ./theRealOneToDo.sh
+  992  ./theRealOneToDo.sh
+  993  cd ../standardpioneer
+  994  ls
+  995  code ../couldbe
+  996  code .
+  997  npm run build
+  998  npm run serve
+  999  ./nu.sh
+ 1000  ./stopActivityLog.sh
+ 1001  git branch -all
+ 1002  git branch --all
