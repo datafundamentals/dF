@@ -1,6 +1,14 @@
-# Product & Technical Requirements Document: Bucket-Based Inventory System
+# Product & Technical Requirements Document: Bucket-Based Parts Locator
 
 ## 0. PRE-REQUIREMENTS
+
+### Decisions confirmed for this ticket
+
+- **Code placement:** The browser application belongs under `apps/`, following the monorepo's app structure. Reusable canonical types and signals/state belong in `packages/types/` and `packages/state/` when applicable. The deployable Cloudflare API Worker belongs under `services/workers/`, alongside the existing Cloudflare auth Worker; it is server code, not a reusable package or a tool.
+- **Authorization:** This application is for exactly two users, one of whom is the owner. Use a Cloudflare Access allowlist for those two identities. Do not make the app publicly available to every authenticated Cloudflare Access user. The identities and account-specific Access configuration must be supplied/configured before production deployment; do not hard-code identity secrets in frontend code.
+- **Part lifecycle:** This is a practical locator for unwanted stored parts, not an inventory-control system. When a part's quantity reaches zero, remove it from the active application and delete its database record; it must no longer appear in searches.
+- **Images:** Practicality and expedient implementation take priority over image fidelity. Keep client-side resizing/compression simple and reliable. The 1600 px maximum edge and 600 KB target are practical goals, not reasons to block intake or build elaborate compression machinery; reduce quality as needed when there is a conflict.
+- **Unresolved engineering decisions:** Surface security and deployment questions as they arise, explain the risk and a recommended option, and resolve decisions that affect production security before deployment. Do not silently broaden access or assume the hosting, domain, or Cloudflare account configuration.
 
 This ticket requires the coding agent to reconcile three unresolved sets of work which are not complete and thus have not been reconciled, even before beginning the work outlined in this ticket. This reconciliation process should not be impossible, mathematically - but it may create some contradictory instructions. This section of the document shall attempt to outline how to resolve them, when that is possible - by unwinding the history of this repository.
 
@@ -16,9 +24,9 @@ e). There may be confusion caused by conflicts between requirements as noted abo
 
 ## 1. System Overview & Objective
 
-The Bucket-Based Inventory System is a multi-user, mobile-first web application designed to catalog, locate, and manage hundreds of loose physical parts stored across physical buckets.
+The Bucket-Based Parts Locator is a mobile-first web application for cataloging and finding loose physical parts stored across physical buckets. It is for locating otherwise unwanted stored items, not for formal inventory control.
 
-Physical buckets are placed in defined storage locations and identified by randomly generated 4-character uppercase alphanumeric codes (e.g., `KGCT`). Users photograph each part at intake, input structured metadata and flexible tags, and store the records in a unified Cloudflare backend. Users can subsequently search for parts by keyword, bucket, or tags to immediately identify which bucket contains the item and where that bucket is physically located.
+Physical buckets are placed in defined storage locations and identified by randomly generated 4-character uppercase alphanumeric codes (e.g., `KGCT`). Users photograph each part at intake, input structured metadata and flexible tags, and store records in a Cloudflare backend. Users can search for parts by keyword, bucket, or tags to identify which bucket contains an item and where that bucket is physically located. A part is removed when its quantity reaches zero.
 
 ---
 
@@ -28,34 +36,34 @@ Physical buckets are placed in defined storage locations and identified by rando
 +---------------------------------------------------------------------------------+
 | Client Tier: Mobile-First Progressive Web App (Android / Desktop)               |
 | - Standard HTML5 Camera Hardware Capture (`capture="environment"`)              |
-| - Client-side Canvas Image Resizing & JPEG Compression                          |
+| - Practical client-side Canvas Image Resizing & JPEG Compression               |
 | - Cloudflare Access Cookie (`CF_Authorization`) passed on all HTTPS requests    |
 +----------------------------------------+----------------------------------------+
                                          |
                                          v
 +---------------------------------------------------------------------------------+
 | Compute Tier: Cloudflare Workers (Edge API Runtime)                             |
-| - Validates Cloudflare Access JWT cookie / headers                              |
+| - Exposes the API and enforces the two-user Cloudflare Access allowlist         |
 | - Manages multi-statement atomic transactions via D1 Batch API                  |
 | - Directly streams binary image blobs to R2 Object Storage                      |
-| - Serves static frontend assets                                                 |
+| - Static frontend hosting is separate unless deployment design requires otherwise |
 +-----------------------------------+--------------------+------------------------+
                                     |                    |
                                     v                    v
 +---------------------------------------+   +-------------------------------------+
 | Database Tier: Cloudflare D1 (SQLite)  |   | Object Storage: Cloudflare R2       |
 | - Relational entities & M:N tag joins |   | - Optimized part image files        |
-| - Write-serialized global consistency |   | - Content-hashed keys (`parts/*.jpg`)|
-| - Real-time multi-user state visibility|  +-------------------------------------+
+| - Shared database state                 |   | - Content-hashed keys (`parts/*.jpg`)|
+| - Fresh reads on next search/refresh    |  +-------------------------------------+
 +---------------------------------------+
 
 ```
 
 ### Core System Constraints
 
-1. **Multi-User Consistency:** Database writes must route through a central, shared database engine (Cloudflare D1) so quantity changes, relocations, or new entries are visible in real time across all authenticated devices.
+1. **Multi-User Consistency:** Database writes must route through a central, shared database engine (Cloudflare D1) so quantity changes, relocations, or new entries are visible when another device next searches or refreshes. Live push updates are not required.
 2. **Android Capture & Storage Handling:** Android devices route camera capture via native mechanisms. Photos must be intercepted in-memory by the browser as raw Blobs, downsampled client-side to conserve mobile bandwidth, and uploaded directly to Cloudflare R2.
-3. **Authentication:** The application operates behind Cloudflare Access. Every incoming request to the API worker must be authenticated via the `CF_Authorization` cookie. The backend extracts user identity via the `Cf-Access-Authenticated-User-Email` header for audit attribution.
+3. **Authentication and authorization:** Protect the API with Cloudflare Access and restrict its policy to the two configured user identities. Every API request must be authenticated and rejected unless it satisfies that allowlist. Use only identity information supplied by the trusted Access boundary for audit attribution; never trust a client-provided identity header. Document how Access JWT/session verification and trusted identity propagation are enforced for the selected Worker route and hosting arrangement.
 4. **Synchronous Intake Guard:** The intake UI must block record creation until a valid photo blob has been captured and all mandatory text fields are filled.
 
 ---
@@ -91,7 +99,6 @@ CREATE TABLE parts (
     description TEXT NOT NULL,
     photo_r2_key TEXT NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 1,
-    status TEXT NOT NULL DEFAULT 'ACTIVE', -- 'ACTIVE', 'CONSUMED'
     created_by TEXT NOT NULL,
     created_at INTEGER DEFAULT (unixepoch()),
     updated_at INTEGER DEFAULT (unixepoch()),
@@ -129,7 +136,6 @@ CREATE TABLE inventory_logs (
 -- Indices for performance
 CREATE INDEX idx_buckets_location ON buckets(location_id);
 CREATE INDEX idx_parts_bucket ON parts(bucket_id);
-CREATE INDEX idx_parts_status ON parts(status);
 CREATE INDEX idx_part_tags_tag ON part_tags(tag_id);
 
 ```
@@ -160,8 +166,10 @@ All endpoints require a valid Cloudflare Access session.
 | `GET` | `/api/parts` | Search parts by text, bucket, or tags | Query params: `?q=&bucket_id=&tag=` | `[ { id, name, description, quantity, bucket_id, location_name, tags: string[], photo_url } ]` |
 | `POST` | `/api/parts/intake` | Multipart intake (photo + metadata + tags) | `multipart/form-data`: `file`, `bucket_id`, `name`, `description`, `quantity`, `tags` (JSON array) | `{ success: true, part_id: string }` |
 | `PATCH` | `/api/parts/:id` | Update part metadata, bucket, or tags | `{ name?: string, description?: string, quantity?: number, bucket_id?: string, tags?: string[] }` | `{ success: true, part_id: string }` |
-| `POST` | `/api/parts/:id/decrement` | Decrement part quantity by count | `{ count: number }` | `{ success: true, remaining: number, status: string }` |
+| `POST` | `/api/parts/:id/decrement` | Decrement part quantity by count; delete the part when quantity reaches zero | `{ count: number }` | `{ success: true, remaining: number, deleted: boolean }` |
 | `GET` | `/api/photos/:key` | Retrieve photo file stream from R2 | None | Binary image (`image/jpeg`) |
+
+When decrementing to zero, record the decrement in `inventory_logs`, delete the part row (and its `part_tags` through the foreign-key cascade), and remove its R2 photo object. Because D1 and R2 do not share an atomic transaction, choose and document a practical failure-handling strategy for photo cleanup so failed object deletion does not silently leave untracked storage indefinitely.
 
 ---
 
@@ -173,8 +181,8 @@ All endpoints require a valid Cloudflare Access session.
 * Upon image selection:
 1. The raw file is rendered into an offscreen HTML Canvas.
 2. Canvas calculates scaled dimensions maintaining aspect ratio, capped at a maximum of `1600px` on the longest edge.
-3. The canvas is exported to a Blob as `image/jpeg` at `0.80` to `0.85` compression quality.
-4. The compressed Blob is held in memory and previewed in the UI.
+3. The canvas is exported as a JPEG Blob using a straightforward quality setting. Image fidelity is low priority; reduce quality as needed to produce a practical upload without adding elaborate compression logic.
+4. The compressed Blob is held in memory and previewed in the UI. A 600 KB upload size is a target when practical, not a hard barrier to saving a part.
 
 
 
@@ -222,7 +230,7 @@ All endpoints require a valid Cloudflare Access session.
 * Displays thumbnail, part name, short description, quantity, 4-character Bucket Badge (`KGCT`), Location Badge, and Tag Chips.
 
 
-* **Quick Consumption:** A single-tap "Take 1" button calls `/api/parts/:id/decrement` and updates quantity locally without a full page reload.
+* **Quick Removal:** A single-tap "Take 1" button calls `/api/parts/:id/decrement` and updates the result locally without a full page reload. When the resulting quantity is zero, remove the part from search results because the backend deletes it.
 * **Edit Part Modal:**
 * Accessible from any search result card.
 * Allows editing `name`, `description`, `quantity`, and target `bucket_id`.
@@ -238,6 +246,17 @@ All endpoints require a valid Cloudflare Access session.
 1. **Bucket ID Uniqueness:** Creating 1,000 mock buckets consecutively produces valid 4-character codes using only the allowed Base32 character set, with zero primary key collisions surviving the retry mechanism.
 2. **Location Enforcement:** The API rejects `POST /api/buckets` and `PATCH /api/buckets/:id/location` requests that supply missing or non-existent `location_id` values with an HTTP 400 status code.
 3. **Intake Integrity:** The frontend intake form cannot be submitted when the photo, name, or description fields are empty. The backend independently validates and rejects incomplete multipart requests.
-4. **Client Image Downsampling:** Android uploads originating from high-resolution sensors (e.g., 12MP to 50MP) are resized on canvas to $\le 1600\text{px}$ before transmission, resulting in uploaded payload sizes consistently under 600 KB.
+4. **Practical Client Image Downsampling:** Android uploads from high-resolution sensors are resized on canvas to a longest edge of at most 1600 px before transmission. The implementation favors a simple, reliable upload and targets payloads under 600 KB where practical; image fidelity is secondary, and the size target must not block intake.
 5. **Tag Filtering Accuracy:** Searching with multiple tags (e.g., `tag=charlie` AND `tag=remove`) returns only parts associated with both tags.
-6. **Multi-User State Propagation:** Updating a part's quantity or moving a bucket's location on Device A reflects immediately when Device B executes a search or refreshes its view.
+6. **Multi-User State Propagation:** Updating a part's quantity or moving a bucket's location on Device A is reflected when Device B next executes a search or refreshes its view; live push updates are not required.
+7. **Two-User Access Control:** Requests from either allowlisted user can use the app and API; unauthenticated requests and authenticated identities outside the allowlist are rejected by the Cloudflare Access boundary.
+8. **Delete at Zero:** Decrementing a part to zero removes it from subsequent searches, deletes its D1 record and tag associations, and initiates cleanup of its R2 photo object.
+
+## 7. Security and Deployment Questions to Resolve During Implementation
+
+The ticket owner has not selected a Cloudflare hosting/domain design or provided the two allowlisted identities. Surface these items when implementation reaches them, with a recommended option and concrete consequences; do not invent account-specific values or deploy an open policy.
+
+- Which hostname and deployment arrangement will serve the app and API, and will the API use the same origin as the app? This determines Access route scope, cookie behavior, CORS needs, and whether browser requests require additional CSRF protections.
+- How will the two-user allowlist be configured and reviewed in Cloudflare Access, and how will the Worker ensure it only trusts identity supplied by the protected Access boundary?
+- What local development identity/authentication path is acceptable without weakening production Access policy?
+- What practical cleanup/retry approach will prevent orphaned R2 photos if deleting a photo and deleting its D1 row cannot succeed together?
