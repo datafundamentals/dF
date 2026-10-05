@@ -3,6 +3,7 @@ packages:
   - "apps/*/functions"  # Cloud Functions workspaces
   - "packages/*"
   - "services/*"     # includes a package.json wrapper so pnpm/turbo can see it
+  - "services/workers/*" # Cloudflare Worker workspaces
   - "tools/*"
   - "extensions/*"
 

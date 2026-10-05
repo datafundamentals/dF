@@ -8,6 +8,7 @@
     "apps/*/functions",
     "packages/*",
     "services/*",
+    "services/workers/*",
     "extensions/*"
   ],
   "scripts": {

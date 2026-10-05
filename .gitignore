@@ -33,7 +33,9 @@ elastic-start-local
 # Environment files
 **/.env
 **/.env.*
+**/.dev.vars*
 !**/.env.example
+!**/.dev.vars.example
 !**/.env.emulator
 !**/.env.production.example
 !apps/df-activity-log/.env.development.example
