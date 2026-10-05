@@ -165,11 +165,11 @@ All endpoints require a valid Cloudflare Access session.
 | `GET` | `/api/tags` | List all tags with usage counts | None | `[ { id: string, label: string, count: number } ]` |
 | `GET` | `/api/parts` | Search parts by text, bucket, or tags | Query params: `?q=&bucket_id=&tag=` | `[ { id, name, description, quantity, bucket_id, location_name, tags: string[], photo_url } ]` |
 | `POST` | `/api/parts/intake` | Multipart intake (photo + metadata + tags) | `multipart/form-data`: `file`, `bucket_id`, `name`, `description`, `quantity`, `tags` (JSON array) | `{ success: true, part_id: string }` |
-| `PATCH` | `/api/parts/:id` | Update part metadata, bucket, or tags | `{ name?: string, description?: string, quantity?: number, bucket_id?: string, tags?: string[] }` | `{ success: true, part_id: string }` |
+| `PATCH` | `/api/parts/:id` | Update part metadata, bucket, or tags; delete the part if quantity is set to zero | `{ name?: string, description?: string, quantity?: number, bucket_id?: string, tags?: string[] }` | `{ success: true, part_id?: string, deleted?: boolean }` |
 | `POST` | `/api/parts/:id/decrement` | Decrement part quantity by count; delete the part when quantity reaches zero | `{ count: number }` | `{ success: true, remaining: number, deleted: boolean }` |
 | `GET` | `/api/photos/:key` | Retrieve photo file stream from R2 | None | Binary image (`image/jpeg`) |
 
-When decrementing to zero, record the decrement in `inventory_logs`, delete the part row (and its `part_tags` through the foreign-key cascade), and remove its R2 photo object. Because D1 and R2 do not share an atomic transaction, choose and document a practical failure-handling strategy for photo cleanup so failed object deletion does not silently leave untracked storage indefinitely.
+Whenever a part's resulting quantity reaches zero, whether through decrement or metadata editing, record the action in `inventory_logs`, delete the part row (and its `part_tags` through the foreign-key cascade), and remove its R2 photo object. Because D1 and R2 do not share an atomic transaction, choose and document a practical failure-handling strategy for photo cleanup so failed object deletion does not silently leave untracked storage indefinitely.
 
 ---
 
@@ -250,7 +250,7 @@ When decrementing to zero, record the decrement in `inventory_logs`, delete the 
 5. **Tag Filtering Accuracy:** Searching with multiple tags (e.g., `tag=charlie` AND `tag=remove`) returns only parts associated with both tags.
 6. **Multi-User State Propagation:** Updating a part's quantity or moving a bucket's location on Device A is reflected when Device B next executes a search or refreshes its view; live push updates are not required.
 7. **Two-User Access Control:** Requests from either allowlisted user can use the app and API; unauthenticated requests and authenticated identities outside the allowlist are rejected by the Cloudflare Access boundary.
-8. **Delete at Zero:** Decrementing a part to zero removes it from subsequent searches, deletes its D1 record and tag associations, and initiates cleanup of its R2 photo object.
+8. **Delete at Zero:** Any operation that would leave a part at zero quantity, including decrement and metadata editing, removes it from subsequent searches, deletes its D1 record and tag associations, and initiates cleanup of its R2 photo object.
 
 ## 7. Security and Deployment Questions to Resolve During Implementation
 
