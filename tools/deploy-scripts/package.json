@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "copy-bundle": "node src/copy-app-bundle.mjs"
+    "copy-bundle": "node src/copy-app-bundle.mjs",
+    "test": "vitest run bucket-locator-tests"
   },
   "dependencies": {
   }

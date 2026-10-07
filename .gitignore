@@ -102,6 +102,8 @@ coverage/
 
 # Firebase Emulator runtime/cache (NOT the seed data)
 **/.firebase/
+**/.wrangler/
+**/wrangler.generated.jsonc
 **/firebase-debug.log
 **/firestore-debug.log
 **/ui-debug.log

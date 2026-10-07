@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "accountId": "b22fa15694f8fbaa0d46ac881d00f486",
+  "siteOrigin": "https://btrg.org",
+  "approvedUsers": [
+    "pete.carapetyan@gmail.com",
+    "jeffcarapetyan11@gmail.com"
+  ],
+  "routes": {
+    "api": "/api/*",
+    "auth": "/cf-auth/_protected/*",
+    "logout": "/cdn-cgi/access/logout"
+  },
+  "workers": {
+    "apiName": "df-bucket-locator-api",
+    "authName": "df-standard-pioneer-auth",
+    "additionalAuthRoutes": []
+  },
+  "localDevelopment": {
+    "accessAudience": "58054d2267f843cbf9b05e387c305e57cfd52a2a2c31cf518aa637840c1c517e",
+    "d1DatabaseId": "00000000-0000-0000-0000-000000000001",
+    "identity": {
+      "email": "sahar.ayazian@gmail.com",
+      "name": "Sahar"
+    }
+  },
+  "sharedStorage": {
+    "d1Binding": "DB",
+    "d1DatabaseName": "df-bucket-locator",
+    "d1DatabaseId": "bea3323e-9a57-4381-99d7-d0062e1ede14",
+    "r2Binding": "PHOTOS",
+    "r2BucketName": "df-bucket-locator-photos"
+    }
+}

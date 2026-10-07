@@ -1,0 +1,21 @@
+{
+  "name": "@df/bucket-locator-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "dev": "node ../../../tools/deploy-scripts/src/run-bucket-locator-worker.mjs api dev --port 8788",
+    "preflight": "node ../../../tools/deploy-scripts/src/run-bucket-locator-worker.mjs preflight",
+    "db:migrate:local": "node ../../../tools/deploy-scripts/src/run-bucket-locator-worker.mjs migrate-local",
+    "deploy": "node ../../../tools/deploy-scripts/src/run-bucket-locator-worker.mjs deploy api",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "typegen": "node ../../../tools/deploy-scripts/src/run-bucket-locator-worker.mjs api typegen"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4",
+    "wrangler": "4.128.0"
+  }
+}

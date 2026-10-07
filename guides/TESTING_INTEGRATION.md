@@ -23,6 +23,7 @@ Always verify commands in documentation against the relevant `package.json` befo
 | `@df/df-npm-info-app` | `pnpm --filter @df/df-npm-info-app dev` (Vite) | `pnpm --filter @df/df-npm-info-app test` | `start:test` serves on port 4173 for Playwright |
 | `@df/df-teaching-app` | `pnpm --filter @df/df-teaching-app dev` | `pnpm --filter @df/df-teaching-app test` | Supports forced-error toggles for negative paths |
 | `@df/df-lit-starter` | `pnpm --filter @df/df-lit-starter dev` | `pnpm --filter @df/df-lit-starter test` | Runs WTR (dev + prod) then Playwright |
+| `@df/df-bucket-locator` | `pnpm --filter @df/df-bucket-locator dev` | `pnpm --filter @df/df-bucket-locator test` | Cloudflare Access and API calls are mocked at the network layer |
 
 Repo-level helpers:
 

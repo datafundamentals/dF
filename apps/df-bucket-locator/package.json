@@ -1,0 +1,28 @@
+{
+  "name": "@df/df-bucket-locator",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "build": "tsc -p tsconfig.json && vite build",
+    "build:rollup": "pnpm clean && pnpm build:typescript && rollup -c",
+    "build:typescript": "tsc -p tsconfig.json",
+    "dev": "vite",
+    "start:test": "pnpm build && vite preview --strictPort --port 4178 --host 127.0.0.1",
+    "test": "playwright test --config ../../playwright.config.ts --project=df-bucket-locator"
+  },
+  "dependencies": {
+    "@df/state": "workspace:*",
+    "@df/types": "workspace:*",
+    "@df/ui-lit": "workspace:*",
+    "@lit-labs/signals": "^0.1.0",
+    "@material/web": "^2.4.0",
+    "lit": "^3.3.1"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.2",
+    "vite": "^5.4.10"
+  }
+}

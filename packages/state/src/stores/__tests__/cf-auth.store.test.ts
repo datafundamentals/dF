@@ -46,7 +46,7 @@ describe('cf-auth.store', () => {
     });
     expect(getCurrentCfUser()?.email).toBe('user@example.com');
     expect(isCfAuthenticated()).toBe(true);
-    expect(fetch).toHaveBeenCalledWith('/cf-auth/_protected/whoami', {
+    expect(fetch).toHaveBeenCalledWith(new URL('/cf-auth/_protected/whoami', window.location.origin).toString(), {
       credentials: 'include',
       redirect: 'manual',
       headers: {

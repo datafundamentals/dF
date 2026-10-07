@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "node ../../../tools/deploy-scripts/src/run-bucket-locator-worker.mjs auth dev --port 8787",
+    "deploy": "node ../../../tools/deploy-scripts/src/run-bucket-locator-worker.mjs deploy auth",
     "lint": "eslint src test",
     "test": "vitest run",
-    "typegen": "wrangler types"
+    "typegen": "node ../../../tools/deploy-scripts/src/run-bucket-locator-worker.mjs auth typegen"
   },
   "dependencies": {
     "@df/types": "workspace:*"

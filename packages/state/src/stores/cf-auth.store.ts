@@ -1,5 +1,6 @@
 import {computed, signal} from '@lit-labs/signals';
 import type {CfAuthConfig, CfAuthState, CfUser} from '@df/types';
+import {resolveBackendUrl} from '../utils/bucket-locator-backend-url.js';
 
 const cfUserSignal = signal<CfUser | null>(null);
 const cfAuthStatusSignal = signal<CfAuthState['authState']>('idle');
@@ -18,7 +19,12 @@ export const cfAuthState = computed<CfAuthState>(() => ({
 
 /** Configure Cloudflare Access authentication and check the current session. */
 export function initializeCfAuth(nextConfig: CfAuthConfig): Promise<void> {
-  config = {...nextConfig};
+  config = {
+    ...nextConfig,
+    sessionUrl: resolveBackendUrl(nextConfig.sessionUrl),
+    loginUrl: resolveBackendUrl(nextConfig.loginUrl),
+    logoutUrl: resolveBackendUrl(nextConfig.logoutUrl),
+  };
   return refreshCfAuth();
 }
 

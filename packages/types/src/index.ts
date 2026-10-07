@@ -19,3 +19,4 @@ export * from './firebase-goldilocks.types.js';
 export * from './firebase-rbac.types.js';
 export * from './elastic.types.js';
 export * from './dashboard.js';
+export * from './bucket-locator.types.js';
