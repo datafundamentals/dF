@@ -1,6 +1,6 @@
 # Zoom Meeting Downloader
 
-A Python tool to download all Zoom cloud recordings for a user to a local directory or external drive.
+A Python tool to download recent Zoom cloud recordings for a user to a local directory or external drive.
 
 last time i ran this it worked with this:
 `/Users/petecarapetyan/work/primary/dF/tools/zoom_meeting_downloader/venv/bin/python /Users/petecarapetyan/work/primary/dF/tools/zoom_meeting_downloader/my_script.py`
@@ -63,7 +63,7 @@ This tool now supports the shared workspace environment at `dF/tools/venv`.
 Open `my_script.py` to adjust settings if needed:
 
 *   `DOWNLOAD_BASE_DIR`: Target directory for downloads (default: `/Volumes/Seagate5T/fomoZoomRecordings`).
-*   `START_DATE`: The date to start checking for recordings (default: `2023-01-01`).
+*   `LOOKBACK_DAYS`: How far back to check for recordings on each run (default: `30` days). The window ends today, so routine runs no longer query older months. Increase this temporarily if you need to recover older recordings.
 
 ## Usage
 
@@ -78,7 +78,7 @@ Open `my_script.py` to adjust settings if needed:
     *   You will be redirected to `localhost:8000`, and the script will capture the code.
 
 3.  **Download Process**:
-    *   The script will iterate through months starting from `START_DATE`.
+    *   The script checks only the last `LOOKBACK_DAYS` days, ending today, in API date ranges of at most 30 days.
     *   Files are saved in `YYYY-MM` subfolders.
     *   Progress is logged to the terminal and `download_log.txt`.
     *   Existing files are skipped.

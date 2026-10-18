@@ -12,7 +12,7 @@ ACCOUNT_ID = os.getenv('ZOOM_ACCOUNT_ID')
 CLIENT_ID = os.getenv('ZOOM_CLIENT_ID')
 CLIENT_SECRET = os.getenv('ZOOM_CLIENT_SECRET')
 DOWNLOAD_BASE_DIR = '/Volumes/Seagate5T/fomoZoomRecordings'
-START_DATE = "2026-01-01" 
+LOOKBACK_DAYS = 30
 LOG_FILE = "log/download_log.txt"
 
 # --- LOGGING SETUP ---
@@ -109,8 +109,8 @@ def delete_recording_file(meeting_id, recording_id, token):
 
 def fetch_and_download_for_user(token, user_id, user_email):
     headers = {"Authorization": f"Bearer {token}"}
-    current_date = datetime.strptime(START_DATE, "%Y-%m-%d")
     end_limit = datetime.now()
+    current_date = end_limit - timedelta(days=LOOKBACK_DAYS)
 
     if not os.path.exists(DOWNLOAD_BASE_DIR):
         try:
@@ -123,7 +123,7 @@ def fetch_and_download_for_user(token, user_id, user_email):
 
     while current_date < end_limit:
         from_str = current_date.strftime("%Y-%m-%d")
-        to_date = current_date + timedelta(days=30)
+        to_date = min(current_date + timedelta(days=30), end_limit)
         to_str = to_date.strftime("%Y-%m-%d")
         
         logging.info(f"Checking range: {from_str} to {to_str} for {user_email}")
